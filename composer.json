@@ -36,7 +36,8 @@
     "cycle/orm": "^1.0",
     "cycle/proxy-factory": "^1.0",
     "cycle/annotated": "^2.0",
-    "cycle/migrations": "^1.0"
+    "cycle/migrations": "^1.0",
+    "ramsey/uuid": "^4.0"
   },
   "require-dev": {
     "phpunit/phpunit": "^8.5"
