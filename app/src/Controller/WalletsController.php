@@ -9,12 +9,12 @@ use App\Database\Wallet;
 use Psr\Http\Message\ResponseInterface;
 use Spiral\Prototype\Traits\PrototypeTrait;
 
-class WalletController
+class WalletsController
 {
     use PrototypeTrait;
 
     /**
-     * @Route(action="/wallet", verbs={"GET"})
+     * @Route(action="/wallets", verbs={"GET"})
      * @return string
      */
     public function list(): array
@@ -28,7 +28,7 @@ class WalletController
     }
 
     /**
-     * @Route(action="/wallet/<id>", verbs={"GET"})s
+     * @Route(action="/wallets/<id>", verbs={"GET"})s
      * @param int $id
      * @return \Psr\Http\Message\ResponseInterface
      */
