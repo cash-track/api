@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Service;
 
-use App\Database\Currency;
 use App\Database\User;
 use Cycle\ORM\ORM;
 use Cycle\ORM\TransactionInterface;
@@ -37,23 +36,12 @@ class UserService
     }
 
     /**
-     * Creates new Wallet and link to creator
-     *
      * @param \App\Database\User $user
-     * @param string $name
-     * @param bool $isPublic
-     * @param \App\Database\Currency|null $defaultCurrency
-     * @return \App\Database\Wallet
+     * @return \App\Database\User
      * @throws \Throwable
      */
-    public function create(string $name, string $email, string $password): User
+    public function store(User $user): User
     {
-        $user = new User();
-        $user->name = $name;
-        $user->email = $email;
-        $user->password = password_hash($password, PASSWORD_BCRYPT);
-        $user->defaultCurrencyCode = Currency::DEFAULT_CURRENCY_CODE;
-
         $this->tr->persist($user);
         $this->tr->run();
 
@@ -62,51 +50,13 @@ class UserService
 
     /**
      * @param \App\Database\User $user
-     * @param array $data
+     * @param string $password
      * @return \App\Database\User
-     * @throws \Throwable
      */
-    public function update(User $user, array $data): User
+    public function hashPassword(User $user, string $password): User
     {
-        if (count($data) == 0) {
-            return $user;
-        }
-
-        foreach ($data as $key => $value) {
-            switch ($key) {
-                case User::FIELD_NAME:
-                    $user->name = $value;
-                    break;
-                case User::FIELD_LAST_NAME:
-                    $user->lastName = $value;
-                    break;
-                case User::FIELD_NICK_NAME:
-                    $user->nickName = $value;
-                    break;
-                case User::FIELD_DEFAULT_CURRENCY_CODE:
-                    if ($user->defaultCurrencyCode == $value) {
-                        continue;
-                    }
-                    
-                    $newCurrency = $this->orm->getRepository(Currency::class)->findByPK($value);
-
-                    if ($newCurrency instanceof Currency) {
-                        $user->defaultCurrency = $newCurrency;
-                    }
-                    
-                    break;
-            }
-        }
-
-        $this->tr->persist($user);
-        $this->tr->run();
+        $user->password = password_hash($password, PASSWORD_ARGON2ID);
 
         return $user;
-    }
-
-    public function delete(User $user): void
-    {
-        $this->tr->delete($user);
-        $this->tr->run();
     }
 }
