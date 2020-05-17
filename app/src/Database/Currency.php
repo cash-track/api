@@ -11,6 +11,13 @@ use Cycle\Annotated\Annotation as Cycle;
  */
 class Currency
 {
+    const DEFAULT_CURRENCY_CODE = 'USD';
+
+    const FIELD_CODE = 'code';
+    const FIELD_NAME = 'name';
+    const FIELD_CHAR = 'char';
+    const FIELD_RATE = 'rate';
+
     /**
      * @Cycle\Column(type = "string(3)", primary = true)
      * @var string
@@ -30,16 +37,14 @@ class Currency
     public $char;
 
     /**
-     * @Cycle\Relation\HasOne(target = "App\Database\CurrencyRate", outerKey = "code")
-     * @var \App\Database\CurrencyRate
+     * @Cycle\Column(type = "decimal(8,4)")
+     * @var double
      */
     public $rate;
 
     /**
-     * Currency constructor.
+     * @Cycle\Column(type = "datetime", name = "updated_at")
+     * @var \DateTimeImmutable
      */
-    public function __construct()
-    {
-        $this->rate = new CurrencyRate();
-    }
+    public $updatedAt;
 }

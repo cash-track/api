@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Migration;
 
 use Spiral\Migrations\Migration;
 
-class OrmDefault620516534629bbad2ceb26e9fdb6c93a extends Migration
+class OrmDefaultB8eb6e683d7ff894d1fab6f562042d3a extends Migration
 {
     protected const DATABASE = 'default';
 
@@ -105,14 +107,6 @@ class OrmDefault620516534629bbad2ceb26e9fdb6c93a extends Migration
             ->setPrimaryKeys(["id"])
             ->create();
         
-        $this->table('user_wallets')
-            ->addColumn('id', 'primary', [
-                'nullable' => false,
-                'default'  => null
-            ])
-            ->setPrimaryKeys(["id"])
-            ->create();
-        
         $this->table('users')
             ->addColumn('id', 'primary', [
                 'nullable' => false,
@@ -162,30 +156,6 @@ class OrmDefault620516534629bbad2ceb26e9fdb6c93a extends Migration
                 'default'  => null
             ])
             ->setPrimaryKeys(["id"])
-            ->create();
-        
-        $this->table('currency_rates')
-            ->addColumn('code', 'string', [
-                'nullable' => false,
-                'default'  => null,
-                'size'     => 3
-            ])
-            ->addColumn('base_currency_code', 'string', [
-                'nullable' => false,
-                'default'  => null,
-                'size'     => 3
-            ])
-            ->addColumn('rate', 'decimal', [
-                'nullable'  => false,
-                'default'   => null,
-                'scale'     => 4,
-                'precision' => 8
-            ])
-            ->addColumn('updated_at', 'datetime', [
-                'nullable' => false,
-                'default'  => null
-            ])
-            ->setPrimaryKeys(["code"])
             ->create();
         
         $this->table('currency_exchanges')
@@ -258,11 +228,7 @@ class OrmDefault620516534629bbad2ceb26e9fdb6c93a extends Migration
         
         $this->table('currency_exchanges')->drop();
         
-        $this->table('currency_rates')->drop();
-        
         $this->table('users')->drop();
-        
-        $this->table('user_wallets')->drop();
         
         $this->table('charges')->drop();
         

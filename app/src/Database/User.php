@@ -12,6 +12,14 @@ use Cycle\ORM\Relation\Pivoted\PivotedCollection;
  */
 class User
 {
+    const FIELD_NAME = 'name';
+    const FIELD_LAST_NAME = 'lastName';
+    const FIELD_NICK_NAME = 'nickName';
+    const FIELD_EMAIL = 'email';
+    const FIELD_PHOTO_URL = 'photoUrl';
+    const FIELD_DEFAULT_CURRENCY_CODE = 'defaultCurrencyCode';
+    const FIELD_PASSWORD = 'password';
+
     /**
      * @Cycle\Column(type = "primary")
      * @var int

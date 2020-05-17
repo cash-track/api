@@ -1,45 +1,27 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Migration;
 
 use Spiral\Migrations\Migration;
 
-class OrmDefault0ec38a9cecfb9dbcd9e7c86abbc92438 extends Migration
+class OrmDefault7af405532addf215012ad5dac76567ea extends Migration
 {
     protected const DATABASE = 'default';
 
     public function up()
     {
-        $this->table('currency_rates')
-            ->addIndex(["base_currency_code"], [
-                'name'   => 'currency_rates_index_base_currency_code_5ebdb7b4cc0bb',
-                'unique' => false
-            ])
-            ->addIndex(["code"], [
-                'name'   => 'currency_rates_index_code_5ebdb7b4cc14c',
-                'unique' => false
-            ])
-            ->addForeignKey(["base_currency_code"], 'currencies', ["code"], [
-                'name'   => 'currency_rates_foreign_base_currency_code_5ebdb7b4cc0c4',
-                'delete' => 'CASCADE',
-                'update' => 'CASCADE'
-            ])
-            ->addForeignKey(["code"], 'currencies', ["code"], [
-                'name'   => 'currency_rates_foreign_code_5ebdb7b4cc155',
-                'delete' => 'CASCADE',
-                'update' => 'CASCADE'
-            ])
-            ->update();
-        
         $this->table('currencies')
-            ->addIndex(["code"], [
-                'name'   => 'currencies_index_code_5ebdb7b4cc090',
-                'unique' => false
+            ->addColumn('rate', 'decimal', [
+                'nullable'  => false,
+                'default'   => null,
+                'scale'     => 4,
+                'precision' => 8
             ])
-            ->addForeignKey(["code"], 'currency_rates', ["code"], [
-                'name'   => 'currencies_foreign_code_5ebdb7b4cc09b',
-                'delete' => 'NO ACTION',
-                'update' => 'NO ACTION'
+            ->addColumn('updated_at', 'datetime', [
+                'nullable' => false,
+                'default'  => null
             ])
             ->update();
         
@@ -50,11 +32,11 @@ class OrmDefault0ec38a9cecfb9dbcd9e7c86abbc92438 extends Migration
                 'size'     => 3
             ])
             ->addIndex(["default_currency_code"], [
-                'name'   => 'wallets_index_default_currency_code_5ebdb7b4cb4ba',
+                'name'   => 'wallets_index_default_currency_code_5ec06ad5291af',
                 'unique' => false
             ])
             ->addForeignKey(["default_currency_code"], 'currencies', ["code"], [
-                'name'   => 'wallets_foreign_default_currency_code_5ebdb7b4cb6e6',
+                'name'   => 'wallets_foreign_default_currency_code_5ec06ad52921f',
                 'delete' => 'CASCADE',
                 'update' => 'CASCADE'
             ])
@@ -67,11 +49,11 @@ class OrmDefault0ec38a9cecfb9dbcd9e7c86abbc92438 extends Migration
                 'size'     => 3
             ])
             ->addIndex(["default_currency_code"], [
-                'name'   => 'users_index_default_currency_code_5ebdb7b4cbfdd',
+                'name'   => 'users_index_default_currency_code_5ec06ad529498',
                 'unique' => false
             ])
             ->addForeignKey(["default_currency_code"], 'currencies', ["code"], [
-                'name'   => 'users_foreign_default_currency_code_5ebdb7b4cbfea',
+                'name'   => 'users_foreign_default_currency_code_5ec06ad52949f',
                 'delete' => 'CASCADE',
                 'update' => 'CASCADE'
             ])
@@ -79,20 +61,20 @@ class OrmDefault0ec38a9cecfb9dbcd9e7c86abbc92438 extends Migration
         
         $this->table('currency_exchanges')
             ->addIndex(["src_currency_code"], [
-                'name'   => 'currency_exchanges_index_src_currency_code_5ebdb7b4cc0ec',
+                'name'   => 'currency_exchanges_index_src_currency_code_5ec06ad52950a',
                 'unique' => false
             ])
             ->addIndex(["dst_currency_code"], [
-                'name'   => 'currency_exchanges_index_dst_currency_code_5ebdb7b4cc11b',
+                'name'   => 'currency_exchanges_index_dst_currency_code_5ec06ad52952f',
                 'unique' => false
             ])
             ->addForeignKey(["src_currency_code"], 'currencies', ["code"], [
-                'name'   => 'currency_exchanges_foreign_src_currency_code_5ebdb7b4cc0f4',
+                'name'   => 'currency_exchanges_foreign_src_currency_code_5ec06ad529511',
                 'delete' => 'CASCADE',
                 'update' => 'CASCADE'
             ])
             ->addForeignKey(["dst_currency_code"], 'currencies', ["code"], [
-                'name'   => 'currency_exchanges_foreign_dst_currency_code_5ebdb7b4cc124',
+                'name'   => 'currency_exchanges_foreign_dst_currency_code_5ec06ad529536',
                 'delete' => 'CASCADE',
                 'update' => 'CASCADE'
             ])
@@ -100,35 +82,39 @@ class OrmDefault0ec38a9cecfb9dbcd9e7c86abbc92438 extends Migration
         
         $this->table('charges')
             ->addIndex(["wallet_id"], [
-                'name'   => 'charges_index_wallet_id_5ebdb7b4cbe56',
+                'name'   => 'charges_index_wallet_id_5ec06ad52938f',
                 'unique' => false
             ])
             ->addIndex(["user_id"], [
-                'name'   => 'charges_index_user_id_5ebdb7b4cbf70',
+                'name'   => 'charges_index_user_id_5ec06ad529453',
                 'unique' => false
             ])
             ->addIndex(["currency_exchange_id"], [
-                'name'   => 'charges_index_currency_exchange_id_5ebdb7b4cbfa9',
+                'name'   => 'charges_index_currency_exchange_id_5ec06ad529479',
                 'unique' => false
             ])
             ->addForeignKey(["wallet_id"], 'wallets', ["id"], [
-                'name'   => 'charges_foreign_wallet_id_5ebdb7b4cbe6a',
+                'name'   => 'charges_foreign_wallet_id_5ec06ad52939a',
                 'delete' => 'CASCADE',
                 'update' => 'CASCADE'
             ])
             ->addForeignKey(["user_id"], 'users', ["id"], [
-                'name'   => 'charges_foreign_user_id_5ebdb7b4cbf7a',
+                'name'   => 'charges_foreign_user_id_5ec06ad52945a',
                 'delete' => 'CASCADE',
                 'update' => 'CASCADE'
             ])
             ->addForeignKey(["currency_exchange_id"], 'currency_exchanges', ["id"], [
-                'name'   => 'charges_foreign_currency_exchange_id_5ebdb7b4cbfb6',
+                'name'   => 'charges_foreign_currency_exchange_id_5ec06ad529480',
                 'delete' => 'SET NULL',
                 'update' => 'SET NULL'
             ])
             ->update();
         
         $this->table('user_wallets')
+            ->addColumn('id', 'primary', [
+                'nullable' => false,
+                'default'  => null
+            ])
             ->addColumn('wallet_id', 'integer', [
                 'nullable' => false,
                 'default'  => null
@@ -138,46 +124,38 @@ class OrmDefault0ec38a9cecfb9dbcd9e7c86abbc92438 extends Migration
                 'default'  => null
             ])
             ->addIndex(["wallet_id", "user_id"], [
-                'name'   => 'user_wallets_index_wallet_id_user_id_5ebdb7b4cbec4',
+                'name'   => 'user_wallets_index_wallet_id_user_id_5ec06ad5293dc',
                 'unique' => true
             ])
             ->addIndex(["wallet_id"], [
-                'name'   => 'user_wallets_index_wallet_id_5ebdb7b4cbed8',
+                'name'   => 'user_wallets_index_wallet_id_5ec06ad5293ea',
                 'unique' => false
             ])
             ->addIndex(["user_id"], [
-                'name'   => 'user_wallets_index_user_id_5ebdb7b4cbefa',
+                'name'   => 'user_wallets_index_user_id_5ec06ad529403',
                 'unique' => false
             ])
             ->addIndex(["user_id", "wallet_id"], [
-                'name'   => 'user_wallets_index_user_id_wallet_id_5ebdb7b4cc046',
+                'name'   => 'user_wallets_index_user_id_wallet_id_5ec06ad5294db',
                 'unique' => true
             ])
             ->addForeignKey(["wallet_id"], 'wallets', ["id"], [
-                'name'   => 'user_wallets_foreign_wallet_id_5ebdb7b4cbed1',
+                'name'   => 'user_wallets_foreign_wallet_id_5ec06ad5293e6',
                 'delete' => 'CASCADE',
                 'update' => 'CASCADE'
             ])
             ->addForeignKey(["user_id"], 'users', ["id"], [
-                'name'   => 'user_wallets_foreign_user_id_5ebdb7b4cbef3',
+                'name'   => 'user_wallets_foreign_user_id_5ec06ad5293fe',
                 'delete' => 'CASCADE',
                 'update' => 'CASCADE'
             ])
-            ->update();
+            ->setPrimaryKeys(["id"])
+            ->create();
     }
 
     public function down()
     {
-        $this->table('user_wallets')
-            ->dropForeignKey(["wallet_id"])
-            ->dropForeignKey(["user_id"])
-            ->dropIndex(["wallet_id", "user_id"])
-            ->dropIndex(["wallet_id"])
-            ->dropIndex(["user_id"])
-            ->dropIndex(["user_id", "wallet_id"])
-            ->dropColumn('wallet_id')
-            ->dropColumn('user_id')
-            ->update();
+        $this->table('user_wallets')->drop();
         
         $this->table('charges')
             ->dropForeignKey(["wallet_id"])
@@ -216,15 +194,8 @@ class OrmDefault0ec38a9cecfb9dbcd9e7c86abbc92438 extends Migration
             ->update();
         
         $this->table('currencies')
-            ->dropForeignKey(["code"])
-            ->dropIndex(["code"])
-            ->update();
-        
-        $this->table('currency_rates')
-            ->dropForeignKey(["base_currency_code"])
-            ->dropForeignKey(["code"])
-            ->dropIndex(["base_currency_code"])
-            ->dropIndex(["code"])
+            ->dropColumn('rate')
+            ->dropColumn('updated_at')
             ->update();
     }
 }

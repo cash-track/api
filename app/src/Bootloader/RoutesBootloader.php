@@ -4,47 +4,40 @@ declare(strict_types=1);
 
 namespace App\Bootloader;
 
-use App\Controller\HomeController;
+use Spiral\Annotations\AnnotationLocator;
 use Spiral\Boot\Bootloader\Bootloader;
 use Spiral\Router\Route;
-use Spiral\Router\RouteInterface;
 use Spiral\Router\RouterInterface;
-use Spiral\Router\Target\Controller;
-use Spiral\Router\Target\Namespaced;
+use Spiral\Router\Target\Action;
 
 class RoutesBootloader extends Bootloader
 {
     /**
+     * @param \Spiral\Annotations\AnnotationLocator $annotationLocator
      * @param RouterInterface $router
      */
-    public function boot(RouterInterface $router): void
+    public function boot(AnnotationLocator $annotationLocator, RouterInterface $router): void
     {
-        // named route
-        $router->setRoute(
-            'html',
-            new Route('/<action>.html', new Controller(HomeController::class))
-        );
+        $methods = $annotationLocator->findMethods(\App\Annotation\Route::class);
 
-        // fallback (default) route
-        $router->setDefault($this->defaultRoute());
-    }
+        foreach ($methods as $method) {
+            $name = sprintf(
+                "%s.%s",
+                $method->getClass()->getShortName(),
+                $method->getMethod()->getShortName()
+            );
 
-    /**
-     * Default route points to namespace of controllers.
-     *
-     * @return RouteInterface
-     */
-    protected function defaultRoute(): RouteInterface
-    {
-        // handle all /controller/action like urls
-        $route = new Route(
-            '/[<controller>[/<action>]]',
-            new Namespaced('App\\Controller')
-        );
+            $route = new Route(
+                $method->getAnnotation()->action,
+                new Action(
+                    $method->getClass()->getName(),
+                    $method->getMethod()->getName()
+                )
+            );
 
-        return $route->withDefaults([
-            'controller' => 'home',
-            'action'     => 'index'
-        ]);
+            $route = $route->withVerbs(...(array)$method->getAnnotation()->verbs);
+
+            $router->setRoute($name, $route);
+        }
     }
 }
