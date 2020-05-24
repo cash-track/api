@@ -38,6 +38,8 @@ class RegisterController
             ], 500);
         }
 
+        // TODO. Send confirmation email
+
         // TODO. Authenticate newly user here
 
         return $this->response->json([
