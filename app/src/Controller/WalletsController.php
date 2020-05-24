@@ -14,7 +14,7 @@ class WalletsController
     use PrototypeTrait;
 
     /**
-     * @Route(route="/wallets", name="wallet.list", methods="GET")
+     * @Route(route="/wallets", name="wallet.list", methods="GET", group="auth")
      *
      * @return string
      */
@@ -29,7 +29,7 @@ class WalletsController
     }
 
     /**
-     * @Route(route="/wallets/<id>", name="wallet.index", methods="GET")
+     * @Route(route="/wallets/<id>", name="wallet.index", methods="GET", group="auth")
      *
      * @param int $id
      * @return \Psr\Http\Message\ResponseInterface

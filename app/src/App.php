@@ -88,7 +88,7 @@ class App extends Kernel
      */
     protected const APP = [
         Auth\AuthBootloader::class,
-
+        Bootloader\RouteGroupsBootloader::class,
         Bootloader\UserBootloader::class,
         Bootloader\LocaleSelectorBootloader::class,
 

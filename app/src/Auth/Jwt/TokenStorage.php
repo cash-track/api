@@ -53,7 +53,7 @@ class TokenStorage implements TokenStorageInterface, SingletonInterface
             $payload = JWT::decode($id, $this->secret, [$this->alg]);
             return Token::fromPayload($id, (array) $payload);
         } catch (\Throwable $exception) {
-            throw new TokenStorageException('Invalid token', $exception->getCode(), $exception);
+            return null;
         }
     }
 
