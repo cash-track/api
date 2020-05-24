@@ -15,19 +15,19 @@ class RegisterController
 
     /**
      * @Route(action="/auth/register", verbs={"POST"})
-     * @param \App\Request\RegisterRequest $registerRequest
+     * @param \App\Request\RegisterRequest $request
      * @return \Psr\Http\Message\ResponseInterface
      */
-    public function register(RegisterRequest $registerRequest): ResponseInterface
+    public function register(RegisterRequest $request): ResponseInterface
     {
-        if (! $registerRequest->isValid()) {
+        if (! $request->isValid()) {
             return $this->response->json([
-                'errors' => $registerRequest->getErrors(),
+                'errors' => $request->getErrors(),
             ], 422);
         }
 
-        $user = $registerRequest->createUser();
-        $user = $this->userService->hashPassword($user, $registerRequest->getField('password'));
+        $user = $request->createUser();
+        $user = $this->authService->hashPassword($user, $request->getField('password'));
 
         try {
             $user = $this->userService->store($user);

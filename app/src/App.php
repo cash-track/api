@@ -74,13 +74,20 @@ class App extends Kernel
         // Debug and debug extensions
         Framework\DebugBootloader::class,
         Framework\Debug\LogCollectorBootloader::class,
-        Framework\Debug\HttpCollectorBootloader::class
+        Framework\Debug\HttpCollectorBootloader::class,
+
+        // Authentication
+        Framework\Auth\HttpAuthBootloader::class,
+        Auth\Jwt\TokensBootloader::class,
     ];
 
     /*
      * Application specific services and extensions.
      */
     protected const APP = [
+        Auth\Bootloader::class,
+
+        Bootloader\UserBootloader::class,
         Bootloader\LocaleSelectorBootloader::class,
         Bootloader\RoutesBootloader::class,
 

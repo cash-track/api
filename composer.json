@@ -38,7 +38,10 @@
     "cycle/annotated": "^2.0",
     "cycle/migrations": "^1.0",
     "ramsey/uuid": "^4.0",
-    "voku/portable-utf8": "^5.4"
+    "voku/portable-utf8": "^5.4",
+    "spiral/auth": "^1.0",
+    "spiral/auth-http": "^1.0",
+    "firebase/php-jwt": "^5.2"
   },
   "replace": {
     "symfony/polyfill-php72": "1.99",
