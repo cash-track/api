@@ -47,16 +47,4 @@ class UserService
 
         return $user;
     }
-
-    /**
-     * @param \App\Database\User $user
-     * @param string $password
-     * @return \App\Database\User
-     */
-    public function hashPassword(User $user, string $password): User
-    {
-        $user->password = password_hash($password, PASSWORD_ARGON2ID);
-
-        return $user;
-    }
 }

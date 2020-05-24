@@ -4,17 +4,18 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
-use App\Annotation\Route;
 use App\Database\Wallet;
 use Psr\Http\Message\ResponseInterface;
 use Spiral\Prototype\Traits\PrototypeTrait;
+use Spiral\Router\Annotation\Route;
 
 class WalletsController
 {
     use PrototypeTrait;
 
     /**
-     * @Route(action="/wallets", verbs={"GET"})
+     * @Route(route="/wallets", name="wallet.list", methods="GET", group="auth")
+     *
      * @return string
      */
     public function list(): array
@@ -28,7 +29,8 @@ class WalletsController
     }
 
     /**
-     * @Route(action="/wallets/<id>", verbs={"GET"})s
+     * @Route(route="/wallets/<id>", name="wallet.index", methods="GET", group="auth")
+     *
      * @param int $id
      * @return \Psr\Http\Message\ResponseInterface
      */

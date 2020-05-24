@@ -11,6 +11,7 @@ use Spiral\Framework\Kernel;
 use Spiral\Monolog\Bootloader as Monolog;
 use Spiral\Nyholm\Bootloader as Nyholm;
 use Spiral\Prototype\Bootloader as Prototype;
+use Spiral\Router\Bootloader as Router;
 use Spiral\Scaffolder\Bootloader as Scaffolder;
 use Spiral\Stempler\Bootloader as Stempler;
 
@@ -41,6 +42,7 @@ class App extends Kernel
         // HTTP extensions
         Nyholm\NyholmBootloader::class,
         Framework\Http\RouterBootloader::class,
+        Router\AnnotatedRoutesBootloader::class,
         Framework\Http\ErrorHandlerBootloader::class,
         Framework\Http\JsonPayloadsBootloader::class,
         Framework\Http\CookiesBootloader::class,
@@ -74,15 +76,21 @@ class App extends Kernel
         // Debug and debug extensions
         Framework\DebugBootloader::class,
         Framework\Debug\LogCollectorBootloader::class,
-        Framework\Debug\HttpCollectorBootloader::class
+        Framework\Debug\HttpCollectorBootloader::class,
+
+        // Authentication
+        Framework\Auth\HttpAuthBootloader::class,
+        Auth\Jwt\TokensBootloader::class,
     ];
 
     /*
      * Application specific services and extensions.
      */
     protected const APP = [
+        Auth\AuthBootloader::class,
+        Bootloader\RouteGroupsBootloader::class,
+        Bootloader\UserBootloader::class,
         Bootloader\LocaleSelectorBootloader::class,
-        Bootloader\RoutesBootloader::class,
 
         // fast code prototyping
         Prototype\PrototypeBootloader::class,

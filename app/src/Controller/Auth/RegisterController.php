@@ -4,30 +4,31 @@ declare(strict_types=1);
 
 namespace App\Controller\Auth;
 
-use App\Annotation\Route;
 use App\Request\RegisterRequest;
 use Psr\Http\Message\ResponseInterface;
 use Spiral\Prototype\Traits\PrototypeTrait;
+use Spiral\Router\Annotation\Route;
 
 class RegisterController
 {
     use PrototypeTrait;
 
     /**
-     * @Route(action="/auth/register", verbs={"POST"})
-     * @param \App\Request\RegisterRequest $registerRequest
+     * @Route(route="/auth/register", name="auth.register", methods="POST")
+     *
+     * @param \App\Request\RegisterRequest $request
      * @return \Psr\Http\Message\ResponseInterface
      */
-    public function register(RegisterRequest $registerRequest): ResponseInterface
+    public function register(RegisterRequest $request): ResponseInterface
     {
-        if (! $registerRequest->isValid()) {
+        if (! $request->isValid()) {
             return $this->response->json([
-                'errors' => $registerRequest->getErrors(),
+                'errors' => $request->getErrors(),
             ], 422);
         }
 
-        $user = $registerRequest->createUser();
-        $user = $this->userService->hashPassword($user, $registerRequest->getField('password'));
+        $user = $request->createUser();
+        $user = $this->authService->hashPassword($user, $request->getField('password'));
 
         try {
             $user = $this->userService->store($user);
