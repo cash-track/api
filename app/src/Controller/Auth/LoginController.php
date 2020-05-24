@@ -4,19 +4,20 @@ declare(strict_types=1);
 
 namespace App\Controller\Auth;
 
-use App\Annotation\Route;
 use App\Database\User;
 use App\Request\LoginRequest;
 use Psr\Http\Message\ResponseInterface;
 use Spiral\Auth\TokenInterface;
 use Spiral\Prototype\Traits\PrototypeTrait;
+use Spiral\Router\Annotation\Route;
 
 final class LoginController
 {
     use PrototypeTrait;
 
     /**
-     * @Route(action="/auth/login", verbs={"POST"})
+     * @Route(route="/auth/login", name="auth.login", methods="POST")
+     *
      * @param \App\Request\LoginRequest $request
      * @return \Psr\Http\Message\ResponseInterface
      */

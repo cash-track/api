@@ -4,17 +4,18 @@ declare(strict_types=1);
 
 namespace App\Controller\Profile;
 
-use App\Annotation\Route;
 use App\Database\User;
 use Psr\Http\Message\ResponseInterface;
 use Spiral\Prototype\Traits\PrototypeTrait;
+use Spiral\Router\Annotation\Route;
 
 class ProfileController
 {
     use PrototypeTrait;
 
     /**
-     * @Route(action="/profile", verbs={"GET"})
+     * @Route(route="/profile", name="profile.index", methods="GET")
+     *
      * @return \Psr\Http\Message\ResponseInterface
      */
     public function index(): ResponseInterface

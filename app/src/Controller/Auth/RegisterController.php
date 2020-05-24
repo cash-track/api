@@ -4,17 +4,18 @@ declare(strict_types=1);
 
 namespace App\Controller\Auth;
 
-use App\Annotation\Route;
 use App\Request\RegisterRequest;
 use Psr\Http\Message\ResponseInterface;
 use Spiral\Prototype\Traits\PrototypeTrait;
+use Spiral\Router\Annotation\Route;
 
 class RegisterController
 {
     use PrototypeTrait;
 
     /**
-     * @Route(action="/auth/register", verbs={"POST"})
+     * @Route(route="/auth/register", name="auth.register", methods="POST")
+     *
      * @param \App\Request\RegisterRequest $request
      * @return \Psr\Http\Message\ResponseInterface
      */
