@@ -59,7 +59,7 @@ final class LoginController
     private function responseAuthenticated(TokenInterface $token, User $user): ResponseInterface
     {
         return $this->response->json([
-            'userID' => $user->id,
+            'data' => $this->userView->head($user),
             'token' => $token->getID(),
         ], 200);
     }
