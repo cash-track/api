@@ -48,8 +48,6 @@ class RegisterRequest extends Filter
         ],
     ];
 
-    protected const SETTERS = [];
-
     public function createUser(): User
     {
         $user = new User();

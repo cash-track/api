@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Service;
 
 use App\Database\User;
+use App\Security\PasswordContainerInterface;
 use Spiral\Auth\AuthScope;
 use Spiral\Auth\TokenInterface;
 use Spiral\Auth\TokenStorageInterface;
@@ -38,25 +39,23 @@ class AuthService
     }
 
     /**
-     * @param \App\Database\User $user
+     * @param \App\Security\PasswordContainerInterface $container
      * @param string $password
-     * @return \App\Database\User
+     * @return void
      */
-    public function hashPassword(User $user, string $password): User
+    public function hashPassword(PasswordContainerInterface $container, string $password): void
     {
-        $user->password = password_hash($password, PASSWORD_ARGON2ID);
-
-        return $user;
+        $container->setPasswordHash(password_hash($password, PASSWORD_ARGON2ID));
     }
 
     /**
-     * @param \App\Database\User $user
+     * @param \App\Security\PasswordContainerInterface $container
      * @param string $password
      * @return bool
      */
-    public function verifyPassword(User $user, string $password): bool
+    public function verifyPassword(PasswordContainerInterface $container, string $password): bool
     {
-        return password_verify($password, $user->password);
+        return password_verify($password, $container->getPasswordHash());
     }
 
     /**
