@@ -32,6 +32,18 @@ class UserView implements SingletonInterface
      * @param \App\Database\User $user
      * @return array
      */
+    public function head(User $user): array
+    {
+        return [
+            'type' => 'user',
+            'id'   => $user->id,
+        ];
+    }
+
+    /**
+     * @param \App\Database\User $user
+     * @return array
+     */
     public function map(User $user): array
     {
         return [

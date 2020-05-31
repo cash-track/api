@@ -8,7 +8,7 @@ use Psr\Http\Message\ResponseInterface;
 use Spiral\Prototype\Traits\PrototypeTrait;
 use Spiral\Router\Annotation\Route;
 
-class LogoutController
+final class LogoutController
 {
     use PrototypeTrait;
 

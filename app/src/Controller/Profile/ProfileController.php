@@ -9,7 +9,7 @@ use Psr\Http\Message\ResponseInterface;
 use Spiral\Prototype\Traits\PrototypeTrait;
 use Spiral\Router\Annotation\Route;
 
-class ProfileController
+final class ProfileController
 {
     use PrototypeTrait;
 
