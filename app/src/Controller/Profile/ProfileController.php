@@ -22,10 +22,6 @@ class ProfileController
         /** @var \App\Database\User $user */
         $user = $this->auth->getActor();
 
-        return $this->response->json([
-            'data' => [
-                'id' => $user->id,
-            ],
-        ], 200);
+        return $this->userView->json($user);
     }
 }
