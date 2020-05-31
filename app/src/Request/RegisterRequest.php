@@ -30,7 +30,8 @@ class RegisterRequest extends Filter
         'nickName' => [
             'is_string',
             'type::notEmpty',
-            ['entity::unique', User::class, 'email'],
+            ['string::regexp', '/^[a-zA-Z0-9_]*$/'],
+            ['entity::unique', User::class, 'nickName'],
         ],
         'email' => [
             'address::email',
