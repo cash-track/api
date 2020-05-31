@@ -6,9 +6,14 @@ namespace App\Repository;
 
 use App\Database\Currency;
 use Cycle\ORM\Select\Repository;
+use Spiral\Database\Injection\Parameter;
 
 class CurrencyRepository extends Repository
 {
+    const FEATURED_USD = 'USD';
+    const FEATURED_EUR = 'EUR';
+    const FEATURED_UAH = 'UAH';
+
     /**
      * Fetch default currency
      *
@@ -23,5 +28,23 @@ class CurrencyRepository extends Repository
         }
 
         return null;
+    }
+
+    /**
+     * @return \App\Database\Currency[]
+     */
+    public function getFeatured(): array
+    {
+        $currencies = $this->select()->where('code', 'in', new Parameter([
+            self::FEATURED_EUR,
+            self::FEATURED_USD,
+            self::FEATURED_UAH,
+        ]))->fetchAll();
+
+        if (! is_array($currencies)) {
+            return [];
+        }
+
+        return $currencies;
     }
 }
