@@ -49,6 +49,8 @@ class TokenStorage implements TokenStorageInterface, SingletonInterface
      */
     public function load(string $id): ?TokenInterface
     {
+        // TODO. Validate token for the blacklisted
+
         try {
             $payload = JWT::decode($id, $this->secret, [$this->alg]);
             return Token::fromPayload($id, (array) $payload);
@@ -91,6 +93,6 @@ class TokenStorage implements TokenStorageInterface, SingletonInterface
      */
     public function delete(TokenInterface $token): void
     {
-        // TODO: Implement delete() method.
+        // TODO: Implement delete() method. Add token to the blacklist
     }
 }
