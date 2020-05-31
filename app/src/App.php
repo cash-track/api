@@ -91,6 +91,7 @@ class App extends Kernel
         Bootloader\RouteGroupsBootloader::class,
         Bootloader\UserBootloader::class,
         Bootloader\LocaleSelectorBootloader::class,
+        Bootloader\CheckerBootloader::class,
 
         // fast code prototyping
         Prototype\PrototypeBootloader::class,

@@ -30,7 +30,7 @@ final class RegisterController
         }
 
         $user = $request->createUser();
-        $user = $this->authService->hashPassword($user, $request->getField('password'));
+        $this->authService->hashPassword($user, $request->getField('password'));
 
         try {
             $user = $this->userService->store($user);

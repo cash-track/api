@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Database;
 
+use App\Security\PasswordContainerInterface;
 use Cycle\Annotated\Annotation as Cycle;
 use Cycle\ORM\Relation\Pivoted\PivotedCollection;
 
@@ -14,7 +15,7 @@ use Cycle\ORM\Relation\Pivoted\PivotedCollection;
  *     @Cycle\Table\Index(columns = {"email"}, unique = true)
  * })
  */
-class User
+class User implements PasswordContainerInterface
 {
     /**
      * @Cycle\Column(type = "primary")
@@ -96,5 +97,21 @@ class User
     {
        $this->defaultCurrency = new Currency();
        $this->wallets = new PivotedCollection();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function getPasswordHash(): string
+    {
+        return $this->password;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function setPasswordHash(string $password): void
+    {
+        $this->password = $password;
     }
 }

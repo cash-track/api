@@ -38,8 +38,6 @@ class UpdateBasicRequest extends Filter
         ],
     ];
 
-    protected const SETTERS = [];
-
     public function getName(): string
     {
         return $this->getField('name');
