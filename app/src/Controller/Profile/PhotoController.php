@@ -42,11 +42,11 @@ final class PhotoController
             ], 500);
         }
 
-        if ($user->photoUrl !== null) {
-            $this->photoStorageService->removeProfilePhoto($user->photoUrl);
+        if ($user->photo !== null) {
+            $this->photoStorageService->removeProfilePhoto($user->photo);
         }
 
-        $user->photoUrl = $fileName;
+        $user->photo = $fileName;
 
         try {
             $this->userService->store($user);

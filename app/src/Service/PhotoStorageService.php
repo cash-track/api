@@ -42,8 +42,12 @@ class PhotoStorageService
      * @param string $fileName
      * @return string
      */
-    public function getProfilePhotoPublicUrl(string $fileName): string
+    public function getProfilePhotoPublicUrl(?string $fileName):? string
     {
+        if ($fileName === null) {
+            return null;
+        }
+
         return $this->config->getHost() . '/' . self::PHOTO_PATH . $fileName;
     }
 
@@ -56,11 +60,11 @@ class PhotoStorageService
         $fileName = $this->generateFileName($uploadedFile->getClientFilename()) . '.' . $this->getFileExtension($uploadedFile->getClientFilename());
 
         $result = $this->storage->putObject([
-            'Bucket' => $this->config->getBucket(),
-            'ACL'    => 'public-read',
-            'Key'    => self::PHOTO_PATH . $fileName,
-            'Body'   => $uploadedFile->getStream(),
-            'ContentType' => $uploadedFile->getClientMediaType(),
+            'Bucket'             => $this->config->getBucket(),
+            'ACL'                => 'public-read',
+            'Key'                => self::PHOTO_PATH . $fileName,
+            'Body'               => $uploadedFile->getStream(),
+            'ContentType'        => $uploadedFile->getClientMediaType(),
             'ContentDisposition' => 'inline',
         ]);
 
