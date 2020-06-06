@@ -93,6 +93,8 @@ class App extends Kernel
         Bootloader\LocaleSelectorBootloader::class,
         Bootloader\CheckerBootloader::class,
 
+        Bootloader\FirebaseBootloader::class,
+
         // fast code prototyping
         Prototype\PrototypeBootloader::class,
     ];
