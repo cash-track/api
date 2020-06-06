@@ -34,17 +34,13 @@ class FirebaseBootloader extends Bootloader
     public function boot(Container $container): void
     {
         $container->bind(Factory::class, function (): Factory {
-            $factory = new Factory();
-            $factory->withDatabaseUri($this->config->getDatabaseUri());
-            $factory->withServiceAccount($this->getServiceAccount());
-
-            $factory->createStorage();
+            $factory = (new Factory())
+                ->withDatabaseUri($this->config->getDatabaseUri())
+                ->withDefaultStorageBucket($this->config->getStorageBucket())
+                ->withDefaultStorageBucket($this->config->getStorageBucket())
+                ->withServiceAccount($this->getServiceAccount());
 
             return $factory;
-        });
-
-        $container->bind(Storage::class, function (Factory $factory): Storage {
-            return $factory->createStorage();
         });
     }
 

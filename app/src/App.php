@@ -94,6 +94,7 @@ class App extends Kernel
         Bootloader\CheckerBootloader::class,
 
         Bootloader\FirebaseBootloader::class,
+        Bootloader\S3Bootloader::class,
 
         // fast code prototyping
         Prototype\PrototypeBootloader::class,

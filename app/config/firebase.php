@@ -6,6 +6,7 @@ declare(strict_types = 1);
 
 return [
     'databaseUri'             => env('FIREBASE_DATABASE_URI'),
+    'storageBucket'           => env('FIREBASE_STORAGE_BUCKET'),
 
     /**
      * Fill those values from Firebase Admin SDK credentials file.

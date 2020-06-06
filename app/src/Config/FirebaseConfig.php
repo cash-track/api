@@ -15,6 +15,7 @@ class FirebaseConfig extends InjectableConfig
      */
     protected $config = [
         'databaseUri'             => null,
+        'storageBucket'           => null,
         'projectId'               => null,
         'privateKeyId'            => null,
         'privateKey'              => null,
@@ -32,6 +33,14 @@ class FirebaseConfig extends InjectableConfig
     public function getDatabaseUri(): string
     {
         return (string) $this->config['databaseUri'];
+    }
+
+    /**
+     * @return string
+     */
+    public function getStorageBucket(): string
+    {
+        return (string) $this->config['storageBucket'];
     }
 
     /**
