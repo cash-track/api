@@ -27,7 +27,7 @@ class AuthService
     private $tokenStorage;
 
     /**
-     * UserService constructor.
+     * AuthService constructor.
      *
      * @param \Spiral\Auth\AuthScope $auth
      * @param \Spiral\Auth\TokenStorageInterface $tokenStorage

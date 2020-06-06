@@ -49,10 +49,10 @@ class User implements PasswordContainerInterface
     public $email;
 
     /**
-     * @Cycle\Column(type = "string(255)", nullable = true, name = "photo_url")
+     * @Cycle\Column(type = "string(255)", nullable = true, name = "photo")
      * @var string|null
      */
-    public $photoUrl;
+    public $photo;
 
     /**
      * @Cycle\Column(type = "string(3)", nullable = true, name = "default_currency_code")

@@ -53,7 +53,7 @@ class UserView implements SingletonInterface
             'lastName'  => $user->lastName,
             'nickName'  => $user->nickName,
             'email'     => $user->email,
-            'photoUrl'  => $user->photoUrl,
+            'photoUrl'  => $this->photoStorageService->getProfilePhotoPublicUrl($user->photo),
             'createdAt' => $user->createdAt->format(DATE_W3C),
             'updatedAt' => $user->updatedAt->format(DATE_W3C),
 

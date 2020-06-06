@@ -43,7 +43,9 @@
     "spiral/auth": "^1.0",
     "spiral/auth-http": "^1.0",
     "firebase/php-jwt": "^5.2",
-    "spiral/annotated-routes": "^1.1"
+    "spiral/annotated-routes": "^1.1",
+    "kreait/firebase-php": "^5.0",
+    "aws/aws-sdk-php": "^3.140"
   },
   "replace": {
     "symfony/polyfill-php72": "1.99",
