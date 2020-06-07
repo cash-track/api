@@ -41,7 +41,11 @@ final class RegisterController
             ], 500);
         }
 
-        // TODO. Send confirmation email
+        try {
+            $this->emailConfirmationService->create($user);
+        } catch (\Throwable $exception) {
+            // TODO. Handle error
+        }
 
         $token = $this->authService->authenticate($user);
 

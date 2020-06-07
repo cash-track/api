@@ -49,6 +49,12 @@ class User implements PasswordContainerInterface
     public $email;
 
     /**
+     * @Cycle\Column(type = "boolean", default = "0", name = "is_email_confirmed")
+     * @var bool
+     */
+    public $isEmailConfirmed = false;
+
+    /**
      * @Cycle\Column(type = "string(255)", nullable = true, name = "photo")
      * @var string|null
      */
