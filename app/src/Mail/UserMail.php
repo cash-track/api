@@ -5,9 +5,9 @@ declare(strict_types = 1);
 namespace App\Mail;
 
 use App\Database\User;
-use App\Service\Mailer\Mail as Message;
+use App\Service\Mailer\Mail;
 
-class UserMail extends Mail
+abstract class UserMail extends Mail
 {
     /**
      * @var \App\Database\User
@@ -29,8 +29,8 @@ class UserMail extends Mail
     /**
      * {@inheritDoc}
      */
-    public function build(): Message
+    public function build(): Mail
     {
-        return parent::build()->to($this->user->email, $this->user->fullName());
+        return $this->to($this->user->email, $this->user->fullName());
     }
 }

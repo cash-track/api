@@ -3,6 +3,11 @@
 declare(strict_types = 1);
 
 return [
+    'sender' => [
+        'name'    => env('MAIL_SENDER_NAME', 'Support Manager'),
+        'address' => env('MAIL_SENDER_ADDRESS', 'support@cash-track.ml'),
+    ],
+
     'driver' => env('MAIL_DRIVER', 'smtp'),
 
     'drivers' => [

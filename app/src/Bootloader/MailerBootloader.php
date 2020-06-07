@@ -35,7 +35,10 @@ class MailerBootloader extends Bootloader
     public function boot(Container $container): void
     {
         $container->bind(MailerInterface::class, function (ViewsInterface $views): MailerInterface {
-            return new Mailer(new \Swift_Mailer($this->getTransport()), $views);
+            $mailer = new Mailer(new \Swift_Mailer($this->getTransport()), $views);
+
+            return $mailer->setDefaultFromName($this->config->getSenderName())
+                          ->setDefaultFromAddress($this->config->getSenderAddress());
         });
     }
 

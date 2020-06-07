@@ -13,8 +13,8 @@ interface MailerInterface
     public function send(Mail $mail): void;
 
     /**
-     * @param \App\Service\Mailer\Mail $message
+     * @param \App\Service\Mailer\Mail $mail
      * @return string
      */
-    public function render(Mail $message): string;
+    public function render(Mail $mail): string;
 }
