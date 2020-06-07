@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 use Spiral\Database\Driver;
 
@@ -16,5 +16,5 @@ return [
             'username'   => env('DB_USER'),
             'password'   => env('DB_PASSWORD'),
         ],
-    ]
+    ],
 ];

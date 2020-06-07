@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @see \App\Config\CdnConfig
- */
 declare(strict_types = 1);
 
 return [

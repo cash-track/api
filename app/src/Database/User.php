@@ -114,4 +114,12 @@ class User implements PasswordContainerInterface
     {
         $this->password = $password;
     }
+
+    /**
+     * @return string
+     */
+    public function fullName(): string
+    {
+        return "{$this->name} {$this->lastName}";
+    }
 }

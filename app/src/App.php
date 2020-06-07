@@ -95,6 +95,7 @@ class App extends Kernel
 
         Bootloader\FirebaseBootloader::class,
         Bootloader\S3Bootloader::class,
+        Bootloader\MailerBootloader::class,
 
         // fast code prototyping
         Prototype\PrototypeBootloader::class,
