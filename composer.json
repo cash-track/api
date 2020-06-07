@@ -45,7 +45,8 @@
     "firebase/php-jwt": "^5.2",
     "spiral/annotated-routes": "^1.1",
     "kreait/firebase-php": "^5.0",
-    "aws/aws-sdk-php": "^3.140"
+    "aws/aws-sdk-php": "^3.140",
+    "swiftmailer/swiftmailer": "^6.0"
   },
   "replace": {
     "symfony/polyfill-php72": "1.99",

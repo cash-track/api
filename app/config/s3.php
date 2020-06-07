@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @see \App\Config\S3Config
- */
 declare(strict_types = 1);
 
 return [
