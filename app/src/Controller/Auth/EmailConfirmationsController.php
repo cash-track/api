@@ -18,7 +18,7 @@ final class EmailConfirmationsController
      *
      * @return \Psr\Http\Message\ResponseInterface
      */
-    public function confirmation(): ResponseInterface
+    public function index(): ResponseInterface
     {
         /** @var \App\Database\User $user */
         $user = $this->auth->getActor();
@@ -26,7 +26,9 @@ final class EmailConfirmationsController
         $confirmation = $this->emailConfirmations->findByPK($user->email);
 
         if (! $confirmation instanceof EmailConfirmation) {
-            return $this->response->json(['data' => null]);
+            return $this->response->json([
+                'data' => null,
+            ]);
         }
 
         return $this->emailConfirmationView->json($confirmation);
@@ -72,6 +74,6 @@ final class EmailConfirmationsController
 
         return $this->response->json([
             'message' => 'Confirmation message has been sent.',
-            ]);
+        ]);
     }
 }

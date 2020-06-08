@@ -2,7 +2,7 @@
 
 declare(strict_types = 1);
 
-namespace App\Service\EmailConfirmation;
+namespace App\Service\Auth;
 
 use App\Config\AppConfig;
 use App\Database\EmailConfirmation;
@@ -18,46 +18,18 @@ use Spiral\Router\RouterInterface;
 /**
  * @Prototyped(property="emailConfirmationService")
  */
-class EmailConfirmationService
+class EmailConfirmationService extends HelperService
 {
-    const TTL = 60 * 60;
-    const RESEND_TIME_LIMIT = 60;
-
-    /**
-     * @var \Cycle\ORM\TransactionInterface
-     */
-    private $tr;
-
     /**
      * @var \App\Repository\EmailConfirmationRepository
      */
-    private $confirmationRepository;
+    protected $repository;
 
     /**
-     * @var \App\Repository\UserRepository
-     */
-    private $userRepository;
-
-    /**
-     * @var \Spiral\Auth\AuthScope
-     */
-    private $mailer;
-
-    /**
-     * @var \Spiral\Router\RouterInterface
-     */
-    private $router;
-
-    /**
-     * @var \App\Config\AppConfig
-     */
-    private $appConfig;
-
-    /**
-     * AuthService constructor.
+     * EmailConfirmationService constructor.
      *
      * @param \Cycle\ORM\TransactionInterface $tr
-     * @param \App\Repository\EmailConfirmationRepository $confirmationRepository
+     * @param \App\Repository\EmailConfirmationRepository $repository
      * @param \App\Repository\UserRepository $userRepository
      * @param \App\Service\Mailer\MailerInterface $mailer
      * @param \Spiral\Router\RouterInterface $router
@@ -65,18 +37,15 @@ class EmailConfirmationService
      */
     public function __construct(
         TransactionInterface $tr,
-        EmailConfirmationRepository $confirmationRepository,
+        EmailConfirmationRepository $repository,
         UserRepository $userRepository,
         MailerInterface $mailer,
         RouterInterface $router,
         AppConfig $appConfig
     ) {
-        $this->tr                     = $tr;
-        $this->confirmationRepository = $confirmationRepository;
-        $this->userRepository         = $userRepository;
-        $this->mailer                 = $mailer;
-        $this->router                 = $router;
-        $this->appConfig              = $appConfig;
+        parent::__construct($tr, $userRepository, $mailer, $router, $appConfig);
+
+        $this->repository = $repository;
     }
 
     /**
@@ -106,9 +75,9 @@ class EmailConfirmationService
      */
     public function reSend(User $user)
     {
-        $confirmation = $this->confirmationRepository->findByPK($user->email);
+        $confirmation = $this->repository->findByPK($user->email);
         if ($confirmation instanceof EmailConfirmation) {
-            if ($this->isConfirmationResendThrottled($confirmation)) {
+            if ($this->isThrottled($confirmation->createdAt)) {
                 throw new \RuntimeException('Previous confirmation is already sent less than ' . self::RESEND_TIME_LIMIT . ' seconds ago');
             }
 
@@ -125,13 +94,13 @@ class EmailConfirmationService
      */
     public function confirm(string $token)
     {
-        $confirmation = $this->confirmationRepository->findByToken($token);
+        $confirmation = $this->repository->findByToken($token);
 
         if ( ! $confirmation instanceof EmailConfirmation) {
             throw new \RuntimeException('Wrong confirmation token');
         }
 
-        if ($this->isConfirmationExpired($confirmation)) {
+        if ($this->isExpired($confirmation->createdAt)) {
             throw new \RuntimeException('Confirmation link are expired');
         }
 
@@ -149,24 +118,6 @@ class EmailConfirmationService
     }
 
     /**
-     * @param \App\Database\EmailConfirmation $confirmation
-     * @return bool
-     */
-    private function isConfirmationResendThrottled(EmailConfirmation $confirmation): bool
-    {
-        return $confirmation->createdAt->getTimestamp() + self::RESEND_TIME_LIMIT > time();
-    }
-
-    /**
-     * @return string
-     * @throws \Exception
-     */
-    private function generateToken(): string
-    {
-        return sha1((string) microtime(true) . bin2hex(random_bytes(256)));
-    }
-
-    /**
      * @param string $token
      * @return string
      */
@@ -177,14 +128,5 @@ class EmailConfirmationService
         ]);
 
         return $this->appConfig->getUrl() . (string) $uri;
-    }
-
-    /**
-     * @param \App\Database\EmailConfirmation $confirmation
-     * @return bool
-     */
-    private function isConfirmationExpired(EmailConfirmation $confirmation): bool
-    {
-        return $confirmation->createdAt->getTimestamp() + self::TTL < time();
     }
 }
