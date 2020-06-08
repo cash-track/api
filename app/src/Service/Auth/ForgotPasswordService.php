@@ -2,7 +2,7 @@
 
 declare(strict_types = 1);
 
-namespace App\Service;
+namespace App\Service\Auth;
 
 use App\Config\AppConfig;
 use App\Database\ForgotPasswordRequest;
@@ -18,43 +18,15 @@ use Spiral\Router\RouterInterface;
 /**
  * @Prototyped(property="forgotPasswordService")
  */
-class ForgotPasswordService
+class ForgotPasswordService extends HelperService
 {
-    const TTL = 60 * 60;
-    const RESEND_TIME_LIMIT = 60;
-
-    /**
-     * @var \Cycle\ORM\TransactionInterface
-     */
-    private $tr;
-
     /**
      * @var \App\Repository\ForgotPasswordRequestRepository
      */
     private $repository;
 
     /**
-     * @var \App\Repository\UserRepository
-     */
-    private $userRepository;
-
-    /**
-     * @var \Spiral\Auth\AuthScope
-     */
-    private $mailer;
-
-    /**
-     * @var \Spiral\Router\RouterInterface
-     */
-    private $router;
-
-    /**
-     * @var \App\Config\AppConfig
-     */
-    private $appConfig;
-
-    /**
-     * @var \App\Service\AuthService
+     * @var \App\Service\Auth\AuthService
      */
     private $authService;
 
@@ -62,29 +34,30 @@ class ForgotPasswordService
      * ForgotPasswordService constructor.
      *
      * @param \Cycle\ORM\TransactionInterface $tr
-     * @param \App\Repository\ForgotPasswordRequestRepository $forgotPasswordRequestRepository
+     * @param \App\Repository\ForgotPasswordRequestRepository $repository
      * @param \App\Repository\UserRepository $userRepository
      * @param \App\Service\Mailer\MailerInterface $mailer
      * @param \Spiral\Router\RouterInterface $router
      * @param \App\Config\AppConfig $appConfig
-     * @param \App\Service\AuthService $authService
+     * @param \App\Service\Auth\AuthService $authService
      */
     public function __construct(
         TransactionInterface $tr,
-        ForgotPasswordRequestRepository $forgotPasswordRequestRepository,
+        ForgotPasswordRequestRepository $repository,
         UserRepository $userRepository,
         MailerInterface $mailer,
         RouterInterface $router,
         AppConfig $appConfig,
         AuthService $authService
     ) {
-        $this->tr                     = $tr;
-        $this->repository = $forgotPasswordRequestRepository;
-        $this->userRepository         = $userRepository;
-        $this->mailer                 = $mailer;
-        $this->router                 = $router;
-        $this->appConfig              = $appConfig;
-        $this->authService = $authService;
+        parent::__construct($tr, $userRepository, $mailer, $router, $appConfig);
+        $this->tr             = $tr;
+        $this->repository     = $repository;
+        $this->userRepository = $userRepository;
+        $this->mailer         = $mailer;
+        $this->router         = $router;
+        $this->appConfig      = $appConfig;
+        $this->authService    = $authService;
     }
 
     /**
@@ -94,18 +67,18 @@ class ForgotPasswordService
     public function create(string $email)
     {
         $user = $this->userRepository->findByEmail($email);
-        if (! $user instanceof User) {
+        if ( ! $user instanceof User) {
             throw new \RuntimeException('Unable to find user by email');
         }
 
         $request = $this->repository->findByPK($email);
-        if ($request instanceof ForgotPasswordRequest && $this->isRequestThrottled($request)) {
+        if ($request instanceof ForgotPasswordRequest && $this->isThrottled($request->createdAt)) {
             throw new \RuntimeException('Previous request was created in less than ' . self::RESEND_TIME_LIMIT . ' seconds');
         }
 
-        $request = new ForgotPasswordRequest();
-        $request->email = $user->email;
-        $request->code = $this->generateToken();
+        $request            = new ForgotPasswordRequest();
+        $request->email     = $user->email;
+        $request->code      = $this->generateToken();
         $request->createdAt = new \DateTimeImmutable();
 
         $this->tr->persist($request);
@@ -127,7 +100,7 @@ class ForgotPasswordService
             throw new \RuntimeException('Wrong password reset code');
         }
 
-        if ($this->isRequestExpired($request)) {
+        if ($this->isExpired($request->createdAt)) {
             throw new \RuntimeException('Password reset link are expired');
         }
 
@@ -145,40 +118,13 @@ class ForgotPasswordService
     }
 
     /**
-     * @return string
-     * @throws \Exception
-     */
-    private function generateToken(): string
-    {
-        return sha1((string) microtime(true) . bin2hex(random_bytes(256)));
-    }
-
-    /**
      * @param string $code
      * @return string
      */
     private function getResetLink(string $code): string
     {
-        // TODO. Implement this route on the fromtend side. Render password reset form.
+        // TODO. Implement this route on the frontend side. Render password reset form.
 
-        return $this->appConfig->getUrl() ."/auth/password/reset/{$code}";
-    }
-
-    /**
-     * @param \App\Database\ForgotPasswordRequest $request
-     * @return bool
-     */
-    private function isRequestThrottled(ForgotPasswordRequest $request): bool
-    {
-        return $request->createdAt->getTimestamp() + self::RESEND_TIME_LIMIT > time();
-    }
-
-    /**
-     * @param \App\Database\ForgotPasswordRequest $request
-     * @return bool
-     */
-    private function isRequestExpired(ForgotPasswordRequest $request): bool
-    {
-        return $request->createdAt->getTimestamp() + self::TTL < time();
+        return $this->appConfig->getUrl() . "/auth/password/reset/{$code}";
     }
 }
