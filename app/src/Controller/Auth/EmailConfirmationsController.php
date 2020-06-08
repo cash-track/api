@@ -33,7 +33,7 @@ final class EmailConfirmationsController
     }
 
     /**
-     * @Route(route="/auth/email/confirm/<token>", name="auth.email.confirm")
+     * @Route(route="/auth/email/confirmation/<token>", name="auth.email.confirm")
      *
      * @param string $token
      * @return string
@@ -52,7 +52,7 @@ final class EmailConfirmationsController
     }
 
     /**
-     * @Route(route="/auth/email/resend", name="auth.email.resend", methods="POST", group="auth")
+     * @Route(route="/auth/email/confirmation/resend", name="auth.email.resend", methods="POST", group="auth")
      *
      * @return \Psr\Http\Message\ResponseInterface
      */
