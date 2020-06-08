@@ -47,15 +47,16 @@ class UserView implements SingletonInterface
     public function map(User $user): array
     {
         return [
-            'type'      => 'user',
-            'id'        => $user->id,
-            'name'      => $user->name,
-            'lastName'  => $user->lastName,
-            'nickName'  => $user->nickName,
-            'email'     => $user->email,
-            'photoUrl'  => $this->photoStorageService->getProfilePhotoPublicUrl($user->photo),
-            'createdAt' => $user->createdAt->format(DATE_W3C),
-            'updatedAt' => $user->updatedAt->format(DATE_W3C),
+            'type'             => 'user',
+            'id'               => $user->id,
+            'name'             => $user->name,
+            'lastName'         => $user->lastName,
+            'nickName'         => $user->nickName,
+            'email'            => $user->email,
+            'isEmailConfirmed' => $user->isEmailConfirmed,
+            'photoUrl'         => $this->photoStorageService->getProfilePhotoPublicUrl($user->photo),
+            'createdAt'        => $user->createdAt->format(DATE_W3C),
+            'updatedAt'        => $user->updatedAt->format(DATE_W3C),
 
             'defaultCurrencyCode' => $user->defaultCurrencyCode,
             'defaultCurrency'     => $this->currencyView->map($user->defaultCurrency),
