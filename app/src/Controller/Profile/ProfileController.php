@@ -55,7 +55,7 @@ final class ProfileController
         } catch (\Throwable $exception) {
             $this->logger->warning('Unable to load currency entity', [
                 'action' => 'profile.update',
-                'userId' => $user->id,
+                'id'     => $user->id,
                 'msg'    => $exception->getMessage(),
             ]);
         }
@@ -65,7 +65,7 @@ final class ProfileController
         } catch (\Throwable $exception) {
             $this->logger->error('Unable to store user', [
                 'action' => 'profile.update',
-                'userId' => $user->id,
+                'id'     => $user->id,
                 'msg'    => $exception->getMessage(),
             ]);
 

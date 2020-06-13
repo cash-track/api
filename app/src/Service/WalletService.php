@@ -55,29 +55,16 @@ class WalletService
 
         $wallet->users->add($user);
 
-        $this->tr->persist($wallet);
-        $this->tr->run();
-
-        return $wallet;
+        return $this->store($wallet);
     }
 
-    public function update(Wallet $wallet, array $data): Wallet
+    /**
+     * @param \App\Database\Wallet $wallet
+     * @return \App\Database\Wallet
+     * @throws \Throwable
+     */
+    public function store(Wallet $wallet): Wallet
     {
-        if (count($data) == 0) {
-            return $wallet;
-        }
-
-        foreach ($data as $key => $value) {
-            switch ($key) {
-                case 'name':
-                    $wallet->name = $value;
-                    break;
-                case 'slug':
-                    $wallet->slug = $value;
-                    break;
-            }
-        }
-
         $this->tr->persist($wallet);
         $this->tr->run();
 
