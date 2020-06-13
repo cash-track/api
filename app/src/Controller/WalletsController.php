@@ -106,6 +106,7 @@ final class WalletsController
         }
 
         $wallet->name = $request->getName();
+        $wallet->isPublic = $request->getIsPublic();
         $wallet->defaultCurrencyCode = $request->getDefaultCurrencyCode();
 
         try {

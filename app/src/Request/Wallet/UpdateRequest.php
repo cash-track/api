@@ -11,12 +11,17 @@ class UpdateRequest extends Filter
 {
     protected const SCHEMA = [
         'name'                => 'data:name',
+        'isPublic'            => 'data:isPublic',
         'defaultCurrencyCode' => 'data:defaultCurrencyCode',
     ];
 
     protected const VALIDATES = [
         'name'                => [
             'is_string',
+            'type::notEmpty',
+        ],
+        'isPublic'            => [
+            'type::boolean',
             'type::notEmpty',
         ],
         'defaultCurrencyCode' => [
@@ -29,6 +34,11 @@ class UpdateRequest extends Filter
     public function getName(): string
     {
         return (string) $this->getField('name');
+    }
+
+    public function getIsPublic(): bool
+    {
+        return (bool) $this->getField('isPublic', false);
     }
 
     public function getDefaultCurrencyCode(): string

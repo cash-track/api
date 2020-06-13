@@ -71,6 +71,10 @@ class WalletService
         return $wallet;
     }
 
+    /**
+     * @param \App\Database\Wallet $wallet
+     * @throws \Throwable
+     */
     public function delete(Wallet $wallet): void
     {
         $this->tr->delete($wallet);
