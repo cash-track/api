@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Service;
 
-use App\Database\Currency;
 use App\Database\User;
 use App\Database\Wallet;
+use App\Repository\CurrencyRepository;
 use Cycle\ORM\TransactionInterface;
 use Spiral\Prototype\Annotation\Prototyped;
 
@@ -21,38 +21,39 @@ class WalletService
     private $tr;
 
     /**
+     * @var \App\Repository\CurrencyRepository
+     */
+    private $currencyRepository;
+
+    /**
      * WalletService constructor.
      *
      * @param \Cycle\ORM\TransactionInterface $tr
+     * @param \App\Repository\CurrencyRepository $currencyRepository
      */
-    public function __construct(TransactionInterface $tr)
+    public function __construct(TransactionInterface $tr, CurrencyRepository $currencyRepository)
     {
         $this->tr = $tr;
+        $this->currencyRepository = $currencyRepository;
     }
 
     /**
      * Creates new Wallet and link to creator
      *
+     * @param \App\Database\Wallet $wallet
      * @param \App\Database\User $user
-     * @param string $name
-     * @param bool $isPublic
-     * @param \App\Database\Currency|null $defaultCurrency
      * @return \App\Database\Wallet
      * @throws \Throwable
      */
-    public function create(User $user, string $name, bool $isPublic = false, Currency $defaultCurrency = null): Wallet
+    public function create(Wallet $wallet, User $user): Wallet
     {
-        $wallet = new Wallet();
-        $wallet->name = $name;
-        $wallet->slug = str_slug($name);
-        $wallet->isPublic = $isPublic;
-        $wallet->users->add($user);
-
-        if ($defaultCurrency instanceof Currency) {
-            $wallet->defaultCurrency = $defaultCurrency;
-        } else {
-            $wallet->defaultCurrency = $user->defaultCurrency;
+        if (empty($wallet->slug)) {
+            $this->setSlugByName($wallet);
         }
+
+        $this->setDefaultCurrency($wallet, $user->defaultCurrencyCode);
+
+        $wallet->users->add($user);
 
         $this->tr->persist($wallet);
         $this->tr->run();
@@ -173,6 +174,36 @@ class WalletService
 
         $this->tr->persist($wallet);
         $this->tr->run();
+
+        return $wallet;
+    }
+
+    /**
+     * @param \App\Database\Wallet $wallet
+     * @return \App\Database\Wallet
+     * @throws \Exception
+     */
+    protected function setSlugByName(Wallet $wallet): Wallet
+    {
+        $wallet->slug = str_slug($wallet->name . ' ' . bin2hex(random_bytes(3)));
+
+        return $wallet;
+    }
+
+    /**
+     * @param \App\Database\Wallet $wallet
+     * @param string $defaultCurrencyCode
+     * @return \App\Database\Wallet
+     */
+    protected function setDefaultCurrency(Wallet $wallet, string $defaultCurrencyCode): Wallet
+    {
+        $code = $defaultCurrencyCode;
+
+        if (!empty($wallet->defaultCurrencyCode)) {
+            $code = $wallet->defaultCurrencyCode;
+        }
+
+        $wallet->defaultCurrency = $this->currencyRepository->findByPK($code);
 
         return $wallet;
     }
