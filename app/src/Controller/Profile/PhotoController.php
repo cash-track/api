@@ -9,7 +9,7 @@ use Psr\Http\Message\ResponseInterface;
 use Spiral\Prototype\Traits\PrototypeTrait;
 use Spiral\Router\Annotation\Route;
 
-final class PhotoController
+final class PhotoController extends ProfileController
 {
     use PrototypeTrait;
 
@@ -19,12 +19,9 @@ final class PhotoController
      * @param \App\Request\Profile\UpdatePhotoRequest $request
      * @return \Psr\Http\Message\ResponseInterface
      */
-    public function update(UpdatePhotoRequest $request): ResponseInterface
+    public function updatePhoto(UpdatePhotoRequest $request): ResponseInterface
     {
-        /** @var \App\Database\User $user */
-        $user = $this->auth->getActor();
-
-        $request->setContext($user);
+        $request->setContext($this->user);
 
         if ( ! $request->isValid()) {
             return $this->response->json([
@@ -42,18 +39,18 @@ final class PhotoController
             ], 500);
         }
 
-        if ($user->photo !== null) {
-            $this->photoStorageService->removeProfilePhoto($user->photo);
+        if ($this->user->photo !== null) {
+            $this->photoStorageService->removeProfilePhoto($this->user->photo);
         }
 
-        $user->photo = $fileName;
+        $this->user->photo = $fileName;
 
         try {
-            $this->userService->store($user);
+            $this->userService->store($this->user);
         } catch (\Throwable $exception) {
             $this->logger->error('Unable to store user', [
                 'action' => 'profile.update.photo',
-                'userId' => $user->id,
+                'userId' => $this->user->id,
                 'msg'    => $exception->getMessage(),
             ]);
 

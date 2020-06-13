@@ -8,6 +8,7 @@ use App\Database\Wallet;
 use App\Request\Wallet\CreateRequest;
 use App\Request\Wallet\UpdateRequest;
 use Psr\Http\Message\ResponseInterface;
+use Spiral\Auth\AuthScope;
 use Spiral\Prototype\Traits\PrototypeTrait;
 use Spiral\Router\Annotation\Route;
 
@@ -16,17 +17,29 @@ final class WalletsController
     use PrototypeTrait;
 
     /**
+     * @var \App\Database\User
+     */
+    private $user;
+
+    /**
+     * WalletsController constructor.
+     *
+     * @param \Spiral\Auth\AuthScope $auth
+     */
+    public function __construct(AuthScope $auth)
+    {
+        $this->user = $auth->getActor();
+    }
+
+    /**
      * @Route(route="/wallets", name="wallet.list", methods="GET", group="auth")
      *
      * @return string
      */
     public function list(): array
     {
-        /** @var \App\Database\User $user */
-        $user = $this->auth->getActor();
-
         return [
-            'data' => $user->wallets->map(function ($wallet) {
+            'data' => $this->user->wallets->map(function ($wallet) {
                 return $this->walletView->map($wallet);
             })->getValues(),
         ];
@@ -40,10 +53,7 @@ final class WalletsController
      */
     public function index(int $id): ResponseInterface
     {
-        /** @var \App\Database\User $user */
-        $user = $this->auth->getActor();
-
-        $wallet = $this->wallets->findByPKByUserPK($id, $user->id);
+        $wallet = $this->wallets->findByPKByUserPK($id, $this->user->id);
 
         if (! $wallet instanceof Wallet) {
             return $this->response->create(404);
@@ -60,9 +70,6 @@ final class WalletsController
      */
     public function create(CreateRequest $request): ResponseInterface
     {
-        /** @var \App\Database\User $user */
-        $user = $this->auth->getActor();
-
         if ( ! $request->isValid()) {
             return $this->response->json([
                 'errors' => $request->getErrors(),
@@ -70,7 +77,7 @@ final class WalletsController
         }
 
         try {
-            $wallet = $this->walletService->create($request->createWallet(), $user);
+            $wallet = $this->walletService->create($request->createWallet(), $this->user);
         } catch (\Throwable $exception) {
             return $this->response->json([
                 'message' => 'Unable to create new wallet. Please try again later.',
@@ -90,10 +97,7 @@ final class WalletsController
      */
     public function update(int $id, UpdateRequest $request): ResponseInterface
     {
-        /** @var \App\Database\User $user */
-        $user = $this->auth->getActor();
-
-        $wallet = $this->wallets->findByPKByUserPK($id, $user->id);
+        $wallet = $this->wallets->findByPKByUserPK($id, $this->user->id);
 
         if (! $wallet instanceof Wallet) {
             return $this->response->create(404);
@@ -145,10 +149,7 @@ final class WalletsController
      */
     public function delete(int $id): ResponseInterface
     {
-        /** @var \App\Database\User $user */
-        $user = $this->auth->getActor();
-
-        $wallet = $this->wallets->findByPKByUserPK($id, $user->id);
+        $wallet = $this->wallets->findByPKByUserPK($id, $this->user->id);
 
         if (! $wallet instanceof Wallet) {
             return $this->response->create(404);

@@ -6,12 +6,28 @@ namespace App\Controller\Profile;
 
 use App\Request\Profile\UpdateBasicRequest;
 use Psr\Http\Message\ResponseInterface;
+use Spiral\Auth\AuthScope;
 use Spiral\Prototype\Traits\PrototypeTrait;
 use Spiral\Router\Annotation\Route;
 
-final class ProfileController
+class ProfileController
 {
     use PrototypeTrait;
+
+    /**
+     * @var \App\Database\User
+     */
+    protected $user;
+
+    /**
+     * ProfileController constructor.
+     *
+     * @param \Spiral\Auth\AuthScope $auth
+     */
+    public function __construct(AuthScope $auth)
+    {
+        $this->user = $auth->getActor();
+    }
 
     /**
      * @Route(route="/profile", name="profile.index", methods="GET", group="auth")
@@ -20,10 +36,7 @@ final class ProfileController
      */
     public function index(): ResponseInterface
     {
-        /** @var \App\Database\User $user */
-        $user = $this->auth->getActor();
-
-        return $this->userView->json($user);
+        return $this->userView->json($this->user);
     }
 
     /**
@@ -34,10 +47,7 @@ final class ProfileController
      */
     public function update(UpdateBasicRequest $request): ResponseInterface
     {
-        /** @var \App\Database\User $user */
-        $user = $this->auth->getActor();
-
-        $request->setContext($user);
+        $request->setContext($this->user);
 
         if ( ! $request->isValid()) {
             return $this->response->json([
@@ -45,27 +55,27 @@ final class ProfileController
             ], 422);
         }
 
-        $user->name = $request->getName();
-        $user->lastName = $request->getLastName();
-        $user->nickName = $request->getNickName();
-        $user->defaultCurrencyCode = $request->getDefaultCurrencyCode();
+        $this->user->name = $request->getName();
+        $this->user->lastName = $request->getLastName();
+        $this->user->nickName = $request->getNickName();
+        $this->user->defaultCurrencyCode = $request->getDefaultCurrencyCode();
 
         try {
-            $user->defaultCurrency = $this->currencies->findByPK($request->getDefaultCurrencyCode());
+            $this->user->defaultCurrency = $this->currencies->findByPK($request->getDefaultCurrencyCode());
         } catch (\Throwable $exception) {
             $this->logger->warning('Unable to load currency entity', [
                 'action' => 'profile.update',
-                'id'     => $user->id,
+                'id'     => $this->user->id,
                 'msg'    => $exception->getMessage(),
             ]);
         }
 
         try {
-            $this->userService->store($user);
+            $this->userService->store($this->user);
         } catch (\Throwable $exception) {
             $this->logger->error('Unable to store user', [
                 'action' => 'profile.update',
-                'id'     => $user->id,
+                'id'     => $this->user->id,
                 'msg'    => $exception->getMessage(),
             ]);
 
@@ -75,6 +85,6 @@ final class ProfileController
             ], 500);
         }
 
-        return $this->userView->json($user);
+        return $this->userView->json($this->user);
     }
 }

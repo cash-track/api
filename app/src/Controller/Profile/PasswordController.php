@@ -9,7 +9,7 @@ use Psr\Http\Message\ResponseInterface;
 use Spiral\Prototype\Traits\PrototypeTrait;
 use Spiral\Router\Annotation\Route;
 
-final class PasswordController
+final class PasswordController extends ProfileController
 {
     use PrototypeTrait;
 
@@ -19,12 +19,9 @@ final class PasswordController
      * @param \App\Request\Profile\UpdatePasswordRequest $request
      * @return \Psr\Http\Message\ResponseInterface
      */
-    public function update(UpdatePasswordRequest $request): ResponseInterface
+    public function updatePassword(UpdatePasswordRequest $request): ResponseInterface
     {
-        /** @var \App\Database\User $user */
-        $user = $this->auth->getActor();
-
-        $request->setContext($user);
+        $request->setContext($this->user);
 
         if ( ! $request->isValid()) {
             return $this->response->json([
@@ -32,14 +29,14 @@ final class PasswordController
             ], 422);
         }
 
-        $this->authService->hashPassword($user, $request->getNewPassword());
+        $this->authService->hashPassword($this->user, $request->getNewPassword());
 
         try {
-            $this->userService->store($user);
+            $this->userService->store($this->user);
         } catch (\Throwable $exception) {
             $this->logger->error('Unable to store user', [
                 'action' => 'profile.update.password',
-                'userId' => $user->id,
+                'userId' => $this->user->id,
                 'msg'    => $exception->getMessage(),
             ]);
 
