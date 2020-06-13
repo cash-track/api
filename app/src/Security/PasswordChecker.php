@@ -2,7 +2,7 @@
 
 namespace App\Security;
 
-use App\Service\AuthService;
+use App\Service\Auth\AuthService;
 use Spiral\Validation\AbstractChecker;
 
 class PasswordChecker extends AbstractChecker
@@ -12,14 +12,14 @@ class PasswordChecker extends AbstractChecker
     ];
 
     /**
-     * @var \App\Service\AuthService
+     * @var \App\Service\Auth\AuthService
      */
     private $auth;
 
     /**
      * PasswordChecker constructor.
      *
-     * @param \App\Service\AuthService $auth
+     * @param \App\Service\Auth\AuthService $auth
      */
     public function __construct(AuthService $auth)
     {
