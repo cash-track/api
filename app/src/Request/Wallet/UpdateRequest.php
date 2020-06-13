@@ -22,7 +22,6 @@ class UpdateRequest extends Filter
         ],
         'isPublic'            => [
             'type::boolean',
-            'type::notEmpty',
         ],
         'defaultCurrencyCode' => [
             'is_string',

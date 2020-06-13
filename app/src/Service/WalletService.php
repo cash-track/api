@@ -81,6 +81,70 @@ class WalletService
         $this->tr->run();
     }
 
+    /**
+     * @param \App\Database\Wallet $wallet
+     * @return \App\Database\Wallet
+     * @throws \Throwable
+     */
+    public function activate(Wallet $wallet): Wallet
+    {
+        if ($wallet->isActive) {
+            return $wallet;
+        }
+
+        $wallet->isActive = true;
+
+        return $this->store($wallet);
+    }
+
+    /**
+     * @param \App\Database\Wallet $wallet
+     * @return \App\Database\Wallet
+     * @throws \Throwable
+     */
+    public function disable(Wallet $wallet): Wallet
+    {
+        if (! $wallet->isActive) {
+            return $wallet;
+        }
+
+        $wallet->isActive = false;
+
+        return $this->store($wallet);
+    }
+
+    /**
+     * @param \App\Database\Wallet $wallet
+     * @return \App\Database\Wallet
+     * @throws \Throwable
+     */
+    public function archive(Wallet $wallet): Wallet
+    {
+        if ($wallet->isArchived) {
+            return $wallet;
+        }
+
+        $wallet->isArchived = true;
+
+        return $this->store($wallet);
+    }
+
+    /**
+     * @param \App\Database\Wallet $wallet
+     * @return \App\Database\Wallet
+     * @throws \Throwable
+     */
+    public function unArchive(Wallet $wallet): Wallet
+    {
+        if (! $wallet->isArchived) {
+            return $wallet;
+        }
+
+        $wallet->isArchived = false;
+
+        return $this->store($wallet);
+    }
+
     public function share(Wallet $wallet, User $user): Wallet
     {
         if ($wallet->users->contains($user)) {
@@ -102,66 +166,6 @@ class WalletService
         }
 
         $wallet->users->removeElement($user);
-
-        $this->tr->persist($wallet);
-        $this->tr->run();
-
-        return $wallet;
-    }
-
-    public function archive(Wallet $wallet): Wallet
-    {
-        $wallet->isArchived = true;
-
-        $this->tr->persist($wallet);
-        $this->tr->run();
-
-        return $wallet;
-    }
-
-    public function unArchive(Wallet $wallet): Wallet
-    {
-        $wallet->isArchived = false;
-
-        $this->tr->persist($wallet);
-        $this->tr->run();
-
-        return $wallet;
-    }
-
-    public function publish(Wallet $wallet): Wallet
-    {
-        $wallet->isPublic = true;
-
-        $this->tr->persist($wallet);
-        $this->tr->run();
-
-        return $wallet;
-    }
-
-    public function private(Wallet $wallet): Wallet
-    {
-        $wallet->isPublic = false;
-
-        $this->tr->persist($wallet);
-        $this->tr->run();
-
-        return $wallet;
-    }
-
-    public function activate(Wallet $wallet): Wallet
-    {
-        $wallet->isActive = true;
-
-        $this->tr->persist($wallet);
-        $this->tr->run();
-
-        return $wallet;
-    }
-
-    public function disable(Wallet $wallet): Wallet
-    {
-        $wallet->isActive = false;
 
         $this->tr->persist($wallet);
         $this->tr->run();
