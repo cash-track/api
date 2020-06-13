@@ -84,10 +84,11 @@ final class WalletsController
     /**
      * @Route(route="/wallets/<id>", name="wallet.update", methods="PUT", group="auth")
      *
+     * @param int $id
      * @param \App\Request\Wallet\UpdateRequest $request
      * @return \Psr\Http\Message\ResponseInterface
      */
-    public function update($id, UpdateRequest $request): ResponseInterface
+    public function update(int $id, UpdateRequest $request): ResponseInterface
     {
         /** @var \App\Database\User $user */
         $user = $this->auth->getActor();
@@ -133,5 +134,40 @@ final class WalletsController
         }
 
         return $this->walletView->json($wallet);
+    }
+
+    /**
+     * @Route(route="/wallets/<id>", name="wallet.delete", methods="DELETE", group="auth")
+     *
+     * @param int $id
+     * @return \Psr\Http\Message\ResponseInterface
+     */
+    public function delete(int $id): ResponseInterface
+    {
+        /** @var \App\Database\User $user */
+        $user = $this->auth->getActor();
+
+        $wallet = $this->wallets->findByPKByUserPK($id, $user->id);
+
+        if (! $wallet instanceof Wallet) {
+            return $this->response->create(404);
+        }
+
+        try {
+            $this->walletService->delete($wallet);
+        } catch (\Throwable $exception) {
+            $this->logger->error('Unable to delete wallet', [
+                'action' => 'wallet.delete',
+                'id'     => $wallet->id,
+                'msg'    => $exception->getMessage(),
+            ]);
+
+            return $this->response->json([
+                'message' => 'Unable to delete wallet. Please try again later.',
+                'error'   => $exception->getMessage(),
+            ], 500);
+        }
+
+        return $this->response->create(200);
     }
 }
