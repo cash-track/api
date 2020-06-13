@@ -85,7 +85,7 @@ class User implements PasswordContainerInterface
     public $updatedAt;
 
     /**
-     * @Cycle\Relation\BelongsTo(target = "App\Database\Currency", innerKey = "default_currency_code", cascade = false)
+     * @Cycle\Relation\BelongsTo(target = "App\Database\Currency", innerKey = "default_currency_code", cascade = false, load = "eager")
      * @var \App\Database\Currency
      */
     public $defaultCurrency;
@@ -103,6 +103,8 @@ class User implements PasswordContainerInterface
     {
        $this->defaultCurrency = new Currency();
        $this->wallets = new PivotedCollection();
+       $this->createdAt = new \DateTimeImmutable();
+       $this->updatedAt = new \DateTimeImmutable();
     }
 
     /**

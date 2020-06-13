@@ -42,4 +42,12 @@ class Currency
      * @var \DateTimeImmutable
      */
     public $updatedAt;
+
+    /**
+     * Currency constructor.
+     */
+    public function __construct()
+    {
+        $this->updatedAt = new \DateTimeImmutable();
+    }
 }

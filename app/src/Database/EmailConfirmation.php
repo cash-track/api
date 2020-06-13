@@ -32,4 +32,12 @@ class EmailConfirmation
      * @var \DateTimeImmutable
      */
     public $createdAt;
+
+    /**
+     * EmailConfirmation constructor.
+     */
+    public function __construct()
+    {
+        $this->createdAt = new \DateTimeImmutable();
+    }
 }
