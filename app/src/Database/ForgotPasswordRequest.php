@@ -32,4 +32,12 @@ class ForgotPasswordRequest
      * @var \DateTimeImmutable
      */
     public $createdAt;
+
+    /**
+     * ForgotPasswordRequest constructor.
+     */
+    public function __construct()
+    {
+        $this->createdAt = new \DateTimeImmutable();
+    }
 }

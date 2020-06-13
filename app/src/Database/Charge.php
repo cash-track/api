@@ -99,5 +99,7 @@ class Charge
     {
         $this->wallet = new Wallet();
         $this->user = new User();
+        $this->createdAt = new \DateTimeImmutable();
+        $this->updatedAt = new \DateTimeImmutable();
     }
 }

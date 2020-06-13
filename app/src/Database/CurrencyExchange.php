@@ -77,5 +77,7 @@ class CurrencyExchange
     {
         $this->srcCurrency = new Currency();
         $this->dstCurrency = new Currency();
+        $this->createdAt = new \DateTimeImmutable();
+        $this->updatedAt = new \DateTimeImmutable();
     }
 }

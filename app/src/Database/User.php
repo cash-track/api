@@ -103,6 +103,8 @@ class User implements PasswordContainerInterface
     {
        $this->defaultCurrency = new Currency();
        $this->wallets = new PivotedCollection();
+       $this->createdAt = new \DateTimeImmutable();
+       $this->updatedAt = new \DateTimeImmutable();
     }
 
     /**
