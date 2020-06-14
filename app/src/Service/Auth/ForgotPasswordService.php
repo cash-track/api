@@ -4,16 +4,15 @@ declare(strict_types = 1);
 
 namespace App\Service\Auth;
 
-use App\Config\AppConfig;
 use App\Database\ForgotPasswordRequest;
 use App\Database\User;
 use App\Mail\ForgotPasswordMail;
 use App\Repository\ForgotPasswordRequestRepository;
 use App\Repository\UserRepository;
 use App\Service\Mailer\MailerInterface;
+use App\Service\UriService;
 use Cycle\ORM\TransactionInterface;
 use Spiral\Prototype\Annotation\Prototyped;
-use Spiral\Router\RouterInterface;
 
 /**
  * @Prototyped(property="forgotPasswordService")
@@ -34,29 +33,23 @@ class ForgotPasswordService extends HelperService
      * ForgotPasswordService constructor.
      *
      * @param \Cycle\ORM\TransactionInterface $tr
-     * @param \App\Repository\ForgotPasswordRequestRepository $repository
      * @param \App\Repository\UserRepository $userRepository
      * @param \App\Service\Mailer\MailerInterface $mailer
-     * @param \Spiral\Router\RouterInterface $router
-     * @param \App\Config\AppConfig $appConfig
+     * @param \App\Service\UriService $uri
+     * @param \App\Repository\ForgotPasswordRequestRepository $repository
      * @param \App\Service\Auth\AuthService $authService
      */
     public function __construct(
         TransactionInterface $tr,
-        ForgotPasswordRequestRepository $repository,
         UserRepository $userRepository,
         MailerInterface $mailer,
-        RouterInterface $router,
-        AppConfig $appConfig,
+        UriService $uri,
+        ForgotPasswordRequestRepository $repository,
         AuthService $authService
     ) {
-        parent::__construct($tr, $userRepository, $mailer, $router, $appConfig);
-        $this->tr             = $tr;
+        parent::__construct($tr, $userRepository, $mailer, $uri);
+
         $this->repository     = $repository;
-        $this->userRepository = $userRepository;
-        $this->mailer         = $mailer;
-        $this->router         = $router;
-        $this->appConfig      = $appConfig;
         $this->authService    = $authService;
     }
 
@@ -84,7 +77,7 @@ class ForgotPasswordService extends HelperService
         $this->tr->persist($request);
         $this->tr->run();
 
-        $this->mailer->send(new ForgotPasswordMail($user, $this->getResetLink($request->code)));
+        $this->mailer->send(new ForgotPasswordMail($user, $this->uri->passwordReset($request->code)));
     }
 
     /**
@@ -115,16 +108,5 @@ class ForgotPasswordService extends HelperService
         $this->tr->persist($user);
         $this->tr->delete($request);
         $this->tr->run();
-    }
-
-    /**
-     * @param string $code
-     * @return string
-     */
-    private function getResetLink(string $code): string
-    {
-        // TODO. Implement this route on the frontend side. Render password reset form.
-
-        return $this->appConfig->getUrl() . "/auth/password/reset/{$code}";
     }
 }

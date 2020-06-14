@@ -4,16 +4,15 @@ declare(strict_types = 1);
 
 namespace App\Service\Auth;
 
-use App\Config\AppConfig;
 use App\Database\EmailConfirmation;
 use App\Database\User;
 use App\Mail\EmailConfirmationMail;
 use App\Repository\EmailConfirmationRepository;
 use App\Repository\UserRepository;
 use App\Service\Mailer\MailerInterface;
+use App\Service\UriService;
 use Cycle\ORM\TransactionInterface;
 use Spiral\Prototype\Annotation\Prototyped;
-use Spiral\Router\RouterInterface;
 
 /**
  * @Prototyped(property="emailConfirmationService")
@@ -29,21 +28,19 @@ class EmailConfirmationService extends HelperService
      * EmailConfirmationService constructor.
      *
      * @param \Cycle\ORM\TransactionInterface $tr
-     * @param \App\Repository\EmailConfirmationRepository $repository
      * @param \App\Repository\UserRepository $userRepository
      * @param \App\Service\Mailer\MailerInterface $mailer
-     * @param \Spiral\Router\RouterInterface $router
-     * @param \App\Config\AppConfig $appConfig
+     * @param \App\Service\UriService $uri
+     * @param \App\Repository\EmailConfirmationRepository $repository
      */
     public function __construct(
         TransactionInterface $tr,
-        EmailConfirmationRepository $repository,
         UserRepository $userRepository,
         MailerInterface $mailer,
-        RouterInterface $router,
-        AppConfig $appConfig
+        UriService $uri,
+        EmailConfirmationRepository $repository
     ) {
-        parent::__construct($tr, $userRepository, $mailer, $router, $appConfig);
+        parent::__construct($tr, $userRepository, $mailer, $uri);
 
         $this->repository = $repository;
     }
@@ -66,7 +63,7 @@ class EmailConfirmationService extends HelperService
         $this->tr->persist($confirmation);
         $this->tr->run();
 
-        $this->mailer->send(new EmailConfirmationMail($user, $this->getConfirmationLink($confirmation->token)));
+        $this->mailer->send(new EmailConfirmationMail($user, $this->uri->emailConfirmation($confirmation->token)));
     }
 
     /**
@@ -115,18 +112,5 @@ class EmailConfirmationService extends HelperService
         $this->tr->persist($user);
         $this->tr->delete($confirmation);
         $this->tr->run();
-    }
-
-    /**
-     * @param string $token
-     * @return string
-     */
-    private function getConfirmationLink(string $token): string
-    {
-        $uri = $this->router->uri('auth.email.confirm', [
-            'token' => $token,
-        ]);
-
-        return $this->appConfig->getUrl() . (string) $uri;
     }
 }

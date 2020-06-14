@@ -2,34 +2,18 @@
 
 declare(strict_types=1);
 
-namespace App\Controller;
+namespace App\Controller\Wallets;
 
 use App\Database\Wallet;
 use App\Request\Wallet\CreateRequest;
 use App\Request\Wallet\UpdateRequest;
 use Psr\Http\Message\ResponseInterface;
-use Spiral\Auth\AuthScope;
 use Spiral\Prototype\Traits\PrototypeTrait;
 use Spiral\Router\Annotation\Route;
 
-final class WalletsController
+final class WalletsController extends Controller
 {
     use PrototypeTrait;
-
-    /**
-     * @var \App\Database\User
-     */
-    private $user;
-
-    /**
-     * WalletsController constructor.
-     *
-     * @param \Spiral\Auth\AuthScope $auth
-     */
-    public function __construct(AuthScope $auth)
-    {
-        $this->user = $auth->getActor();
-    }
 
     /**
      * @Route(route="/wallets", name="wallet.list", methods="GET", group="auth")
