@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use App\Database\User;
 use App\Database\Wallet;
 use Psr\Http\Message\ResponseInterface;
 use Spiral\Auth\AuthScope;
@@ -150,6 +151,88 @@ final class WalletsActionsController
 
             return $this->response->json([
                 'message' => 'Unable to un-archive wallet. Please try again later.',
+                'error'   => $exception->getMessage(),
+            ], 500);
+        }
+
+        return $this->response->create(200);
+    }
+
+    /**
+     * @Route(route="/wallets/<id>/share/<userId>", name="wallet.share", methods="POST", group="auth")
+     *
+     * @param int $id
+     * @param int $userId
+     * @return \Psr\Http\Message\ResponseInterface
+     */
+    public function share(int $id, int $userId): ResponseInterface
+    {
+        $wallet = $this->wallets->findByPKByUserPK($id, $this->user->id);
+
+        if (! $wallet instanceof Wallet) {
+            return $this->response->create(404);
+        }
+
+        $user = $this->users->findByPK($userId);
+
+        if (! $user instanceof User) {
+            return $this->response->create(404);
+        }
+
+        try {
+            $this->walletService->share($wallet, $user, $this->user);
+        } catch (\Throwable $exception) {
+            $this->logger->error('Unable to share wallet', [
+                'action'   => 'wallet.share',
+                'id'       => $wallet->id,
+                'userId'   => $user->id,
+                'sharerId' => $this->user->id,
+                'msg'      => $exception->getMessage(),
+            ]);
+
+            return $this->response->json([
+                'message' => 'Unable to share wallet. Please try again later.',
+                'error'   => $exception->getMessage(),
+            ], 500);
+        }
+
+        return $this->response->create(200);
+    }
+
+    /**
+     * @Route(route="/wallets/<id>/revoke/<userId>", name="wallet.revoke", methods="POST", group="auth")
+     *
+     * @param int $id
+     * @param int $userId
+     * @return \Psr\Http\Message\ResponseInterface
+     */
+    public function revoke(int $id, int $userId): ResponseInterface
+    {
+        $wallet = $this->wallets->findByPKByUserPK($id, $this->user->id);
+
+        if (! $wallet instanceof Wallet) {
+            return $this->response->create(404);
+        }
+
+        $user = $this->users->findByPK($userId);
+
+        if (! $user instanceof User) {
+            return $this->response->create(404);
+        }
+
+        try {
+            $this->walletService->revoke($wallet, $user);
+        } catch (\Throwable $exception) {
+            $this->logger->error('Unable to revoke wallet', [
+                'action'    => 'wallet.revoke',
+                'id'        => $wallet->id,
+                'userId'    => $user->id,
+                'revokerId' => $this->user->id,
+                'msg'       => $exception->getMessage(),
+            ]);
+
+            return $this->response->json([
+                'message' => 'Unable to revoke wallet. Please try again later.',
                 'error'   => $exception->getMessage(),
             ], 500);
         }

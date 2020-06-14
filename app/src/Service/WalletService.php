@@ -6,7 +6,9 @@ namespace App\Service;
 
 use App\Database\User;
 use App\Database\Wallet;
+use App\Mail\WalletShareMail;
 use App\Repository\CurrencyRepository;
+use App\Service\Mailer\MailerInterface;
 use Cycle\ORM\TransactionInterface;
 use Spiral\Prototype\Annotation\Prototyped;
 
@@ -26,15 +28,33 @@ class WalletService
     private $currencyRepository;
 
     /**
+     * @var \App\Service\Mailer\MailerInterface
+     */
+    private $mailer;
+
+    /**
+     * @var \App\Service\UriService
+     */
+    private $uri;
+
+    /**
      * WalletService constructor.
      *
      * @param \Cycle\ORM\TransactionInterface $tr
      * @param \App\Repository\CurrencyRepository $currencyRepository
+     * @param \App\Service\UriService $uri
+     * @param \App\Service\Mailer\MailerInterface $mailer
      */
-    public function __construct(TransactionInterface $tr, CurrencyRepository $currencyRepository)
-    {
+    public function __construct(
+        TransactionInterface $tr,
+        CurrencyRepository $currencyRepository,
+        UriService $uri,
+        MailerInterface $mailer
+    ) {
         $this->tr = $tr;
         $this->currencyRepository = $currencyRepository;
+        $this->mailer = $mailer;
+        $this->uri = $uri;
     }
 
     /**
@@ -145,32 +165,42 @@ class WalletService
         return $this->store($wallet);
     }
 
-    public function share(Wallet $wallet, User $user): Wallet
+    /**
+     * @param \App\Database\Wallet $wallet
+     * @param \App\Database\User $user
+     * @param \App\Database\User $sharer
+     * @return \App\Database\Wallet
+     * @throws \Throwable
+     */
+    public function share(Wallet $wallet, User $user, User $sharer): Wallet
     {
         if ($wallet->users->contains($user)) {
             return $wallet;
         }
 
         $wallet->users->add($user);
+        $wallet = $this->store($wallet);
 
-        $this->tr->persist($wallet);
-        $this->tr->run();
+        $this->mailer->send(new WalletShareMail($user, $sharer, $wallet, $this->uri->wallet($wallet)));
 
         return $wallet;
     }
 
+    /**
+     * @param \App\Database\Wallet $wallet
+     * @param \App\Database\User $user
+     * @return \App\Database\Wallet
+     * @throws \Throwable
+     */
     public function revoke(Wallet $wallet, User $user): Wallet
     {
-        if (!$wallet->users->contains($user)) {
+        if (! $wallet->users->contains($user)) {
             return $wallet;
         }
 
         $wallet->users->removeElement($user);
 
-        $this->tr->persist($wallet);
-        $this->tr->run();
-
-        return $wallet;
+        return $this->store($wallet);
     }
 
     /**

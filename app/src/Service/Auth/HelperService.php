@@ -4,11 +4,10 @@ declare(strict_types = 1);
 
 namespace App\Service\Auth;
 
-use App\Config\AppConfig;
 use App\Repository\UserRepository;
 use App\Service\Mailer\MailerInterface;
+use App\Service\UriService;
 use Cycle\ORM\TransactionInterface;
-use Spiral\Router\RouterInterface;
 
 abstract class HelperService
 {
@@ -31,14 +30,9 @@ abstract class HelperService
     protected $mailer;
 
     /**
-     * @var \Spiral\Router\RouterInterface
+     * @var \App\Service\UriService
      */
-    protected $router;
-
-    /**
-     * @var \App\Config\AppConfig
-     */
-    protected $appConfig;
+    protected $uri;
 
     /**
      * AuthService constructor.
@@ -46,21 +40,18 @@ abstract class HelperService
      * @param \Cycle\ORM\TransactionInterface $tr
      * @param \App\Repository\UserRepository $userRepository
      * @param \App\Service\Mailer\MailerInterface $mailer
-     * @param \Spiral\Router\RouterInterface $router
-     * @param \App\Config\AppConfig $appConfig
+     * @param \App\Service\UriService $uri
      */
     public function __construct(
         TransactionInterface $tr,
         UserRepository $userRepository,
         MailerInterface $mailer,
-        RouterInterface $router,
-        AppConfig $appConfig
+        UriService $uri
     ) {
-        $this->tr                     = $tr;
-        $this->userRepository         = $userRepository;
-        $this->mailer                 = $mailer;
-        $this->router                 = $router;
-        $this->appConfig              = $appConfig;
+        $this->tr             = $tr;
+        $this->userRepository = $userRepository;
+        $this->mailer         = $mailer;
+        $this->uri            = $uri;
     }
 
     /**
