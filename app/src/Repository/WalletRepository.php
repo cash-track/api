@@ -17,4 +17,14 @@ class WalletRepository extends Repository
     {
         return $this->select()->wherePK($id)->where('users.id', $userID)->fetchOne();
     }
+
+    /**
+     * @param $id
+     * @param $userID
+     * @return object|null
+     */
+    public function findByPKByUserPKWithUsers($id, $userID)
+    {
+        return $this->select()->wherePK($id)->where('users.id', $userID)->with('users')->fetchOne();
+    }
 }
