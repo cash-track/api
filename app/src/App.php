@@ -81,6 +81,8 @@ class App extends Kernel
         // Authentication
         Framework\Auth\HttpAuthBootloader::class,
         Auth\Jwt\TokensBootloader::class,
+
+        Service\Pagination\PaginationBootloader::class,
     ];
 
     /*

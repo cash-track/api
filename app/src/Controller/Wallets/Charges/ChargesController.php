@@ -30,13 +30,15 @@ class ChargesController extends Controller
             return $this->response->create(404);
         }
 
-        $charges = $this->charges->findByWalletId($wallet->id);
+        $charges = $this->charges
+            ->paginate($this->paginators->createPaginator())
+            ->findByWalletId($wallet->id);
 
         if (!is_array($charges) || count($charges) === 0) {
             return $this->response->json(['data' => []]);
         }
 
-        return $this->chargesView->json($charges);
+        return $this->chargesView->jsonPaginated($charges, $this->charges->getPaginationState());
     }
 
     /**

@@ -29,6 +29,19 @@ class ChargesView implements SingletonInterface
 
     /**
      * @param \App\Database\Charge[] $charges
+     * @param array $paginationState
+     * @return \Psr\Http\Message\ResponseInterface
+     */
+    public function jsonPaginated(array $charges, array $paginationState): ResponseInterface
+    {
+        return $this->response->json([
+            'data' => $this->map($charges),
+            'pagination' => $paginationState,
+        ], 200);
+    }
+
+    /**
+     * @param \App\Database\Charge[] $charges
      * @return array
      */
     public function map(array $charges): array
