@@ -24,4 +24,14 @@ class ChargeRepository extends Repository
 
         return $query->fetchAll();
     }
+
+    /**
+     * @param string $chargeId
+     * @param int $walletId
+     * @return object|null
+     */
+    public function findByPKByWalletPK(string $chargeId, int $walletId)
+    {
+        return $this->select()->wherePK($chargeId)->where('wallet_id', $walletId)->fetchOne();
+    }
 }

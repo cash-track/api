@@ -35,15 +35,16 @@ class WalletView implements SingletonInterface
     public function map(Wallet $wallet): array
     {
         return [
-            'type'       => 'wallet',
-            'id'         => $wallet->id,
-            'name'       => $wallet->name,
-            'slug'       => $wallet->slug,
-            'isActive'   => $wallet->isActive,
-            'isPublic'   => $wallet->isPublic,
-            'isArchived' => $wallet->isArchived,
-            'createdAt'  => $wallet->createdAt->format(DATE_W3C),
-            'updatedAt'  => $wallet->updatedAt->format(DATE_W3C),
+            'type'        => 'wallet',
+            'id'          => $wallet->id,
+            'name'        => $wallet->name,
+            'slug'        => $wallet->slug,
+            'totalAmount' => $wallet->totalAmount,
+            'isActive'    => $wallet->isActive,
+            'isPublic'    => $wallet->isPublic,
+            'isArchived'  => $wallet->isArchived,
+            'createdAt'   => $wallet->createdAt->format(DATE_W3C),
+            'updatedAt'   => $wallet->updatedAt->format(DATE_W3C),
 
             'defaultCurrencyCode' => $wallet->defaultCurrencyCode,
             'defaultCurrency'     => $this->currencyView->map($wallet->defaultCurrency),
