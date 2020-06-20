@@ -17,6 +17,8 @@ class JwtConfig extends InjectableConfig
         'secret' => null,
         'ttl' => null,
         'refreshTtl' => null,
+        'publicKey' => null,
+        'privateKey' => null,
     ];
 
     /**
@@ -41,5 +43,21 @@ class JwtConfig extends InjectableConfig
     public function getRefreshTtl(): int
     {
         return (int) $this->config['refreshTtl'];
+    }
+
+    /**
+     * @return string
+     */
+    public function getPublicKey(): string
+    {
+        return (string) $this->config['publicKey'];
+    }
+
+    /**
+     * @return string
+     */
+    public function getPrivateKey(): string
+    {
+        return (string) $this->config['privateKey'];
     }
 }

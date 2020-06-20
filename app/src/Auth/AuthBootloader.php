@@ -14,6 +14,6 @@ class AuthBootloader extends FrameworkBootloader
      */
     public function boot(HttpAuthBootloader $auth): void
     {
-        $auth->addTransport('bearer-header', new BearerHeaderTransport());
+        $auth->addTransport(BearerHeaderTransport::TRANSPORT, new BearerHeaderTransport());
     }
 }

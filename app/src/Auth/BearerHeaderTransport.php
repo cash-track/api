@@ -13,6 +13,8 @@ use Spiral\Auth\HttpTransportInterface;
  */
 final class BearerHeaderTransport implements HttpTransportInterface
 {
+    const TRANSPORT = 'bearer-header';
+
     /** @var string */
     private $header;
 

@@ -16,17 +16,17 @@ class TokenStorage implements TokenStorageInterface, SingletonInterface
     /**
      * @var string
      */
-    private $secret;
+    protected $secret;
 
     /**
      * @var string
      */
-    private $alg = 'HS256';
+    protected $alg = 'HS256';
 
     /**
      * @var int
      */
-    private $ttl;
+    protected $ttl;
 
     /**
      * TokenStorage constructor.
@@ -52,7 +52,7 @@ class TokenStorage implements TokenStorageInterface, SingletonInterface
         // TODO. Validate token for the blacklisted
 
         try {
-            $payload = JWT::decode($id, $this->secret, [$this->alg]);
+            $payload = JWT::decode($id, $this->getVerifyKey(), [$this->alg]);
             return Token::fromPayload($id, (array) $payload);
         } catch (\Throwable $exception) {
             return null;
@@ -83,7 +83,7 @@ class TokenStorage implements TokenStorageInterface, SingletonInterface
         ]);
 
 
-        $jwt = JWT::encode($payload, $this->secret, $this->alg);
+        $jwt = JWT::encode($payload, $this->getSigningKey(), $this->alg);
 
         return new Token((string) $jwt, $payload, $expiresAt);
     }
@@ -94,5 +94,21 @@ class TokenStorage implements TokenStorageInterface, SingletonInterface
     public function delete(TokenInterface $token): void
     {
         // TODO: Implement delete() method. Add token to the blacklist
+    }
+
+    /**
+     * @return string
+     */
+    protected function getVerifyKey(): string
+    {
+        return $this->secret;
+    }
+
+    /**
+     * @return string
+     */
+    protected function getSigningKey(): string
+    {
+        return $this->secret;
     }
 }

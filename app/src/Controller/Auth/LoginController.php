@@ -7,13 +7,12 @@ namespace App\Controller\Auth;
 use App\Database\User;
 use App\Request\LoginRequest;
 use Psr\Http\Message\ResponseInterface;
-use Spiral\Auth\TokenInterface;
 use Spiral\Prototype\Traits\PrototypeTrait;
 use Spiral\Router\Annotation\Route;
 
 final class LoginController
 {
-    use PrototypeTrait;
+    use PrototypeTrait, AuthResponses;
 
     /**
      * @Route(route="/auth/login", name="auth.login", methods="POST")
@@ -46,31 +45,9 @@ final class LoginController
             return $this->responseAuthenticationFailure();
         }
 
-        $token = $this->authService->authenticate($user);
+        $accessToken = $this->authService->authenticate($user);
+        $refreshToken = $this->refreshTokenService->authenticate($user);
 
-        return $this->responseAuthenticated($token, $user);
-    }
-
-    /**
-     * @param \Spiral\Auth\TokenInterface $token
-     * @param \App\Database\User $user
-     * @return \Psr\Http\Message\ResponseInterface
-     */
-    private function responseAuthenticated(TokenInterface $token, User $user): ResponseInterface
-    {
-        return $this->response->json([
-            'data' => $this->userView->head($user),
-            'token' => $token->getID(),
-        ], 200);
-    }
-
-    /**
-     * @return \Psr\Http\Message\ResponseInterface
-     */
-    private function responseAuthenticationFailure(): ResponseInterface
-    {
-        return $this->response->json([
-            'message' => 'Wrong email or password.',
-        ], 400);
+        return $this->responseTokensWithUser($accessToken, $refreshToken, $user);
     }
 }
