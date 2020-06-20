@@ -32,6 +32,12 @@ class Wallet
     public $slug;
 
     /**
+     * @Cycle\Column(type = "decimal(13,2)", default = "0", name = "total_amount")
+     * @var float
+     */
+    public $totalAmount;
+
+    /**
      * @Cycle\Column(type = "boolean", default = "1", name = "is_active")
      * @var bool
      */

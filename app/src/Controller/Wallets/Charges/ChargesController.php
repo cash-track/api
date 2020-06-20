@@ -74,10 +74,8 @@ class ChargesController extends Controller
 
         // TODO. Implement currency conversion when charge currency is different that wallet.
 
-        // TODO. Update wallet total.
-
         try {
-            $this->chargeService->store($charge);
+            $this->chargeWalletService->create($wallet, $charge);
         } catch (\Throwable $exception) {
             $this->logger->error('Unable to store charge', [
                 'action' => 'wallet.charge.create',
@@ -123,6 +121,8 @@ class ChargesController extends Controller
             ], 422);
         }
 
+        $oldCharge = clone $charge;
+
         $charge->type = $request->getType();
         $charge->amount = $request->getAmount();
         $charge->title = $request->getTitle();
@@ -130,10 +130,8 @@ class ChargesController extends Controller
 
         // TODO. Implement currency conversion when charge currency is different that wallet.
 
-        // TODO. Update wallet total.
-
         try {
-            $this->chargeService->store($charge);
+            $this->chargeWalletService->update($wallet, $oldCharge, $charge);
         } catch (\Throwable $exception) {
             $this->logger->error('Unable to store charge', [
                 'action' => 'wallet.charge.update',
@@ -173,9 +171,7 @@ class ChargesController extends Controller
         }
 
         try {
-            $this->chargeService->delete($charge);
-
-            // TODO. Update wallet total.
+            $this->chargeWalletService->delete($wallet, $charge);
         } catch (\Throwable $exception) {
             $this->logger->error('Unable to delete charge', [
                 'action' => 'wallet.charge.delete',

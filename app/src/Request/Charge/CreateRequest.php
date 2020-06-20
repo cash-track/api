@@ -26,6 +26,7 @@ class CreateRequest extends Filter
         'amount'      => [
             'is_numeric',
             'type::notEmpty',
+            ['number::higher', 0]
         ],
         'title'       => [
             'is_string',
