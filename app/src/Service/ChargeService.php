@@ -40,4 +40,14 @@ class ChargeService
 
         return $charge;
     }
+
+    /**
+     * @param \App\Database\Charge $charge
+     * @throws \Throwable
+     */
+    public function delete(Charge $charge): void
+    {
+        $this->tr->delete($charge);
+        $this->tr->run();
+    }
 }

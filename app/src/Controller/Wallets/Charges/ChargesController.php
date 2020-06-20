@@ -150,4 +150,46 @@ class ChargesController extends Controller
 
         return $this->chargeView->json($charge);
     }
+
+    /**
+     * @Route(route="/wallets/<walletId>/charges/<chargeId>", name="wallet.charge.delete", methods="DELETE", group="auth")
+     *
+     * @param int $walletId
+     * @param string $chargeId
+     * @return \Psr\Http\Message\ResponseInterface
+     */
+    public function delete(int $walletId, string $chargeId): ResponseInterface
+    {
+        $wallet = $this->wallets->findByPKByUserPK($walletId, $this->user->id);
+
+        if (! $wallet instanceof Wallet) {
+            return $this->response->create(404);
+        }
+
+        $charge = $this->charges->findByPKByWalletPK($chargeId, $walletId);
+
+        if (! $charge instanceof Charge) {
+            return $this->response->create(404);
+        }
+
+        try {
+            $this->chargeService->delete($charge);
+
+            // TODO. Update wallet total.
+        } catch (\Throwable $exception) {
+            $this->logger->error('Unable to delete charge', [
+                'action' => 'wallet.charge.delete',
+                'id'     => $wallet->id,
+                'userId' => $this->user->id,
+                'msg'    => $exception->getMessage(),
+            ]);
+
+            return $this->response->json([
+                'message' => 'Unable to delete charge. Please try again later.',
+                'error'   => $exception->getMessage(),
+            ], 500);
+        }
+
+        return $this->response->create(200);
+    }
 }
