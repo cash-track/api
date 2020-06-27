@@ -11,6 +11,7 @@
   "require": {
     "php": ">=7.3",
     "ext-mbstring": "*",
+    "ext-openssl": "*",
     "spiral/framework": "^2.0",
     "spiral/snapshots": "^1.0",
     "spiral/console": "^1.2",
