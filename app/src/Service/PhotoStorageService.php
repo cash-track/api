@@ -27,7 +27,7 @@ class PhotoStorageService
     private $config;
 
     /**
-     * StorageService constructor.
+     * PhotoStorageService constructor.
      *
      * @param \Aws\S3\S3ClientInterface $storage
      * @param \App\Config\CdnConfig $config

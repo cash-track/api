@@ -14,13 +14,13 @@ class AppConfig extends InjectableConfig
      * @internal For internal usage. Will be hydrated in the constructor.
      */
     protected $config = [
-        'url' => null
+        'url' => '',
     ];
 
     /**
-     * @return null
+     * @return string
      */
-    public function getUrl()
+    public function getUrl(): string
     {
         return $this->config['url'];
     }
