@@ -25,7 +25,7 @@ class UriService
     private $router;
 
     /**
-     * UserService constructor.
+     * UriService constructor.
      *
      * @param \App\Config\AppConfig $config
      * @param \Spiral\Router\RouterInterface $router

@@ -89,6 +89,7 @@ class App extends Kernel
      * Application specific services and extensions.
      */
     protected const APP = [
+        Bootloader\CorsBootloader::class,
         Auth\AuthBootloader::class,
         Bootloader\RouteGroupsBootloader::class,
         Bootloader\UserBootloader::class,
