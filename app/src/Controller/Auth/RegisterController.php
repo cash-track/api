@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controller\Auth;
 
+use App\Request\CheckNickNameRequest;
 use App\Request\RegisterRequest;
 use Psr\Http\Message\ResponseInterface;
 use Spiral\Prototype\Traits\PrototypeTrait;
@@ -49,5 +50,24 @@ final class RegisterController
         $refreshToken = $this->refreshTokenService->authenticate($user);
 
         return $this->responseTokensWithUser($accessToken, $refreshToken, $user);
+    }
+
+    /**
+     * @Route(route="/auth/register/check/nick-name", name="auth.register.check.nickname", methods="POST")
+     *
+     * @param \App\Request\CheckNickNameRequest $request
+     * @return \Psr\Http\Message\ResponseInterface
+     */
+    public function checkNickName(CheckNickNameRequest $request): ResponseInterface
+    {
+        if (! $request->isValid()) {
+            return $this->response->json([
+                'errors' => $request->getErrors(),
+            ], 422);
+        }
+
+        return $this->response->json([
+            'message' => 'Nick name are free to register'
+        ]);
     }
 }
