@@ -6,6 +6,7 @@ namespace App\Controller\Auth;
 
 use App\Request\ForgotPasswordCreateRequest;
 use App\Request\ForgotPasswordResetRequest;
+use App\Service\Auth\ForgotPasswordThrottledException;
 use Psr\Http\Message\ResponseInterface;
 use Spiral\Prototype\Traits\PrototypeTrait;
 use Spiral\Router\Annotation\Route;
@@ -30,6 +31,10 @@ final class ForgotPasswordController
 
         try {
             $this->forgotPasswordService->create($request->getEmail());
+        } catch (ForgotPasswordThrottledException $exception) {
+            return $this->response->json([
+                'message' => $exception->getMessage(),
+            ], 400);
         } catch (\Throwable $exception) {
             return $this->response->json([
                 'message' => 'Unable to reset your password.',

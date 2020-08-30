@@ -55,7 +55,7 @@ class UriService
      */
     public function emailConfirmation(string $token): string
     {
-        return $this->home((string) $this->router->uri('auth.email.confirm', ['token' => $token]));
+        return $this->config->getWebSiteUrl() . $this->config->getEmailConfirmationLink($token);
     }
 
     /**
@@ -66,9 +66,7 @@ class UriService
      */
     public function passwordReset(string $code): string
     {
-        // TODO. Implement this route on the frontend side. Render password reset form.
-
-        return $this->home("/auth/password/reset/{$code}");
+        return $this->config->getWebSiteUrl() . $this->config->getPasswordResetLink($code);
     }
 
     /**
