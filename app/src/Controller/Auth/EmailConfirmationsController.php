@@ -42,15 +42,18 @@ final class EmailConfirmationsController
      */
     public function confirm(string $token)
     {
-        // TODO. UI Implementation required.
-
         try {
             $this->emailConfirmationService->confirm($token);
         } catch (\Throwable $exception) {
-            return $exception->getMessage();
+            return $this->response->json([
+                'message' => 'Unable to confirm your email',
+                'error' => $exception->getMessage(),
+            ], 400);
         }
 
-        return 'ok, please login.';
+        return $this->response->json([
+            'message' => 'Your email has been confirmed',
+        ]);
     }
 
     /**

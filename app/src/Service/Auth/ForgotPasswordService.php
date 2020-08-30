@@ -65,8 +65,14 @@ class ForgotPasswordService extends HelperService
         }
 
         $request = $this->repository->findByPK($email);
+
         if ($request instanceof ForgotPasswordRequest && $this->isThrottled($request->createdAt)) {
-            throw new \RuntimeException('Previous request was created in less than ' . self::RESEND_TIME_LIMIT . ' seconds');
+            throw new ForgotPasswordThrottledException('Previous request was created in less than ' . self::RESEND_TIME_LIMIT . ' seconds');
+        }
+
+        if ($request instanceof ForgotPasswordRequest) {
+            $this->tr->delete($request);
+            $this->tr->run();
         }
 
         $request            = new ForgotPasswordRequest();
