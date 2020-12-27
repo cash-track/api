@@ -1,7 +1,12 @@
 {
   "name": "cash-track/api",
+  "type": "project",
   "description": "The core service to handle API requests from different clients",
   "license": "MIT",
+  "support": {
+    "issues": "https://github.com/cash-track/api/issues",
+    "source": "https://github.com/cash-track/api"
+  },
   "authors": [
     {
       "name": "Volodymyr Komarov",
@@ -12,39 +17,19 @@
     "php": ">=7.3",
     "ext-mbstring": "*",
     "ext-openssl": "*",
-    "spiral/framework": "^2.0",
-    "spiral/snapshots": "^1.0",
-    "spiral/console": "^1.2",
+    "spiral/framework": "^2.7",
     "spiral/jobs": "^2.0",
-    "spiral/http": "^1.1",
-    "spiral/cookies": "^1.0",
-    "spiral/csrf": "^1.0",
-    "spiral/router": "^1.1",
-    "spiral/session": "^1.1",
     "spiral/roadrunner": "^1.4",
-    "spiral/translator": "^1.2",
-    "spiral/encrypter": "^1.1",
-    "spiral/security": "^2.1",
-    "spiral/validation": "^1.2",
-    "spiral/filters": "^1.2",
     "spiral/database": "^2.3",
     "spiral/migrations": "^2.0",
-    "spiral/monolog-bridge": "^1.0",
-    "spiral/stempler-bridge": "^1.0",
-    "spiral/dotenv-bridge": "^1.0",
     "spiral/nyholm-bridge": "^1.0",
-    "spiral/scaffolder": "^2.0",
-    "spiral/prototype": "^1.0",
     "cycle/orm": "^1.0",
     "cycle/proxy-factory": "^1.0",
     "cycle/annotated": "^2.0",
     "cycle/migrations": "^1.0",
     "ramsey/uuid": "^4.0",
     "voku/portable-utf8": "^5.4",
-    "spiral/auth": "^1.0",
-    "spiral/auth-http": "^1.0",
     "firebase/php-jwt": "^5.2",
-    "spiral/annotated-routes": "^1.1",
     "kreait/firebase-php": "^5.0",
     "aws/aws-sdk-php": "^3.140",
     "swiftmailer/swiftmailer": "^6.0"
@@ -57,9 +42,16 @@
     "symfony/polyfill-mbstring": "1.99"
   },
   "require-dev": {
-    "phpunit/phpunit": "^8.5"
+    "phpunit/phpunit": "^8.5|^9.0"
   },
-  "scripts": {},
+  "scripts": {
+    "post-create-project-cmd": [
+      "php -r \"copy('.env.sample', '.env');\"",
+      "php app.php encrypt:key -m .env",
+      "php app.php configure -vv",
+      "spiral get-binary"
+    ]
+  },
   "autoload": {
     "files": [
       "app/helpers/str.php"
@@ -74,6 +66,14 @@
     }
   },
   "extra": {
-    "publish-cmd": "php app.php publish"
-  }
+    "publish-cmd": "php app.php publish",
+    "branch-alias": {
+      "dev-master": "1.4.x-dev"
+    }
+  },
+  "config": {
+    "sort-packages": true
+  },
+  "minimum-stability": "dev",
+  "prefer-stable": true
 }
