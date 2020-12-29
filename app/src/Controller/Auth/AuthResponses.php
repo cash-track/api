@@ -61,7 +61,7 @@ trait AuthResponses
     protected function responseUnauthenticated(): ResponseInterface
     {
         return $this->response->json([
-            'message' => 'Authentication required.'
+            'message' => 'Authentication required.',
         ], 401);
     }
 }

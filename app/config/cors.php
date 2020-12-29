@@ -3,7 +3,7 @@
 declare(strict_types = 1);
 
 return [
-    'allowedOrigins' => ['*'],
+    'allowedOrigins' => explode(',', env('CORS_ALLOWED_ORIGINS')),
     'allowedOriginsPatterns' => [],
     'supportsCredentials' => false,
     'allowedHeaders' => ['*'],
