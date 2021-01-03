@@ -9,6 +9,15 @@ use Cycle\ORM\Select\Repository;
 class WalletRepository extends Repository
 {
     /**
+     * @param $userID
+     * @return object[]
+     */
+    public function findAllByUserPK($userID)
+    {
+        return $this->select()->where('users.id', $userID)->orderBy('created_at', 'DESC')->fetchAll();
+    }
+
+    /**
      * @param $id
      * @param $userID
      * @return object|null

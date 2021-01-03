@@ -23,9 +23,9 @@ final class WalletsController extends Controller
     public function list(): array
     {
         return [
-            'data' => $this->user->wallets->map(function ($wallet) {
+            'data' => array_map(function (Wallet $wallet) {
                 return $this->walletView->map($wallet);
-            })->getValues(),
+            }, $this->wallets->findAllByUserPK($this->user->id)),
         ];
     }
 
