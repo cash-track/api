@@ -17,6 +17,7 @@ class ChargeRepository extends Repository
     public function findByWalletId(int $walletId)
     {
         $query = $this->select()
+                      ->load('user')
                       ->where('wallet_id', $walletId)
                       ->orderBy('created_at', 'DESC');
 
@@ -32,6 +33,22 @@ class ChargeRepository extends Repository
      */
     public function findByPKByWalletPK(string $chargeId, int $walletId)
     {
-        return $this->select()->wherePK($chargeId)->where('wallet_id', $walletId)->fetchOne();
+        return $this->select()->load('user')->wherePK($chargeId)->where('wallet_id', $walletId)->fetchOne();
+    }
+
+    /**
+     * @param int $walletId
+     * @param string|null $type
+     * @return float
+     */
+    public function totalByWalletPK(int $walletId, string $type = null): float
+    {
+        $query = $this->select()->where('wallet_id', $walletId);
+
+        if (! empty($type)) {
+            $query = $query->where('type', $type);
+        }
+
+        return (float) $query->sum('amount');
     }
 }

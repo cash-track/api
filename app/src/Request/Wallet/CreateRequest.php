@@ -47,6 +47,7 @@ class CreateRequest extends Filter
         $wallet->slug                = $this->getField('slug');
         $wallet->isPublic            = $this->getField('isPublic', false);
         $wallet->defaultCurrencyCode = $this->getField('defaultCurrencyCode');
+        $wallet->totalAmount         = 0;
 
         return $wallet;
     }

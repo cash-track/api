@@ -4,6 +4,7 @@ declare(strict_types = 1);
 
 namespace App\Controller\Profile;
 
+use App\Request\CheckNickNameRequest;
 use App\Request\Profile\UpdateBasicRequest;
 use Psr\Http\Message\ResponseInterface;
 use Spiral\Auth\AuthScope;
@@ -37,6 +38,27 @@ class ProfileController
     public function index(): ResponseInterface
     {
         return $this->userView->json($this->user);
+    }
+
+    /**
+     * @Route(route="/profile/check/nick-name", name="profile.check.nickname", methods="POST", group="auth")
+     *
+     * @param \App\Request\CheckNickNameRequest $request
+     * @return \Psr\Http\Message\ResponseInterface
+     */
+    public function checkNickName(CheckNickNameRequest $request): ResponseInterface
+    {
+        $request->setContext($this->user);
+
+        if (! $request->isValid()) {
+            return $this->response->json([
+                'errors' => $request->getErrors(),
+            ], 422);
+        }
+
+        return $this->response->json([
+            'message' => 'Nick name are free to use'
+        ]);
     }
 
     /**

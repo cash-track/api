@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controller\Wallets;
 
+use App\Database\Charge;
 use App\Database\Wallet;
 use App\Request\Wallet\CreateRequest;
 use App\Request\Wallet\UpdateRequest;
@@ -23,9 +24,9 @@ final class WalletsController extends Controller
     public function list(): array
     {
         return [
-            'data' => $this->user->wallets->map(function ($wallet) {
+            'data' => array_map(function (Wallet $wallet) {
                 return $this->walletView->map($wallet);
-            })->getValues(),
+            }, $this->wallets->findAllByUserPK($this->user->id)),
         ];
     }
 
@@ -44,6 +45,29 @@ final class WalletsController extends Controller
         }
 
         return $this->walletView->json($wallet);
+    }
+
+    /**
+     * @Route(route="/wallets/<id>/total", name="wallet.index.total", methods="GET", group="auth")
+     *
+     * @param int $id
+     * @return \Psr\Http\Message\ResponseInterface
+     */
+    public function indexTotal(int $id): ResponseInterface
+    {
+        $wallet = $this->wallets->findByPKByUserPK($id, $this->user->id);
+
+        if (! $wallet instanceof Wallet) {
+            return $this->response->create(404);
+        }
+
+        return $this->response->json([
+            'data' => [
+                'totalAmount' => $wallet->totalAmount,
+                'totalIncomeAmount' => $this->charges->totalByWalletPK($id, Charge::TYPE_INCOME),
+                'totalExpenseAmount' => $this->charges->totalByWalletPK($id, Charge::TYPE_EXPENSE),
+            ],
+        ]);
     }
 
     /**
