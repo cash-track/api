@@ -42,6 +42,7 @@ class App extends Kernel
         // HTTP extensions
         Nyholm\NyholmBootloader::class,
         Framework\Http\RouterBootloader::class,
+        Bootloader\CorsBootloader::class,
         Router\AnnotatedRoutesBootloader::class,
         Framework\Http\ErrorHandlerBootloader::class,
         Framework\Http\JsonPayloadsBootloader::class,
@@ -89,7 +90,6 @@ class App extends Kernel
      * Application specific services and extensions.
      */
     protected const APP = [
-        Bootloader\CorsBootloader::class,
         Auth\AuthBootloader::class,
         Bootloader\RouteGroupsBootloader::class,
         Bootloader\UserBootloader::class,
