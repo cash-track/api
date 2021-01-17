@@ -48,6 +48,8 @@ class WalletView implements SingletonInterface
 
             'defaultCurrencyCode' => $wallet->defaultCurrencyCode,
             'defaultCurrency'     => $this->currencyView->map($wallet->defaultCurrency),
+
+            'users' => $wallet->users->count() ? $this->usersView->map($wallet->users->getValues()) : [],
         ];
     }
 }
