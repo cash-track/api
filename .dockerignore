@@ -1,0 +1,9 @@
+.git
+.bin
+.env
+.env.build
+vendor
+runtime
+.phpunit.result.cache
+spiral
+spiral-dev
