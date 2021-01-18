@@ -14,7 +14,7 @@ class WalletRepository extends Repository
      */
     public function findAllByUserPK($userID)
     {
-        return $this->select()->where('users.id', $userID)->orderBy('created_at', 'DESC')->fetchAll();
+        return $this->select()->load('users')->where('users.id', $userID)->orderBy('created_at', 'DESC')->fetchAll();
     }
 
     /**
