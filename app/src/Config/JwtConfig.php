@@ -50,7 +50,7 @@ class JwtConfig extends InjectableConfig
      */
     public function getPublicKey(): string
     {
-        return (string) $this->config['publicKey'];
+        return (string) base64_decode((string) $this->config['publicKey']);
     }
 
     /**
@@ -58,6 +58,6 @@ class JwtConfig extends InjectableConfig
      */
     public function getPrivateKey(): string
     {
-        return (string) $this->config['privateKey'];
+        return (string) base64_decode((string) $this->config['privateKey']);
     }
 }

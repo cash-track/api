@@ -17,6 +17,7 @@
     "php": ">=7.3",
     "ext-mbstring": "*",
     "ext-openssl": "*",
+    "ext-pdo": "*",
     "spiral/framework": "^2.7",
     "spiral/jobs": "^2.0",
     "spiral/roadrunner": "^1.4",
