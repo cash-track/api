@@ -19,7 +19,7 @@ class UpdatePhotoRequest extends Filter
             'file::uploaded',
             'image::valid',
             ['file::size', 5120],
-            ['image::smaller', 2560, 1440],
+            ['image::smaller', 5000, 5000],
             ['image::bigger', 50, 50],
         ],
     ];
