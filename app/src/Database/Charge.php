@@ -21,13 +21,13 @@ class Charge
     public $id;
 
     /**
-     * @Cycle\Column(type = "integer", name = "wallet_id")
+     * @Cycle\Column(type = "int", name = "wallet_id")
      * @var int
      */
     public $walletId;
 
     /**
-     * @Cycle\Column(type = "integer", name = "user_id")
+     * @Cycle\Column(type = "int", name = "user_id")
      * @var int
      */
     public $userId;
@@ -51,7 +51,7 @@ class Charge
     public $title;
 
     /**
-     * @Cycle\Column(type = "integer", name = "currency_exchange_id", nullable = true)
+     * @Cycle\Column(type = "int", name = "currency_exchange_id", nullable = false)
      * @var int|null
      */
     public $currencyExchangeId = null;
@@ -87,7 +87,7 @@ class Charge
     public $user;
 
     /**
-     * @Cycle\Relation\BelongsTo(target = "App\Database\CurrencyExchange", nullable = true, fkAction="SET NULL", innerKey = "currency_exchange_id")
+     * @Cycle\Relation\BelongsTo(target = "App\Database\CurrencyExchange", nullable = false, fkAction="SET NULL", innerKey = "currency_exchange_id")
      * @var \App\Database\CurrencyExchange|null
      */
     public $currencyExchange;
