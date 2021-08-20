@@ -56,7 +56,7 @@ class Wallet
     public $isPublic = false;
 
     /**
-     * @Cycle\Column(type = "string(3)", nullable = true, name = "default_currency_code")
+     * @Cycle\Column(type = "string(3)", name = "default_currency_code")
      * @var string|null
      */
     public $defaultCurrencyCode;
