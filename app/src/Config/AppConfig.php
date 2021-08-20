@@ -20,6 +20,7 @@ class AppConfig extends InjectableConfig
 
         'email_confirmation_link' => '',
         'password_reset_link' => '',
+        'wallet_link' => '',
     ];
 
     /**
@@ -70,5 +71,14 @@ class AppConfig extends InjectableConfig
         }
 
         return (string) str_replace('{code}', $code, $this->config['password_reset_link']);
+    }
+
+    /**
+     * @param int $walletId
+     * @return string
+     */
+    public function getWalletLink(int $walletId): string
+    {
+        return (string) str_replace('{wallet}', (string) $walletId, $this->config['wallet_link']);
     }
 }

@@ -20,20 +20,13 @@ class UriService
     private $config;
 
     /**
-     * @var \Spiral\Router\RouterInterface
-     */
-    private $router;
-
-    /**
      * UriService constructor.
      *
      * @param \App\Config\AppConfig $config
-     * @param \Spiral\Router\RouterInterface $router
      */
-    public function __construct(AppConfig $config, RouterInterface $router)
+    public function __construct(AppConfig $config)
     {
         $this->config = $config;
-        $this->router = $router;
     }
 
     /**
@@ -44,7 +37,7 @@ class UriService
      */
     public function wallet(Wallet $wallet): string
     {
-        return $this->home((string) $this->router->uri('wallet.index', ['id' => $wallet->id]));
+        return $this->config->getWebAppUrl() . $this->config->getWalletLink($wallet->id);
     }
 
     /**
