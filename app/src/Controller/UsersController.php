@@ -49,4 +49,20 @@ final class UsersController
 
         return $this->userView->json($user);
     }
+
+    /**
+     * @Route(route="/users/find/by-common-wallets", name="users.find.by-common-wallets", methods="GET", group="auth")
+     *
+     * @return \Psr\Http\Message\ResponseInterface
+     */
+    public function findByCommonWallets(): ResponseInterface
+    {
+        /** @var \App\Database\User $user */
+        $user = $this->auth->getActor();
+
+        /** @var \App\Database\User[] $users */
+        $users = $this->users->findByCommonWallets($user);
+
+        return $this->usersView->json($users);
+    }
 }

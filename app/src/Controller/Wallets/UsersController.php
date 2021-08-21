@@ -93,6 +93,13 @@ final class UsersController extends Controller
             return $this->response->create(404);
         }
 
+        if ($wallet->users->count() === 1 && $wallet->users->first()->id === $this->user->id) {
+            return $this->response->json([
+                'message' => 'Unable to revoke user from wallet. You are only one member. Delete wallet if you do not need them anymore.',
+                'error'   => 'Current user is the one wallet owner.',
+            ], 403);
+        }
+
         try {
             $this->walletService->revoke($wallet, $user);
         } catch (\Throwable $exception) {
