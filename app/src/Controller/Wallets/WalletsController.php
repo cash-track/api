@@ -19,15 +19,31 @@ final class WalletsController extends Controller
     /**
      * @Route(route="/wallets", name="wallet.list", methods="GET", group="auth")
      *
-     * @return string
+     * @return \Psr\Http\Message\ResponseInterface
      */
-    public function list(): array
+    public function list(): ResponseInterface
     {
-        return [
-            'data' => array_map(function (Wallet $wallet) {
-                return $this->walletView->map($wallet);
-            }, $this->wallets->findAllByUserPK($this->user->id)),
-        ];
+        return $this->walletsView->json($this->wallets->findAllByUserPK($this->user->id));
+    }
+
+    /**
+     * @Route(route="/wallets/unarchived", name="wallet.list.unarchived", methods="GET", group="auth")
+     *
+     * @return \Psr\Http\Message\ResponseInterface
+     */
+    public function listUnArchived(): ResponseInterface
+    {
+        return $this->walletsView->json($this->wallets->findAllByUserPKByArchived($this->user->id, false));
+    }
+
+    /**
+     * @Route(route="/wallets/archived", name="wallet.list.archived", methods="GET", group="auth")
+     *
+     * @return \Psr\Http\Message\ResponseInterface
+     */
+    public function listArchived(): ResponseInterface
+    {
+        return $this->walletsView->json($this->wallets->findAllByUserPKByArchived($this->user->id, true));
     }
 
     /**
