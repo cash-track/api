@@ -17,5 +17,7 @@ $ composer install
 $ php app.php encrypt:key -m .env
 $ php app.php configure -vv
 $ vendor/bin/spiral get-binary
+$ php app.php migrate:init
+$ php app.php migrate
 ```
 
