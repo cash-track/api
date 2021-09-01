@@ -13,12 +13,6 @@ jobs:
       contents: read
       packages: write
 
-    env:
-      DB_HOST: 0.0.0.0:33060
-      DB_NAME: cashtrack
-      DB_USER: root
-      DB_PASSWORD: secret
-
     services:
       mysql:
         image: mysql:8.0
