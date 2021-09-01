@@ -13,6 +13,12 @@ jobs:
       contents: read
       packages: write
 
+    env:
+      DB_HOST: localhost:3306
+      DB_NAME: cashtrack
+      DB_USER: cashtrack
+      DB_PASSWORD: secret
+
     services:
       mysql:
         image: mysql:8.0
@@ -28,8 +34,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: Start mysql service
-        run: sudo /etc/init.d/mysql start
+      - name: Setup MySQL
+        run: |
+          sudo /etc/init.d/mysql start
+          mysql -e 'CREATE DATABASE ${{ env.DB_NAME }};' -u${{ env.DB_USER }} -p${{ env.DB_PASSWORD }}
 
       - name: Setup PHP with PECL extension
         uses: shivammathur/setup-php@v2
