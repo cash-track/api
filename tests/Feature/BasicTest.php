@@ -10,17 +10,8 @@ class BasicTest extends TestCase
 {
     public function testDefaultActionWorks(): void
     {
-        $want = 'Welcome to Spiral Framework<';
-        $got = (string)$this->get('/')->getBody();
+        $response = $this->get('/');
 
-        $this->assertStringContainsString($want, $got);
-    }
-
-    public function testDefaultActionWithRuLocale(): void
-    {
-        $want = 'Вас приветствует Spiral Framework';
-        $got = (string)$this->get('/', [], [ 'accept-language' => 'ru'])->getBody();
-
-        $this->assertStringContainsString($want, $got);
+        $this->assertEquals(404, $response->getStatusCode());
     }
 }
