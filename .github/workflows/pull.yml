@@ -14,7 +14,7 @@ jobs:
       packages: write
 
     env:
-      DB_HOST: mysql:3306
+      DB_HOST: 0.0.0.0:33060
       DB_NAME: cashtrack
       DB_USER: root
       DB_PASSWORD: secret
@@ -27,7 +27,7 @@ jobs:
           MYSQL_ROOT_PASSWORD: secret
           MYSQL_DATABASE: cashtrack
         ports:
-          - 3306/tcp
+          - 33060:3306
         options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
 
     steps:
@@ -55,8 +55,6 @@ jobs:
           restore-keys: ${{ runner.os }}-composer-
 
       - name: Setup application
-        env:
-          DB_HOST: mysql:${{ job.services.mysql.ports['3306'] }}
         run: |
           cp .env.actions .env
           composer install --no-progress --prefer-dist --optimize-autoloader
@@ -67,6 +65,4 @@ jobs:
           php app.php migrate
 
       - name: Run tests
-        env:
-          DB_HOST: mysql:${{ job.services.mysql.ports['3306'] }}
         run: ./vendor/bin/phpunit
