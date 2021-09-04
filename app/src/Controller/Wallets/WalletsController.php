@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Controller\Wallets;
 
 use App\Database\Charge;
+use App\Database\Currency;
 use App\Database\Wallet;
 use App\Request\Wallet\CreateRequest;
 use App\Request\Wallet\UpdateRequest;
@@ -138,7 +139,13 @@ final class WalletsController extends Controller
         $wallet->defaultCurrencyCode = $request->getDefaultCurrencyCode();
 
         try {
-            $wallet->defaultCurrency = $this->currencies->findByPK($request->getDefaultCurrencyCode());
+            $defaultCurrency = $this->currencies->findByPK($request->getDefaultCurrencyCode());
+
+            if (! $defaultCurrency instanceof Currency) {
+                throw new \RuntimeException('Unable to load default currency');
+            }
+
+            $wallet->defaultCurrency = $defaultCurrency;
         } catch (\Throwable $exception) {
             $this->logger->warning('Unable to load currency entity', [
                 'action' => 'wallet.update',
