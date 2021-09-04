@@ -62,6 +62,12 @@ final class PaginationFactory implements PaginationProviderInterface
             $page = (int) $query[$parameter];
         }
 
-        return $this->factory->make(Paginator::class, compact('limit', 'parameter'))->withPage($page);
+        $paginator = $this->factory->make(Paginator::class, compact('limit', 'parameter'));
+
+        if ($paginator === null) {
+            throw new \RuntimeException('Unable to resolve paginator');
+        }
+
+        return $paginator->withPage($page);
     }
 }

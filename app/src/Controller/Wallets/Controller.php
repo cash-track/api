@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controller\Wallets;
 
+use App\Database\User;
 use Spiral\Auth\AuthScope;
 use Spiral\Prototype\Traits\PrototypeTrait;
 
@@ -23,6 +24,12 @@ class Controller
      */
     public function __construct(AuthScope $auth)
     {
-        $this->user = $auth->getActor();
+        $user = $auth->getActor();
+
+        if (! $user instanceof User) {
+            throw new \RuntimeException('Unable to get authenticated user');
+        }
+
+        $this->user = $user;
     }
 }

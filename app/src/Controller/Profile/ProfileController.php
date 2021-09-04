@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controller\Profile;
 
+use App\Database\User;
 use App\Request\CheckNickNameRequest;
 use App\Request\Profile\UpdateBasicRequest;
 use Psr\Http\Message\ResponseInterface;
@@ -27,7 +28,13 @@ class ProfileController
      */
     public function __construct(AuthScope $auth)
     {
-        $this->user = $auth->getActor();
+        $user = $auth->getActor();
+
+        if (! $user instanceof User) {
+            throw new \RuntimeException('Unable to get authenticated user');
+        }
+
+        $this->user = $user;
     }
 
     /**

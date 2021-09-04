@@ -28,7 +28,6 @@ final class RefreshController
     {
         $authContext = $this->refreshTokenService->getContextByRequest($request);
 
-        /** @var \App\Database\User $user */
         $user = $authContext->getActor();
 
         if (! $user instanceof User) {

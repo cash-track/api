@@ -16,7 +16,7 @@ abstract class Mail
     /**
      * @var string
      */
-    private $viewName;
+    private $viewName = '';
 
     /**
      * Mail constructor.

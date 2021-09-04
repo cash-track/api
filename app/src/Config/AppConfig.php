@@ -57,7 +57,7 @@ class AppConfig extends InjectableConfig
             return $this->config['email_confirmation_link'];
         }
 
-        return (string) str_replace('{token}', $token, $this->config['email_confirmation_link']);
+        return str_replace('{token}', $token, $this->config['email_confirmation_link']);
     }
 
     /**
@@ -70,7 +70,7 @@ class AppConfig extends InjectableConfig
             return $this->config['password_reset_link'];
         }
 
-        return (string) str_replace('{code}', $code, $this->config['password_reset_link']);
+        return str_replace('{code}', $code, $this->config['password_reset_link']);
     }
 
     /**
@@ -79,6 +79,6 @@ class AppConfig extends InjectableConfig
      */
     public function getWalletLink(int $walletId): string
     {
-        return (string) str_replace('{wallet}', (string) $walletId, $this->config['wallet_link']);
+        return str_replace('{wallet}', (string) $walletId, $this->config['wallet_link']);
     }
 }

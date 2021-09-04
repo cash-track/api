@@ -22,7 +22,7 @@ interface PaginatorInterface
      * Paginate the target selection and return new paginator instance.
      *
      * @param \Spiral\Pagination\PaginableInterface $target
-     * @return PaginatorInterface
+     * @return \App\Service\Pagination\PaginatorInterface
      */
     public function paginate(PaginableInterface $target): PaginatorInterface;
 

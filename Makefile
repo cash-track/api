@@ -12,7 +12,7 @@ IMAGE_DEV=$(REPO):dev
 IMAGE_LATEST=$(REPO):latest
 WORKDIR=$(shell pwd)
 
-.PHONY: build tag push start stop network phpcs
+.PHONY: build tag push start stop network phpcs psalm
 
 build:
 	docker build . -t $(IMAGE_DEV)
@@ -52,3 +52,6 @@ phpcs:
 	# --report=code - Add problem code piece bellow error message
 	# --standard=PSR12 - Define a target standard to check (PSR12 is not accepted yet by PHP-FIG)
 	./vendor/bin/phpcs -p -n --standard=PSR12 --colors --report=code ./app/src
+
+psalm:
+	./vendor/bin/psalm --php-version=8.0 --show-info=true

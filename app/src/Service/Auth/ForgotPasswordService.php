@@ -55,9 +55,10 @@ class ForgotPasswordService extends HelperService
 
     /**
      * @param string $email
+     * @return void
      * @throws \Throwable
      */
-    public function create(string $email)
+    public function create(string $email): void
     {
         $user = $this->userRepository->findByEmail($email);
         if (! $user instanceof User) {
@@ -89,9 +90,10 @@ class ForgotPasswordService extends HelperService
     /**
      * @param string $code
      * @param string $password
+     * @return void
      * @throws \Throwable
      */
-    public function reset(string $code, string $password)
+    public function reset(string $code, string $password): void
     {
         $request = $this->repository->findByCode($code);
 

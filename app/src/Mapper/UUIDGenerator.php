@@ -18,7 +18,7 @@ trait UUIDGenerator
         try {
             return Uuid::uuid4()->toString();
         } catch (\Exception $e) {
-            throw new MapperException($e->getMessage(), $e->getCode(), $e);
+            throw new MapperException($e->getMessage(), (int) $e->getCode(), $e);
         }
     }
 }

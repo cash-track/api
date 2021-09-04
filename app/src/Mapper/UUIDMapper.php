@@ -10,6 +10,9 @@ class UUIDMapper extends Mapper
 {
     use UUIDGenerator;
 
+    /** @var array */
+    protected $fields = [];
+
     /**
      * Generate entity primary key value.
      *

@@ -18,37 +18,37 @@ class Charge
      * @Cycle\Column(type = "string(36)", primary = true)
      * @var string
      */
-    public $id;
+    public $id = '';
 
     /**
      * @Cycle\Column(type = "int", name = "wallet_id")
      * @var int
      */
-    public $walletId;
+    public $walletId = 0;
 
     /**
      * @Cycle\Column(type = "int", name = "user_id")
      * @var int
      */
-    public $userId;
+    public $userId = 0;
 
     /**
      * @Cycle\Column(type = "enum(+,-)", default = "+")
      * @var string
      */
-    public $type;
+    public $type = '';
 
     /**
      * @Cycle\Column(type = "decimal(13,2)")
      * @var float
      */
-    public $amount;
+    public $amount = 0.0;
 
     /**
      * @Cycle\Column(type = "string")
      * @var string
      */
-    public $title;
+    public $title = '';
 
     /**
      * @Cycle\Column(type = "int", name = "currency_exchange_id", nullable = false)
@@ -60,7 +60,7 @@ class Charge
      * @Cycle\Column(type = "text")
      * @var string
      */
-    public $description;
+    public $description = '';
 
     /**
      * @Cycle\Column(type = "datetime", name = "created_at")

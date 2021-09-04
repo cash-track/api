@@ -94,31 +94,31 @@ class PhotoStorageService
     }
 
     /**
-     * @param string $fileName
+     * @param string|null $fileName
      * @return string
      */
-    private function generateFileName(string $fileName = ''): string
+    private function generateFileName(?string $fileName = ''): string
     {
-        return md5($fileName . microtime());
+        return md5(((string) $fileName) . microtime());
     }
 
     /**
-     * @param string $fileName
+     * @param string|null $fileName
      * @param string $default
      * @return string
      */
-    private function getFileExtension(string $fileName, string $default = 'jpg'): string
+    private function getFileExtension(?string $fileName, string $default = 'jpg'): string
     {
-        $parts = explode('.', $fileName, 2);
-
-        if ($parts === false) {
+        if ($fileName === null) {
             return $default;
         }
+
+        $parts = explode('.', $fileName, 2);
 
         if (count($parts) !== 2) {
             return $default;
         }
 
-        return $parts[1];
+        return $parts[1] ?? $default;
     }
 }

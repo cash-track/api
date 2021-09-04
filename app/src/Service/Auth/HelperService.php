@@ -25,7 +25,7 @@ abstract class HelperService
     protected $userRepository;
 
     /**
-     * @var \Spiral\Auth\AuthScope
+     * @var \App\Service\Mailer\MailerInterface
      */
     protected $mailer;
 

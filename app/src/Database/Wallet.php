@@ -17,25 +17,25 @@ class Wallet
      * @Cycle\Column(type = "primary")
      * @var int
      */
-    public $id;
+    public $id = 0;
 
     /**
      * @Cycle\Column(type = "string")
      * @var string
      */
-    public $name;
+    public $name = '';
 
     /**
      * @Cycle\Column(type = "string")
      * @var string
      */
-    public $slug;
+    public $slug = '';
 
     /**
      * @Cycle\Column(type = "decimal(13,2)", default = "0", name = "total_amount")
      * @var float
      */
-    public $totalAmount;
+    public $totalAmount = 0.0;
 
     /**
      * @Cycle\Column(type = "boolean", default = "1", name = "is_active")

@@ -26,7 +26,13 @@ final class UsersController
      */
     public function __construct(AuthScope $auth)
     {
-        $this->user = $auth->getActor();
+        $user = $auth->getActor();
+
+        if (! $user instanceof User) {
+            throw new \RuntimeException('Unable to get authenticated user');
+        }
+
+        $this->user = $user;
     }
 
     /**
