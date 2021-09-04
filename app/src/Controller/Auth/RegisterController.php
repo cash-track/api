@@ -12,7 +12,8 @@ use Spiral\Router\Annotation\Route;
 
 final class RegisterController
 {
-    use PrototypeTrait, AuthResponses;
+    use PrototypeTrait;
+    use AuthResponses;
 
     /**
      * @Route(route="/auth/register", name="auth.register", methods="POST")

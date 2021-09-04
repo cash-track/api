@@ -23,7 +23,7 @@ final class PhotoController extends ProfileController
     {
         $request->setContext($this->user);
 
-        if ( ! $request->isValid()) {
+        if (! $request->isValid()) {
             return $this->response->json([
                 'errors' => $request->getErrors(),
             ], 422);

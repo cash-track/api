@@ -42,7 +42,7 @@ class PhotoStorageService
      * @param string $fileName
      * @return string
      */
-    public function getProfilePhotoPublicUrl(?string $fileName):? string
+    public function getProfilePhotoPublicUrl(?string $fileName): ?string
     {
         if ($fileName === null) {
             return null;
@@ -55,7 +55,7 @@ class PhotoStorageService
      * @param \Psr\Http\Message\UploadedFileInterface $uploadedFile
      * @return string|null
      */
-    public function storeUploadedProfilePhoto(UploadedFileInterface $uploadedFile):? string
+    public function storeUploadedProfilePhoto(UploadedFileInterface $uploadedFile): ?string
     {
         $fileName = $this->generateFileName($uploadedFile->getClientFilename()) . '.' . $this->getFileExtension($uploadedFile->getClientFilename());
 

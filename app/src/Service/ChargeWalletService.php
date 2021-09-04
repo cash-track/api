@@ -53,7 +53,7 @@ class ChargeWalletService
      * @return \App\Database\Charge
      * @throws \Throwable
      */
-    public function update(Wallet $wallet, Charge $oldCharge, Charge $newCharge) : Charge
+    public function update(Wallet $wallet, Charge $oldCharge, Charge $newCharge): Charge
     {
         $wallet = $this->rollback($wallet, $oldCharge);
         $wallet = $this->apply($wallet, $newCharge);

@@ -12,7 +12,7 @@ IMAGE_DEV=$(REPO):dev
 IMAGE_LATEST=$(REPO):latest
 WORKDIR=$(shell pwd)
 
-.PHONY: build tag push start stop network
+.PHONY: build tag push start stop network phpcs
 
 build:
 	docker build . -t $(IMAGE_DEV)
@@ -42,3 +42,13 @@ stop:
 
 network:
 	docker network create --driver bridge cash-track-local || true
+
+phpcs:
+	# Arguments used
+	#
+	# -p - Show progress
+	# -n - Does not print a warnings
+	# -colors - Support console colors
+	# --report=code - Add problem code piece bellow error message
+	# --standard=PSR12 - Define a target standard to check (PSR12 is not accepted yet by PHP-FIG)
+	./vendor/bin/phpcs -p -n --standard=PSR12 --colors --report=code ./app/src

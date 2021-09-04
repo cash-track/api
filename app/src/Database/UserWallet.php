@@ -16,5 +16,4 @@ class UserWallet
      * @var int
      */
     public $id;
-
 }

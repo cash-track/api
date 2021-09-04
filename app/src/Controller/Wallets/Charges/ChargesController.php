@@ -56,7 +56,7 @@ class ChargesController extends Controller
             return $this->response->create(404);
         }
 
-        if ( ! $request->isValid()) {
+        if (! $request->isValid()) {
             return $this->response->json([
                 'errors' => $request->getErrors(),
             ], 422);
@@ -115,7 +115,7 @@ class ChargesController extends Controller
             return $this->response->create(404);
         }
 
-        if ( ! $request->isValid()) {
+        if (! $request->isValid()) {
             return $this->response->json([
                 'errors' => $request->getErrors(),
             ], 422);

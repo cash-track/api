@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace App\Bootloader;
 
@@ -47,7 +47,8 @@ class FirebaseBootloader extends Bootloader
     /**
      * @return array
      */
-    public function getServiceAccount(): array {
+    public function getServiceAccount(): array
+    {
         return [
             'type'                        => 'service_account',
             'project_id'                  => $this->config->getProjectId(),

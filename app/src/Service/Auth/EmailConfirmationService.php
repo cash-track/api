@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace App\Service\Auth;
 
@@ -93,7 +93,7 @@ class EmailConfirmationService extends HelperService
     {
         $confirmation = $this->repository->findByToken($token);
 
-        if ( ! $confirmation instanceof EmailConfirmation) {
+        if (! $confirmation instanceof EmailConfirmation) {
             throw new \RuntimeException('Wrong confirmation token');
         }
 
@@ -103,7 +103,7 @@ class EmailConfirmationService extends HelperService
 
         $user = $this->userRepository->findByEmail($confirmation->email);
 
-        if ( ! $user instanceof User) {
+        if (! $user instanceof User) {
             throw new \RuntimeException('Unable to find user linked to confirmation link');
         }
 

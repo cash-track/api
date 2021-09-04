@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace App\Service\Auth;
 
@@ -60,7 +60,7 @@ class ForgotPasswordService extends HelperService
     public function create(string $email)
     {
         $user = $this->userRepository->findByEmail($email);
-        if ( ! $user instanceof User) {
+        if (! $user instanceof User) {
             throw new \RuntimeException('Unable to find user by email');
         }
 
@@ -95,7 +95,7 @@ class ForgotPasswordService extends HelperService
     {
         $request = $this->repository->findByCode($code);
 
-        if ( ! $request instanceof ForgotPasswordRequest) {
+        if (! $request instanceof ForgotPasswordRequest) {
             throw new \RuntimeException('Wrong password reset code');
         }
 
@@ -105,7 +105,7 @@ class ForgotPasswordService extends HelperService
 
         $user = $this->userRepository->findByEmail($request->email);
 
-        if ( ! $user instanceof User) {
+        if (! $user instanceof User) {
             throw new \RuntimeException('Unable to find user linked to password reset link');
         }
 

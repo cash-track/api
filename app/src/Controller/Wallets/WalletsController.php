@@ -94,7 +94,7 @@ final class WalletsController extends Controller
      */
     public function create(CreateRequest $request): ResponseInterface
     {
-        if ( ! $request->isValid()) {
+        if (! $request->isValid()) {
             return $this->response->json([
                 'errors' => $request->getErrors(),
             ], 422);
@@ -127,7 +127,7 @@ final class WalletsController extends Controller
             return $this->response->create(404);
         }
 
-        if ( ! $request->isValid()) {
+        if (! $request->isValid()) {
             return $this->response->json([
                 'errors' => $request->getErrors(),
             ], 422);

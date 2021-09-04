@@ -14,7 +14,8 @@ use Spiral\Router\Annotation\Route;
 
 final class RefreshController
 {
-    use PrototypeTrait, AuthResponses;
+    use PrototypeTrait;
+    use AuthResponses;
 
     /**
      * @Route(route="/auth/refresh", name="auth.refresh", methods="POST")

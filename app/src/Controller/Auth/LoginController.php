@@ -12,7 +12,8 @@ use Spiral\Router\Annotation\Route;
 
 final class LoginController
 {
-    use PrototypeTrait, AuthResponses;
+    use PrototypeTrait;
+    use AuthResponses;
 
     /**
      * @Route(route="/auth/login", name="auth.login", methods="POST")
