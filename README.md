@@ -1,5 +1,7 @@
 # API
 
+[![Check](https://github.com/cash-track/api/actions/workflows/pull.yml/badge.svg)](https://github.com/cash-track/api/actions/workflows/pull.yml) [![Release](https://github.com/cash-track/api/actions/workflows/release.yml/badge.svg)](https://github.com/cash-track/api/actions/workflows/release.yml)
+
 Core service to handle requests from clients like web UI, mobile app, etc.
 
 ## Push to registry
