@@ -11,21 +11,27 @@ class WalletRepository extends Repository
 {
     /**
      * @param int $userID
-     * @return \App\Database\Wallet[]|object[]
+     * @return \App\Database\Wallet[]
      */
     public function findAllByUserPK(int $userID): array
     {
-        return $this->allByUserPK($userID)->fetchAll();
+        /** @var \App\Database\Wallet[] $wallets */
+        $wallets = $this->allByUserPK($userID)->fetchAll();
+
+        return $wallets;
     }
 
     /**
      * @param int $userID
      * @param bool $isArchived
-     * @return \App\Database\Wallet[]|object[]
+     * @return \App\Database\Wallet[]
      */
     public function findAllByUserPKByArchived(int $userID, bool $isArchived = false): array
     {
-        return $this->allByUserPK($userID)->where('is_archived', $isArchived)->fetchAll();
+        /** @var \App\Database\Wallet[] $wallets */
+        $wallets = $this->allByUserPK($userID)->where('is_archived', $isArchived)->fetchAll();
+
+        return $wallets;
     }
 
     /**

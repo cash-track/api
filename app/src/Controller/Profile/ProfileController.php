@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controller\Profile;
 
+use App\Database\Currency;
 use App\Database\User;
 use App\Request\CheckNickNameRequest;
 use App\Request\Profile\UpdateBasicRequest;
@@ -90,7 +91,13 @@ class ProfileController
         $this->user->defaultCurrencyCode = $request->getDefaultCurrencyCode();
 
         try {
-            $this->user->defaultCurrency = $this->currencies->findByPK($request->getDefaultCurrencyCode());
+            $defaultCurrency = $this->currencies->findByPK($request->getDefaultCurrencyCode());
+
+            if (! $defaultCurrency instanceof Currency) {
+                throw new \RuntimeException('Unable to load default currency');
+            }
+
+            $this->user->defaultCurrency = $defaultCurrency;
         } catch (\Throwable $exception) {
             $this->logger->warning('Unable to load currency entity', [
                 'action' => 'profile.update',

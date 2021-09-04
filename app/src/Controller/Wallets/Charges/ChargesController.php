@@ -34,7 +34,7 @@ class ChargesController extends Controller
             ->paginate($this->paginators->createPaginator())
             ->findByWalletId($wallet->id);
 
-        if (!is_array($charges) || count($charges) === 0) {
+        if (count($charges) === 0) {
             return $this->response->json(['data' => []]);
         }
 
