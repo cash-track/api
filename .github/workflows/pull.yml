@@ -58,5 +58,11 @@ jobs:
           php app.php migrate:init
           php app.php migrate
 
-      - name: Run tests
+      - name: Run PHPUnit
         run: ./vendor/bin/phpunit
+
+      - name: Run Code Sniffer
+        run: ./vendor/bin/phpcs -p -n --standard=PSR12 --colors --report=code ./app/src
+
+      - name: Run Psalm
+        run: ./vendor/bin/psalm --php-version=8.0 --show-info=true

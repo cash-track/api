@@ -21,32 +21,32 @@ class User implements PasswordContainerInterface
      * @Cycle\Column(type = "primary")
      * @var int
      */
-    public $id;
+    public $id = 0;
 
     /**
      * @Cycle\Column(type = "string")
      * @var string
      */
-    public $name;
+    public $name = '';
 
     /**
      * @Cycle\Column(type = "string", nullable = true, name = "last_name")
      * @var string
      */
-    public $lastName;
+    public $lastName = '';
 
     /**
      * @Cycle\Column(type = "string", name = "nick_name")
      * @var string
      */
-    public $nickName;
+    public $nickName = '';
 
     /**
      * @Cycle\Column(type = "string")
      *
      * @var string
      */
-    public $email;
+    public $email = '';
 
     /**
      * @Cycle\Column(type = "boolean", default = "0", name = "is_email_confirmed")
@@ -70,7 +70,7 @@ class User implements PasswordContainerInterface
      * @Cycle\Column(type = "string")
      * @var string
      */
-    public $password;
+    public $password = '';
 
     /**
      * @Cycle\Column(type = "datetime", name = "created_at")
@@ -101,10 +101,10 @@ class User implements PasswordContainerInterface
      */
     public function __construct()
     {
-       $this->defaultCurrency = new Currency();
-       $this->wallets = new PivotedCollection();
-       $this->createdAt = new \DateTimeImmutable();
-       $this->updatedAt = new \DateTimeImmutable();
+        $this->defaultCurrency = new Currency();
+        $this->wallets = new PivotedCollection();
+        $this->createdAt = new \DateTimeImmutable();
+        $this->updatedAt = new \DateTimeImmutable();
     }
 
     /**

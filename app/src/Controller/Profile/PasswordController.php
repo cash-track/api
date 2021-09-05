@@ -23,7 +23,7 @@ final class PasswordController extends ProfileController
     {
         $request->setContext($this->user);
 
-        if ( ! $request->isValid()) {
+        if (! $request->isValid()) {
             return $this->response->json([
                 'errors' => $request->getErrors(),
             ], 422);

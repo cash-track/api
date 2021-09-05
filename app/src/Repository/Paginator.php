@@ -10,7 +10,7 @@ use Cycle\ORM\Select;
 trait Paginator
 {
     /**
-     * @var \App\Service\Pagination\PaginatorInterface
+     * @var \App\Service\Pagination\PaginatorInterface|null
      */
     protected $paginator;
 

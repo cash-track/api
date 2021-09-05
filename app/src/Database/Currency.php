@@ -17,25 +17,25 @@ class Currency
      * @Cycle\Column(type = "string(3)", primary = true)
      * @var string
      */
-    public $code;
+    public $code = '';
 
     /**
      * @Cycle\Column(type = "string")
      * @var string
      */
-    public $name;
+    public $name = '';
 
     /**
      * @Cycle\Column(type = "string(1)")
      * @var string
      */
-    public $char;
+    public $char = '';
 
     /**
      * @Cycle\Column(type = "decimal(8,4)")
      * @var double
      */
-    public $rate;
+    public $rate = 0.0;
 
     /**
      * @Cycle\Column(type = "datetime", name = "updated_at")

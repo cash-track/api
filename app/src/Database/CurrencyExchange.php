@@ -13,38 +13,39 @@ class CurrencyExchange
 {
     /**
      * @Cycle\Column(type = "primary")
+     * @var int
      */
-    public $id;
+    public $id = 0;
 
     /**
      * @Cycle\Column(type = "string(3)", name = "src_currency_code")
      * @var string
      */
-    public $srcCurrencyCode;
+    public $srcCurrencyCode = '';
 
     /**
      * @Cycle\Column(type = "decimal(13,2)", name = "src_amount")
      * @var float
      */
-    public $srcAmount;
+    public $srcAmount = 0.0;
 
     /**
      * @Cycle\Column(type = "decimal(8,4)")
      * @var double
      */
-    public $rate;
+    public $rate = 0.0;
 
     /**
      * @Cycle\Column(type = "string(3)", name = "dst_currency_code")
      * @var string
      */
-    public $dstCurrencyCode;
+    public $dstCurrencyCode = '';
 
     /**
      * @Cycle\Column(type = "decimal(13,2)", name = "dst_amount")
      * @var float
      */
-    public $dstAmount;
+    public $dstAmount = 0.0;
 
     /**
      * @Cycle\Column(type = "datetime", name = "created_at")

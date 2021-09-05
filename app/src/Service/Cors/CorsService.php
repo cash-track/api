@@ -188,7 +188,7 @@ class CorsService implements CorsInterface
             return $response;
         }
 
-        return $response->withHeader('Access-Control-Max-Age', $this->config->getMaxAge());
+        return $response->withHeader('Access-Control-Max-Age', (string) $this->config->getMaxAge());
     }
 
     /**

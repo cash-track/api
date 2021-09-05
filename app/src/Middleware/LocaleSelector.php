@@ -59,8 +59,8 @@ class LocaleSelector implements MiddlewareInterface
     {
         $header = $request->getHeaderLine('accept-language');
         foreach (explode(',', $header) as $value) {
-            if (strpos($value, ';') !== false) {
-                yield substr($value, 0, strpos($value, ';'));
+            if (($colon = strpos($value, ';')) !== false) {
+                yield substr($value, 0, $colon);
             }
 
             yield $value;

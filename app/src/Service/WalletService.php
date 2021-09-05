@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Service;
 
+use App\Database\Currency;
 use App\Database\User;
 use App\Database\Wallet;
 use App\Mail\WalletShareMail;
@@ -217,18 +218,24 @@ class WalletService
 
     /**
      * @param \App\Database\Wallet $wallet
-     * @param string $defaultCurrencyCode
+     * @param string|null $defaultCurrencyCode
      * @return \App\Database\Wallet
      */
-    protected function setDefaultCurrency(Wallet $wallet, string $defaultCurrencyCode): Wallet
+    protected function setDefaultCurrency(Wallet $wallet, ?string $defaultCurrencyCode): Wallet
     {
-        $code = $defaultCurrencyCode;
+        $code = $defaultCurrencyCode ?? Currency::DEFAULT_CURRENCY_CODE;
 
         if (!empty($wallet->defaultCurrencyCode)) {
             $code = $wallet->defaultCurrencyCode;
         }
 
-        $wallet->defaultCurrency = $this->currencyRepository->findByPK($code);
+        $currency = $this->currencyRepository->findByPK($code);
+
+        if (! $currency instanceof Currency) {
+            throw new \RuntimeException("Unable to get currency by code [{$code}]");
+        }
+
+        $wallet->defaultCurrency = $currency;
 
         return $wallet;
     }

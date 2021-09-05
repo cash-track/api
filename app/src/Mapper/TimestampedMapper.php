@@ -18,6 +18,9 @@ use Cycle\ORM\Mapper\Mapper;
  */
 class TimestampedMapper extends Mapper
 {
+    /** @var array */
+    protected $fields = [];
+
     /**
      * {@inheritDoc}
      *

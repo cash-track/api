@@ -1,5 +1,6 @@
 <?php
 
+declare(strict_types=1);
 
 namespace App\Mapper;
 
@@ -12,11 +13,12 @@ trait UUIDGenerator
      * @return string
      * @throws \Cycle\ORM\Exception\MapperException
      */
-    public function generateNextUUIDKey() :string {
+    public function generateNextUUIDKey(): string
+    {
         try {
             return Uuid::uuid4()->toString();
         } catch (\Exception $e) {
-            throw new MapperException($e->getMessage(), $e->getCode(), $e);
+            throw new MapperException($e->getMessage(), (int) $e->getCode(), $e);
         }
     }
 }

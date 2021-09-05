@@ -48,6 +48,7 @@ class UserRepository extends Repository implements ActorProviderInterface
     }
 
     /**
+     * @psalm-suppress UndefinedMagicMethod
      * @param \App\Database\User $user
      * @return \Cycle\ORM\Select
      */

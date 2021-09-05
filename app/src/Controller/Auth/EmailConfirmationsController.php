@@ -38,9 +38,9 @@ final class EmailConfirmationsController
      * @Route(route="/auth/email/confirmation/<token>", name="auth.email.confirm")
      *
      * @param string $token
-     * @return string
+     * @return \Psr\Http\Message\ResponseInterface
      */
-    public function confirm(string $token)
+    public function confirm(string $token): ResponseInterface
     {
         try {
             $this->emailConfirmationService->confirm($token);

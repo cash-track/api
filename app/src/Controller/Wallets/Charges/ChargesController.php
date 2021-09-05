@@ -34,7 +34,7 @@ class ChargesController extends Controller
             ->paginate($this->paginators->createPaginator())
             ->findByWalletId($wallet->id);
 
-        if (!is_array($charges) || count($charges) === 0) {
+        if (count($charges) === 0) {
             return $this->response->json(['data' => []]);
         }
 
@@ -56,7 +56,7 @@ class ChargesController extends Controller
             return $this->response->create(404);
         }
 
-        if ( ! $request->isValid()) {
+        if (! $request->isValid()) {
             return $this->response->json([
                 'errors' => $request->getErrors(),
             ], 422);
@@ -115,7 +115,7 @@ class ChargesController extends Controller
             return $this->response->create(404);
         }
 
-        if ( ! $request->isValid()) {
+        if (! $request->isValid()) {
             return $this->response->json([
                 'errors' => $request->getErrors(),
             ], 422);

@@ -179,7 +179,7 @@ final class Paginator implements PaginatorInterface, \Countable
     /**
      * {@inheritdoc}
      */
-    public function nextPage()
+    public function nextPage(): ?int
     {
         if ($this->getPage() != $this->countPages) {
             return $this->getPage() + 1;
@@ -191,7 +191,7 @@ final class Paginator implements PaginatorInterface, \Countable
     /**
      * {@inheritdoc}
      */
-    public function previousPage()
+    public function previousPage(): ?int
     {
         if ($this->getPage() > 1) {
             return $this->getPage() - 1;

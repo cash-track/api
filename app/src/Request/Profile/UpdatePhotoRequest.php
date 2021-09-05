@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace App\Request\Profile;
 
@@ -25,7 +25,7 @@ class UpdatePhotoRequest extends Filter
     ];
 
     /**
-     * @return \Psr\Http\Message\UploadedFileInterface|null
+     * @return \Psr\Http\Message\UploadedFileInterface
      * @throws \Laminas\Diactoros\Exception\UploadedFileErrorException
      */
     public function getPhoto(): UploadedFileInterface

@@ -20,11 +20,14 @@ trait AuthResponses
      */
     protected function responseTokens(TokenInterface $accessToken, TokenInterface $refreshToken): ResponseInterface
     {
+        $accessTokenExpiredAt = $accessToken->getExpiresAt();
+        $refreshTokenExpiredAt = $refreshToken->getExpiresAt();
+
         return $this->response->json([
             'accessToken' => $accessToken->getID(),
-            'accessTokenExpiredAt' => $accessToken->getExpiresAt()->format(DATE_RFC3339),
+            'accessTokenExpiredAt' => $accessTokenExpiredAt ? $accessTokenExpiredAt->format(DATE_RFC3339) : null,
             'refreshToken' => $refreshToken->getID(),
-            'refreshTokenExpiredAt' => $refreshToken->getExpiresAt()->format(DATE_RFC3339),
+            'refreshTokenExpiredAt' => $refreshTokenExpiredAt ? $refreshTokenExpiredAt->format(DATE_RFC3339) : null,
         ], 200);
     }
 
@@ -36,12 +39,15 @@ trait AuthResponses
      */
     protected function responseTokensWithUser(TokenInterface $accessToken, TokenInterface $refreshToken, User $user): ResponseInterface
     {
+        $accessTokenExpiredAt = $accessToken->getExpiresAt();
+        $refreshTokenExpiredAt = $refreshToken->getExpiresAt();
+
         return $this->response->json([
             'data' => $this->userView->head($user),
             'accessToken' => $accessToken->getID(),
-            'accessTokenExpiredAt' => $accessToken->getExpiresAt()->format(DATE_RFC3339),
+            'accessTokenExpiredAt' => $accessTokenExpiredAt ? $accessTokenExpiredAt->format(DATE_RFC3339) : null,
             'refreshToken' => $refreshToken->getID(),
-            'refreshTokenExpiredAt' => $refreshToken->getExpiresAt()->format(DATE_RFC3339),
+            'refreshTokenExpiredAt' => $refreshTokenExpiredAt ? $refreshTokenExpiredAt->format(DATE_RFC3339) : null,
         ], 200);
     }
 

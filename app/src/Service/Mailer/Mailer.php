@@ -14,19 +14,19 @@ class Mailer implements MailerInterface
     private $mailer;
 
     /**
-     * @var \Spiral\Views\ViewInterface
+     * @var \Spiral\Views\ViewsInterface
      */
     private $views;
 
     /**
      * @var string
      */
-    private $defaultFromName;
+    private $defaultFromName = '';
 
     /**
      * @var string
      */
-    private $defaultFromAddress;
+    private $defaultFromAddress = '';
 
     /**
      * Mailer constructor.

@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace App\Service\Auth;
 
@@ -25,7 +25,7 @@ abstract class HelperService
     protected $userRepository;
 
     /**
-     * @var \Spiral\Auth\AuthScope
+     * @var \App\Service\Mailer\MailerInterface
      */
     protected $mailer;
 

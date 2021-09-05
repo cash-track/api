@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace App\Bootloader;
 
@@ -37,8 +37,10 @@ class MailerBootloader extends Bootloader
         $container->bind(MailerInterface::class, function (ViewsInterface $views): MailerInterface {
             $mailer = new Mailer(new \Swift_Mailer($this->getTransport()), $views);
 
-            return $mailer->setDefaultFromName($this->config->getSenderName())
-                          ->setDefaultFromAddress($this->config->getSenderAddress());
+            $mailer->setDefaultFromName($this->config->getSenderName());
+            $mailer->setDefaultFromAddress($this->config->getSenderAddress());
+
+            return $mailer;
         });
     }
 
@@ -63,7 +65,7 @@ class MailerBootloader extends Bootloader
         $transport = new \Swift_SmtpTransport();
 
         return $transport->setHost($this->config->getSmtpHost())
-                         ->setPort($this->config->getSmtpPort())
+                         ->setPort((int) $this->config->getSmtpPort())
                          ->setUsername($this->config->getSmtpUsername())
                          ->setPassword($this->config->getSmtpPassword())
                          ->setEncryption($this->config->getSmtpEncryption());

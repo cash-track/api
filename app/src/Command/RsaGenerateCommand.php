@@ -9,6 +9,9 @@ use Spiral\Files\Exception\WriteErrorException;
 use Spiral\Files\FilesInterface;
 use Symfony\Component\Console\Input\InputOption;
 
+/**
+ * @psalm-suppress PropertyNotSetInConstructor
+ */
 class RsaGenerateCommand extends Command
 {
     protected const NAME = 'rsa:gen';
@@ -58,7 +61,7 @@ class RsaGenerateCommand extends Command
             return;
         }
 
-        $privateKey = null;
+        $privateKey = '';
         if (!openssl_pkey_export($key, $privateKey)) {
             $this->writeln('Unable to extract private key from OpenSSL key: ' . openssl_error_string());
             return;
@@ -83,10 +86,10 @@ class RsaGenerateCommand extends Command
 
     /**
      * @param string $name
-     * @param $data
+     * @param string $data
      * @return string
      */
-    protected function writeFile(string $name, $data): string
+    protected function writeFile(string $name, string $data): string
     {
         $path = $this->getKeyPath($name);
 

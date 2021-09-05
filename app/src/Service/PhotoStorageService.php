@@ -42,7 +42,7 @@ class PhotoStorageService
      * @param string $fileName
      * @return string
      */
-    public function getProfilePhotoPublicUrl(?string $fileName):? string
+    public function getProfilePhotoPublicUrl(?string $fileName): ?string
     {
         if ($fileName === null) {
             return null;
@@ -55,7 +55,7 @@ class PhotoStorageService
      * @param \Psr\Http\Message\UploadedFileInterface $uploadedFile
      * @return string|null
      */
-    public function storeUploadedProfilePhoto(UploadedFileInterface $uploadedFile):? string
+    public function storeUploadedProfilePhoto(UploadedFileInterface $uploadedFile): ?string
     {
         $fileName = $this->generateFileName($uploadedFile->getClientFilename()) . '.' . $this->getFileExtension($uploadedFile->getClientFilename());
 
@@ -94,31 +94,31 @@ class PhotoStorageService
     }
 
     /**
-     * @param string $fileName
+     * @param string|null $fileName
      * @return string
      */
-    private function generateFileName(string $fileName = ''): string
+    private function generateFileName(?string $fileName = ''): string
     {
-        return md5($fileName . microtime());
+        return md5(((string) $fileName) . microtime());
     }
 
     /**
-     * @param string $fileName
+     * @param string|null $fileName
      * @param string $default
      * @return string
      */
-    private function getFileExtension(string $fileName, string $default = 'jpg'): string
+    private function getFileExtension(?string $fileName, string $default = 'jpg'): string
     {
-        $parts = explode('.', $fileName, 2);
-
-        if ($parts === false) {
+        if ($fileName === null) {
             return $default;
         }
+
+        $parts = explode('.', $fileName, 2);
 
         if (count($parts) !== 2) {
             return $default;
         }
 
-        return $parts[1];
+        return $parts[1] ?? $default;
     }
 }

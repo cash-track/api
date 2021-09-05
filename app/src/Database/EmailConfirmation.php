@@ -19,13 +19,13 @@ class EmailConfirmation
      * @Cycle\Column(type = "string", primary = true)
      * @var string
      */
-    public $email;
+    public $email = '';
 
     /**
      * @Cycle\Column(type = "string")
      * @var string
      */
-    public $token;
+    public $token = '';
 
     /**
      * @Cycle\Column(type = "datetime", name = "created_at")

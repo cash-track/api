@@ -14,7 +14,8 @@ use Spiral\Router\Annotation\Route;
 
 final class RefreshController
 {
-    use PrototypeTrait, AuthResponses;
+    use PrototypeTrait;
+    use AuthResponses;
 
     /**
      * @Route(route="/auth/refresh", name="auth.refresh", methods="POST")
@@ -27,7 +28,6 @@ final class RefreshController
     {
         $authContext = $this->refreshTokenService->getContextByRequest($request);
 
-        /** @var \App\Database\User $user */
         $user = $authContext->getActor();
 
         if (! $user instanceof User) {

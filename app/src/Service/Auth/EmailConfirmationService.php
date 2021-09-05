@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace App\Service\Auth;
 
@@ -47,9 +47,10 @@ class EmailConfirmationService extends HelperService
 
     /**
      * @param \App\Database\User $user
+     * @return void
      * @throws \Throwable
      */
-    public function create(User $user)
+    public function create(User $user): void
     {
         if ($user->isEmailConfirmed) {
             throw new \RuntimeException('You already confirmed your account email');
@@ -68,9 +69,10 @@ class EmailConfirmationService extends HelperService
 
     /**
      * @param \App\Database\User $user
+     * @return void
      * @throws \Throwable
      */
-    public function reSend(User $user)
+    public function reSend(User $user): void
     {
         $confirmation = $this->repository->findByPK($user->email);
         if ($confirmation instanceof EmailConfirmation) {
@@ -87,13 +89,14 @@ class EmailConfirmationService extends HelperService
 
     /**
      * @param string $token
+     * @return void
      * @throws \Throwable
      */
-    public function confirm(string $token)
+    public function confirm(string $token): void
     {
         $confirmation = $this->repository->findByToken($token);
 
-        if ( ! $confirmation instanceof EmailConfirmation) {
+        if (! $confirmation instanceof EmailConfirmation) {
             throw new \RuntimeException('Wrong confirmation token');
         }
 
@@ -103,7 +106,7 @@ class EmailConfirmationService extends HelperService
 
         $user = $this->userRepository->findByEmail($confirmation->email);
 
-        if ( ! $user instanceof User) {
+        if (! $user instanceof User) {
             throw new \RuntimeException('Unable to find user linked to confirmation link');
         }
 

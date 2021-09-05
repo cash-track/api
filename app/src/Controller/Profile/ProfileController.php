@@ -1,9 +1,11 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace App\Controller\Profile;
 
+use App\Database\Currency;
+use App\Database\User;
 use App\Request\CheckNickNameRequest;
 use App\Request\Profile\UpdateBasicRequest;
 use Psr\Http\Message\ResponseInterface;
@@ -27,7 +29,13 @@ class ProfileController
      */
     public function __construct(AuthScope $auth)
     {
-        $this->user = $auth->getActor();
+        $user = $auth->getActor();
+
+        if (! $user instanceof User) {
+            throw new \RuntimeException('Unable to get authenticated user');
+        }
+
+        $this->user = $user;
     }
 
     /**
@@ -71,7 +79,7 @@ class ProfileController
     {
         $request->setContext($this->user);
 
-        if ( ! $request->isValid()) {
+        if (! $request->isValid()) {
             return $this->response->json([
                 'errors' => $request->getErrors(),
             ], 422);
@@ -83,7 +91,13 @@ class ProfileController
         $this->user->defaultCurrencyCode = $request->getDefaultCurrencyCode();
 
         try {
-            $this->user->defaultCurrency = $this->currencies->findByPK($request->getDefaultCurrencyCode());
+            $defaultCurrency = $this->currencies->findByPK($request->getDefaultCurrencyCode());
+
+            if (! $defaultCurrency instanceof Currency) {
+                throw new \RuntimeException('Unable to load default currency');
+            }
+
+            $this->user->defaultCurrency = $defaultCurrency;
         } catch (\Throwable $exception) {
             $this->logger->warning('Unable to load currency entity', [
                 'action' => 'profile.update',

@@ -19,7 +19,7 @@ class CurrencyRepository extends Repository
      *
      * @return \App\Database\Currency|null
      */
-    public function getDefault():? Currency
+    public function getDefault(): ?Currency
     {
         $currency = $this->findByPK(Currency::DEFAULT_CURRENCY_CODE);
 
@@ -31,20 +31,14 @@ class CurrencyRepository extends Repository
     }
 
     /**
-     * @return \App\Database\Currency[]
+     * @return \App\Database\Currency[]|object[]|array
      */
     public function getFeatured(): array
     {
-        $currencies = $this->select()->where('code', 'in', new Parameter([
+        return $this->select()->where('code', 'in', new Parameter([
             self::FEATURED_EUR,
             self::FEATURED_USD,
             self::FEATURED_UAH,
         ]))->fetchAll();
-
-        if (! is_array($currencies)) {
-            return [];
-        }
-
-        return $currencies;
     }
 }

@@ -85,7 +85,7 @@ class TokenStorage implements TokenStorageInterface, SingletonInterface
 
         $jwt = JWT::encode($payload, $this->getSigningKey(), $this->alg);
 
-        return new Token((string) $jwt, $payload, $expiresAt);
+        return new Token($jwt, $payload, $expiresAt);
     }
 
     /**

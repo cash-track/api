@@ -10,49 +10,55 @@ use Cycle\ORM\Select\Repository;
 class WalletRepository extends Repository
 {
     /**
-     * @param $userID
-     * @return \App\Database\Wallet[]|object[]
+     * @param int $userID
+     * @return \App\Database\Wallet[]
      */
-    public function findAllByUserPK($userID): array
+    public function findAllByUserPK(int $userID): array
     {
-        return $this->allByUserPK($userID)->fetchAll();
+        /** @var \App\Database\Wallet[] $wallets */
+        $wallets = $this->allByUserPK($userID)->fetchAll();
+
+        return $wallets;
     }
 
     /**
-     * @param $userID
+     * @param int $userID
      * @param bool $isArchived
-     * @return \App\Database\Wallet[]|object[]
+     * @return \App\Database\Wallet[]
      */
-    public function findAllByUserPKByArchived($userID, bool $isArchived = false): array
+    public function findAllByUserPKByArchived(int $userID, bool $isArchived = false): array
     {
-        return $this->allByUserPK($userID)->where('is_archived', $isArchived)->fetchAll();
+        /** @var \App\Database\Wallet[] $wallets */
+        $wallets = $this->allByUserPK($userID)->where('is_archived', $isArchived)->fetchAll();
+
+        return $wallets;
     }
 
     /**
-     * @param $userID
+     * @param int $userID
      * @return \Cycle\ORM\Select
      */
-    protected function allByUserPK($userID): Select
+    protected function allByUserPK(int $userID): Select
     {
         return $this->select()->load('users')->where('users.id', $userID)->orderBy('created_at', 'DESC');
     }
 
     /**
-     * @param $id
-     * @param $userID
+     * @param int $id
+     * @param int $userID
      * @return \App\Database\Wallet|object|null
      */
-    public function findByPKByUserPK($id, $userID)
+    public function findByPKByUserPK(int $id, $userID)
     {
         return $this->select()->wherePK($id)->where('users.id', $userID)->fetchOne();
     }
 
     /**
-     * @param $id
-     * @param $userID
+     * @param int $id
+     * @param int $userID
      * @return \App\Database\Wallet|object|null
      */
-    public function findByPKByUserPKWithUsers($id, $userID)
+    public function findByPKByUserPKWithUsers(int $id, int $userID)
     {
         return $this->select()->wherePK($id)->where('users.id', $userID)->with('users')->fetchOne();
     }

@@ -19,13 +19,13 @@ class ForgotPasswordRequest
      * @Cycle\Column(type = "string", primary = true)
      * @var string
      */
-    public $email;
+    public $email = '';
 
     /**
      * @Cycle\Column(type = "string")
      * @var string
      */
-    public $code;
+    public $code = '';
 
     /**
      * @Cycle\Column(type = "datetime", name = "created_at")
