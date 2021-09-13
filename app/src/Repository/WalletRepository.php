@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Repository;
 
+use App\Database\Currency;
 use Cycle\ORM\Select;
 use Cycle\ORM\Select\Repository;
 
@@ -30,6 +31,22 @@ class WalletRepository extends Repository
     {
         /** @var \App\Database\Wallet[] $wallets */
         $wallets = $this->allByUserPK($userID)->where('is_archived', $isArchived)->fetchAll();
+
+        return $wallets;
+    }
+
+    /**
+     * @param int $userID
+     * @param string $currencyCode
+     * @return \App\Database\Wallet[]
+     */
+    public function findAllByUserPKByCurrencyCode(int $userID, string $currencyCode = Currency::DEFAULT_CURRENCY_CODE): array
+    {
+        /** @var \App\Database\Wallet[] $wallets */
+        $wallets = $this->select()
+                        ->where('users.id', $userID)
+                        ->where('default_currency_code', $currencyCode)
+                        ->fetchAll();
 
         return $wallets;
     }

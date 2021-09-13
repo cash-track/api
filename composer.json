@@ -54,6 +54,20 @@
       "php app.php encrypt:key -m .env",
       "php app.php configure -vv",
       "spiral get-binary"
+    ],
+    "checks": [
+      "./vendor/bin/phpunit",
+      "./vendor/bin/phpcs -p -n --standard=PSR12 --colors --report=code ./app/src",
+      "./vendor/bin/psalm --php-version=8.0 --show-info=true"
+    ],
+    "phpunit": [
+      "./vendor/bin/phpunit"
+    ],
+    "phpcs": [
+      "./vendor/bin/phpcs -p -n --standard=PSR12 --colors --report=code ./app/src"
+    ],
+    "psalm": [
+      "./vendor/bin/psalm --php-version=8.0 --show-info=true"
     ]
   },
   "autoload": {
