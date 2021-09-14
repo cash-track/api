@@ -60,4 +60,17 @@ class ProfileStatisticsController
             'data' => $data,
         ]);
     }
+
+    /**
+     * @Route(route="/profile/statistics/counters", name="profile.statistics.counters", methods="GET", group="auth")
+     *
+     * @param \App\Service\Statistics\ProfileStatistics $statistics
+     * @return \Psr\Http\Message\ResponseInterface
+     */
+    public function counters(ProfileStatistics $statistics): ResponseInterface
+    {
+        return $this->response->json([
+            'data' => $statistics->getCounters($this->user),
+        ]);
+    }
 }

@@ -71,4 +71,20 @@ class ChargeRepository extends Repository
 
         return (float) $query->sum('amount');
     }
+
+    /**
+     * @param int $userID
+     * @param string|null $type
+     * @return int
+     */
+    public function countAllByUserPKByType(int $userID, string $type = null): int
+    {
+        $query = $this->select()->where('user_id', $userID);
+
+        if ($type !== null) {
+            $query = $query->where('type', $type);
+        }
+
+        return $query->count();
+    }
 }

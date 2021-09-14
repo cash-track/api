@@ -76,4 +76,18 @@ class ProfileStatistics
 
         return $data;
     }
+
+    /**
+     * @param \App\Database\User $user
+     * @return array
+     */
+    public function getCounters(User $user): array
+    {
+        return [
+            'wallets' => $this->walletRepository->countAllByUserPK($user->id),
+            'walletsArchived' => $this->walletRepository->countArchivedByUserPK($user->id),
+            'charges' => $this->chargeRepository->countAllByUserPKByType($user->id),
+            'chargesIncome' => $this->chargeRepository->countAllByUserPKByType($user->id, Charge::TYPE_INCOME),
+        ];
+    }
 }
