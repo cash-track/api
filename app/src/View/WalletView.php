@@ -87,7 +87,7 @@ class WalletView implements SingletonInterface
 
             'users' => $wallet->users->count() ? $this->users->map($wallet->users->getValues()) : [],
 
-            'latestCharges' => $wallet->latestCharges->count() ? $this->charges->map($wallet->latestCharges->getValues()) : [],
+            'latestCharges' => $wallet->latestCharges !== null ? $this->charges->map($wallet->latestCharges->getValues()) : [],
         ];
     }
 }

@@ -92,9 +92,9 @@ class Wallet
     public $users;
 
     /**
-     * @var \Doctrine\Common\Collections\ArrayCollection
+     * @var \Doctrine\Common\Collections\ArrayCollection|null
      */
-    public ArrayCollection $latestCharges;
+    public ArrayCollection|null $latestCharges = null;
 
     /**
      * Wallet constructor.
