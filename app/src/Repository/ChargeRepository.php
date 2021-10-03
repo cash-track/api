@@ -28,6 +28,24 @@ class ChargeRepository extends Repository
     }
 
     /**
+     * @param int $walletId
+     * @param int $limit
+     * @return \App\Database\Charge[]
+     */
+    public function findByWalletIDLatest(int $walletId, int $limit = 4): array
+    {
+        /** @var \App\Database\Charge[] $charges */
+        $charges = $this->select()
+                    ->load('user')
+                    ->where('wallet_id', $walletId)
+                    ->orderBy('created_at', 'DESC')
+                    ->limit($limit)
+                    ->fetchAll();
+
+        return $charges;
+    }
+
+    /**
      * @param string $chargeId
      * @param int $walletId
      * @return object|null

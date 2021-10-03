@@ -37,6 +37,19 @@ class WalletRepository extends Repository
 
     /**
      * @param int $userID
+     * @param int $limit
+     * @return \App\Database\Wallet[]
+     */
+    public function findAllUnArchivedByUserPKWithLimit(int $userID, int $limit = 4): array
+    {
+        /** @var \App\Database\Wallet[] $wallets */
+        $wallets = $this->allByUserPK($userID)->where('is_archived', false)->limit($limit)->fetchAll();
+
+        return $wallets;
+    }
+
+    /**
+     * @param int $userID
      * @param string $currencyCode
      * @return \App\Database\Wallet[]
      */
