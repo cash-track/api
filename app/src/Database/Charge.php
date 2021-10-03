@@ -16,9 +16,9 @@ class Charge
 
     /**
      * @Cycle\Column(type = "string(36)", primary = true)
-     * @var string
+     * @var string|null
      */
-    public $id = '';
+    public $id;
 
     /**
      * @Cycle\Column(type = "int", name = "wallet_id")
