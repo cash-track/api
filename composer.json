@@ -32,6 +32,7 @@
     "voku/portable-utf8": "^5.4",
     "firebase/php-jwt": "^5.2",
     "kreait/firebase-php": "^5.0",
+    "lcobucci/jwt": "4.1.5",
     "aws/aws-sdk-php": "^3.190",
     "swiftmailer/swiftmailer": "^6.2",
     "laminas/laminas-diactoros": "^2.6"
