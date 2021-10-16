@@ -43,9 +43,12 @@ class WalletRepository extends Repository
     public function findByUserPKLatestWithLimit(int $userID, int $limit = 4): array
     {
         /** @var \App\Database\Wallet[] $wallets */
-        $wallets = $this->allByUserPK($userID)
-                        ->limit($limit)
+        $wallets = $this->select()
+                        ->load('users')
+                        ->where('users.id', $userID)
+                        ->orderBy('is_archived')
                         ->orderBy('updated_at', 'DESC')
+                        ->limit($limit)
                         ->fetchAll();
 
         return $wallets;
