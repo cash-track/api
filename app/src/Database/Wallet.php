@@ -92,6 +92,11 @@ class Wallet
     public $users;
 
     /**
+     * @var \Doctrine\Common\Collections\ArrayCollection|null
+     */
+    public ArrayCollection|null $latestCharges = null;
+
+    /**
      * Wallet constructor.
      */
     public function __construct()
@@ -101,5 +106,6 @@ class Wallet
         $this->users = new PivotedCollection();
         $this->createdAt = new \DateTimeImmutable();
         $this->updatedAt = new \DateTimeImmutable();
+        $this->latestCharges = new ArrayCollection();
     }
 }

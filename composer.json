@@ -14,7 +14,7 @@
     }
   ],
   "require": {
-    "php": ">=7.3",
+    "php": ">=8.0",
     "ext-mbstring": "*",
     "ext-openssl": "*",
     "ext-pdo": "*",
@@ -32,6 +32,7 @@
     "voku/portable-utf8": "^5.4",
     "firebase/php-jwt": "^5.2",
     "kreait/firebase-php": "^5.0",
+    "lcobucci/jwt": "4.1.5",
     "aws/aws-sdk-php": "^3.190",
     "swiftmailer/swiftmailer": "^6.2",
     "laminas/laminas-diactoros": "^2.6"
@@ -54,6 +55,20 @@
       "php app.php encrypt:key -m .env",
       "php app.php configure -vv",
       "spiral get-binary"
+    ],
+    "checks": [
+      "./vendor/bin/phpunit",
+      "./vendor/bin/phpcs -p -n --standard=PSR12 --colors --report=code ./app/src",
+      "./vendor/bin/psalm --php-version=8.0 --show-info=true"
+    ],
+    "phpunit": [
+      "./vendor/bin/phpunit"
+    ],
+    "phpcs": [
+      "./vendor/bin/phpcs -p -n --standard=PSR12 --colors --report=code ./app/src"
+    ],
+    "psalm": [
+      "./vendor/bin/psalm --php-version=8.0 --show-info=true"
     ]
   },
   "autoload": {

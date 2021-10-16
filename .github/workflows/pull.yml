@@ -39,7 +39,7 @@ jobs:
         id: composer-cache
         run: echo "::set-output name=dir::$(composer config cache-files-dir)"
 
-      - name: Cache composer dependencies
+      - name: Prepare cache for composer
         uses: actions/cache@v2
         with:
           path: ${{ steps.composer-cache.outputs.dir }}
@@ -47,6 +47,16 @@ jobs:
           # key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.json') }}
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
           restore-keys: ${{ runner.os }}-composer-
+
+      - name: Prepare cache for vulnerability database
+        uses: actions/cache@v2
+        id: vulnerability-db-cache
+        with:
+          path: ~/.vulnerability-db/cache
+          key: vulnerability-db
+
+      - name: Scan packages for vulnerability
+        uses: symfonycorp/security-checker-action@v2
 
       - name: Setup application
         run: |
