@@ -13,9 +13,9 @@ class CurrencyExchange
 {
     /**
      * @Cycle\Column(type = "primary")
-     * @var int
+     * @var int|null
      */
-    public $id = 0;
+    public $id;
 
     /**
      * @Cycle\Column(type = "string(3)", name = "src_currency_code")

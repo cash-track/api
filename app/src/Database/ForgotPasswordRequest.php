@@ -17,9 +17,9 @@ class ForgotPasswordRequest
 {
     /**
      * @Cycle\Column(type = "string", primary = true)
-     * @var string
+     * @var string|null
      */
-    public $email = '';
+    public $email;
 
     /**
      * @Cycle\Column(type = "string")

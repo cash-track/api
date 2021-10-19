@@ -30,7 +30,7 @@ class UserRepository extends Repository implements ActorProviderInterface
      * @param string $email
      * @return object|null
      */
-    public function findByEmail($email)
+    public function findByEmail(string $email): object|null
     {
         return $this->findOne(['email' => $email]);
     }

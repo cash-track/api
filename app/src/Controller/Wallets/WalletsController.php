@@ -24,7 +24,7 @@ final class WalletsController extends Controller
      */
     public function list(): ResponseInterface
     {
-        return $this->walletsView->json($this->wallets->findAllByUserPK($this->user->id));
+        return $this->walletsView->json($this->wallets->findAllByUserPK((int) $this->user->id));
     }
 
     /**
@@ -34,7 +34,7 @@ final class WalletsController extends Controller
      */
     public function listUnArchived(): ResponseInterface
     {
-        return $this->walletsView->json($this->wallets->findAllByUserPKByArchived($this->user->id, false));
+        return $this->walletsView->json($this->wallets->findAllByUserPKByArchived((int) $this->user->id, false));
     }
 
     /**
@@ -44,7 +44,7 @@ final class WalletsController extends Controller
      */
     public function listArchived(): ResponseInterface
     {
-        return $this->walletsView->json($this->wallets->findAllByUserPKByArchived($this->user->id, true));
+        return $this->walletsView->json($this->wallets->findAllByUserPKByArchived((int) $this->user->id, true));
     }
 
     /**
@@ -55,7 +55,7 @@ final class WalletsController extends Controller
      */
     public function index(int $id): ResponseInterface
     {
-        $wallet = $this->wallets->findByPKByUserPK($id, $this->user->id);
+        $wallet = $this->wallets->findByPKByUserPK($id, (int) $this->user->id);
 
         if (! $wallet instanceof Wallet) {
             return $this->response->create(404);
@@ -72,7 +72,7 @@ final class WalletsController extends Controller
      */
     public function indexTotal(int $id): ResponseInterface
     {
-        $wallet = $this->wallets->findByPKByUserPK($id, $this->user->id);
+        $wallet = $this->wallets->findByPKByUserPK($id, (int) $this->user->id);
 
         if (! $wallet instanceof Wallet) {
             return $this->response->create(404);
@@ -122,7 +122,7 @@ final class WalletsController extends Controller
      */
     public function update(int $id, UpdateRequest $request): ResponseInterface
     {
-        $wallet = $this->wallets->findByPKByUserPK($id, $this->user->id);
+        $wallet = $this->wallets->findByPKByUserPK($id, (int) $this->user->id);
 
         if (! $wallet instanceof Wallet) {
             return $this->response->create(404);
@@ -180,7 +180,7 @@ final class WalletsController extends Controller
      */
     public function delete(int $id): ResponseInterface
     {
-        $wallet = $this->wallets->findByPKByUserPK($id, $this->user->id);
+        $wallet = $this->wallets->findByPKByUserPK($id, (int) $this->user->id);
 
         if (! $wallet instanceof Wallet) {
             return $this->response->create(404);

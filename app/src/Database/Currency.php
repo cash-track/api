@@ -15,9 +15,9 @@ class Currency
 
     /**
      * @Cycle\Column(type = "string(3)", primary = true)
-     * @var string
+     * @var string|null
      */
-    public $code = '';
+    public $code;
 
     /**
      * @Cycle\Column(type = "string")

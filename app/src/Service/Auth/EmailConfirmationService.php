@@ -104,7 +104,7 @@ class EmailConfirmationService extends HelperService
             throw new \RuntimeException('Confirmation link are expired');
         }
 
-        $user = $this->userRepository->findByEmail($confirmation->email);
+        $user = $this->userRepository->findByEmail((string) $confirmation->email);
 
         if (! $user instanceof User) {
             throw new \RuntimeException('Unable to find user linked to confirmation link');

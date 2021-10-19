@@ -50,7 +50,7 @@ class ProfileStatistics
     {
         $walletIDs = array_map(function (Wallet $wallet) {
             return (int) $wallet->id;
-        }, $this->walletRepository->findAllByUserPKByCurrencyCode($user->id, $currency->code));
+        }, $this->walletRepository->findAllByUserPKByCurrencyCode((int) $user->id, (string) $currency->code));
 
         $data = [
             Charge::TYPE_INCOME => [
@@ -84,10 +84,10 @@ class ProfileStatistics
     public function getCounters(User $user): array
     {
         return [
-            'wallets' => $this->walletRepository->countAllByUserPK($user->id),
-            'walletsArchived' => $this->walletRepository->countArchivedByUserPK($user->id),
-            'charges' => $this->chargeRepository->countAllByUserPKByType($user->id),
-            'chargesIncome' => $this->chargeRepository->countAllByUserPKByType($user->id, Charge::TYPE_INCOME),
+            'wallets' => $this->walletRepository->countAllByUserPK((int) $user->id),
+            'walletsArchived' => $this->walletRepository->countArchivedByUserPK((int) $user->id),
+            'charges' => $this->chargeRepository->countAllByUserPKByType((int) $user->id),
+            'chargesIncome' => $this->chargeRepository->countAllByUserPKByType((int) $user->id, Charge::TYPE_INCOME),
         ];
     }
 }

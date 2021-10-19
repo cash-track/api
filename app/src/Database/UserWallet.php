@@ -13,7 +13,7 @@ class UserWallet
 {
     /**
      * @Cycle\Column(type = "primary")
-     * @var int
+     * @var int|null
      */
-    public $id = 0;
+    public $id;
 }

@@ -21,7 +21,7 @@ final class ActiveController extends Controller
      */
     public function activate(int $id): ResponseInterface
     {
-        $wallet = $this->wallets->findByPKByUserPK($id, $this->user->id);
+        $wallet = $this->wallets->findByPKByUserPK($id, (int) $this->user->id);
 
         if (! $wallet instanceof Wallet) {
             return $this->response->create(404);
@@ -53,7 +53,7 @@ final class ActiveController extends Controller
      */
     public function disable(int $id): ResponseInterface
     {
-        $wallet = $this->wallets->findByPKByUserPK($id, $this->user->id);
+        $wallet = $this->wallets->findByPKByUserPK($id, (int) $this->user->id);
 
         if (! $wallet instanceof Wallet) {
             return $this->response->create(404);

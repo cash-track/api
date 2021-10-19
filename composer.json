@@ -59,7 +59,7 @@
     "checks": [
       "./vendor/bin/phpunit",
       "./vendor/bin/phpcs -p -n --standard=PSR12 --colors --report=code ./app/src",
-      "./vendor/bin/psalm --php-version=8.0 --show-info=true"
+      "./vendor/bin/psalm --php-version=8.0 --show-info=true --no-cache"
     ],
     "phpunit": [
       "./vendor/bin/phpunit"
