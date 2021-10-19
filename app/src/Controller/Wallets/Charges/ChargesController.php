@@ -24,7 +24,7 @@ class ChargesController extends Controller
      */
     public function list(int $walletId): ResponseInterface
     {
-        $wallet = $this->wallets->findByPKByUserPK($walletId, $this->user->id);
+        $wallet = $this->wallets->findByPKByUserPK($walletId, (int) $this->user->id);
 
         if (! $wallet instanceof Wallet) {
             return $this->response->create(404);
@@ -50,7 +50,7 @@ class ChargesController extends Controller
      */
     public function create(int $walletId, CreateRequest $request): ResponseInterface
     {
-        $wallet = $this->wallets->findByPKByUserPK($walletId, $this->user->id);
+        $wallet = $this->wallets->findByPKByUserPK($walletId, (int) $this->user->id);
 
         if (! $wallet instanceof Wallet) {
             return $this->response->create(404);
@@ -70,7 +70,7 @@ class ChargesController extends Controller
         $charge->wallet = $wallet;
         $charge->walletId = (int) $wallet->id;
         $charge->user = $this->user;
-        $charge->userId = $this->user->id;
+        $charge->userId = (int) $this->user->id;
 
         // TODO. Implement currency conversion when charge currency is different that wallet.
 
@@ -103,7 +103,7 @@ class ChargesController extends Controller
      */
     public function update(int $walletId, string $chargeId, CreateRequest $request): ResponseInterface
     {
-        $wallet = $this->wallets->findByPKByUserPK($walletId, $this->user->id);
+        $wallet = $this->wallets->findByPKByUserPK($walletId, (int) $this->user->id);
 
         if (! $wallet instanceof Wallet) {
             return $this->response->create(404);
@@ -158,7 +158,7 @@ class ChargesController extends Controller
      */
     public function delete(int $walletId, string $chargeId): ResponseInterface
     {
-        $wallet = $this->wallets->findByPKByUserPK($walletId, $this->user->id);
+        $wallet = $this->wallets->findByPKByUserPK($walletId, (int) $this->user->id);
 
         if (! $wallet instanceof Wallet) {
             return $this->response->create(404);

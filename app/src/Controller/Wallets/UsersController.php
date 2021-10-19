@@ -22,7 +22,7 @@ final class UsersController extends Controller
      */
     public function users(int $id): ResponseInterface
     {
-        $wallet = $this->wallets->findByPKByUserPKWithUsers($id, $this->user->id);
+        $wallet = $this->wallets->findByPKByUserPKWithUsers($id, (int) $this->user->id);
 
         if (! $wallet instanceof Wallet) {
             return $this->response->create(404);
@@ -40,7 +40,7 @@ final class UsersController extends Controller
      */
     public function patch(int $id, int $userId): ResponseInterface
     {
-        $wallet = $this->wallets->findByPKByUserPKWithUsers($id, $this->user->id);
+        $wallet = $this->wallets->findByPKByUserPKWithUsers($id, (int) $this->user->id);
 
         if (! $wallet instanceof Wallet) {
             return $this->response->create(404);
@@ -81,7 +81,7 @@ final class UsersController extends Controller
      */
     public function delete(int $id, int $userId): ResponseInterface
     {
-        $wallet = $this->wallets->findByPKByUserPKWithUsers($id, $this->user->id);
+        $wallet = $this->wallets->findByPKByUserPKWithUsers($id, (int) $this->user->id);
 
         if (! $wallet instanceof Wallet) {
             return $this->response->create(404);

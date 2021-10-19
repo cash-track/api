@@ -75,4 +75,4 @@ jobs:
         run: ./vendor/bin/phpcs -p -n --standard=PSR12 --colors --report=code ./app/src
 
       - name: Run Psalm
-        run: ./vendor/bin/psalm --php-version=8.0 --show-info=true
+        run: ./vendor/bin/psalm --php-version=8.0 --show-info=true --no-cache

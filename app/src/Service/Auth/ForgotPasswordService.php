@@ -105,7 +105,7 @@ class ForgotPasswordService extends HelperService
             throw new \RuntimeException('Password reset link are expired');
         }
 
-        $user = $this->userRepository->findByEmail($request->email);
+        $user = $this->userRepository->findByEmail((string) $request->email);
 
         if (! $user instanceof User) {
             throw new \RuntimeException('Unable to find user linked to password reset link');

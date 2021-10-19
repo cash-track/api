@@ -77,7 +77,7 @@ class ProfileStatisticsController extends AuthAwareController
         ChargeRepository $chargeRepository,
         WalletsView $view
     ): ResponseInterface {
-        $wallets = $walletRepository->findByUserPKLatestWithLimit($this->user->id);
+        $wallets = $walletRepository->findByUserPKLatestWithLimit((int) $this->user->id);
 
         foreach ($wallets as $wallet) {
             $wallet->latestCharges = new ArrayCollection($chargeRepository->findByWalletIDLatest((int) $wallet->id));
