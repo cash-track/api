@@ -32,7 +32,7 @@ class ChargesController extends Controller
 
         $charges = $this->charges
             ->paginate($this->paginators->createPaginator())
-            ->findByWalletId($wallet->id);
+            ->findByWalletId((int) $wallet->id);
 
         if (count($charges) === 0) {
             return $this->response->json(['data' => []]);
@@ -68,7 +68,7 @@ class ChargesController extends Controller
         $charge->title = $request->getTitle();
         $charge->description = $request->getDescription();
         $charge->wallet = $wallet;
-        $charge->walletId = $wallet->id;
+        $charge->walletId = (int) $wallet->id;
         $charge->user = $this->user;
         $charge->userId = $this->user->id;
 

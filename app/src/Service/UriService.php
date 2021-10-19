@@ -37,7 +37,7 @@ class UriService
      */
     public function wallet(Wallet $wallet): string
     {
-        return $this->config->getWebAppUrl() . $this->config->getWalletLink($wallet->id);
+        return $this->config->getWebAppUrl() . $this->config->getWalletLink((int) $wallet->id);
     }
 
     /**

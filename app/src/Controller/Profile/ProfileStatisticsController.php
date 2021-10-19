@@ -80,7 +80,7 @@ class ProfileStatisticsController extends AuthAwareController
         $wallets = $walletRepository->findByUserPKLatestWithLimit($this->user->id);
 
         foreach ($wallets as $wallet) {
-            $wallet->latestCharges = new ArrayCollection($chargeRepository->findByWalletIDLatest($wallet->id));
+            $wallet->latestCharges = new ArrayCollection($chargeRepository->findByWalletIDLatest((int) $wallet->id));
         }
 
         return $view->json($wallets);

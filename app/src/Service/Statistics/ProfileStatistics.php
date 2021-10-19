@@ -49,7 +49,7 @@ class ProfileStatistics
     public function getChargeFlow(User $user, Currency $currency): array
     {
         $walletIDs = array_map(function (Wallet $wallet) {
-            return $wallet->id;
+            return (int) $wallet->id;
         }, $this->walletRepository->findAllByUserPKByCurrencyCode($user->id, $currency->code));
 
         $data = [
