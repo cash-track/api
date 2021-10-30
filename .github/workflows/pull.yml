@@ -32,6 +32,7 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.0'
+          coverage: pcov
           extensions: zip, mbstring, pdo_mysql, mysqli
           tools: composer, phpunit
 
@@ -61,18 +62,25 @@ jobs:
       - name: Setup application
         run: |
           cp .env.actions .env
-          composer install --no-progress --prefer-dist --optimize-autoloader
+          composer install --no-progress --no-interaction --prefer-dist --optimize-autoloader
           php app.php encrypt:key -m .env
           php app.php configure -vv
           vendor/bin/spiral get-binary
           php app.php migrate:init
           php app.php migrate
 
-      - name: Run PHPUnit
-        run: ./vendor/bin/phpunit
-
       - name: Run Code Sniffer
         run: ./vendor/bin/phpcs -p -n --standard=PSR12 --colors --report=code ./app/src
 
       - name: Run Psalm
         run: ./vendor/bin/psalm --php-version=8.0 --show-info=true --no-cache
+
+      - name: Run PHPUnit
+        run: ./vendor/bin/phpunit --coverage-clover=coverage.xml
+
+      - name: Upload coverage to Codecov
+        continue-on-error: true
+        uses: codecov/codecov-action@v2
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage.xml
