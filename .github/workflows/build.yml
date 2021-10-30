@@ -25,7 +25,7 @@ jobs:
         uses: symfonycorp/security-checker-action@v2
 
   static-analysis:
-    name: Psalm
+    name: Static Analysis
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
@@ -91,6 +91,7 @@ jobs:
         run: ./vendor/bin/phpcs -p -n --standard=PSR12 --colors --report=code ./app/src
 
   tests:
+    name: Tests
     runs-on: ubuntu-latest
     permissions:
       contents: read
