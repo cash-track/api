@@ -10,6 +10,17 @@ use Laminas\Diactoros\ServerRequest;
 
 trait InteractsWithHttp
 {
+    protected $defaultHeaders = [
+        'Accept-Language' => 'en',
+        'Content-Type' => 'application/json',
+        'Accept' => 'application/json',
+    ];
+
+    protected function getHeaders(array $headers = []): array
+    {
+        return array_merge($headers, $this->defaultHeaders);
+    }
+
     public function get(
         $uri,
         array $query = [],
@@ -51,17 +62,13 @@ trait InteractsWithHttp
         array $headers = [],
         array $cookies = []
     ): ServerRequest {
-        $headers = array_merge([
-            'accept-language' => 'en'
-        ], $headers);
-
         return new ServerRequest(
             [],
             [],
             $uri,
             $method,
             'php://input',
-            $headers,
+            $this->getHeaders($headers),
             $cookies,
             $query
         );
