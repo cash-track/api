@@ -7,8 +7,8 @@ namespace Tests\Feature\Auth\RegisterController;
 use App\Service\Mailer\MailerInterface;
 use App\Service\UserService;
 use Tests\DatabaseTransaction;
-use Tests\Fixtures\Fixture;
-use Tests\Fixtures\Users;
+use Tests\Fixtures;
+use Tests\Factories\UserFactory;
 use Tests\TestCase;
 
 class RegisterTest extends TestCase implements DatabaseTransaction
@@ -34,14 +34,14 @@ class RegisterTest extends TestCase implements DatabaseTransaction
 
         $this->app->container->bind(MailerInterface::class, $mock);
 
-        $user = Users::default();
+        $user = UserFactory::make();
 
         $response = $this->post('/auth/register', [
             'name' => $user->name,
             'nickName' => $user->nickName,
             'email' => $user->email,
-            'password' => Users::DEFAULT_PASSWORD,
-            'passwordConfirmation' => Users::DEFAULT_PASSWORD,
+            'password' => UserFactory::DEFAULT_PASSWORD,
+            'passwordConfirmation' => UserFactory::DEFAULT_PASSWORD,
         ]);
 
         $body = $this->getJsonResponseBody($response);
@@ -70,14 +70,14 @@ class RegisterTest extends TestCase implements DatabaseTransaction
 
         $this->app->container->bind(UserService::class, $mock);
 
-        $user = Users::default();
+        $user = UserFactory::make();
 
         $response = $this->post('/auth/register', [
             'name' => $user->name,
             'nickName' => $user->nickName,
             'email' => $user->email,
-            'password' => Users::DEFAULT_PASSWORD,
-            'passwordConfirmation' => Users::DEFAULT_PASSWORD,
+            'password' => UserFactory::DEFAULT_PASSWORD,
+            'passwordConfirmation' => UserFactory::DEFAULT_PASSWORD,
         ]);
 
         $this->assertEquals(500, $response->getStatusCode(), $this->getResponseBody($response));
@@ -106,14 +106,14 @@ class RegisterTest extends TestCase implements DatabaseTransaction
 
         $this->app->container->bind(MailerInterface::class, $mock);
 
-        $user = Users::default();
+        $user = UserFactory::make();
 
         $response = $this->post('/auth/register', [
             'name' => $user->name,
             'nickName' => $user->nickName,
             'email' => $user->email,
-            'password' => Users::DEFAULT_PASSWORD,
-            'passwordConfirmation' => Users::DEFAULT_PASSWORD,
+            'password' => UserFactory::DEFAULT_PASSWORD,
+            'passwordConfirmation' => UserFactory::DEFAULT_PASSWORD,
         ]);
 
         $body = $this->getJsonResponseBody($response);
@@ -152,14 +152,14 @@ class RegisterTest extends TestCase implements DatabaseTransaction
 
     public function testValidationFailsByShortPassword(): void
     {
-        $user = Users::default();
+        $user = UserFactory::make();
 
         $response = $this->post('/auth/register', [
             'name' => $user->name,
             'nickName' => $user->nickName,
             'email' => $user->email,
-            'password' => Fixture::string(5),
-            'passwordConfirmation' => Fixture::string(5),
+            'password' => Fixtures::string(5),
+            'passwordConfirmation' => Fixtures::string(5),
         ]);
 
         $this->assertEquals(422, $response->getStatusCode(), $this->getResponseBody($response));
@@ -173,17 +173,17 @@ class RegisterTest extends TestCase implements DatabaseTransaction
 
     public function testValidationFailsByNickNameExists(): void
     {
-        $existingUser = Users::default();
+        $existingUser = UserFactory::make();
         $this->app->get(UserService::class)->store($existingUser);
 
-        $newUser = Users::default();
+        $newUser = UserFactory::make();
 
         $response = $this->post('/auth/register', [
             'name' => $newUser->name,
             'nickName' => $existingUser->nickName,
             'email' => $newUser->email,
-            'password' => Fixture::string(),
-            'passwordConfirmation' => Fixture::string(),
+            'password' => Fixtures::string(),
+            'passwordConfirmation' => Fixtures::string(),
         ]);
 
         $this->assertEquals(422, $response->getStatusCode(), $this->getResponseBody($response));
@@ -201,11 +201,11 @@ class RegisterTest extends TestCase implements DatabaseTransaction
     public function testValidationFailsByNickNameInvalid(string $nickName): void
     {
         $response = $this->post('/auth/register', [
-            'name' => Fixture::string(),
+            'name' => Fixtures::string(),
             'nickName' => $nickName,
-            'email' => Fixture::email(),
-            'password' => Fixture::string(),
-            'passwordConfirmation' => Fixture::string(),
+            'email' => Fixtures::email(),
+            'password' => Fixtures::string(),
+            'passwordConfirmation' => Fixtures::string(),
         ]);
 
         $this->assertEquals(422, $response->getStatusCode(), $this->getResponseBody($response));
@@ -222,24 +222,24 @@ class RegisterTest extends TestCase implements DatabaseTransaction
             ['',],
             ['as',],
         ], array_map(
-            fn ($item) => [Fixture::string() . $item],
+            fn ($item) => [Fixtures::string() . $item],
             str_split('!@#$%^&*()-=+"\<>,.\''),
         ));
     }
 
     public function testValidationFailsByEmailExists(): void
     {
-        $existingUser = Users::default();
+        $existingUser = UserFactory::make();
         $this->app->get(UserService::class)->store($existingUser);
 
-        $newUser = Users::default();
+        $newUser = UserFactory::make();
 
         $response = $this->post('/auth/register', [
             'name' => $newUser->name,
             'nickName' => $newUser->nickName,
             'email' => $existingUser->email,
-            'password' => Fixture::string(),
-            'passwordConfirmation' => Fixture::string(),
+            'password' => Fixtures::string(),
+            'passwordConfirmation' => Fixtures::string(),
         ]);
 
         $this->assertEquals(422, $response->getStatusCode(), $this->getResponseBody($response));
@@ -256,14 +256,14 @@ class RegisterTest extends TestCase implements DatabaseTransaction
      */
     public function testValidationFailsByEmailInvalid(string $email): void
     {
-        $newUser = Users::default();
+        $newUser = UserFactory::make();
 
         $response = $this->post('/auth/register', [
             'name' => $newUser->name,
             'nickName' => $newUser->nickName,
             'email' => $email,
-            'password' => Fixture::string(),
-            'passwordConfirmation' => Fixture::string(),
+            'password' => Fixtures::string(),
+            'passwordConfirmation' => Fixtures::string(),
         ]);
 
         $this->assertEquals(422, $response->getStatusCode(), $this->getResponseBody($response));

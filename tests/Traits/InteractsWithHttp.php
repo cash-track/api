@@ -16,9 +16,11 @@ trait InteractsWithHttp
         'Accept' => 'application/json',
     ];
 
+    protected array $authHeaders = [];
+
     protected function getHeaders(array $headers = []): array
     {
-        return array_merge($headers, $this->defaultHeaders);
+        return array_merge($headers, $this->defaultHeaders, $this->authHeaders);
     }
 
     public function get(
@@ -62,6 +64,10 @@ trait InteractsWithHttp
         array $headers = [],
         array $cookies = []
     ): ServerRequest {
+        $headers = $this->getHeaders($headers);
+
+        $this->resetAuth();
+
         return new ServerRequest(
             [],
             [],
@@ -93,19 +99,42 @@ trait InteractsWithHttp
         return $body->getContents();
     }
 
-    public function getJsonResponseBody(ResponseInterface $response):? array
+    public function getJsonResponseBody(ResponseInterface $response): array
     {
         try {
             $data = json_decode($this->getResponseBody($response), true, 512, JSON_THROW_ON_ERROR);
         } catch (JsonException $exception) {
             $this->assertNotEmpty($exception->getMessage(), "Body:\n{$this->getResponseBody($response)}");
-            return null;
+            return [];
         }
 
         if (is_array($data)) {
             return $data;
         }
 
-        return null;
+        return [];
+    }
+
+    public function makeAuthHeadersByResponse(array $tokens = []): array
+    {
+        if (($tokens['accessToken'] ?? null) === null) {
+            return [];
+        }
+
+        return [
+            'Authorization' => "Bearer {$tokens['accessToken']}",
+        ];
+    }
+
+    public function withAuth(array $body): self
+    {
+        $this->authHeaders = $this->makeAuthHeadersByResponse($body);
+
+        return $this;
+    }
+
+    public function resetAuth(): void
+    {
+        $this->authHeaders = [];
     }
 }

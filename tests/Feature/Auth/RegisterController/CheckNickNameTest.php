@@ -6,8 +6,8 @@ namespace Tests\Feature\Auth\RegisterController;
 
 use App\Service\UserService;
 use Tests\DatabaseTransaction;
-use Tests\Fixtures\Fixture;
-use Tests\Fixtures\Users;
+use Tests\Fixtures;
+use Tests\Factories\UserFactory;
 use Tests\TestCase;
 
 class CheckNickNameTest extends TestCase implements DatabaseTransaction
@@ -15,7 +15,7 @@ class CheckNickNameTest extends TestCase implements DatabaseTransaction
     public function testNickNameFree(): void
     {
         $response = $this->post('/auth/register/check/nick-name', [
-            'nickName' => Fixture::string(),
+            'nickName' => Fixtures::string(),
         ]);
 
         $this->assertEquals(200, $response->getStatusCode());
@@ -23,7 +23,7 @@ class CheckNickNameTest extends TestCase implements DatabaseTransaction
 
     public function testClaimed(): void
     {
-        $user = Users::default();
+        $user = UserFactory::make();
         $this->app->get(UserService::class)->store($user);
 
         $response = $this->post('/auth/register/check/nick-name', [
@@ -53,7 +53,7 @@ class CheckNickNameTest extends TestCase implements DatabaseTransaction
             ['',],
             ['as',],
         ], array_map(
-            fn ($item) => [Fixture::string() . $item],
+            fn ($item) => [Fixtures::string() . $item],
             str_split('!@#$%^&*()-=+"\<>,.\''),
         ));
     }
