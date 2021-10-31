@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Traits;
 
+use JsonException;
 use Psr\Http\Message\ResponseInterface;
 use Laminas\Diactoros\ServerRequest;
 
@@ -87,7 +88,12 @@ trait InteractsWithHttp
 
     public function getJsonResponseBody(ResponseInterface $response):? array
     {
-        $data = json_decode($this->getResponseBody($response), true, 512, JSON_THROW_ON_ERROR);
+        try {
+            $data = json_decode($this->getResponseBody($response), true, 512, JSON_THROW_ON_ERROR);
+        } catch (JsonException $exception) {
+            $this->assertNotEmpty($exception->getMessage(), "Body:\n{$this->getResponseBody($response)}");
+            return null;
+        }
 
         if (is_array($data)) {
             return $data;
