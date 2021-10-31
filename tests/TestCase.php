@@ -13,15 +13,17 @@ use Spiral\Http\Http;
 use Spiral\Translator\TranslatorInterface;
 use Spiral\Views\ViewsInterface;
 use Tests\Traits\InteractsWithConsole;
+use Tests\Traits\InteractsWithDatabase;
 use Tests\Traits\InteractsWithHttp;
 
 abstract class TestCase extends BaseTestCase
 {
     use InteractsWithConsole;
     use InteractsWithHttp;
+    use InteractsWithDatabase;
 
     /**
-     * @var \Spiral\Boot\AbstractKernel
+     * @var \Tests\TestApp
      */
     protected $app;
 

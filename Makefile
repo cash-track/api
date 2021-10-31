@@ -12,7 +12,7 @@ IMAGE_DEV=$(REPO):dev
 IMAGE_LATEST=$(REPO):latest
 WORKDIR=$(shell pwd)
 
-.PHONY: build tag push start stop network phpcs psalm
+.PHONY: build tag push start stop network phpcs psalm test-env-start test-env-stop
 
 build:
 	docker build . -t $(IMAGE_DEV)
@@ -55,3 +55,9 @@ phpcs:
 
 psalm:
 	./vendor/bin/psalm --php-version=8.0 --show-info=true
+
+test-env-start:
+	cd ./tests && docker-compose up -d
+
+test-env-stop:
+	cd ./tests && docker-compose down

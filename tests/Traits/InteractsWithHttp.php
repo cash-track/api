@@ -76,4 +76,19 @@ trait InteractsWithHttp
 
         return $result;
     }
+
+    public function getResponseBody(ResponseInterface $response):? array
+    {
+        $body = $response->getBody();
+
+        $body->rewind();
+
+        $data = json_decode($body->getContents(), true, 512, JSON_THROW_ON_ERROR);
+
+        if (is_array($data)) {
+            return $data;
+        }
+
+        return null;
+    }
 }

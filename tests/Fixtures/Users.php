@@ -14,8 +14,8 @@ class Users extends Fixture
     {
         $user = new User;
 
-        $user->name = ucfirst(self::string());
-        $user->lastName = ucfirst(self::string());;
+        $user->name = ucfirst(strtolower(self::string()));
+        $user->lastName = ucfirst(strtolower(self::string()));
         $user->nickName = self::string();
         $user->email = self::email();
         $user->defaultCurrencyCode = Currencies::code();

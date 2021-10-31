@@ -9,6 +9,11 @@ use App\App;
 class TestApp extends App
 {
     /**
+     * @var \Spiral\Core\Container
+     */
+    public $container;
+
+    /**
      * Get object from the container.
      *
      * @param string      $alias

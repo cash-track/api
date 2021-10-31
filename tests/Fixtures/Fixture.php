@@ -11,7 +11,17 @@ class Fixture
 {
     public static function string(int $length = 6): string
     {
-        return bin2hex(random_bytes($length));
+        $keyspace = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+
+        $pieces = [];
+
+        $max = mb_strlen($keyspace, '8bit') - 1;
+
+        for ($i = 0; $i < $length; ++$i) {
+            $pieces[] = $keyspace[rand(0, $max)];
+        }
+
+        return implode('', $pieces);
     }
 
     public static function arrayElement(array $arr): mixed

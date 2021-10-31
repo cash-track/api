@@ -12,7 +12,7 @@ use Tests\TestCase;
 
 class CheckNickNameTest extends TestCase implements DatabaseTransaction
 {
-    public function testCheckNickNameFree(): void
+    public function testNickNameFree(): void
     {
         $response = $this->post('/auth/register/check/nick-name', [
             'nickName' => Fixture::string(),
@@ -21,30 +21,7 @@ class CheckNickNameTest extends TestCase implements DatabaseTransaction
         $this->assertEquals(200, $response->getStatusCode());
     }
 
-    public function provideInvalidNickNames(): array
-    {
-        return [
-            ['',],
-            ['as',],
-            ['nick-name',]
-        ];
-    }
-
-    /**
-     * @dataProvider provideInvalidNickNames
-     * @param string $nickName
-     * @return void
-     */
-    public function testCheckNickNameValidation(string $nickName): void
-    {
-        $response = $this->post('/auth/register/check/nick-name', [
-            'nickName' => $nickName,
-        ]);
-
-        $this->assertEquals(422, $response->getStatusCode());
-    }
-
-    public function testCheckNickNameClaimed(): void
+    public function testClaimed(): void
     {
         $user = Users::default();
         $this->app->get(UserService::class)->store($user);
@@ -54,5 +31,30 @@ class CheckNickNameTest extends TestCase implements DatabaseTransaction
         ]);
 
         $this->assertEquals(422, $response->getStatusCode());
+    }
+
+    /**
+     * @dataProvider provideInvalidNickNames
+     * @param string $nickName
+     * @return void
+     */
+    public function testValidation(string $nickName): void
+    {
+        $response = $this->post('/auth/register/check/nick-name', [
+            'nickName' => $nickName,
+        ]);
+
+        $this->assertEquals(422, $response->getStatusCode());
+    }
+
+    public function provideInvalidNickNames(): array
+    {
+        return array_merge([
+            ['',],
+            ['as',],
+        ], array_map(
+            fn ($item) => [Fixture::string() . $item],
+            str_split('!@#$%^&*()-=+"\<>,.\''),
+        ));
     }
 }
