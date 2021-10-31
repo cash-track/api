@@ -80,7 +80,7 @@ class RegisterTest extends TestCase implements DatabaseTransaction
             'passwordConfirmation' => Users::DEFAULT_PASSWORD,
         ]);
 
-        $this->assertEquals(500, $response->getStatusCode());
+        $this->assertEquals(500, $response->getStatusCode(), $this->getResponseBody($response));
 
         $body = $this->getJsonResponseBody($response);
 
@@ -101,7 +101,7 @@ class RegisterTest extends TestCase implements DatabaseTransaction
             'passwordConfirmation' => ''
         ]);
 
-        $this->assertEquals(422, $response->getStatusCode());
+        $this->assertEquals(422, $response->getStatusCode(), $this->getResponseBody($response));
 
         $body = $this->getJsonResponseBody($response);
 
@@ -124,7 +124,7 @@ class RegisterTest extends TestCase implements DatabaseTransaction
             'passwordConfirmation' => Fixture::string(5),
         ]);
 
-        $this->assertEquals(422, $response->getStatusCode());
+        $this->assertEquals(422, $response->getStatusCode(), $this->getResponseBody($response));
 
         $body = $this->getJsonResponseBody($response);
 
@@ -148,7 +148,7 @@ class RegisterTest extends TestCase implements DatabaseTransaction
             'passwordConfirmation' => Fixture::string(),
         ]);
 
-        $this->assertEquals(422, $response->getStatusCode());
+        $this->assertEquals(422, $response->getStatusCode(), $this->getResponseBody($response));
 
         $body = $this->getJsonResponseBody($response);
 
@@ -170,7 +170,7 @@ class RegisterTest extends TestCase implements DatabaseTransaction
             'passwordConfirmation' => Fixture::string(),
         ]);
 
-        $this->assertEquals(422, $response->getStatusCode());
+        $this->assertEquals(422, $response->getStatusCode(), $this->getResponseBody($response));
 
         $body = $this->getJsonResponseBody($response);
 
@@ -204,7 +204,7 @@ class RegisterTest extends TestCase implements DatabaseTransaction
             'passwordConfirmation' => Fixture::string(),
         ]);
 
-        $this->assertEquals(422, $response->getStatusCode());
+        $this->assertEquals(422, $response->getStatusCode(), $this->getResponseBody($response));
 
         $body = $this->getJsonResponseBody($response);
 
@@ -228,7 +228,7 @@ class RegisterTest extends TestCase implements DatabaseTransaction
             'passwordConfirmation' => Fixture::string(),
         ]);
 
-        $this->assertEquals(422, $response->getStatusCode());
+        $this->assertEquals(422, $response->getStatusCode(), $this->getResponseBody($response));
 
         $body = $this->getJsonResponseBody($response);
 

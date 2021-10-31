@@ -14,6 +14,9 @@ use Symfony\Component\Console\Input\InputOption;
  */
 class RsaGenerateCommand extends Command
 {
+    const PUBLIC_KEY_PLACEHOLDER = '{rsa-public-key}';
+    const PRIVATE_KEY_PLACEHOLDER = '{rsa-private-key}';
+
     protected const NAME = 'rsa:gen';
 
     protected const DESCRIPTION = 'Generate public and private keys helper';
@@ -23,6 +26,7 @@ class RsaGenerateCommand extends Command
     protected const OPTIONS = [
         ['out-dir', 'd', InputOption::VALUE_OPTIONAL, 'Output directory for key files [example: app/config/]'],
         ['out-prefix', 'p', InputOption::VALUE_OPTIONAL, 'Output file name pattern for key files [example: app => app-public.key]'],
+        ['mount', 'm', InputOption::VALUE_OPTIONAL, 'Mount RSA keys into given file'],
     ];
 
     /**
@@ -75,6 +79,15 @@ class RsaGenerateCommand extends Command
 
         $publicKey = $publicKey["key"];
 
+        $file = $this->option('mount');
+        if ($file !== null && is_string($file)) {
+            $this->mount($file, self::PUBLIC_KEY_PLACEHOLDER, $publicKey);
+            $this->mount($file, self::PRIVATE_KEY_PLACEHOLDER, $privateKey);
+
+            $this->writeln("Generated keys has been saved in {$file}");
+            return;
+        }
+
         $publicKeyPath = $this->writeFile('public', $publicKey);
 
         $this->writeln("Public key file located at {$publicKeyPath}");
@@ -82,6 +95,35 @@ class RsaGenerateCommand extends Command
         $privateKeyPath = $this->writeFile('private', $privateKey);
 
         $this->writeln("Private key file located at {$privateKeyPath}");
+    }
+
+    /**
+     * @param string $file
+     * @param string $placeholder
+     * @param string $key
+     * @return void
+     */
+    protected function mount(string $file, string $placeholder, string $key): void
+    {
+        if (!$this->files->exists($file)) {
+            $this->writeln("Unable to locate mount file {$file}");
+            return;
+        }
+
+        $content = $this->files->read($file);
+
+        $content = str_replace($placeholder, $this->convertRSAKeyToSingleLine($key), $content);
+
+        $this->files->write($file, $content);
+    }
+
+    /**
+     * @param string $key
+     * @return string
+     */
+    protected function convertRSAKeyToSingleLine(string $key): string
+    {
+        return base64_encode($key);
     }
 
     /**
