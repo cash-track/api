@@ -44,9 +44,9 @@ class RegisterTest extends TestCase implements DatabaseTransaction
             'passwordConfirmation' => Users::DEFAULT_PASSWORD,
         ]);
 
-        $body = $this->getResponseBody($response);
+        $body = $this->getJsonResponseBody($response);
 
-        $this->assertEquals(200, $response->getStatusCode(), json_encode($body));
+        $this->assertEquals(200, $response->getStatusCode(), $this->getResponseBody($response));
 
         $this->assertArrayHasKey('data', $body);
         $this->assertArrayHasKey('id', $body['data']);
@@ -82,7 +82,7 @@ class RegisterTest extends TestCase implements DatabaseTransaction
 
         $this->assertEquals(500, $response->getStatusCode());
 
-        $body = $this->getResponseBody($response);
+        $body = $this->getJsonResponseBody($response);
 
         $this->assertArrayHasKey('message', $body);
         $this->assertArrayHasKey('error', $body);
@@ -103,7 +103,7 @@ class RegisterTest extends TestCase implements DatabaseTransaction
 
         $this->assertEquals(422, $response->getStatusCode());
 
-        $body = $this->getResponseBody($response);
+        $body = $this->getJsonResponseBody($response);
 
         $this->assertArrayHasKey('errors', $body);
         $this->assertArrayHasKey('name', $body['errors']);
@@ -126,7 +126,7 @@ class RegisterTest extends TestCase implements DatabaseTransaction
 
         $this->assertEquals(422, $response->getStatusCode());
 
-        $body = $this->getResponseBody($response);
+        $body = $this->getJsonResponseBody($response);
 
         $this->assertArrayHasKey('errors', $body);
         $this->assertArrayHasKey('password', $body['errors']);
@@ -150,7 +150,7 @@ class RegisterTest extends TestCase implements DatabaseTransaction
 
         $this->assertEquals(422, $response->getStatusCode());
 
-        $body = $this->getResponseBody($response);
+        $body = $this->getJsonResponseBody($response);
 
         $this->assertArrayHasKey('errors', $body);
         $this->assertArrayHasKey('nickName', $body['errors']);
@@ -172,7 +172,7 @@ class RegisterTest extends TestCase implements DatabaseTransaction
 
         $this->assertEquals(422, $response->getStatusCode());
 
-        $body = $this->getResponseBody($response);
+        $body = $this->getJsonResponseBody($response);
 
         $this->assertArrayHasKey('errors', $body);
         $this->assertArrayHasKey('nickName', $body['errors']);
@@ -206,7 +206,7 @@ class RegisterTest extends TestCase implements DatabaseTransaction
 
         $this->assertEquals(422, $response->getStatusCode());
 
-        $body = $this->getResponseBody($response);
+        $body = $this->getJsonResponseBody($response);
 
         $this->assertArrayHasKey('errors', $body);
         $this->assertArrayHasKey('email', $body['errors']);
@@ -230,7 +230,7 @@ class RegisterTest extends TestCase implements DatabaseTransaction
 
         $this->assertEquals(422, $response->getStatusCode());
 
-        $body = $this->getResponseBody($response);
+        $body = $this->getJsonResponseBody($response);
 
         $this->assertArrayHasKey('errors', $body);
         $this->assertArrayHasKey('email', $body['errors']);
