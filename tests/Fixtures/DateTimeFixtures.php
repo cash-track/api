@@ -7,41 +7,8 @@ namespace Tests\Fixtures;
 use DateInterval;
 use DateTimeImmutable;
 
-class Fixture
+trait DateTimeFixtures
 {
-    public static function string(int $length = 6): string
-    {
-        return bin2hex(random_bytes($length));
-    }
-
-    public static function arrayElement(array $arr): mixed
-    {
-        $keys = array_keys($arr);
-
-        if (count($keys) === 0) {
-            return null;
-        }
-
-        $keyIndex = rand(0, count($keys) - 1);
-
-        return $arr[$keys[$keyIndex]] ?? null;
-    }
-
-    public static function email(): string
-    {
-        return self::string() . '@' . self::string() . '.com';
-    }
-
-    public static function fileName(string $extension = 'png'): string
-    {
-        return self::string(16) . '.' . $extension;
-    }
-
-    public static function boolean(): bool
-    {
-        return (bool) rand(0, 1);
-    }
-
     public static function dateTime(): DateTimeImmutable
     {
         return self::dateTimeWithin(

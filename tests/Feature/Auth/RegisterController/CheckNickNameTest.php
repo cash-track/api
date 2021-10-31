@@ -6,28 +6,31 @@ namespace Tests\Feature\Auth\RegisterController;
 
 use App\Service\UserService;
 use Tests\DatabaseTransaction;
-use Tests\Fixtures\Fixture;
-use Tests\Fixtures\Users;
+use Tests\Fixtures;
+use Tests\Factories\UserFactory;
 use Tests\TestCase;
 
 class CheckNickNameTest extends TestCase implements DatabaseTransaction
 {
-    public function testCheckNickNameFree(): void
+    public function testNickNameFree(): void
     {
         $response = $this->post('/auth/register/check/nick-name', [
-            'nickName' => Fixture::string(),
+            'nickName' => Fixtures::string(),
         ]);
 
         $this->assertEquals(200, $response->getStatusCode());
     }
 
-    public function provideInvalidNickNames(): array
+    public function testClaimed(): void
     {
-        return [
-            ['',],
-            ['as',],
-            ['nick-name',]
-        ];
+        $user = UserFactory::make();
+        $this->app->get(UserService::class)->store($user);
+
+        $response = $this->post('/auth/register/check/nick-name', [
+            'nickName' => $user->nickName
+        ]);
+
+        $this->assertEquals(422, $response->getStatusCode());
     }
 
     /**
@@ -35,7 +38,7 @@ class CheckNickNameTest extends TestCase implements DatabaseTransaction
      * @param string $nickName
      * @return void
      */
-    public function testCheckNickNameValidation(string $nickName): void
+    public function testValidation(string $nickName): void
     {
         $response = $this->post('/auth/register/check/nick-name', [
             'nickName' => $nickName,
@@ -44,15 +47,14 @@ class CheckNickNameTest extends TestCase implements DatabaseTransaction
         $this->assertEquals(422, $response->getStatusCode());
     }
 
-    public function testCheckNickNameClaimed(): void
+    public function provideInvalidNickNames(): array
     {
-        $user = Users::default();
-        $this->app->get(UserService::class)->store($user);
-
-        $response = $this->post('/auth/register/check/nick-name', [
-            'nickName' => $user->nickName
-        ]);
-
-        $this->assertEquals(422, $response->getStatusCode());
+        return array_merge([
+            ['',],
+            ['as',],
+        ], array_map(
+            fn ($item) => [Fixtures::string() . $item],
+            str_split('!@#$%^&*()-=+"\<>,.\''),
+        ));
     }
 }

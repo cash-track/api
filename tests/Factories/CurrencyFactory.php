@@ -2,9 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Tests\Fixtures;
+namespace Tests\Factories;
 
-class Currencies extends Fixture
+use Tests\Fixtures;
+
+class CurrencyFactory extends AbstractFactory
 {
     public static function supportedCodes(): array
     {
@@ -17,6 +19,6 @@ class Currencies extends Fixture
 
     public static function code(): string
     {
-        return self::arrayElement(self::supportedCodes());
+        return Fixtures::arrayElement(self::supportedCodes());
     }
 }

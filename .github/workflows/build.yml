@@ -138,6 +138,7 @@ jobs:
           cp .env.actions .env
           composer install --no-progress --no-interaction --prefer-dist --optimize-autoloader
           php app.php encrypt:key -m .env
+          php app.php rsa:gen -m .env
           php app.php configure -vv
           vendor/bin/spiral get-binary
           php app.php migrate:init

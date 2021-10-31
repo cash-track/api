@@ -4,11 +4,25 @@ declare(strict_types=1);
 
 namespace Tests\Traits;
 
+use JsonException;
 use Psr\Http\Message\ResponseInterface;
 use Laminas\Diactoros\ServerRequest;
 
 trait InteractsWithHttp
 {
+    protected $defaultHeaders = [
+        'Accept-Language' => 'en',
+        'Content-Type' => 'application/json',
+        'Accept' => 'application/json',
+    ];
+
+    protected array $authHeaders = [];
+
+    protected function getHeaders(array $headers = []): array
+    {
+        return array_merge($headers, $this->defaultHeaders, $this->authHeaders);
+    }
+
     public function get(
         $uri,
         array $query = [],
@@ -50,9 +64,9 @@ trait InteractsWithHttp
         array $headers = [],
         array $cookies = []
     ): ServerRequest {
-        $headers = array_merge([
-            'accept-language' => 'en'
-        ], $headers);
+        $headers = $this->getHeaders($headers);
+
+        $this->resetAuth();
 
         return new ServerRequest(
             [],
@@ -60,7 +74,7 @@ trait InteractsWithHttp
             $uri,
             $method,
             'php://input',
-            $headers,
+            $this->getHeaders($headers),
             $cookies,
             $query
         );
@@ -75,5 +89,52 @@ trait InteractsWithHttp
         }
 
         return $result;
+    }
+
+    public function getResponseBody(ResponseInterface $response): string {
+        $body = $response->getBody();
+
+        $body->rewind();
+
+        return $body->getContents();
+    }
+
+    public function getJsonResponseBody(ResponseInterface $response): array
+    {
+        try {
+            $data = json_decode($this->getResponseBody($response), true, 512, JSON_THROW_ON_ERROR);
+        } catch (JsonException $exception) {
+            $this->assertNotEmpty($exception->getMessage(), "Body:\n{$this->getResponseBody($response)}");
+            return [];
+        }
+
+        if (is_array($data)) {
+            return $data;
+        }
+
+        return [];
+    }
+
+    public function makeAuthHeadersByResponse(array $tokens = []): array
+    {
+        if (($tokens['accessToken'] ?? null) === null) {
+            return [];
+        }
+
+        return [
+            'Authorization' => "Bearer {$tokens['accessToken']}",
+        ];
+    }
+
+    public function withAuth(array $body): self
+    {
+        $this->authHeaders = $this->makeAuthHeadersByResponse($body);
+
+        return $this;
+    }
+
+    public function resetAuth(): void
+    {
+        $this->authHeaders = [];
     }
 }
