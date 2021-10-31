@@ -44,9 +44,9 @@ class RegisterTest extends TestCase implements DatabaseTransaction
             'passwordConfirmation' => Users::DEFAULT_PASSWORD,
         ]);
 
-        $this->assertEquals(200, $response->getStatusCode());
-
         $body = $this->getResponseBody($response);
+
+        $this->assertEquals(200, $response->getStatusCode(), json_encode($body));
 
         $this->assertArrayHasKey('data', $body);
         $this->assertArrayHasKey('id', $body['data']);
