@@ -91,6 +91,44 @@ class RegisterTest extends TestCase implements DatabaseTransaction
         $this->assertDatabaseMissing('email_confirmations', ['email' => $user->email]);
     }
 
+    public function testSendConfirmationMailFailed(): void
+    {
+        $mock = $this->getMockBuilder(MailerInterface::class)
+                     ->disableOriginalConstructor()
+                     ->onlyMethods(['send', 'render'])
+                     ->getMock();
+
+        $mock->expects($this->once())->method('send');
+
+        $mock->expects($this->once())
+             ->method('send')
+             ->willThrowException(new \RuntimeException('Transport exception'));
+
+        $this->app->container->bind(MailerInterface::class, $mock);
+
+        $user = Users::default();
+
+        $response = $this->post('/auth/register', [
+            'name' => $user->name,
+            'nickName' => $user->nickName,
+            'email' => $user->email,
+            'password' => Users::DEFAULT_PASSWORD,
+            'passwordConfirmation' => Users::DEFAULT_PASSWORD,
+        ]);
+
+        $body = $this->getJsonResponseBody($response);
+
+        $this->assertEquals(200, $response->getStatusCode(), $this->getResponseBody($response));
+
+        $this->assertArrayHasKey('data', $body);
+        $this->assertArrayHasKey('id', $body['data']);
+        $this->assertArrayHasKey('accessToken', $body);
+        $this->assertArrayHasKey('refreshToken', $body);
+
+        $this->assertDatabaseHas('users', ['email' => $user->email]);
+        $this->assertDatabaseHas('email_confirmations', ['email' => $user->email]);
+    }
+
     public function testValidationFailsByEmptyForm(): void
     {
         $response = $this->post('/auth/register', [
