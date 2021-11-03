@@ -13,13 +13,6 @@
       "email": "vovikems@gmail.com"
     }
   ],
-  "repositories": [
-    {
-      "type": "vcs",
-      "url": "https://github.com/vokomarov/database",
-      "no-api": true
-    }
-  ],
   "require": {
     "php": ">=8.0",
     "ext-mbstring": "*",
@@ -28,7 +21,7 @@
     "spiral/framework": "^2.8",
     "spiral/jobs": "^2.0",
     "spiral/roadrunner": "^v1.9.2",
-    "spiral/database": "dev-fix-mysqlnd-exceptions-mapping as v2.9.2",
+    "spiral/database": "v2.9.3",
     "spiral/migrations": "^2.2",
     "spiral/nyholm-bridge": "^1.1",
     "cycle/orm": "^1.0",
