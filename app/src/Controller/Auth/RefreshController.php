@@ -42,14 +42,9 @@ final class RefreshController
         $authContext = $this->refreshTokenService->getContextByRequest($request);
 
         $user = $authContext->getActor();
-
-        if (! $user instanceof User) {
-            return $this->responseUnauthenticated();
-        }
-
         $refreshToken = $authContext->getToken();
 
-        if (! $refreshToken instanceof TokenInterface) {
+        if (! $user instanceof User || ! $refreshToken instanceof TokenInterface) {
             return $this->responseUnauthenticated();
         }
 

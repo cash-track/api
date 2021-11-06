@@ -39,26 +39,8 @@ class LogoutControllerTest extends TestCase implements DatabaseTransaction
         $response = $this->withAuth($auth)->post('/auth/logout');
         $this->assertEquals(200, $response->getStatusCode(), $this->getResponseBody($response));
 
-        // TODO. Remove once token blacklist implemented
-        $this->markTestSkipped('Skipped due to tokens blacklist not implemented');
-
-        $response = $this->withAuth($auth)->get('/profile');
-        $this->assertEquals(401, $response->getStatusCode(), $this->getResponseBody($response));
+        // TODO. Add checking to access protected endpoints once token blacklist implemented
     }
 
-    public function testUnableRefresh(): void
-    {
-        // TODO. Remove once token blacklist implemented
-        $this->markTestSkipped('Skipped due to tokens blacklist not implemented');
-
-        $auth = $this->makeAuth($this->userFactory->create());
-
-        $response = $this->withAuth($auth)->post('/auth/logout');
-        $this->assertEquals(200, $response->getStatusCode(), $this->getResponseBody($response));
-
-        $response = $this->withAuthRefresh($auth)->post('/auth/refresh', [
-            'accessToken' => $auth['accessToken'],
-        ]);
-        $this->assertEquals(401, $response->getStatusCode(), $this->getResponseBody($response));
-    }
+    // TODO. Add checking to access protected endpoints once token blacklist implemented
 }
