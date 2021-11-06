@@ -18,7 +18,8 @@ class RegisterTest extends TestCase implements DatabaseTransaction
         parent::setUp();
 
         $mailer = $this->getMockBuilder(MailerInterface::class)
-                       ->onlyMethods(['send', 'render']);
+                       ->onlyMethods(['send', 'render'])
+                       ->getMock();
 
         $this->app->container->bind(MailerInterface::class, $mailer);
     }

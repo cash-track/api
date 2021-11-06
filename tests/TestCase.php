@@ -15,12 +15,14 @@ use Spiral\Views\ViewsInterface;
 use Tests\Traits\InteractsWithConsole;
 use Tests\Traits\InteractsWithDatabase;
 use Tests\Traits\InteractsWithHttp;
+use Tests\Traits\ProvideAuth;
 
 abstract class TestCase extends BaseTestCase
 {
     use InteractsWithConsole;
     use InteractsWithHttp;
     use InteractsWithDatabase;
+    use ProvideAuth;
 
     /**
      * @var \Tests\TestApp
@@ -67,6 +69,11 @@ abstract class TestCase extends BaseTestCase
         if ($fs->isDirectory($runtime)) {
             $fs->deleteDirectory($runtime);
         }
+
+        unset($this->db);
+        unset($this->http);
+        unset($this->views);
+        unset($this->app);
     }
 
     protected function makeApp(array $env = []): TestApp
@@ -79,5 +86,10 @@ abstract class TestCase extends BaseTestCase
             'runtime' => $root . '/runtime/tests',
             'cache' => $root . '/runtime/tests/cache',
         ], new Environment($env), false);
+    }
+
+    protected function printMemoryUsage(string $title = 'memory usage now'): void
+    {
+        echo $title . ' : ' . round(memory_get_usage() / 1024 / 1024) . 'MB' . PHP_EOL;
     }
 }

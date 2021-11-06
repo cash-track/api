@@ -6,14 +6,36 @@ namespace App\Controller\Auth;
 
 use App\Request\CheckNickNameRequest;
 use App\Request\RegisterRequest;
+use App\Service\Auth\AuthService;
+use App\Service\Auth\EmailConfirmationService;
+use App\Service\Auth\RefreshTokenService;
+use App\Service\UserService;
+use App\View\UserView;
 use Psr\Http\Message\ResponseInterface;
-use Spiral\Prototype\Traits\PrototypeTrait;
+use Spiral\Http\ResponseWrapper;
 use Spiral\Router\Annotation\Route;
 
 final class RegisterController
 {
-    use PrototypeTrait;
     use AuthResponses;
+
+    /**
+     * @param \App\View\UserView $userView
+     * @param \App\Service\Auth\AuthService $authService
+     * @param \App\Service\UserService $userService
+     * @param \Spiral\Http\ResponseWrapper $response
+     * @param \App\Service\Auth\EmailConfirmationService $emailConfirmationService
+     * @param \App\Service\Auth\RefreshTokenService $refreshTokenService
+     */
+    public function __construct(
+        protected UserView $userView,
+        protected AuthService $authService,
+        protected UserService $userService,
+        protected ResponseWrapper $response,
+        protected EmailConfirmationService $emailConfirmationService,
+        protected RefreshTokenService $refreshTokenService,
+    ) {
+    }
 
     /**
      * @Route(route="/auth/register", name="auth.register", methods="POST")

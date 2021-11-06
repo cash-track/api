@@ -5,13 +5,22 @@ declare(strict_types=1);
 namespace App\Controller\Auth;
 
 use App\Database\User;
+use App\View\UserView;
 use Psr\Http\Message\ResponseInterface;
 use Spiral\Auth\TokenInterface;
-use Spiral\Prototype\Traits\PrototypeTrait;
+use Spiral\Http\ResponseWrapper;
 
 trait AuthResponses
 {
-    use PrototypeTrait;
+    /**
+     * @param \Spiral\Http\ResponseWrapper $response
+     * @param \App\View\UserView $userView
+     */
+    public function __construct(
+        protected ResponseWrapper $response,
+        protected UserView $userView,
+    ) {
+    }
 
     /**
      * @param \Spiral\Auth\TokenInterface $accessToken

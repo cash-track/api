@@ -115,20 +115,27 @@ trait InteractsWithHttp
         return [];
     }
 
-    public function makeAuthHeadersByResponse(array $tokens = []): array
+    public function makeAuthHeadersByResponse(array $tokens = [], string $type = 'accessToken'): array
     {
-        if (($tokens['accessToken'] ?? null) === null) {
+        if (($tokens[$type] ?? null) === null) {
             return [];
         }
 
         return [
-            'Authorization' => "Bearer {$tokens['accessToken']}",
+            'Authorization' => "Bearer {$tokens[$type]}",
         ];
     }
 
     public function withAuth(array $body): self
     {
         $this->authHeaders = $this->makeAuthHeadersByResponse($body);
+
+        return $this;
+    }
+
+    public function withAuthRefresh(array $body): self
+    {
+        $this->authHeaders = $this->makeAuthHeadersByResponse($body, 'refreshToken');
 
         return $this;
     }
