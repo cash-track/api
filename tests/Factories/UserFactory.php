@@ -55,14 +55,19 @@ class UserFactory extends AbstractFactory
         return $user;
     }
 
-    public static function emailConfirmed(User $user = null): User
+    public static function emailConfirmed(User $user = null, bool $confirmed = true): User
     {
         if ($user === null) {
             $user = self::make();
         }
 
-        $user->isEmailConfirmed = true;
+        $user->isEmailConfirmed = $confirmed;
 
         return $user;
+    }
+
+    public static function emailNotConfirmed(User $user = null): User
+    {
+        return self::emailConfirmed($user, false);
     }
 }

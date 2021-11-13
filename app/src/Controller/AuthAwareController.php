@@ -22,9 +22,17 @@ abstract class AuthAwareController
         $user = $auth->getActor();
 
         if (! $user instanceof User) {
-            throw new \RuntimeException('Unable to get authenticated user');
+            return;
         }
 
         $this->user = $user;
+    }
+
+    /**
+     * @return bool
+     */
+    protected function isAuthenticated(): bool
+    {
+        return $this->user instanceof User;
     }
 }

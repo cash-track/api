@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Auth\RegisterController;
 
-use App\Service\Mailer\MailerInterface;
+use App\Service\Auth\EmailConfirmationService;
 use App\Service\UserService;
 use Tests\DatabaseTransaction;
 use Tests\Fixtures;
@@ -17,23 +17,24 @@ class RegisterTest extends TestCase implements DatabaseTransaction
     {
         parent::setUp();
 
-        $mailer = $this->getMockBuilder(MailerInterface::class)
-                       ->onlyMethods(['send', 'render'])
-                       ->getMock();
+        $email = $this->getMockBuilder(EmailConfirmationService::class)
+                      ->disableOriginalConstructor()
+                      ->onlyMethods(['create'])
+                      ->getMock();
 
-        $this->app->container->bind(MailerInterface::class, $mailer);
+        $this->app->container->bind(EmailConfirmationService::class, $email);
     }
 
     public function testUserCreated(): void
     {
-        $mock = $this->getMockBuilder(MailerInterface::class)
+        $mock = $this->getMockBuilder(EmailConfirmationService::class)
                      ->disableOriginalConstructor()
-                     ->onlyMethods(['send', 'render'])
+                     ->onlyMethods(['create'])
                      ->getMock();
 
-        $mock->expects($this->once())->method('send');
+        $mock->expects($this->once())->method('create');
 
-        $this->app->container->bind(MailerInterface::class, $mock);
+        $this->app->container->bind(EmailConfirmationService::class, $mock);
 
         $user = UserFactory::make();
 
@@ -55,7 +56,6 @@ class RegisterTest extends TestCase implements DatabaseTransaction
         $this->assertArrayHasKey('refreshToken', $body);
 
         $this->assertDatabaseHas('users', ['email' => $user->email]);
-        $this->assertDatabaseHas('email_confirmations', ['email' => $user->email]);
     }
 
     public function testUserStoreFailed(): void
@@ -92,20 +92,18 @@ class RegisterTest extends TestCase implements DatabaseTransaction
         $this->assertDatabaseMissing('email_confirmations', ['email' => $user->email]);
     }
 
-    public function testSendConfirmationMailFailed(): void
+    public function testEmailConfirmationServiceFailStillStoreUser(): void
     {
-        $mock = $this->getMockBuilder(MailerInterface::class)
+        $mock = $this->getMockBuilder(EmailConfirmationService::class)
                      ->disableOriginalConstructor()
-                     ->onlyMethods(['send', 'render'])
+                     ->onlyMethods(['create'])
                      ->getMock();
 
-        $mock->expects($this->once())->method('send');
-
         $mock->expects($this->once())
-             ->method('send')
+             ->method('create')
              ->willThrowException(new \RuntimeException('Transport exception'));
 
-        $this->app->container->bind(MailerInterface::class, $mock);
+        $this->app->container->bind(EmailConfirmationService::class, $mock);
 
         $user = UserFactory::make();
 
@@ -127,7 +125,6 @@ class RegisterTest extends TestCase implements DatabaseTransaction
         $this->assertArrayHasKey('refreshToken', $body);
 
         $this->assertDatabaseHas('users', ['email' => $user->email]);
-        $this->assertDatabaseHas('email_confirmations', ['email' => $user->email]);
     }
 
     public function testValidationFailsByEmptyForm(): void

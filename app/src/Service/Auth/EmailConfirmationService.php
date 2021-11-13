@@ -61,10 +61,22 @@ class EmailConfirmationService extends HelperService
         $confirmation->token     = $this->generateToken();
         $confirmation->createdAt = new \DateTimeImmutable();
 
+        $this->store($confirmation);
+
+        $this->mailer->send(new EmailConfirmationMail($user, $this->uri->emailConfirmation($confirmation->token)));
+    }
+
+    /**
+     * @param \App\Database\EmailConfirmation $confirmation
+     * @return \App\Database\EmailConfirmation
+     * @throws \Throwable
+     */
+    public function store(EmailConfirmation $confirmation): EmailConfirmation
+    {
         $this->tr->persist($confirmation);
         $this->tr->run();
 
-        $this->mailer->send(new EmailConfirmationMail($user, $this->uri->emailConfirmation($confirmation->token)));
+        return $confirmation;
     }
 
     /**

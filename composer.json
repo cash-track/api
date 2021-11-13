@@ -24,7 +24,7 @@
     "spiral/database": "v2.9.3",
     "spiral/migrations": "^2.2",
     "spiral/nyholm-bridge": "^1.1",
-    "cycle/orm": "^1.0",
+    "cycle/orm": "dev-change-database as 1.7.0",
     "cycle/proxy-factory": "^1.0",
     "cycle/annotated": "^2.0",
     "cycle/migrations": "^1.0",
