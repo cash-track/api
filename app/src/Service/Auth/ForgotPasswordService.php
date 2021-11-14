@@ -12,11 +12,7 @@ use App\Repository\UserRepository;
 use App\Service\Mailer\MailerInterface;
 use App\Service\UriService;
 use Cycle\ORM\TransactionInterface;
-use Spiral\Prototype\Annotation\Prototyped;
 
-/**
- * @Prototyped(property="forgotPasswordService")
- */
 class ForgotPasswordService extends HelperService
 {
     /**
@@ -81,10 +77,22 @@ class ForgotPasswordService extends HelperService
         $request->code      = $this->generateToken();
         $request->createdAt = new \DateTimeImmutable();
 
+        $this->store($request);
+
+        $this->mailer->send(new ForgotPasswordMail($user, $this->uri->passwordReset($request->code)));
+    }
+
+    /**
+     * @param \App\Database\ForgotPasswordRequest $request
+     * @return \App\Database\ForgotPasswordRequest
+     * @throws \Throwable
+     */
+    public function store(ForgotPasswordRequest $request): ForgotPasswordRequest
+    {
         $this->tr->persist($request);
         $this->tr->run();
 
-        $this->mailer->send(new ForgotPasswordMail($user, $this->uri->passwordReset($request->code)));
+        return $request;
     }
 
     /**

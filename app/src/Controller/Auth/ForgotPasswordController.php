@@ -6,14 +6,23 @@ namespace App\Controller\Auth;
 
 use App\Request\ForgotPasswordCreateRequest;
 use App\Request\ForgotPasswordResetRequest;
+use App\Service\Auth\ForgotPasswordService;
 use App\Service\Auth\ForgotPasswordThrottledException;
 use Psr\Http\Message\ResponseInterface;
-use Spiral\Prototype\Traits\PrototypeTrait;
+use Spiral\Http\ResponseWrapper;
 use Spiral\Router\Annotation\Route;
 
 final class ForgotPasswordController
 {
-    use PrototypeTrait;
+    /**
+     * @param \Spiral\Http\ResponseWrapper $response
+     * @param \App\Service\Auth\ForgotPasswordService $forgotPasswordService
+     */
+    public function __construct(
+        protected ResponseWrapper $response,
+        protected ForgotPasswordService $forgotPasswordService,
+    ) {
+    }
 
     /**
      * @Route(route="/auth/password/forgot", name="auth.password.forgot", methods="POST")

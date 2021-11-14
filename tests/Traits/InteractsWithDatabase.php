@@ -19,4 +19,11 @@ trait InteractsWithDatabase
 
         $this->assertEmpty($data);
     }
+
+    public function assertDatabaseCount(int $expected, string $table, array $where)
+    {
+        $data = $this->db->select()->from($table)->where($where)->fetchAll();
+
+        $this->assertCount($expected, $data);
+    }
 }
