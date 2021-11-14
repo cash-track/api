@@ -44,6 +44,11 @@ trait BasicFixtures
         return self::string(16) . '.' . $extension;
     }
 
+    public static function url(string $ends = ''): string
+    {
+        return "https://" . self::string() . '.com/' . self::string() . '/' . $ends;
+    }
+
     public static function boolean(): bool
     {
         return (bool) rand(0, 1);
