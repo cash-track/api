@@ -7,7 +7,7 @@ namespace Tests;
 use PHPUnit\Framework\TestCase as BaseTestCase;
 use Spiral\Boot\DirectoriesInterface;
 use Spiral\Boot\Environment;
-use Spiral\Database\DatabaseInterface;
+use Cycle\Database\DatabaseInterface;
 use Spiral\Files\Files;
 use Spiral\Http\Http;
 use Spiral\Translator\TranslatorInterface;
@@ -40,7 +40,7 @@ abstract class TestCase extends BaseTestCase
     protected $views;
 
     /**
-     * @var \Spiral\Database\DatabaseInterface
+     * @var \Cycle\Database\DatabaseInterface
      */
     protected DatabaseInterface $db;
 

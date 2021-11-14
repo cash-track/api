@@ -42,5 +42,18 @@ class LogoutControllerTest extends TestCase implements DatabaseTransaction
         // TODO. Add checking to access protected endpoints once token blacklist implemented
     }
 
+    public function testLoggedOutClosesRefreshToken(): void
+    {
+        $auth = $this->makeAuth($this->userFactory->create());
+
+        $response = $this->withAuth($auth)->post('/auth/logout', [
+            'refreshToken' => $auth['refreshToken'],
+        ]);
+        $this->assertEquals(200, $response->getStatusCode(), $this->getResponseBody($response));
+
+        // TODO. Add checking to access protected endpoints once token blacklist implemented
+        // TODO. Add checking to refresh once token blacklist implemented
+    }
+
     // TODO. Add checking to access protected endpoints once token blacklist implemented
 }
