@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Bootloader;
 
+use Cycle\Database\Database;
+use Cycle\Database\DatabaseInterface;
 use Cycle\Database\DatabaseManager;
 use Cycle\Database\DatabaseProviderInterface;
 use Spiral\Boot\Bootloader\Bootloader;
@@ -18,5 +20,6 @@ class DatabaseBootloader extends Bootloader
     public function boot(Container $container): void
     {
         $container->bind(DatabaseProviderInterface::class, DatabaseManager::class);
+        $container->bind(DatabaseInterface::class, Database::class);
     }
 }

@@ -57,6 +57,17 @@ trait InteractsWithHttp
         );
     }
 
+    public function put(
+        $uri,
+        array $data = [],
+        array $headers = [],
+        array $cookies = []
+    ): ResponseInterface {
+        return $this->http->handle(
+            $this->request($uri, 'PUT', [], $headers, $cookies)->withParsedBody($data)
+        );
+    }
+
     public function request(
         $uri,
         string $method,

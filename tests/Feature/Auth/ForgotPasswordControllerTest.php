@@ -12,11 +12,14 @@ use App\Service\Mailer\MailerInterface;
 use Tests\DatabaseTransaction;
 use Tests\Factories\ForgotPasswordRequestFactory;
 use Tests\Factories\UserFactory;
+use Tests\Feature\AuthAsserts;
 use Tests\Fixtures;
 use Tests\TestCase;
 
 class ForgotPasswordControllerTest extends TestCase implements DatabaseTransaction
 {
+    use AuthAsserts;
+
     /**
      * @var \Tests\Factories\UserFactory
      */
@@ -386,25 +389,5 @@ class ForgotPasswordControllerTest extends TestCase implements DatabaseTransacti
         $this->assertArrayHasKey('error', $body);
 
         $this->assertUserCannotLogin($user, $password);
-    }
-
-    private function assertUserCanLogin(User $user, string $password): void
-    {
-        $response = $this->post('/auth/login', [
-            'email' => $user->email,
-            'password' => $password,
-        ]);
-
-        $this->assertEquals(200, $response->getStatusCode(), $this->getResponseBody($response));
-    }
-
-    private function assertUserCannotLogin(User $user, string $password): void
-    {
-        $response = $this->post('/auth/login', [
-            'email' => $user->email,
-            'password' => $password,
-        ]);
-
-        $this->assertEquals(400, $response->getStatusCode(), $this->getResponseBody($response));
     }
 }

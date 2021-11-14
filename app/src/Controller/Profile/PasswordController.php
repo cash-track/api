@@ -4,14 +4,34 @@ declare(strict_types=1);
 
 namespace App\Controller\Profile;
 
+use App\Controller\AuthAwareController;
 use App\Request\Profile\UpdatePasswordRequest;
+use App\Service\Auth\AuthService;
+use App\Service\UserService;
 use Psr\Http\Message\ResponseInterface;
-use Spiral\Prototype\Traits\PrototypeTrait;
+use Psr\Log\LoggerInterface;
+use Spiral\Auth\AuthScope;
+use Spiral\Http\ResponseWrapper;
 use Spiral\Router\Annotation\Route;
 
-final class PasswordController extends ProfileController
+final class PasswordController extends AuthAwareController
 {
-    use PrototypeTrait;
+    /**
+     * @param \Spiral\Auth\AuthScope $auth
+     * @param \Spiral\Http\ResponseWrapper $response
+     * @param \App\Service\Auth\AuthService $authService
+     * @param \App\Service\UserService $userService
+     * @param \Psr\Log\LoggerInterface $logger
+     */
+    public function __construct(
+        AuthScope $auth,
+        protected ResponseWrapper $response,
+        protected AuthService $authService,
+        protected UserService $userService,
+        protected LoggerInterface $logger,
+    ) {
+        parent::__construct($auth);
+    }
 
     /**
      * @Route(route="/profile/password", name="profile.update.password", methods="PUT", group="auth")

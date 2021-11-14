@@ -4,39 +4,17 @@ declare(strict_types=1);
 
 namespace App\Controller\Profile;
 
+use App\Controller\AuthAwareController;
 use App\Database\Currency;
-use App\Database\User;
 use App\Request\CheckNickNameRequest;
 use App\Request\Profile\UpdateBasicRequest;
 use Psr\Http\Message\ResponseInterface;
-use Spiral\Auth\AuthScope;
 use Spiral\Prototype\Traits\PrototypeTrait;
 use Spiral\Router\Annotation\Route;
 
-class ProfileController
+class ProfileController extends AuthAwareController
 {
     use PrototypeTrait;
-
-    /**
-     * @var \App\Database\User
-     */
-    protected $user;
-
-    /**
-     * ProfileController constructor.
-     *
-     * @param \Spiral\Auth\AuthScope $auth
-     */
-    public function __construct(AuthScope $auth)
-    {
-        $user = $auth->getActor();
-
-        if (! $user instanceof User) {
-            throw new \RuntimeException('Unable to get authenticated user');
-        }
-
-        $this->user = $user;
-    }
 
     /**
      * @Route(route="/profile", name="profile.index", methods="GET", group="auth")
