@@ -69,23 +69,20 @@ abstract class TestCase extends BaseTestCase
         if ($fs->isDirectory($runtime)) {
             $fs->deleteDirectory($runtime);
         }
-
-        unset($this->db);
-        unset($this->http);
-        unset($this->views);
-        unset($this->app);
     }
 
     protected function makeApp(array $env = []): TestApp
     {
         $root = dirname(__DIR__);
 
-        return TestApp::init([
-            'root' => $root,
-            'app' => $root . '/app',
-            'runtime' => $root . '/runtime/tests',
-            'cache' => $root . '/runtime/tests/cache',
-        ], new Environment($env), false);
+        return TestApp::getInstance(function () use ($root, $env): TestApp {
+            return TestApp::init([
+                'root' => $root,
+                'app' => $root . '/app',
+                'runtime' => $root . '/runtime/tests',
+                'cache' => $root . '/runtime/tests/cache',
+            ], new Environment($env), false);
+        });
     }
 
     protected function printMemoryUsage(string $title = 'memory usage now'): void
