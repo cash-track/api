@@ -44,8 +44,6 @@ class EmailConfirmationControllerTest extends TestCase implements DatabaseTransa
 
     public function testGetEmailConfirmation(): void
     {
-        $this->markTestIncomplete();
-
         $auth = $this->makeAuth($user = $this->userFactory->create());
 
         $confirmation = EmailConfirmationFactory::make();
