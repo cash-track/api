@@ -121,8 +121,6 @@ class EmailConfirmationControllerTest extends TestCase implements DatabaseTransa
 
     public function testConfirmWithMissingToken(): void
     {
-        $this->markTestIncomplete();
-
         $user = $this->userFactory->create(UserFactory::emailNotConfirmed());
 
         $token = Fixtures::string(16);
