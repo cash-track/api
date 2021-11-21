@@ -13,9 +13,6 @@ use Tests\Factories\UserFactory;
 use Tests\Fixtures;
 use Tests\TestCase;
 
-/**
- *
- */
 class EmailConfirmationControllerTest extends TestCase implements DatabaseTransaction
 {
     /**
@@ -32,12 +29,13 @@ class EmailConfirmationControllerTest extends TestCase implements DatabaseTransa
     {
         parent::setUp();
 
-        $this->markTestIncomplete();
-
         $this->userFactory = $this->app->get(UserFactory::class);
         $this->emailConfirmationFactory = $this->app->get(EmailConfirmationFactory::class);
     }
 
+    /**
+     *
+     */
     public function testGetEmailConfirmationRequireAuth(): void
     {
         $response = $this->get('/auth/email/confirmation');
@@ -46,6 +44,8 @@ class EmailConfirmationControllerTest extends TestCase implements DatabaseTransa
 
     public function testGetEmailConfirmation(): void
     {
+        $this->markTestIncomplete();
+
         $auth = $this->makeAuth($user = $this->userFactory->create());
 
         $confirmation = EmailConfirmationFactory::make();
@@ -64,6 +64,8 @@ class EmailConfirmationControllerTest extends TestCase implements DatabaseTransa
 
     public function testGetEmptyEmailConfirmation(): void
     {
+        $this->markTestIncomplete();
+
         $auth = $this->makeAuth($this->userFactory->create());
 
         $response = $this->withAuth($auth)->get('/auth/email/confirmation');
@@ -77,6 +79,8 @@ class EmailConfirmationControllerTest extends TestCase implements DatabaseTransa
 
     public function testConfirm(): void
     {
+        $this->markTestIncomplete();
+
         $user = $this->userFactory->create(UserFactory::emailNotConfirmed());
 
         $confirmation = EmailConfirmationFactory::notExpired();
@@ -103,6 +107,8 @@ class EmailConfirmationControllerTest extends TestCase implements DatabaseTransa
 
     public function testConfirmWithExpiredToken(): void
     {
+        $this->markTestIncomplete();
+
         $user = $this->userFactory->create(UserFactory::emailNotConfirmed());
 
         $confirmation = EmailConfirmationFactory::expired();
@@ -126,6 +132,8 @@ class EmailConfirmationControllerTest extends TestCase implements DatabaseTransa
 
     public function testConfirmWithMissingToken(): void
     {
+        $this->markTestIncomplete();
+
         $user = $this->userFactory->create(UserFactory::emailNotConfirmed());
 
         $token = Fixtures::string(16);
@@ -147,6 +155,8 @@ class EmailConfirmationControllerTest extends TestCase implements DatabaseTransa
 
     public function testConfirmMissingUser(): void
     {
+        $this->markTestIncomplete();
+
         $user = $this->userFactory->create(UserFactory::emailNotConfirmed());
 
         $confirmation = EmailConfirmationFactory::notExpired();
@@ -175,12 +185,16 @@ class EmailConfirmationControllerTest extends TestCase implements DatabaseTransa
 
     public function testReSendRequireAuth(): void
     {
+        $this->markTestIncomplete();
+
         $response = $this->post('/auth/email/confirmation/resend');
         $this->assertEquals(401, $response->getStatusCode(), $this->getResponseBody($response));
     }
 
     public function testReSendSendsMessage(): void
     {
+        $this->markTestIncomplete();
+
         $auth = $this->makeAuth($user = $this->userFactory->create(UserFactory::emailNotConfirmed()));
 
         $mock = $this->getMockBuilder(MailerInterface::class)
@@ -224,6 +238,8 @@ class EmailConfirmationControllerTest extends TestCase implements DatabaseTransa
 
     public function testReSendThrottled(): void
     {
+        $this->markTestIncomplete();
+
         $auth = $this->makeAuth($user = $this->userFactory->create(UserFactory::emailNotConfirmed()));
 
         $this->mockMailerNeverCalled();
@@ -249,6 +265,8 @@ class EmailConfirmationControllerTest extends TestCase implements DatabaseTransa
 
     public function testReSendRejectAlreadyConfirmed(): void
     {
+        $this->markTestIncomplete();
+
         $auth = $this->makeAuth($this->userFactory->create(UserFactory::emailConfirmed()));
 
         $this->mockMailerNeverCalled();
