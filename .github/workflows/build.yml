@@ -144,6 +144,9 @@ jobs:
           php app.php migrate:init
           php app.php migrate
 
+      - name: Run PHPUnit without coverage
+        run: ./vendor/bin/phpunit
+
       - name: Run PHPUnit
         run: ./vendor/bin/phpunit --coverage-clover=coverage.xml
 

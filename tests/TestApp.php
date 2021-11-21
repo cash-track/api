@@ -19,6 +19,11 @@ class TestApp extends App
     protected static $app;
 
     /**
+     * @var bool
+     */
+    public static $reuseApp = true;
+
+    /**
      * @var array
      */
     protected static array $bootLoadedState = [
@@ -45,6 +50,10 @@ class TestApp extends App
      */
     public static function getInstance(callable $resolver): TestApp
     {
+        if (! self::$reuseApp) {
+            return $resolver();
+        }
+
         if (self::$app instanceof self) {
             return self::$app->flush();
         }
