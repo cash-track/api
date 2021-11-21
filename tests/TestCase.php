@@ -78,6 +78,10 @@ abstract class TestCase extends BaseTestCase
             $this->app->flushContainer();
             $this->app = null;
         }
+
+        if (in_array('--debug', $_SERVER['argv'], true)) {
+            $this->printMemoryUsage();
+        }
     }
 
     protected function makeApp(array $env = []): TestApp

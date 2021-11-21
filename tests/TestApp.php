@@ -21,7 +21,7 @@ class TestApp extends App
     /**
      * @var bool
      */
-    public static $reuseApp = false;
+    public static $reuseApp = true;
 
     /**
      * @var array
