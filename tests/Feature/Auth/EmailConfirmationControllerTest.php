@@ -72,8 +72,6 @@ class EmailConfirmationControllerTest extends TestCase implements DatabaseTransa
 
     public function testConfirm(): void
     {
-        $this->markTestIncomplete();
-
         $user = $this->userFactory->create(UserFactory::emailNotConfirmed());
 
         $confirmation = EmailConfirmationFactory::notExpired();
