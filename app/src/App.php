@@ -56,7 +56,6 @@ class App extends Kernel
         Framework\Database\MigrationsBootloader::class,
 
         // ORM
-        Bootloader\DatabaseBootloader::class,
         Framework\Cycle\CycleBootloader::class,
         Framework\Cycle\ProxiesBootloader::class,
         Framework\Cycle\AnnotatedBootloader::class,

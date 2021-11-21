@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "5b89e8c86689839ebd15ddbbc1c4dc2a",
+    "content-hash": "0dd3ff86922c3287a8d53c99efb109c7",
     "packages": [
         {
             "name": "aws/aws-crt-php",
@@ -58,16 +58,16 @@
         },
         {
             "name": "aws/aws-sdk-php",
-            "version": "3.202.2",
+            "version": "3.204.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aws/aws-sdk-php.git",
-                "reference": "4460481cd63446454869534c69ddaf00cffa45be"
+                "reference": "181ca8aaeb0a6efdbeb665af9b02de610719b1bb"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/4460481cd63446454869534c69ddaf00cffa45be",
-                "reference": "4460481cd63446454869534c69ddaf00cffa45be",
+                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/181ca8aaeb0a6efdbeb665af9b02de610719b1bb",
+                "reference": "181ca8aaeb0a6efdbeb665af9b02de610719b1bb",
                 "shasum": ""
             },
             "require": {
@@ -143,9 +143,9 @@
             "support": {
                 "forum": "https://forums.aws.amazon.com/forum.jspa?forumID=80",
                 "issues": "https://github.com/aws/aws-sdk-php/issues",
-                "source": "https://github.com/aws/aws-sdk-php/tree/3.202.2"
+                "source": "https://github.com/aws/aws-sdk-php/tree/3.204.2"
             },
-            "time": "2021-11-12T19:15:25+00:00"
+            "time": "2021-11-19T19:21:39+00:00"
         },
         {
             "name": "brick/math",
@@ -442,69 +442,6 @@
             "time": "2021-09-17T15:15:02+00:00"
         },
         {
-            "name": "cycle/database",
-            "version": "1.0.2",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/cycle/database.git",
-                "reference": "75d97b284cbdf7c5b37608eba64181f1537e54ff"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/cycle/database/zipball/75d97b284cbdf7c5b37608eba64181f1537e54ff",
-                "reference": "75d97b284cbdf7c5b37608eba64181f1537e54ff",
-                "shasum": ""
-            },
-            "require": {
-                "ext-pdo": "*",
-                "php": ">=7.2",
-                "spiral/core": "^2.8",
-                "spiral/logger": "^2.8",
-                "spiral/pagination": "^2.8"
-            },
-            "replace": {
-                "spiral/database": "^2.0"
-            },
-            "require-dev": {
-                "mockery/mockery": "^1.3",
-                "phpunit/phpunit": "^8.5|^9.0",
-                "spiral/code-style": "^1.0",
-                "spiral/dumper": "^2.8",
-                "spiral/tokenizer": "^2.8",
-                "vimeo/psalm": "^4.10"
-            },
-            "type": "library",
-            "extra": {
-                "branch-alias": {
-                    "dev-master": "2.0.x-dev"
-                }
-            },
-            "autoload": {
-                "files": [
-                    "src/polyfill.php"
-                ],
-                "psr-4": {
-                    "Cycle\\Database\\": "src"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Anton Titov / Wolfy-J",
-                    "email": "wolfy.jd@gmail.com"
-                }
-            ],
-            "description": "DBAL, schema introspection, migration and pagination",
-            "support": {
-                "issues": "https://github.com/cycle/database/issues",
-                "source": "https://github.com/cycle/database/tree/1.0.2"
-            },
-            "time": "2021-11-10T19:08:17+00:00"
-        },
-        {
             "name": "cycle/migrations",
             "version": "v1.0.10",
             "source": {
@@ -549,26 +486,26 @@
         },
         {
             "name": "cycle/orm",
-            "version": "dev-change-database",
+            "version": "v1.7.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/cycle/orm.git",
-                "reference": "a5b3ff515e9e1c0608d22e5a78e2237771781851"
+                "reference": "5cecb85cd254a810f297b9cdcdb58518fa78bdee"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/cycle/orm/zipball/a5b3ff515e9e1c0608d22e5a78e2237771781851",
-                "reference": "a5b3ff515e9e1c0608d22e5a78e2237771781851",
+                "url": "https://api.github.com/repos/cycle/orm/zipball/5cecb85cd254a810f297b9cdcdb58518fa78bdee",
+                "reference": "5cecb85cd254a810f297b9cdcdb58518fa78bdee",
                 "shasum": ""
             },
             "require": {
-                "cycle/database": "^1.0.1",
                 "doctrine/collections": "^1.5",
                 "doctrine/inflector": "^1.4|^2.0",
                 "doctrine/instantiator": "^1.2",
                 "ext-pdo": "*",
                 "laminas/laminas-hydrator": "^2.4|^3.0|^4.0",
-                "php": ">=7.2"
+                "php": ">=7.2",
+                "spiral/database": "^2.8.4"
             },
             "require-dev": {
                 "mockery/mockery": "^1.1",
@@ -591,9 +528,9 @@
             "description": "PHP DataMapper ORM and Data Modelling Engine",
             "support": {
                 "issues": "https://github.com/cycle/orm/issues",
-                "source": "https://github.com/cycle/orm/tree/change-database"
+                "source": "https://github.com/cycle/orm/tree/v1.7.1"
             },
-            "time": "2021-11-08T21:16:49+00:00"
+            "time": "2021-11-04T16:16:39+00:00"
         },
         {
             "name": "cycle/proxy-factory",
@@ -2540,16 +2477,16 @@
         },
         {
             "name": "league/mime-type-detection",
-            "version": "1.8.0",
+            "version": "1.9.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/thephpleague/mime-type-detection.git",
-                "reference": "b38b25d7b372e9fddb00335400467b223349fd7e"
+                "reference": "aa70e813a6ad3d1558fc927863d47309b4c23e69"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/thephpleague/mime-type-detection/zipball/b38b25d7b372e9fddb00335400467b223349fd7e",
-                "reference": "b38b25d7b372e9fddb00335400467b223349fd7e",
+                "url": "https://api.github.com/repos/thephpleague/mime-type-detection/zipball/aa70e813a6ad3d1558fc927863d47309b4c23e69",
+                "reference": "aa70e813a6ad3d1558fc927863d47309b4c23e69",
                 "shasum": ""
             },
             "require": {
@@ -2557,7 +2494,7 @@
                 "php": "^7.2 || ^8.0"
             },
             "require-dev": {
-                "friendsofphp/php-cs-fixer": "^2.18",
+                "friendsofphp/php-cs-fixer": "^3.2",
                 "phpstan/phpstan": "^0.12.68",
                 "phpunit/phpunit": "^8.5.8 || ^9.3"
             },
@@ -2580,7 +2517,7 @@
             "description": "Mime-type detection for Flysystem",
             "support": {
                 "issues": "https://github.com/thephpleague/mime-type-detection/issues",
-                "source": "https://github.com/thephpleague/mime-type-detection/tree/1.8.0"
+                "source": "https://github.com/thephpleague/mime-type-detection/tree/1.9.0"
             },
             "funding": [
                 {
@@ -2592,7 +2529,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2021-09-25T08:23:19+00:00"
+            "time": "2021-11-21T11:48:40+00:00"
         },
         {
             "name": "monolog/monolog",
@@ -4022,6 +3959,57 @@
                 "source": "https://github.com/spiral/composer-publish-plugin/tree/v1.1.2"
             },
             "time": "2020-11-12T23:10:18+00:00"
+        },
+        {
+            "name": "spiral/database",
+            "version": "v2.9.3",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/spiral/database.git",
+                "reference": "632488c5f7dfd3d4dc47edc9f1c2c992724e7526"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/spiral/database/zipball/632488c5f7dfd3d4dc47edc9f1c2c992724e7526",
+                "reference": "632488c5f7dfd3d4dc47edc9f1c2c992724e7526",
+                "shasum": ""
+            },
+            "require": {
+                "ext-pdo": "*",
+                "php": ">=7.2",
+                "spiral/core": "^2.7",
+                "spiral/logger": "^2.7",
+                "spiral/pagination": "^2.7"
+            },
+            "require-dev": {
+                "mockery/mockery": "^1.1",
+                "phpunit/phpunit": "~8.0",
+                "spiral/code-style": "^1.0",
+                "spiral/dumper": "^2.7",
+                "spiral/tokenizer": "^2.7"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Spiral\\Database\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Anton Titov / Wolfy-J",
+                    "email": "wolfy.jd@gmail.com"
+                }
+            ],
+            "description": "DBAL, schema introspection, migration and pagination",
+            "support": {
+                "issues": "https://github.com/spiral/database/issues",
+                "source": "https://github.com/spiral/database/tree/v2.9.3"
+            },
+            "time": "2021-11-03T17:51:47+00:00"
         },
         {
             "name": "spiral/framework",
@@ -7126,16 +7114,16 @@
         },
         {
             "name": "phpunit/php-code-coverage",
-            "version": "9.2.8",
+            "version": "9.2.9",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/php-code-coverage.git",
-                "reference": "cf04e88a2e3c56fc1a65488afd493325b4c1bc3e"
+                "reference": "f301eb1453c9e7a1bc912ee8b0ea9db22c60223b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/php-code-coverage/zipball/cf04e88a2e3c56fc1a65488afd493325b4c1bc3e",
-                "reference": "cf04e88a2e3c56fc1a65488afd493325b4c1bc3e",
+                "url": "https://api.github.com/repos/sebastianbergmann/php-code-coverage/zipball/f301eb1453c9e7a1bc912ee8b0ea9db22c60223b",
+                "reference": "f301eb1453c9e7a1bc912ee8b0ea9db22c60223b",
                 "shasum": ""
             },
             "require": {
@@ -7191,7 +7179,7 @@
             ],
             "support": {
                 "issues": "https://github.com/sebastianbergmann/php-code-coverage/issues",
-                "source": "https://github.com/sebastianbergmann/php-code-coverage/tree/9.2.8"
+                "source": "https://github.com/sebastianbergmann/php-code-coverage/tree/9.2.9"
             },
             "funding": [
                 {
@@ -7199,7 +7187,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2021-10-30T08:01:38+00:00"
+            "time": "2021-11-19T15:21:02+00:00"
         },
         {
             "name": "phpunit/php-file-iterator",
@@ -8617,16 +8605,16 @@
         },
         {
             "name": "vimeo/psalm",
-            "version": "4.12.0",
+            "version": "4.13.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/vimeo/psalm.git",
-                "reference": "e42bc4a23f67acba28a23bb09c348e2ff38a1d87"
+                "reference": "cd489407a0219b93cadd04d5aff9845a942f7e5d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/vimeo/psalm/zipball/e42bc4a23f67acba28a23bb09c348e2ff38a1d87",
-                "reference": "e42bc4a23f67acba28a23bb09c348e2ff38a1d87",
+                "url": "https://api.github.com/repos/vimeo/psalm/zipball/cd489407a0219b93cadd04d5aff9845a942f7e5d",
+                "reference": "cd489407a0219b93cadd04d5aff9845a942f7e5d",
                 "shasum": ""
             },
             "require": {
@@ -8672,7 +8660,8 @@
                 "weirdan/prophecy-shim": "^1.0 || ^2.0"
             },
             "suggest": {
-                "ext-igbinary": "^2.0.5"
+                "ext-curl": "In order to send data to shepherd",
+                "ext-igbinary": "^2.0.5 is required, used to serialize caching data"
             },
             "bin": [
                 "psalm",
@@ -8716,9 +8705,9 @@
             ],
             "support": {
                 "issues": "https://github.com/vimeo/psalm/issues",
-                "source": "https://github.com/vimeo/psalm/tree/4.12.0"
+                "source": "https://github.com/vimeo/psalm/tree/4.13.0"
             },
-            "time": "2021-11-06T10:31:17+00:00"
+            "time": "2021-11-19T20:24:40+00:00"
         },
         {
             "name": "webmozart/path-util",
@@ -8772,18 +8761,9 @@
             "time": "2015-12-17T08:42:14+00:00"
         }
     ],
-    "aliases": [
-        {
-            "package": "cycle/orm",
-            "version": "dev-change-database",
-            "alias": "1.7.0",
-            "alias_normalized": "1.7.0.0"
-        }
-    ],
+    "aliases": [],
     "minimum-stability": "dev",
-    "stability-flags": {
-        "cycle/orm": 20
-    },
+    "stability-flags": [],
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {

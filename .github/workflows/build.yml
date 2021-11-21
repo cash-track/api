@@ -144,11 +144,8 @@ jobs:
           php app.php migrate:init
           php app.php migrate
 
-      - name: Run PHPUnit without coverage
-        run: ./vendor/bin/phpunit
-
       - name: Run PHPUnit
-        run: ./vendor/bin/phpunit --coverage-clover=coverage.xml
+        run: ./vendor/bin/phpunit --coverage-clover=coverage.xml --debug
 
       - name: Upload Coverage To Codecov
         continue-on-error: true

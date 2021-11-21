@@ -7,7 +7,7 @@ namespace Tests;
 use PHPUnit\Framework\TestCase as BaseTestCase;
 use Spiral\Boot\DirectoriesInterface;
 use Spiral\Boot\Environment;
-use Cycle\Database\DatabaseInterface;
+use Spiral\Database\DatabaseInterface;
 use Spiral\Files\Files;
 use Spiral\Http\Http;
 use Spiral\Translator\TranslatorInterface;
@@ -40,7 +40,7 @@ abstract class TestCase extends BaseTestCase
     protected $views;
 
     /**
-     * @var \Cycle\Database\DatabaseInterface
+     * @var \Spiral\Database\DatabaseInterface
      */
     protected DatabaseInterface $db;
 
@@ -73,9 +73,10 @@ abstract class TestCase extends BaseTestCase
         if (! TestApp::$reuseApp) {
             $this->db->getDriver()->disconnect();
             unset($this->db);
-            unset($this->http);
-            unset($this->views);
-            unset($this->app);
+            $this->http = null;
+            $this->views = null;
+            $this->app->flushContainer();
+            $this->app = null;
         }
     }
 
