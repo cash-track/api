@@ -98,8 +98,6 @@ class EmailConfirmationControllerTest extends TestCase implements DatabaseTransa
 
     public function testConfirmWithExpiredToken(): void
     {
-        $this->markTestIncomplete();
-
         $user = $this->userFactory->create(UserFactory::emailNotConfirmed());
 
         $confirmation = EmailConfirmationFactory::expired();
