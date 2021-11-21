@@ -100,7 +100,7 @@ class TestApp extends App
      *
      * @return void
      */
-    protected function flushContainer(): void
+    public function flushContainer(): void
     {
         foreach ($this->container->getBindings() as $alias => $_) {
             $this->container->removeBinding($alias);

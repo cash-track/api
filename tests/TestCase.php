@@ -69,6 +69,14 @@ abstract class TestCase extends BaseTestCase
         if ($fs->isDirectory($runtime)) {
             $fs->deleteDirectory($runtime);
         }
+
+        if (! TestApp::$reuseApp) {
+            $this->db->getDriver()->disconnect();
+            unset($this->db);
+            unset($this->http);
+            unset($this->views);
+            unset($this->app);
+        }
     }
 
     protected function makeApp(array $env = []): TestApp
