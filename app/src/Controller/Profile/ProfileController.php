@@ -6,15 +6,37 @@ namespace App\Controller\Profile;
 
 use App\Controller\AuthAwareController;
 use App\Database\Currency;
+use App\Repository\CurrencyRepository;
 use App\Request\CheckNickNameRequest;
 use App\Request\Profile\UpdateBasicRequest;
+use App\Service\UserService;
+use App\View\UserView;
 use Psr\Http\Message\ResponseInterface;
-use Spiral\Prototype\Traits\PrototypeTrait;
+use Psr\Log\LoggerInterface;
+use Spiral\Auth\AuthScope;
+use Spiral\Http\ResponseWrapper;
 use Spiral\Router\Annotation\Route;
 
 class ProfileController extends AuthAwareController
 {
-    use PrototypeTrait;
+    /**
+     * @param \Spiral\Auth\AuthScope $auth
+     * @param \App\View\UserView $userView
+     * @param \Psr\Log\LoggerInterface $logger
+     * @param \App\Service\UserService $userService
+     * @param \Spiral\Http\ResponseWrapper $response
+     * @param \App\Repository\CurrencyRepository $currencyRepository
+     */
+    public function __construct(
+        AuthScope $auth,
+        protected UserView $userView,
+        protected LoggerInterface $logger,
+        protected UserService $userService,
+        protected ResponseWrapper $response,
+        protected CurrencyRepository $currencyRepository,
+    ) {
+        parent::__construct($auth);
+    }
 
     /**
      * @Route(route="/profile", name="profile.index", methods="GET", group="auth")
@@ -69,7 +91,7 @@ class ProfileController extends AuthAwareController
         $this->user->defaultCurrencyCode = $request->getDefaultCurrencyCode();
 
         try {
-            $defaultCurrency = $this->currencies->findByPK($request->getDefaultCurrencyCode());
+            $defaultCurrency = $this->currencyRepository->findByPK($request->getDefaultCurrencyCode());
 
             if (! $defaultCurrency instanceof Currency) {
                 throw new \RuntimeException('Unable to load default currency');

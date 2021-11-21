@@ -38,23 +38,17 @@ class CheckNickNameTest extends TestCase implements DatabaseTransaction
      * @param string $nickName
      * @return void
      */
-    public function testValidation(string $nickName): void
+    public function testValidation($nickName): void
     {
         $response = $this->post('/auth/register/check/nick-name', [
             'nickName' => $nickName,
         ]);
 
-        $this->assertEquals(422, $response->getStatusCode());
+        $this->assertEquals(422, $response->getStatusCode(), "Attempted value: {$nickName}");
     }
 
     public function provideInvalidNickNames(): array
     {
-        return array_merge([
-            ['',],
-            ['as',],
-        ], array_map(
-            fn ($item) => [Fixtures::string() . $item],
-            str_split('!@#$%^&*()-=+"\<>,.\''),
-        ));
+        return UserFactory::invalidNickNames();
     }
 }

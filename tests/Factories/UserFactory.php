@@ -70,4 +70,16 @@ class UserFactory extends AbstractFactory
     {
         return self::emailConfirmed($user, false);
     }
+
+    public static function invalidNickNames(): array
+    {
+        return array_merge([
+            ['',],
+            [0123],
+            [Fixtures::string(2),],
+        ], array_map(
+            fn ($item) => [Fixtures::string() . $item],
+            str_split('!@#$%^&*()-=+"\<>,.\''),
+        ));
+    }
 }
