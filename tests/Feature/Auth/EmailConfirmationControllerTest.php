@@ -176,8 +176,6 @@ class EmailConfirmationControllerTest extends TestCase implements DatabaseTransa
 
     public function testReSendSendsMessage(): void
     {
-        $this->markTestIncomplete();
-
         $auth = $this->makeAuth($user = $this->userFactory->create(UserFactory::emailNotConfirmed()));
 
         $mock = $this->getMockBuilder(MailerInterface::class)
