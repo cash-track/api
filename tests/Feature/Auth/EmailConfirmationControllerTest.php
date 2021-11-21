@@ -244,8 +244,6 @@ class EmailConfirmationControllerTest extends TestCase implements DatabaseTransa
 
     public function testReSendRejectAlreadyConfirmed(): void
     {
-        $this->markTestIncomplete();
-
         $auth = $this->makeAuth($this->userFactory->create(UserFactory::emailConfirmed()));
 
         $this->mockMailerNeverCalled();
