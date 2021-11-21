@@ -10,16 +10,11 @@ use Tests\Fixtures;
 
 class EmailConfirmationFactory extends AbstractFactory
 {
-    public function __construct(protected EmailConfirmationService $storage)
-    {
-        //
-    }
-
     public function create(EmailConfirmation $confirmation = null): EmailConfirmation
     {
         $confirmation = $confirmation ?? self::make();
 
-        $this->storage->store($confirmation);
+        $this->persist($confirmation);
 
         return $confirmation;
     }

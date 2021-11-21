@@ -10,16 +10,11 @@ use Tests\Fixtures;
 
 class ForgotPasswordRequestFactory extends AbstractFactory
 {
-    public function __construct(protected ForgotPasswordService $storage)
-    {
-        //
-    }
-
     public function create(ForgotPasswordRequest $request = null): ForgotPasswordRequest
     {
         $request = $request ?? self::make();
 
-        $this->storage->store($request);
+        $this->persist($request);
 
         return $request;
     }

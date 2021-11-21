@@ -33,9 +33,6 @@ class EmailConfirmationControllerTest extends TestCase implements DatabaseTransa
         $this->emailConfirmationFactory = $this->app->get(EmailConfirmationFactory::class);
     }
 
-    /**
-     *
-     */
     public function testGetEmailConfirmationRequireAuth(): void
     {
         $response = $this->get('/auth/email/confirmation');
@@ -62,8 +59,6 @@ class EmailConfirmationControllerTest extends TestCase implements DatabaseTransa
 
     public function testGetEmptyEmailConfirmation(): void
     {
-        $this->markTestIncomplete();
-
         $auth = $this->makeAuth($this->userFactory->create());
 
         $response = $this->withAuth($auth)->get('/auth/email/confirmation');

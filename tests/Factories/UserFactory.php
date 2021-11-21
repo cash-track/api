@@ -12,16 +12,11 @@ class UserFactory extends AbstractFactory
 {
     public const DEFAULT_PASSWORD = 'secret';
 
-    public function __construct(protected UserService $storage)
-    {
-        //
-    }
-
     public function create(User $user = null): User
     {
         $user = $user ?? self::make();
 
-        $this->storage->store($user);
+        $this->persist($user);
 
         return $user;
     }

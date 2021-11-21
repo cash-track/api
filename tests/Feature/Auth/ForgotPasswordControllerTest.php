@@ -199,12 +199,16 @@ class ForgotPasswordControllerTest extends TestCase implements DatabaseTransacti
 
         $mock = $this->getMockBuilder(UserRepository::class)
                      ->disableOriginalConstructor()
-                     ->onlyMethods(['findByEmail'])
+                     ->onlyMethods(['findByEmail', 'findOne'])
                      ->getMock();
 
         $mock->expects($this->once())
              ->method('findByEmail')
              ->willReturn(null);
+
+        $mock->expects($this->once())
+             ->method('findOne')
+             ->willReturn(ForgotPasswordRequestFactory::make());
 
         $this->app->container->bind(UserRepository::class, $mock);
 
@@ -325,13 +329,17 @@ class ForgotPasswordControllerTest extends TestCase implements DatabaseTransacti
 
         $mock = $this->getMockBuilder(ForgotPasswordRequestRepository::class)
                      ->disableOriginalConstructor()
-                     ->onlyMethods(['findByCode'])
+                     ->onlyMethods(['findByCode', 'findOne'])
                      ->getMock();
 
         $mock->expects($this->once())
              ->method('findByCode')
              ->with($forgotPasswordRequest->code)
              ->willReturn(null);
+
+        $mock->expects($this->once())
+             ->method('findOne')
+             ->willReturn($forgotPasswordRequest);
 
         $this->app->container->bind(ForgotPasswordRequestRepository::class, $mock);
 
