@@ -170,8 +170,6 @@ class EmailConfirmationControllerTest extends TestCase implements DatabaseTransa
 
     public function testReSendRequireAuth(): void
     {
-        $this->markTestIncomplete();
-
         $response = $this->post('/auth/email/confirmation/resend');
         $this->assertEquals(401, $response->getStatusCode(), $this->getResponseBody($response));
     }
