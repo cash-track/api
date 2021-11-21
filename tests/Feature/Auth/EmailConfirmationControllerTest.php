@@ -13,6 +13,9 @@ use Tests\Factories\UserFactory;
 use Tests\Fixtures;
 use Tests\TestCase;
 
+/**
+ *
+ */
 class EmailConfirmationControllerTest extends TestCase implements DatabaseTransaction
 {
     /**
@@ -28,6 +31,8 @@ class EmailConfirmationControllerTest extends TestCase implements DatabaseTransa
     protected function setUp(): void
     {
         parent::setUp();
+
+        $this->markTestIncomplete();
 
         $this->userFactory = $this->app->get(UserFactory::class);
         $this->emailConfirmationFactory = $this->app->get(EmailConfirmationFactory::class);
