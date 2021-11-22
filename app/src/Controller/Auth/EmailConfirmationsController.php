@@ -52,7 +52,7 @@ final class EmailConfirmationsController extends AuthAwareController
     }
 
     /**
-     * @Route(route="/auth/email/confirmation/<token>", name="auth.email.confirm")
+     * @Route(route="/auth/email/confirmation/confirm/<token>", name="auth.email.confirm")
      *
      * @param string $token
      * @return \Psr\Http\Message\ResponseInterface

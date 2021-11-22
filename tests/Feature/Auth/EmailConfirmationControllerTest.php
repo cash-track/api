@@ -78,7 +78,7 @@ class EmailConfirmationControllerTest extends TestCase implements DatabaseTransa
         $confirmation->email = $user->email;
         $confirmation = $this->emailConfirmationFactory->create($confirmation);
 
-        $response = $this->post("/auth/email/confirmation/{$confirmation->token}");
+        $response = $this->post("/auth/email/confirmation/confirm/{$confirmation->token}");
 
         $this->assertEquals(200, $response->getStatusCode(), $this->getResponseBody($response));
 
@@ -104,7 +104,7 @@ class EmailConfirmationControllerTest extends TestCase implements DatabaseTransa
         $confirmation->email = $user->email;
         $confirmation = $this->emailConfirmationFactory->create($confirmation);
 
-        $response = $this->post("/auth/email/confirmation/{$confirmation->token}");
+        $response = $this->post("/auth/email/confirmation/confirm/{$confirmation->token}");
 
         $this->assertEquals(400, $response->getStatusCode(), $this->getResponseBody($response));
 
@@ -125,7 +125,7 @@ class EmailConfirmationControllerTest extends TestCase implements DatabaseTransa
 
         $token = Fixtures::string(16);
 
-        $response = $this->post("/auth/email/confirmation/{$token}");
+        $response = $this->post("/auth/email/confirmation/confirm/{$token}");
 
         $this->assertEquals(400, $response->getStatusCode(), $this->getResponseBody($response));
 
@@ -148,7 +148,7 @@ class EmailConfirmationControllerTest extends TestCase implements DatabaseTransa
         $confirmation->email = Fixtures::email();
         $confirmation = $this->emailConfirmationFactory->create($confirmation);
 
-        $response = $this->post("/auth/email/confirmation/{$confirmation->token}");
+        $response = $this->post("/auth/email/confirmation/confirm/{$confirmation->token}");
 
         $this->assertEquals(400, $response->getStatusCode(), $this->getResponseBody($response));
 
