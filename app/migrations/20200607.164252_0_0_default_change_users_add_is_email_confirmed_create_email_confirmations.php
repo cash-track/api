@@ -2,7 +2,7 @@
 
 namespace Migration;
 
-use Spiral\Migrations\Migration;
+use Cycle\Migrations\Migration;
 
 class OrmDefaultD22f5560ba269799727089c99eb0c5fa extends Migration
 {
