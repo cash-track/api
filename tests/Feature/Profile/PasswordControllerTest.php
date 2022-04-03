@@ -24,14 +24,14 @@ class PasswordControllerTest extends TestCase implements DatabaseTransaction
     {
         parent::setUp();
 
-        $this->userFactory = $this->app->get(UserFactory::class);
+        $this->userFactory = $this->getContainer()->get(UserFactory::class);
     }
 
     public function testUpdatePasswordRequireAuth(): void
     {
         $response = $this->put('/profile/password');
 
-        $this->assertEquals(401, $response->getStatusCode(), $this->getResponseBody($response));
+        $response->assertUnauthorized();
     }
 
     public function testUpdatePassword(): void
@@ -46,7 +46,7 @@ class PasswordControllerTest extends TestCase implements DatabaseTransaction
             'newPasswordConfirmation' => $password,
         ]);
 
-        $this->assertEquals(200, $response->getStatusCode(), $this->getResponseBody($response));
+        $response->assertOk();
 
         $body = $this->getJsonResponseBody($response);
 
@@ -68,7 +68,7 @@ class PasswordControllerTest extends TestCase implements DatabaseTransaction
             'newPasswordConfirmation' => $password,
         ]);
 
-        $this->assertEquals(422, $response->getStatusCode(), $this->getResponseBody($response));
+        $response->assertUnprocessable();
 
         $body = $this->getJsonResponseBody($response);
 
@@ -86,7 +86,7 @@ class PasswordControllerTest extends TestCase implements DatabaseTransaction
 
         $response = $this->withAuth($auth)->put('/profile/password');
 
-        $this->assertEquals(422, $response->getStatusCode(), $this->getResponseBody($response));
+        $response->assertUnprocessable();
 
         $body = $this->getJsonResponseBody($response);
 
@@ -109,7 +109,7 @@ class PasswordControllerTest extends TestCase implements DatabaseTransaction
             'newPasswordConfirmation' => $password . '.',
         ]);
 
-        $this->assertEquals(422, $response->getStatusCode(), $this->getResponseBody($response));
+        $response->assertUnprocessable();
 
         $body = $this->getJsonResponseBody($response);
 
@@ -133,7 +133,7 @@ class PasswordControllerTest extends TestCase implements DatabaseTransaction
              ->method('store')
              ->willThrowException(new \RuntimeException('Storage exception.'));
 
-        $this->app->container->bind(UserService::class, $mock);
+        $this->getContainer()->bind(UserService::class, fn () => $mock);
 
         $password = Fixtures::string();
 
@@ -143,7 +143,7 @@ class PasswordControllerTest extends TestCase implements DatabaseTransaction
             'newPasswordConfirmation' => $password,
         ]);
 
-        $this->assertEquals(500, $response->getStatusCode(), $this->getResponseBody($response));
+        $response->assertStatus(500);
 
         $body = $this->getJsonResponseBody($response);
 

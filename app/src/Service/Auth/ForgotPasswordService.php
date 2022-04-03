@@ -11,42 +11,19 @@ use App\Repository\ForgotPasswordRequestRepository;
 use App\Repository\UserRepository;
 use App\Service\Mailer\MailerInterface;
 use App\Service\UriService;
-use Cycle\ORM\TransactionInterface;
+use Cycle\ORM\EntityManagerInterface;
 
 class ForgotPasswordService extends HelperService
 {
-    /**
-     * @var \App\Repository\ForgotPasswordRequestRepository
-     */
-    private $repository;
-
-    /**
-     * @var \App\Service\Auth\AuthService
-     */
-    private $authService;
-
-    /**
-     * ForgotPasswordService constructor.
-     *
-     * @param \Cycle\ORM\TransactionInterface $tr
-     * @param \App\Repository\UserRepository $userRepository
-     * @param \App\Service\Mailer\MailerInterface $mailer
-     * @param \App\Service\UriService $uri
-     * @param \App\Repository\ForgotPasswordRequestRepository $repository
-     * @param \App\Service\Auth\AuthService $authService
-     */
     public function __construct(
-        TransactionInterface $tr,
+        EntityManagerInterface $tr,
         UserRepository $userRepository,
         MailerInterface $mailer,
         UriService $uri,
-        ForgotPasswordRequestRepository $repository,
-        AuthService $authService
+        private ForgotPasswordRequestRepository $repository,
+        private AuthService $authService
     ) {
         parent::__construct($tr, $userRepository, $mailer, $uri);
-
-        $this->repository     = $repository;
-        $this->authService    = $authService;
     }
 
     /**
@@ -61,6 +38,7 @@ class ForgotPasswordService extends HelperService
             throw new \RuntimeException('Unable to find user by email');
         }
 
+        /** @var \App\Database\ForgotPasswordRequest|null $request */
         $request = $this->repository->findByPK($email);
 
         if ($request instanceof ForgotPasswordRequest && $this->isThrottled($request->createdAt)) {

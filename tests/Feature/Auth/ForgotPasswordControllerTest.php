@@ -34,8 +34,8 @@ class ForgotPasswordControllerTest extends TestCase implements DatabaseTransacti
     {
         parent::setUp();
 
-        $this->userFactory = $this->app->get(UserFactory::class);
-        $this->requestFactory = $this->app->get(ForgotPasswordRequestFactory::class);
+        $this->userFactory = $this->getContainer()->get(UserFactory::class);
+        $this->requestFactory = $this->getContainer()->get(ForgotPasswordRequestFactory::class);
     }
 
     public function testCreate(): void
@@ -56,13 +56,13 @@ class ForgotPasswordControllerTest extends TestCase implements DatabaseTransacti
                 return true;
              }));
 
-        $this->app->container->bind(MailerInterface::class, $mock);
+        $this->getContainer()->bind(MailerInterface::class, fn () => $mock);
 
         $response = $this->post('/auth/password/forgot', [
             'email' => $user->email,
         ]);
 
-        $this->assertEquals(200, $response->getStatusCode(), $this->getResponseBody($response));
+        $response->assertOk();
 
         $body = $this->getJsonResponseBody($response);
 
@@ -79,7 +79,7 @@ class ForgotPasswordControllerTest extends TestCase implements DatabaseTransacti
             'email' => Fixtures::email(),
         ]);
 
-        $this->assertEquals(422, $response->getStatusCode(), $this->getResponseBody($response));
+        $response->assertUnprocessable();
 
         $body = $this->getJsonResponseBody($response);
 
@@ -96,7 +96,7 @@ class ForgotPasswordControllerTest extends TestCase implements DatabaseTransacti
                      ->onlyMethods(['send', 'render'])
                      ->getMock();
 
-        $this->app->container->bind(MailerInterface::class, $mock);
+        $this->getContainer()->bind(MailerInterface::class, fn () => $mock);
 
         $forgotPasswordRequest = ForgotPasswordRequestFactory::throttled();
         $forgotPasswordRequest->email = $user->email;
@@ -106,7 +106,7 @@ class ForgotPasswordControllerTest extends TestCase implements DatabaseTransacti
             'email' => $user->email,
         ]);
 
-        $this->assertEquals(400, $response->getStatusCode(), $this->getResponseBody($response));
+        $response->assertStatus(400);
 
         $body = $this->getJsonResponseBody($response);
 
@@ -130,7 +130,7 @@ class ForgotPasswordControllerTest extends TestCase implements DatabaseTransacti
         $mock->expects($this->once())
              ->method('send');
 
-        $this->app->container->bind(MailerInterface::class, $mock);
+        $this->getContainer()->bind(MailerInterface::class, fn () => $mock);
 
         $forgotPasswordRequest = ForgotPasswordRequestFactory::expired();
         $forgotPasswordRequest->email = $user->email;
@@ -140,7 +140,7 @@ class ForgotPasswordControllerTest extends TestCase implements DatabaseTransacti
             'email' => $user->email,
         ]);
 
-        $this->assertEquals(200, $response->getStatusCode(), $this->getResponseBody($response));
+        $response->assertOk();
 
         $body = $this->getJsonResponseBody($response);
 
@@ -169,13 +169,13 @@ class ForgotPasswordControllerTest extends TestCase implements DatabaseTransacti
              ->method('send')
              ->willThrowException(new \RuntimeException('Transport exception'));
 
-        $this->app->container->bind(MailerInterface::class, $mock);
+        $this->getContainer()->bind(MailerInterface::class, fn () => $mock);
 
         $response = $this->post('/auth/password/forgot', [
             'email' => $user->email,
         ]);
 
-        $this->assertEquals(400, $response->getStatusCode(), $this->getResponseBody($response));
+        $response->assertStatus(400);
 
         $body = $this->getJsonResponseBody($response);
 
@@ -195,7 +195,7 @@ class ForgotPasswordControllerTest extends TestCase implements DatabaseTransacti
         $mock->expects($this->never())
              ->method('send');
 
-        $this->app->container->bind(MailerInterface::class, $mock);
+        $this->getContainer()->bind(MailerInterface::class, fn () => $mock);
 
         $mock = $this->getMockBuilder(UserRepository::class)
                      ->disableOriginalConstructor()
@@ -210,13 +210,13 @@ class ForgotPasswordControllerTest extends TestCase implements DatabaseTransacti
              ->method('findOne')
              ->willReturn(ForgotPasswordRequestFactory::make());
 
-        $this->app->container->bind(UserRepository::class, $mock);
+        $this->getContainer()->bind(UserRepository::class, fn () => $mock);
 
         $response = $this->post('/auth/password/forgot', [
             'email' => $user->email,
         ]);
 
-        $this->assertEquals(400, $response->getStatusCode(), $this->getResponseBody($response));
+        $response->assertStatus(400);
 
         $body = $this->getJsonResponseBody($response);
 
@@ -244,7 +244,7 @@ class ForgotPasswordControllerTest extends TestCase implements DatabaseTransacti
             'passwordConfirmation' => $password,
         ]);
 
-        $this->assertEquals(200, $response->getStatusCode(), $this->getResponseBody($response));
+        $response->assertOk();
 
         $body = $this->getJsonResponseBody($response);
 
@@ -265,7 +265,7 @@ class ForgotPasswordControllerTest extends TestCase implements DatabaseTransacti
             'passwordConfirmation' => '',
         ]);
 
-        $this->assertEquals(422, $response->getStatusCode(), $this->getResponseBody($response));
+        $response->assertUnprocessable();
 
         $body = $this->getJsonResponseBody($response);
 
@@ -283,7 +283,7 @@ class ForgotPasswordControllerTest extends TestCase implements DatabaseTransacti
             'passwordConfirmation' => $password . '.',
         ]);
 
-        $this->assertEquals(422, $response->getStatusCode(), $this->getResponseBody($response));
+        $response->assertUnprocessable();
 
         $body = $this->getJsonResponseBody($response);
 
@@ -309,7 +309,7 @@ class ForgotPasswordControllerTest extends TestCase implements DatabaseTransacti
             'passwordConfirmation' => $password,
         ]);
 
-        $this->assertEquals(400, $response->getStatusCode(), $this->getResponseBody($response));
+        $response->assertStatus(400);
 
         $body = $this->getJsonResponseBody($response);
 
@@ -341,7 +341,7 @@ class ForgotPasswordControllerTest extends TestCase implements DatabaseTransacti
              ->method('findOne')
              ->willReturn($forgotPasswordRequest);
 
-        $this->app->container->bind(ForgotPasswordRequestRepository::class, $mock);
+        $this->getContainer()->bind(ForgotPasswordRequestRepository::class, fn () => $mock);
 
         $password = Fixtures::string();
 
@@ -351,7 +351,7 @@ class ForgotPasswordControllerTest extends TestCase implements DatabaseTransacti
             'passwordConfirmation' => $password,
         ]);
 
-        $this->assertEquals(400, $response->getStatusCode(), $this->getResponseBody($response));
+        $response->assertStatus(400);
 
         $body = $this->getJsonResponseBody($response);
 
@@ -379,7 +379,7 @@ class ForgotPasswordControllerTest extends TestCase implements DatabaseTransacti
              ->with($user->email)
              ->willReturn($this->onConsecutiveCalls(null, $user));
 
-        $this->app->container->bind(UserRepository::class, $mock);
+        $this->getContainer()->bind(UserRepository::class, fn () => $mock);
 
         $password = Fixtures::string();
 
@@ -389,7 +389,7 @@ class ForgotPasswordControllerTest extends TestCase implements DatabaseTransacti
             'passwordConfirmation' => $password,
         ]);
 
-        $this->assertEquals(400, $response->getStatusCode(), $this->getResponseBody($response));
+        $response->assertStatus(400);
 
         $body = $this->getJsonResponseBody($response);
 

@@ -91,13 +91,14 @@ class ProfileController extends AuthAwareController
         $this->user->defaultCurrencyCode = $request->getDefaultCurrencyCode();
 
         try {
+            /** @var \App\Database\Currency|null $defaultCurrency */
             $defaultCurrency = $this->currencyRepository->findByPK($request->getDefaultCurrencyCode());
 
             if (! $defaultCurrency instanceof Currency) {
                 throw new \RuntimeException('Unable to load default currency');
             }
 
-            $this->user->defaultCurrency = $defaultCurrency;
+            $this->user->setDefaultCurrency($defaultCurrency);
         } catch (\Throwable $exception) {
             $this->logger->warning('Unable to load currency entity', [
                 'action' => 'profile.update',

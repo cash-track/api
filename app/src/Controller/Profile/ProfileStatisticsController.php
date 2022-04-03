@@ -12,7 +12,6 @@ use App\Repository\WalletRepository;
 use App\Service\Statistics\ProfileStatistics;
 use App\View\CurrencyView;
 use App\View\WalletsView;
-use Doctrine\Common\Collections\ArrayCollection;
 use Psr\Http\Message\ResponseInterface;
 use Spiral\Http\ResponseWrapper;
 use Spiral\Router\Annotation\Route;
@@ -34,6 +33,7 @@ class ProfileStatisticsController extends AuthAwareController
         CurrencyView $currencyView,
         ProfileStatistics $statistics,
     ): ResponseInterface {
+        /** @var \App\Database\Currency|null $currency */
         $currency = $currencyRepository->findByPK($this->user->defaultCurrencyCode ?? Currency::DEFAULT_CURRENCY_CODE);
 
         if (! $currency instanceof Currency) {
@@ -80,7 +80,7 @@ class ProfileStatisticsController extends AuthAwareController
         $wallets = $walletRepository->findByUserPKLatestWithLimit((int) $this->user->id);
 
         foreach ($wallets as $wallet) {
-            $wallet->latestCharges = new ArrayCollection($chargeRepository->findByWalletIDLatest((int) $wallet->id));
+            $wallet->setLatestCharges($chargeRepository->findByWalletIDLatest((int) $wallet->id));
         }
 
         return $view->json($wallets);

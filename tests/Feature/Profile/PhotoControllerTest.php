@@ -24,14 +24,14 @@ class PhotoControllerTest extends TestCase implements DatabaseTransaction
     {
         parent::setUp();
 
-        $this->userFactory = $this->app->get(UserFactory::class);
+        $this->userFactory = $this->getContainer()->get(UserFactory::class);
     }
 
     public function testUpdatePhotoRequireAuth(): void
     {
         $response = $this->put('/profile/photo');
 
-        $this->assertEquals(401, $response->getStatusCode(), $this->getResponseBody($response));
+        $response->assertUnauthorized();
     }
 
     public function testUpdatePhoto(): void
@@ -58,12 +58,12 @@ class PhotoControllerTest extends TestCase implements DatabaseTransaction
                     ->with($fileName)
                     ->willReturn($url);
 
-        $this->app->container->bind(UpdatePhotoRequest::class, $requestMock);
-        $this->app->container->bind(PhotoStorageService::class, $storageMock);
+        $this->getContainer()->bind(UpdatePhotoRequest::class, fn () => $requestMock);
+        $this->getContainer()->bind(PhotoStorageService::class, fn () => $storageMock);
 
         $response = $this->withAuth($auth)->put('/profile/photo');
 
-        $this->assertEquals(200, $response->getStatusCode(), $this->getResponseBody($response));
+        $response->assertOk();
 
         $body = $this->getJsonResponseBody($response);
 
@@ -86,12 +86,12 @@ class PhotoControllerTest extends TestCase implements DatabaseTransaction
         $requestMock = $this->getMockUpdatePhotoRequest($fileMock, true);
         $storageMock = $this->getMockStorageService();
 
-        $this->app->container->bind(UpdatePhotoRequest::class, $requestMock);
-        $this->app->container->bind(PhotoStorageService::class, $storageMock);
+        $this->getContainer()->bind(UpdatePhotoRequest::class, fn () => $requestMock);
+        $this->getContainer()->bind(PhotoStorageService::class, fn () => $storageMock);
 
         $response = $this->withAuth($auth)->put('/profile/photo');
 
-        $this->assertEquals(422, $response->getStatusCode(), $this->getResponseBody($response));
+        $response->assertUnprocessable();
 
         $body = $this->getJsonResponseBody($response);
 
@@ -112,12 +112,12 @@ class PhotoControllerTest extends TestCase implements DatabaseTransaction
                     ->with($fileMock)
                     ->willReturn(null);
 
-        $this->app->container->bind(UpdatePhotoRequest::class, $requestMock);
-        $this->app->container->bind(PhotoStorageService::class, $storageMock);
+        $this->getContainer()->bind(UpdatePhotoRequest::class, fn () => $requestMock);
+        $this->getContainer()->bind(PhotoStorageService::class, fn () => $storageMock);
 
         $response = $this->withAuth($auth)->put('/profile/photo');
 
-        $this->assertEquals(500, $response->getStatusCode(), $this->getResponseBody($response));
+        $response->assertStatus(500);
 
         $body = $this->getJsonResponseBody($response);
 
@@ -151,13 +151,13 @@ class PhotoControllerTest extends TestCase implements DatabaseTransaction
                         ->method('store')
                         ->willThrowException(new \RuntimeException('Storage exception.'));
 
-        $this->app->container->bind(UpdatePhotoRequest::class, $requestMock);
-        $this->app->container->bind(PhotoStorageService::class, $storageMock);
-        $this->app->container->bind(UserService::class, $userServiceMock);
+        $this->getContainer()->bind(UpdatePhotoRequest::class, fn () => $requestMock);
+        $this->getContainer()->bind(PhotoStorageService::class, fn () => $storageMock);
+        $this->getContainer()->bind(UserService::class, fn () => $userServiceMock);
 
         $response = $this->withAuth($auth)->put('/profile/photo');
 
-        $this->assertEquals(500, $response->getStatusCode(), $this->getResponseBody($response));
+        $response->assertStatus(500);
 
         $body = $this->getJsonResponseBody($response);
 

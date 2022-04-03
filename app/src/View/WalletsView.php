@@ -6,20 +6,16 @@ namespace App\View;
 
 use Psr\Http\Message\ResponseInterface;
 use Spiral\Core\Container\SingletonInterface;
-use Spiral\Prototype\Annotation\Prototyped;
-use Spiral\Prototype\Traits\PrototypeTrait;
+use Spiral\Http\ResponseWrapper;
 
-/**
- * @Prototyped(property="walletsView")
- */
 class WalletsView implements SingletonInterface
 {
-    use PrototypeTrait;
+    public function __construct(
+        protected ResponseWrapper $response,
+        protected WalletView $walletView,
+    ) {
+    }
 
-    /**
-     * @param \App\Database\Wallet[] $wallets
-     * @return \Psr\Http\Message\ResponseInterface
-     */
     public function json(array $wallets): ResponseInterface
     {
         return $this->response->json([
@@ -27,10 +23,6 @@ class WalletsView implements SingletonInterface
         ], 200);
     }
 
-    /**
-     * @param \App\Database\Wallet[] $wallets
-     * @return array
-     */
     public function map(array $wallets): array
     {
         return array_map([$this->walletView, 'map'], $wallets);

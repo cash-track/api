@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Tests\Traits;
 
 use JsonException;
-use Psr\Http\Message\ResponseInterface;
-use Laminas\Diactoros\ServerRequest;
+use Spiral\Testing\Http\TestResponse;
+use Tests\FakeHttp;
 
 trait InteractsWithHttp
 {
@@ -18,6 +18,16 @@ trait InteractsWithHttp
 
     protected array $authHeaders = [];
 
+    protected function fakeHttp(): FakeHttp
+    {
+        return new FakeHttp(
+            $this->getContainer(),
+            function (\Closure $closure, array $bindings = []) {
+                return $this->runScoped($closure, $bindings);
+            }
+        );
+    }
+
     protected function getHeaders(array $headers = []): array
     {
         return array_merge($headers, $this->defaultHeaders, $this->authHeaders);
@@ -28,33 +38,17 @@ trait InteractsWithHttp
         array $query = [],
         array $headers = [],
         array $cookies = []
-    ): ResponseInterface {
-        return $this->http->handle($this->request($uri, 'GET', $query, $headers, $cookies));
+    ): TestResponse {
+        return $this->fakeHttp()->get($uri, $query, $this->getHeaders($headers), $cookies);
     }
-
-    public function getWithAttributes(
-        $uri,
-        array $attributes,
-        array $headers = []
-    ): ResponseInterface {
-        $r = $this->request($uri, 'GET', [], $headers, []);
-        foreach ($attributes as $k => $v) {
-            $r = $r->withAttribute($k, $v);
-        }
-
-        return $this->http->handle($r);
-    }
-
 
     public function post(
         $uri,
         array $data = [],
         array $headers = [],
         array $cookies = []
-    ): ResponseInterface {
-        return $this->http->handle(
-            $this->request($uri, 'POST', [], $headers, $cookies)->withParsedBody($data)
-        );
+    ): TestResponse {
+        return $this->fakeHttp()->postJson($uri, $data, $this->getHeaders($headers), $cookies);
     }
 
     public function put(
@@ -62,55 +56,16 @@ trait InteractsWithHttp
         array $data = [],
         array $headers = [],
         array $cookies = []
-    ): ResponseInterface {
-        return $this->http->handle(
-            $this->request($uri, 'PUT', [], $headers, $cookies)->withParsedBody($data)
-        );
+    ): TestResponse {
+        return $this->fakeHttp()->putJson($uri, $data, $this->getHeaders($headers), $cookies);
     }
 
-    public function request(
-        $uri,
-        string $method,
-        array $query = [],
-        array $headers = [],
-        array $cookies = []
-    ): ServerRequest {
-        $headers = $this->getHeaders($headers);
-
-        $this->resetAuth();
-
-        return new ServerRequest(
-            [],
-            [],
-            $uri,
-            $method,
-            'php://input',
-            $this->getHeaders($headers),
-            $cookies,
-            $query
-        );
-    }
-
-    public function fetchCookies(array $header)
+    public function getResponseBody(TestResponse $response): string
     {
-        $result = [];
-        foreach ($header as $line) {
-            $cookie = explode('=', $line);
-            $result[$cookie[0]] = rawurldecode(substr($cookie[1], 0, strpos($cookie[1], ';')));
-        }
-
-        return $result;
+        return (string) $response->getOriginalResponse()->getBody();
     }
 
-    public function getResponseBody(ResponseInterface $response): string {
-        $body = $response->getBody();
-
-        $body->rewind();
-
-        return $body->getContents();
-    }
-
-    public function getJsonResponseBody(ResponseInterface $response): array
+    public function getJsonResponseBody(TestResponse $response): array
     {
         try {
             $data = json_decode($this->getResponseBody($response), true, 512, JSON_THROW_ON_ERROR);

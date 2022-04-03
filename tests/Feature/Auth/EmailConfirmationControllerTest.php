@@ -29,14 +29,15 @@ class EmailConfirmationControllerTest extends TestCase implements DatabaseTransa
     {
         parent::setUp();
 
-        $this->userFactory = $this->app->get(UserFactory::class);
-        $this->emailConfirmationFactory = $this->app->get(EmailConfirmationFactory::class);
+        $this->userFactory = $this->getContainer()->get(UserFactory::class);
+        $this->emailConfirmationFactory = $this->getContainer()->get(EmailConfirmationFactory::class);
     }
 
     public function testGetEmailConfirmationRequireAuth(): void
     {
         $response = $this->get('/auth/email/confirmation');
-        $this->assertEquals(401, $response->getStatusCode(), $this->getResponseBody($response));
+
+        $response->assertUnauthorized();
     }
 
     public function testGetEmailConfirmation(): void
@@ -48,7 +49,8 @@ class EmailConfirmationControllerTest extends TestCase implements DatabaseTransa
         $this->emailConfirmationFactory->create($confirmation);
 
         $response = $this->withAuth($auth)->get('/auth/email/confirmation');
-        $this->assertEquals(200, $response->getStatusCode(), $this->getResponseBody($response));
+
+        $response->assertOk();
 
         $body = $this->getJsonResponseBody($response);
 
@@ -62,7 +64,8 @@ class EmailConfirmationControllerTest extends TestCase implements DatabaseTransa
         $auth = $this->makeAuth($this->userFactory->create());
 
         $response = $this->withAuth($auth)->get('/auth/email/confirmation');
-        $this->assertEquals(200, $response->getStatusCode(), $this->getResponseBody($response));
+
+        $response->assertOk();
 
         $body = $this->getJsonResponseBody($response);
 
@@ -80,7 +83,7 @@ class EmailConfirmationControllerTest extends TestCase implements DatabaseTransa
 
         $response = $this->post("/auth/email/confirmation/confirm/{$confirmation->token}");
 
-        $this->assertEquals(200, $response->getStatusCode(), $this->getResponseBody($response));
+        $response->assertOk();
 
         $body = $this->getJsonResponseBody($response);
 
@@ -106,7 +109,7 @@ class EmailConfirmationControllerTest extends TestCase implements DatabaseTransa
 
         $response = $this->post("/auth/email/confirmation/confirm/{$confirmation->token}");
 
-        $this->assertEquals(400, $response->getStatusCode(), $this->getResponseBody($response));
+        $response->assertStatus(400);
 
         $body = $this->getJsonResponseBody($response);
 
@@ -127,7 +130,7 @@ class EmailConfirmationControllerTest extends TestCase implements DatabaseTransa
 
         $response = $this->post("/auth/email/confirmation/confirm/{$token}");
 
-        $this->assertEquals(400, $response->getStatusCode(), $this->getResponseBody($response));
+        $response->assertStatus(400);
 
         $body = $this->getJsonResponseBody($response);
 
@@ -150,7 +153,7 @@ class EmailConfirmationControllerTest extends TestCase implements DatabaseTransa
 
         $response = $this->post("/auth/email/confirmation/confirm/{$confirmation->token}");
 
-        $this->assertEquals(400, $response->getStatusCode(), $this->getResponseBody($response));
+        $response->assertStatus(400);
 
         $body = $this->getJsonResponseBody($response);
 
@@ -171,7 +174,8 @@ class EmailConfirmationControllerTest extends TestCase implements DatabaseTransa
     public function testReSendRequireAuth(): void
     {
         $response = $this->post('/auth/email/confirmation/resend');
-        $this->assertEquals(401, $response->getStatusCode(), $this->getResponseBody($response));
+
+        $response->assertUnauthorized();
     }
 
     public function testReSendSendsMessage(): void
@@ -193,7 +197,7 @@ class EmailConfirmationControllerTest extends TestCase implements DatabaseTransa
                  return true;
              }));
 
-        $this->app->container->bind(MailerInterface::class, $mock);
+        $this->getContainer()->bind(MailerInterface::class, fn () => $mock);
 
         $confirmation = EmailConfirmationFactory::notThrottled();
         $confirmation->email = $user->email;
@@ -201,7 +205,7 @@ class EmailConfirmationControllerTest extends TestCase implements DatabaseTransa
 
         $response = $this->withAuth($auth)->post("/auth/email/confirmation/resend");
 
-        $this->assertEquals(200, $response->getStatusCode(), $this->getResponseBody($response));
+        $response->assertOk();
 
         $body = $this->getJsonResponseBody($response);
 
@@ -229,7 +233,7 @@ class EmailConfirmationControllerTest extends TestCase implements DatabaseTransa
 
         $response = $this->withAuth($auth)->post("/auth/email/confirmation/resend");
 
-        $this->assertEquals(400, $response->getStatusCode(), $this->getResponseBody($response));
+        $response->assertStatus(400);
 
         $body = $this->getJsonResponseBody($response);
 
@@ -250,7 +254,7 @@ class EmailConfirmationControllerTest extends TestCase implements DatabaseTransa
 
         $response = $this->withAuth($auth)->post("/auth/email/confirmation/resend");
 
-        $this->assertEquals(400, $response->getStatusCode(), $this->getResponseBody($response));
+        $response->assertStatus(400);
 
         $body = $this->getJsonResponseBody($response);
 
@@ -267,6 +271,6 @@ class EmailConfirmationControllerTest extends TestCase implements DatabaseTransa
 
         $mock->expects($this->never())->method('send');
 
-        $this->app->container->bind(MailerInterface::class, $mock);
+        $this->getContainer()->bind(MailerInterface::class, fn () => $mock);
     }
 }

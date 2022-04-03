@@ -11,7 +11,7 @@ use App\Repository\EmailConfirmationRepository;
 use App\Repository\UserRepository;
 use App\Service\Mailer\MailerInterface;
 use App\Service\UriService;
-use Cycle\ORM\TransactionInterface;
+use Cycle\ORM\EntityManagerInterface;
 use Spiral\Prototype\Annotation\Prototyped;
 
 /**
@@ -27,14 +27,14 @@ class EmailConfirmationService extends HelperService
     /**
      * EmailConfirmationService constructor.
      *
-     * @param \Cycle\ORM\TransactionInterface $tr
+     * @param \Cycle\ORM\EntityManagerInterface $tr
      * @param \App\Repository\UserRepository $userRepository
      * @param \App\Service\Mailer\MailerInterface $mailer
      * @param \App\Service\UriService $uri
      * @param \App\Repository\EmailConfirmationRepository $repository
      */
     public function __construct(
-        TransactionInterface $tr,
+        EntityManagerInterface $tr,
         UserRepository $userRepository,
         MailerInterface $mailer,
         UriService $uri,
@@ -86,6 +86,7 @@ class EmailConfirmationService extends HelperService
      */
     public function reSend(User $user): void
     {
+        /** @var \App\Database\EmailConfirmation|null $confirmation */
         $confirmation = $this->repository->findByPK($user->email);
         if ($confirmation instanceof EmailConfirmation) {
             if ($this->isThrottled($confirmation->createdAt)) {

@@ -15,7 +15,7 @@ trait AuthAsserts
             'password' => $password,
         ]);
 
-        $this->assertEquals(200, $response->getStatusCode(), $this->getResponseBody($response));
+        $response->assertOk();
     }
 
     protected function assertUserCannotLogin(User $user, string $password): void
@@ -25,6 +25,6 @@ trait AuthAsserts
             'password' => $password,
         ]);
 
-        $this->assertEquals(400, $response->getStatusCode(), $this->getResponseBody($response));
+        $response->assertStatus(400);
     }
 }

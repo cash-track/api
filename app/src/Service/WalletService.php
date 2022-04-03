@@ -10,52 +10,16 @@ use App\Database\Wallet;
 use App\Mail\WalletShareMail;
 use App\Repository\CurrencyRepository;
 use App\Service\Mailer\MailerInterface;
-use Cycle\ORM\TransactionInterface;
-use Spiral\Prototype\Annotation\Prototyped;
+use Cycle\ORM\EntityManagerInterface;
 
-/**
- * @Prototyped(property="walletService")
- */
 class WalletService
 {
-    /**
-     * @var \Cycle\ORM\TransactionInterface
-     */
-    private $tr;
-
-    /**
-     * @var \App\Repository\CurrencyRepository
-     */
-    private $currencyRepository;
-
-    /**
-     * @var \App\Service\Mailer\MailerInterface
-     */
-    private $mailer;
-
-    /**
-     * @var \App\Service\UriService
-     */
-    private $uri;
-
-    /**
-     * WalletService constructor.
-     *
-     * @param \Cycle\ORM\TransactionInterface $tr
-     * @param \App\Repository\CurrencyRepository $currencyRepository
-     * @param \App\Service\UriService $uri
-     * @param \App\Service\Mailer\MailerInterface $mailer
-     */
     public function __construct(
-        TransactionInterface $tr,
-        CurrencyRepository $currencyRepository,
-        UriService $uri,
-        MailerInterface $mailer
+        private EntityManagerInterface $tr,
+        private CurrencyRepository $currencyRepository,
+        private UriService $uri,
+        private MailerInterface $mailer
     ) {
-        $this->tr = $tr;
-        $this->currencyRepository = $currencyRepository;
-        $this->mailer = $mailer;
-        $this->uri = $uri;
     }
 
     /**
@@ -229,13 +193,14 @@ class WalletService
             $code = $wallet->defaultCurrencyCode;
         }
 
+        /** @var \App\Database\Currency|null $currency */
         $currency = $this->currencyRepository->findByPK($code);
 
         if (! $currency instanceof Currency) {
             throw new \RuntimeException("Unable to get currency by code [{$code}]");
         }
 
-        $wallet->defaultCurrency = $currency;
+        $wallet->setDefaultCurrency($currency);
 
         return $wallet;
     }

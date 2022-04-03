@@ -21,6 +21,7 @@ class CurrencyRepository extends Repository
      */
     public function getDefault(): ?Currency
     {
+        /** @var \App\Database\Currency|null $currency */
         $currency = $this->findByPK(Currency::DEFAULT_CURRENCY_CODE);
 
         if ($currency instanceof Currency) {

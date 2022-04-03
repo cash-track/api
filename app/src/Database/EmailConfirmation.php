@@ -4,38 +4,25 @@ declare(strict_types=1);
 
 namespace App\Database;
 
-use Cycle\Annotated\Annotation as Cycle;
+use App\Repository\EmailConfirmationRepository;
+use Cycle\Annotated\Annotation as ORM;
 
-/**
- * @Cycle\Entity(repository = "App\Repository\EmailConfirmationRepository")
- * @Cycle\Table(indexes={
- *     @Cycle\Table\Index(columns = {"token"}),
- *     @Cycle\Table\Index(columns = {"email"}, unique = true)
- * })
- */
+#[ORM\Entity(repository: EmailConfirmationRepository::class)]
+#[ORM\Table(indexes: [
+    new ORM\Table\Index(columns: ['token']),
+    new ORM\Table\Index(columns: ['email'], unique: true),
+])]
 class EmailConfirmation
 {
-    /**
-     * @Cycle\Column(type = "string", primary = true)
-     * @var string|null
-     */
-    public $email;
+    #[ORM\Column(type: 'string', primary: true)]
+    public string|null $email = null;
 
-    /**
-     * @Cycle\Column(type = "string")
-     * @var string
-     */
-    public $token = '';
+    #[ORM\Column('string')]
+    public string $token = '';
 
-    /**
-     * @Cycle\Column(type = "datetime", name = "created_at")
-     * @var \DateTimeImmutable
-     */
-    public $createdAt;
+    #[ORM\Column(type: 'datetime', name: 'created_at')]
+    public \DateTimeImmutable $createdAt;
 
-    /**
-     * EmailConfirmation constructor.
-     */
     public function __construct()
     {
         $this->createdAt = new \DateTimeImmutable();

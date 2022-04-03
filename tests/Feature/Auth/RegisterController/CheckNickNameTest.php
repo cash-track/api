@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Auth\RegisterController;
 
-use App\Service\UserService;
 use Tests\DatabaseTransaction;
 use Tests\Fixtures;
 use Tests\Factories\UserFactory;
@@ -12,25 +11,36 @@ use Tests\TestCase;
 
 class CheckNickNameTest extends TestCase implements DatabaseTransaction
 {
+    /**
+     * @var \Tests\Factories\UserFactory
+     */
+    protected UserFactory $userFactory;
+
+    public function setUp(): void
+    {
+        parent::setUp();
+
+        $this->userFactory = $this->getContainer()->get(UserFactory::class);
+    }
+
     public function testNickNameFree(): void
     {
         $response = $this->post('/auth/register/check/nick-name', [
             'nickName' => Fixtures::string(),
         ]);
 
-        $this->assertEquals(200, $response->getStatusCode());
+        $response->assertOk();
     }
 
     public function testClaimed(): void
     {
-        $user = UserFactory::make();
-        $this->app->get(UserService::class)->store($user);
+        $user = $this->userFactory->create();
 
         $response = $this->post('/auth/register/check/nick-name', [
             'nickName' => $user->nickName
         ]);
 
-        $this->assertEquals(422, $response->getStatusCode());
+        $response->assertUnprocessable();
     }
 
     /**
@@ -44,7 +54,7 @@ class CheckNickNameTest extends TestCase implements DatabaseTransaction
             'nickName' => $nickName,
         ]);
 
-        $this->assertEquals(422, $response->getStatusCode(), "Attempted value: {$nickName}");
+        $response->assertUnprocessable();
     }
 
     public function provideInvalidNickNames(): array

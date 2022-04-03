@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Controller\Auth;
 
+use App\Database\Currency;
+use App\Repository\CurrencyRepository;
 use App\Request\CheckNickNameRequest;
 use App\Request\RegisterRequest;
 use App\Service\Auth\AuthService;
@@ -34,6 +36,7 @@ final class RegisterController
         protected ResponseWrapper $response,
         protected EmailConfirmationService $emailConfirmationService,
         protected RefreshTokenService $refreshTokenService,
+        private CurrencyRepository $currencyRepository,
     ) {
     }
 
@@ -52,6 +55,13 @@ final class RegisterController
         }
 
         $user = $request->createUser();
+
+        $currency = $this->currencyRepository->getDefault();
+
+        if ($currency instanceof Currency) {
+            $user->setDefaultCurrency($currency);
+        }
+
         $this->authService->hashPassword($user, $request->getField('password'));
 
         try {

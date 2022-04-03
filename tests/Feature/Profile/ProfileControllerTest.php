@@ -8,7 +8,7 @@ use App\Database\User;
 use App\Repository\CurrencyRepository;
 use App\Request\Profile\UpdateBasicRequest;
 use App\Service\UserService;
-use Psr\Http\Message\ResponseInterface;
+use Spiral\Testing\Http\TestResponse;
 use Tests\DatabaseTransaction;
 use Tests\Factories\UserFactory;
 use Tests\Fixtures;
@@ -25,7 +25,7 @@ class ProfileControllerTest extends TestCase implements DatabaseTransaction
     {
         parent::setUp();
 
-        $this->userFactory = $this->app->get(UserFactory::class);
+        $this->userFactory = $this->getContainer()->get(UserFactory::class);
     }
 
     private function userFields(): array
@@ -49,7 +49,7 @@ class ProfileControllerTest extends TestCase implements DatabaseTransaction
     {
         $response = $this->get('/profile');
 
-        $this->assertEquals(401, $response->getStatusCode(), $this->getResponseBody($response));
+        $response->assertUnauthorized();
     }
 
     public function testIndex(): void
@@ -58,12 +58,12 @@ class ProfileControllerTest extends TestCase implements DatabaseTransaction
 
         $response = $this->withAuth($auth)->get('/profile');
 
-        $this->assertEquals(200, $response->getStatusCode(), $this->getResponseBody($response));
+        $response->assertOk();
 
         $this->assertProfileResponse($user, $response);
     }
 
-    private function assertProfileResponse(User $user, ResponseInterface $response, array $fields = null): void
+    private function assertProfileResponse(User $user, TestResponse $response, array $fields = null): void
     {
         $body = $this->getJsonResponseBody($response);
 
@@ -86,7 +86,7 @@ class ProfileControllerTest extends TestCase implements DatabaseTransaction
     {
         $response = $this->post('/profile/check/nick-name');
 
-        $this->assertEquals(401, $response->getStatusCode(), $this->getResponseBody($response));
+        $response->assertUnauthorized();
     }
 
     public function testCheckNickNamePassForCurrent(): void
@@ -97,7 +97,7 @@ class ProfileControllerTest extends TestCase implements DatabaseTransaction
             'nickName' => $user->nickName,
         ]);
 
-        $this->assertEquals(200, $response->getStatusCode(), $this->getResponseBody($response));
+        $response->assertOk();
 
         $body = $this->getJsonResponseBody($response);
 
@@ -112,7 +112,7 @@ class ProfileControllerTest extends TestCase implements DatabaseTransaction
             'nickName' => Fixtures::string(),
         ]);
 
-        $this->assertEquals(200, $response->getStatusCode(), $this->getResponseBody($response));
+        $response->assertOk();
 
         $body = $this->getJsonResponseBody($response);
 
@@ -129,7 +129,7 @@ class ProfileControllerTest extends TestCase implements DatabaseTransaction
             'nickName' => $existingUser->nickName,
         ]);
 
-        $this->assertEquals(422, $response->getStatusCode(), $this->getResponseBody($response));
+        $response->assertUnprocessable();
 
         $body = $this->getJsonResponseBody($response);
 
@@ -155,7 +155,7 @@ class ProfileControllerTest extends TestCase implements DatabaseTransaction
             'nickName' => $nickName,
         ]);
 
-        $this->assertEquals(422, $response->getStatusCode(), $this->getResponseBody($response));
+        $response->assertUnprocessable();
 
         $body = $this->getJsonResponseBody($response);
 
@@ -167,7 +167,7 @@ class ProfileControllerTest extends TestCase implements DatabaseTransaction
     {
         $response = $this->put('/profile/');
 
-        $this->assertEquals(401, $response->getStatusCode(), $this->getResponseBody($response));
+        $response->assertUnauthorized();
     }
 
     public function testUpdate(): void
@@ -183,7 +183,7 @@ class ProfileControllerTest extends TestCase implements DatabaseTransaction
             'defaultCurrencyCode' => $newProfile->defaultCurrencyCode,
         ]);
 
-        $this->assertEquals(200, $response->getStatusCode(), $this->getResponseBody($response));
+        $response->assertOk();
 
         $this->assertProfileResponse($newProfile, $response);
 
@@ -206,7 +206,7 @@ class ProfileControllerTest extends TestCase implements DatabaseTransaction
             'defaultCurrencyCode' => null,
         ]);
 
-        $this->assertEquals(422, $response->getStatusCode(), $this->getResponseBody($response));
+        $response->assertUnprocessable();
 
         $body = $this->getJsonResponseBody($response);
 
@@ -228,7 +228,7 @@ class ProfileControllerTest extends TestCase implements DatabaseTransaction
             'defaultCurrencyCode' => 123,
         ]);
 
-        $this->assertEquals(422, $response->getStatusCode(), $this->getResponseBody($response));
+        $response->assertUnprocessable();
 
         $body = $this->getJsonResponseBody($response);
 
@@ -257,7 +257,7 @@ class ProfileControllerTest extends TestCase implements DatabaseTransaction
             'defaultCurrencyCode' => $newProfile->defaultCurrencyCode,
         ]);
 
-        $this->assertEquals(422, $response->getStatusCode(), $this->getResponseBody($response));
+        $response->assertUnprocessable();
 
         $body = $this->getJsonResponseBody($response);
 
@@ -278,7 +278,7 @@ class ProfileControllerTest extends TestCase implements DatabaseTransaction
             'defaultCurrencyCode' => $newProfile->defaultCurrencyCode,
         ]);
 
-        $this->assertEquals(422, $response->getStatusCode(), $this->getResponseBody($response));
+        $response->assertUnprocessable();
 
         $body = $this->getJsonResponseBody($response);
 
@@ -313,8 +313,8 @@ class ProfileControllerTest extends TestCase implements DatabaseTransaction
                        ->with($missingCurrencyCode)
                        ->willReturn(null);
 
-        $this->app->container->bind(UpdateBasicRequest::class, $requestMock);
-        $this->app->container->bind(CurrencyRepository::class, $repositoryMock);
+        $this->getContainer()->bind(UpdateBasicRequest::class, fn () => $requestMock);
+        $this->getContainer()->bind(CurrencyRepository::class, fn () => $repositoryMock);
 
         $response = $this->withAuth($auth)->put('/profile', [
             'name' => $newProfile->name,
@@ -323,7 +323,7 @@ class ProfileControllerTest extends TestCase implements DatabaseTransaction
             'defaultCurrencyCode' => $missingCurrencyCode,
         ]);
 
-        $this->assertEquals(500, $response->getStatusCode(), $this->getResponseBody($response));
+        $response->assertStatus(500);
 
         $body = $this->getJsonResponseBody($response);
 
@@ -350,7 +350,7 @@ class ProfileControllerTest extends TestCase implements DatabaseTransaction
              ->method('store')
              ->willThrowException(new \RuntimeException('Storage exception.'));
 
-        $this->app->container->bind(UserService::class, $mock);
+        $this->getContainer()->bind(UserService::class, $mock);
 
         $response = $this->withAuth($auth)->put('/profile', [
             'name' => $newProfile->name,
@@ -359,7 +359,7 @@ class ProfileControllerTest extends TestCase implements DatabaseTransaction
             'defaultCurrencyCode' => $newProfile->defaultCurrencyCode,
         ]);
 
-        $this->assertEquals(500, $response->getStatusCode(), $this->getResponseBody($response));
+        $response->assertStatus(500);
 
         $body = $this->getJsonResponseBody($response);
 

@@ -4,16 +4,11 @@ declare(strict_types=1);
 
 namespace App\Database;
 
-use Cycle\Annotated\Annotation as Cycle;
+use Cycle\Annotated\Annotation as ORM;
 
-/**
- * @Cycle\Entity
- */
+#[ORM\Entity]
 class UserWallet
 {
-    /**
-     * @Cycle\Column(type = "primary")
-     * @var int|null
-     */
-    public $id;
+    #[ORM\Column('primary')]
+    public int|null $id = null;
 }

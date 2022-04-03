@@ -5,8 +5,7 @@ declare(strict_types=1);
 namespace App\Service;
 
 use App\Database\User;
-use Cycle\ORM\ORM;
-use Cycle\ORM\TransactionInterface;
+use Cycle\ORM\EntityManagerInterface;
 use Spiral\Prototype\Annotation\Prototyped;
 
 /**
@@ -15,24 +14,18 @@ use Spiral\Prototype\Annotation\Prototyped;
 class UserService
 {
     /**
-     * @var \Cycle\ORM\TransactionInterface
+     * @var \Cycle\ORM\EntityManagerInterface
      */
     private $tr;
 
     /**
-     * @var \Cycle\ORM\ORM
-     */
-    private $orm;
-
-    /**
      * UserService constructor.
      *
-     * @param \Cycle\ORM\TransactionInterface $tr
+     * @param \Cycle\ORM\EntityManagerInterface $tr
      */
-    public function __construct(TransactionInterface $tr, ORM $orm)
+    public function __construct(EntityManagerInterface $tr)
     {
         $this->tr = $tr;
-        $this->orm = $orm;
     }
 
     /**

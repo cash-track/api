@@ -20,7 +20,7 @@ class RefreshControllerTest extends TestCase implements DatabaseTransaction
     {
         parent::setUp();
 
-        $this->userFactory = $this->app->get(UserFactory::class);
+        $this->userFactory = $this->getContainer()->get(UserFactory::class);
     }
 
     /**
@@ -32,7 +32,7 @@ class RefreshControllerTest extends TestCase implements DatabaseTransaction
     protected function getRefreshToken(int $userId, \DateTimeImmutable $expiredAt = null): string
     {
         /** @var RefreshTokenStorage $tokenStorage */
-        $tokenStorage = $this->app->get(RefreshTokenStorage::class);
+        $tokenStorage = $this->getContainer()->get(RefreshTokenStorage::class);
 
         return $tokenStorage->create([
             'sub' => $userId,
@@ -48,7 +48,7 @@ class RefreshControllerTest extends TestCase implements DatabaseTransaction
             'accessToken' => $auth['accessToken'],
         ]);
 
-        $this->assertEquals(200, $response->getStatusCode(), $this->getResponseBody($response));
+        $response->assertOk();
 
         $newAuth = $this->getJsonResponseBody($response);
 
@@ -56,7 +56,7 @@ class RefreshControllerTest extends TestCase implements DatabaseTransaction
         $this->assertNotEquals($auth['refreshToken'], $newAuth['refreshToken']);
 
         $response = $this->withAuth($newAuth)->get('/profile');
-        $this->assertEquals(200, $response->getStatusCode(), $this->getResponseBody($response));
+        $response->assertOk();
 
         // TODO. Add checking to access protected endpoints once token blacklist implemented
     }
@@ -67,7 +67,7 @@ class RefreshControllerTest extends TestCase implements DatabaseTransaction
 
         $response = $this->withAuthRefresh($auth)->post('/auth/refresh');
 
-        $this->assertEquals(200, $response->getStatusCode(), $this->getResponseBody($response));
+        $response->assertOk();
 
         $newAuth = $this->getJsonResponseBody($response);
 
@@ -75,7 +75,7 @@ class RefreshControllerTest extends TestCase implements DatabaseTransaction
         $this->assertNotEquals($auth['refreshToken'], $newAuth['refreshToken']);
 
         $response = $this->withAuth($newAuth)->get('/profile');
-        $this->assertEquals(200, $response->getStatusCode(), $this->getResponseBody($response));
+        $response->assertOk();
 
         // TODO. Add checking to access protected endpoints once token blacklist implemented
     }
@@ -84,7 +84,7 @@ class RefreshControllerTest extends TestCase implements DatabaseTransaction
     {
         $response = $this->post('/auth/refresh');
 
-        $this->assertEquals(401, $response->getStatusCode(), $this->getResponseBody($response));
+        $response->assertUnauthorized();
     }
 
     public function testRefreshFailsWithExpiredToken()
@@ -100,7 +100,7 @@ class RefreshControllerTest extends TestCase implements DatabaseTransaction
 
         $response = $this->withAuthRefresh($auth)->post('/auth/refresh');
 
-        $this->assertEquals(401, $response->getStatusCode(), $this->getResponseBody($response));
+        $response->assertUnauthorized();
     }
 
     public function testRefreshFailsWithMissingUser()
@@ -114,6 +114,6 @@ class RefreshControllerTest extends TestCase implements DatabaseTransaction
 
         $response = $this->withAuthRefresh($auth)->post('/auth/refresh');
 
-        $this->assertEquals(401, $response->getStatusCode(), $this->getResponseBody($response));
+        $response->assertUnauthorized();
     }
 }

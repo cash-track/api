@@ -19,13 +19,14 @@ class LogoutControllerTest extends TestCase implements DatabaseTransaction
     {
         parent::setUp();
 
-        $this->userFactory = $this->app->get(UserFactory::class);
+        $this->userFactory = $this->getContainer()->get(UserFactory::class);
     }
 
     public function testWithoutAuth(): void
     {
         $response = $this->post('/auth/logout');
-        $this->assertEquals(401, $response->getStatusCode(), $this->getResponseBody($response));
+
+        $response->assertUnauthorized();
 
         $body = $this->getJsonResponseBody($response);
 
@@ -37,7 +38,8 @@ class LogoutControllerTest extends TestCase implements DatabaseTransaction
         $auth = $this->makeAuth($this->userFactory->create());
 
         $response = $this->withAuth($auth)->post('/auth/logout');
-        $this->assertEquals(200, $response->getStatusCode(), $this->getResponseBody($response));
+
+        $response->assertOk();
 
         // TODO. Add checking to access protected endpoints once token blacklist implemented
     }
@@ -49,7 +51,8 @@ class LogoutControllerTest extends TestCase implements DatabaseTransaction
         $response = $this->withAuth($auth)->post('/auth/logout', [
             'refreshToken' => $auth['refreshToken'],
         ]);
-        $this->assertEquals(200, $response->getStatusCode(), $this->getResponseBody($response));
+
+        $response->assertOk();
 
         // TODO. Add checking to access protected endpoints once token blacklist implemented
         // TODO. Add checking to refresh once token blacklist implemented

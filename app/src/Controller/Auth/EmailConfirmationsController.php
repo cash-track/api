@@ -40,6 +40,7 @@ final class EmailConfirmationsController extends AuthAwareController
      */
     public function index(): ResponseInterface
     {
+        /** @var \App\Database\EmailConfirmation|null $confirmation */
         $confirmation = $this->emailConfirmationRepository->findByPK($this->user->email);
 
         if (! $confirmation instanceof EmailConfirmation) {

@@ -13,16 +13,23 @@ use Tests\TestCase;
 
 class RegisterTest extends TestCase implements DatabaseTransaction
 {
+    /**
+     * @var \Tests\Factories\UserFactory
+     */
+    protected UserFactory $userFactory;
+
     public function setUp(): void
     {
         parent::setUp();
+
+        $this->userFactory = $this->getContainer()->get(UserFactory::class);
 
         $email = $this->getMockBuilder(EmailConfirmationService::class)
                       ->disableOriginalConstructor()
                       ->onlyMethods(['create'])
                       ->getMock();
 
-        $this->app->container->bind(EmailConfirmationService::class, $email);
+        $this->getContainer()->bind(EmailConfirmationService::class, fn () => $email);
     }
 
     public function testUserCreated(): void
@@ -34,7 +41,7 @@ class RegisterTest extends TestCase implements DatabaseTransaction
 
         $mock->expects($this->once())->method('create');
 
-        $this->app->container->bind(EmailConfirmationService::class, $mock);
+        $this->getContainer()->bind(EmailConfirmationService::class, fn () => $mock);
 
         $user = UserFactory::make();
 
@@ -46,9 +53,9 @@ class RegisterTest extends TestCase implements DatabaseTransaction
             'passwordConfirmation' => UserFactory::DEFAULT_PASSWORD,
         ]);
 
-        $body = $this->getJsonResponseBody($response);
+        $response->assertOk();
 
-        $this->assertEquals(200, $response->getStatusCode(), $this->getResponseBody($response));
+        $body = $this->getJsonResponseBody($response);
 
         $this->assertArrayHasKey('data', $body);
         $this->assertArrayHasKey('id', $body['data']);
@@ -69,7 +76,7 @@ class RegisterTest extends TestCase implements DatabaseTransaction
              ->method('store')
              ->willThrowException(new \RuntimeException('Database exception'));
 
-        $this->app->container->bind(UserService::class, $mock);
+        $this->getContainer()->bind(UserService::class, fn () => $mock);
 
         $user = UserFactory::make();
 
@@ -81,7 +88,7 @@ class RegisterTest extends TestCase implements DatabaseTransaction
             'passwordConfirmation' => UserFactory::DEFAULT_PASSWORD,
         ]);
 
-        $this->assertEquals(500, $response->getStatusCode(), $this->getResponseBody($response));
+        $response->assertStatus(500);
 
         $body = $this->getJsonResponseBody($response);
 
@@ -103,7 +110,7 @@ class RegisterTest extends TestCase implements DatabaseTransaction
              ->method('create')
              ->willThrowException(new \RuntimeException('Transport exception'));
 
-        $this->app->container->bind(EmailConfirmationService::class, $mock);
+        $this->getContainer()->bind(EmailConfirmationService::class, fn () => $mock);
 
         $user = UserFactory::make();
 
@@ -115,9 +122,9 @@ class RegisterTest extends TestCase implements DatabaseTransaction
             'passwordConfirmation' => UserFactory::DEFAULT_PASSWORD,
         ]);
 
-        $body = $this->getJsonResponseBody($response);
+        $response->assertOk();
 
-        $this->assertEquals(200, $response->getStatusCode(), $this->getResponseBody($response));
+        $body = $this->getJsonResponseBody($response);
 
         $this->assertArrayHasKey('data', $body);
         $this->assertArrayHasKey('id', $body['data']);
@@ -137,7 +144,7 @@ class RegisterTest extends TestCase implements DatabaseTransaction
             'passwordConfirmation' => ''
         ]);
 
-        $this->assertEquals(422, $response->getStatusCode(), $this->getResponseBody($response));
+        $response->assertUnprocessable();
 
         $body = $this->getJsonResponseBody($response);
 
@@ -160,7 +167,7 @@ class RegisterTest extends TestCase implements DatabaseTransaction
             'passwordConfirmation' => Fixtures::string(5),
         ]);
 
-        $this->assertEquals(422, $response->getStatusCode(), $this->getResponseBody($response));
+        $response->assertUnprocessable();
 
         $body = $this->getJsonResponseBody($response);
 
@@ -171,8 +178,7 @@ class RegisterTest extends TestCase implements DatabaseTransaction
 
     public function testValidationFailsByNickNameExists(): void
     {
-        $existingUser = UserFactory::make();
-        $this->app->get(UserService::class)->store($existingUser);
+        $existingUser = $this->userFactory->create();
 
         $newUser = UserFactory::make();
 
@@ -184,7 +190,7 @@ class RegisterTest extends TestCase implements DatabaseTransaction
             'passwordConfirmation' => Fixtures::string(),
         ]);
 
-        $this->assertEquals(422, $response->getStatusCode(), $this->getResponseBody($response));
+        $response->assertUnprocessable();
 
         $body = $this->getJsonResponseBody($response);
 
@@ -206,7 +212,7 @@ class RegisterTest extends TestCase implements DatabaseTransaction
             'passwordConfirmation' => Fixtures::string(),
         ]);
 
-        $this->assertEquals(422, $response->getStatusCode(), $this->getResponseBody($response));
+        $response->assertUnprocessable();
 
         $body = $this->getJsonResponseBody($response);
 
@@ -227,8 +233,7 @@ class RegisterTest extends TestCase implements DatabaseTransaction
 
     public function testValidationFailsByEmailExists(): void
     {
-        $existingUser = UserFactory::make();
-        $this->app->get(UserService::class)->store($existingUser);
+        $existingUser = $this->userFactory->create();
 
         $newUser = UserFactory::make();
 
@@ -240,7 +245,7 @@ class RegisterTest extends TestCase implements DatabaseTransaction
             'passwordConfirmation' => Fixtures::string(),
         ]);
 
-        $this->assertEquals(422, $response->getStatusCode(), $this->getResponseBody($response));
+        $response->assertUnprocessable();
 
         $body = $this->getJsonResponseBody($response);
 
@@ -264,7 +269,7 @@ class RegisterTest extends TestCase implements DatabaseTransaction
             'passwordConfirmation' => Fixtures::string(),
         ]);
 
-        $this->assertEquals(422, $response->getStatusCode(), $this->getResponseBody($response));
+        $response->assertUnprocessable();
 
         $body = $this->getJsonResponseBody($response);
 

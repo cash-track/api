@@ -14,6 +14,8 @@ use Spiral\Prototype\Bootloader as Prototype;
 use Spiral\Router\Bootloader as Router;
 use Spiral\Scaffolder\Bootloader as Scaffolder;
 use Spiral\Stempler\Bootloader as Stempler;
+use Spiral\Cycle\Bootloader as CycleBridge;
+use Spiral\RoadRunnerBridge\Bootloader as RoadRunnerBridge;
 
 class App extends Kernel
 {
@@ -22,6 +24,12 @@ class App extends Kernel
      * within system container on application start.
      */
     protected const LOAD = [
+        RoadRunnerBridge\CacheBootloader::class,
+        RoadRunnerBridge\GRPCBootloader::class,
+        RoadRunnerBridge\HttpBootloader::class,
+        RoadRunnerBridge\QueueBootloader::class,
+        RoadRunnerBridge\RoadRunnerBootloader::class,
+
         // Base extensions
         DotEnv\DotenvBootloader::class,
         Monolog\MonologBootloader::class,
@@ -52,20 +60,22 @@ class App extends Kernel
         Framework\Http\PaginationBootloader::class,
 
         // Databases
-        Framework\Database\DatabaseBootloader::class,
-        Framework\Database\MigrationsBootloader::class,
+        CycleBridge\DatabaseBootloader::class,
+        CycleBridge\MigrationsBootloader::class,
+        // CycleBridge\DisconnectsBootloader::class,
 
         // ORM
-        Framework\Cycle\CycleBootloader::class,
-        Framework\Cycle\ProxiesBootloader::class,
-        Framework\Cycle\AnnotatedBootloader::class,
+        CycleBridge\SchemaBootloader::class,
+        CycleBridge\CycleOrmBootloader::class,
+        CycleBridge\AnnotatedBootloader::class,
+        CycleBridge\CommandBootloader::class,
 
         // Views and view translation
         Framework\Views\ViewsBootloader::class,
         Framework\Views\TranslatedCacheBootloader::class,
 
         // Additional dispatchers
-        Framework\Jobs\JobsBootloader::class,
+        // Framework\Jobs\JobsBootloader::class,
 
         // Extensions and bridges
         Stempler\StemplerBootloader::class,
@@ -84,6 +94,8 @@ class App extends Kernel
         Auth\Jwt\TokensBootloader::class,
 
         Service\Pagination\PaginationBootloader::class,
+
+        RoadRunnerBridge\CommandBootloader::class,
     ];
 
     /*

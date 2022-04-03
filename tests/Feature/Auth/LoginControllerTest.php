@@ -21,7 +21,7 @@ class LoginControllerTest extends TestCase implements DatabaseTransaction
     {
         parent::setUp();
 
-        $this->userFactory = $this->app->get(UserFactory::class);
+        $this->userFactory = $this->getContainer()->get(UserFactory::class);
     }
 
     public function testLoggedIn(): void
@@ -33,7 +33,7 @@ class LoginControllerTest extends TestCase implements DatabaseTransaction
             'password' => UserFactory::DEFAULT_PASSWORD,
         ]);
 
-        $this->assertEquals(200, $response->getStatusCode(), $this->getResponseBody($response));
+        $response->assertOk();
 
         $auth = $this->getJsonResponseBody($response);
 
@@ -44,7 +44,7 @@ class LoginControllerTest extends TestCase implements DatabaseTransaction
 
         $response = $this->withAuth($auth)->get('/profile');
 
-        $this->assertEquals(200, $response->getStatusCode(), $this->getResponseBody($response));
+        $response->assertOk();
 
         $body = $this->getJsonResponseBody($response);
 
@@ -63,7 +63,7 @@ class LoginControllerTest extends TestCase implements DatabaseTransaction
             'password' => UserFactory::DEFAULT_PASSWORD,
         ]);
 
-        $this->assertEquals(400, $response->getStatusCode(), $this->getResponseBody($response));
+        $response->assertStatus(400);
 
         $body = $this->getJsonResponseBody($response);
 
@@ -79,7 +79,7 @@ class LoginControllerTest extends TestCase implements DatabaseTransaction
             'password' => Fixtures::string(),
         ]);
 
-        $this->assertEquals(400, $response->getStatusCode(), $this->getResponseBody($response));
+        $response->assertStatus(400);
 
         $body = $this->getJsonResponseBody($response);
 
@@ -100,14 +100,14 @@ class LoginControllerTest extends TestCase implements DatabaseTransaction
              ->with($user->email)
              ->willThrowException(new \RuntimeException('Database exception'));
 
-        $this->app->container->bind(UserRepository::class, $mock);
+        $this->getContainer()->bind(UserRepository::class, fn () => $mock);
 
         $response = $this->post('/auth/login', [
             'email' => $user->email,
             'password' => UserFactory::DEFAULT_PASSWORD,
         ]);
 
-        $this->assertEquals(500, $response->getStatusCode(), $this->getResponseBody($response));
+        $response->assertStatus(500);
 
         $body = $this->getJsonResponseBody($response);
 
@@ -119,7 +119,7 @@ class LoginControllerTest extends TestCase implements DatabaseTransaction
     {
         $response = $this->post('/auth/login', []);
 
-        $this->assertEquals(422, $response->getStatusCode(), $this->getResponseBody($response));
+        $response->assertUnprocessable();
 
         $body = $this->getJsonResponseBody($response);
 
@@ -135,7 +135,7 @@ class LoginControllerTest extends TestCase implements DatabaseTransaction
             'password' => '',
         ]);
 
-        $this->assertEquals(422, $response->getStatusCode(), $this->getResponseBody($response));
+        $response->assertUnprocessable();
 
         $body = $this->getJsonResponseBody($response);
 

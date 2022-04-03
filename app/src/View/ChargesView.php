@@ -6,20 +6,16 @@ namespace App\View;
 
 use Psr\Http\Message\ResponseInterface;
 use Spiral\Core\Container\SingletonInterface;
-use Spiral\Prototype\Annotation\Prototyped;
-use Spiral\Prototype\Traits\PrototypeTrait;
+use Spiral\Http\ResponseWrapper;
 
-/**
- * @Prototyped(property="chargesView")
- */
 class ChargesView implements SingletonInterface
 {
-    use PrototypeTrait;
+    public function __construct(
+        protected ResponseWrapper $response,
+        protected ChargeView $chargeView,
+    ) {
+    }
 
-    /**
-     * @param \App\Database\Charge[] $charges
-     * @return \Psr\Http\Message\ResponseInterface
-     */
     public function json(array $charges): ResponseInterface
     {
         return $this->response->json([
@@ -27,11 +23,6 @@ class ChargesView implements SingletonInterface
         ], 200);
     }
 
-    /**
-     * @param \App\Database\Charge[] $charges
-     * @param array $paginationState
-     * @return \Psr\Http\Message\ResponseInterface
-     */
     public function jsonPaginated(array $charges, array $paginationState): ResponseInterface
     {
         return $this->response->json([
@@ -40,10 +31,6 @@ class ChargesView implements SingletonInterface
         ], 200);
     }
 
-    /**
-     * @param \App\Database\Charge[] $charges
-     * @return array
-     */
     public function map(array $charges): array
     {
         return array_map([$this->chargeView, 'map'], $charges);

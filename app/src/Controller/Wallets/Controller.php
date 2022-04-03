@@ -6,12 +6,9 @@ namespace App\Controller\Wallets;
 
 use App\Database\User;
 use Spiral\Auth\AuthScope;
-use Spiral\Prototype\Traits\PrototypeTrait;
 
 class Controller
 {
-    use PrototypeTrait;
-
     /**
      * @var \App\Database\User
      */

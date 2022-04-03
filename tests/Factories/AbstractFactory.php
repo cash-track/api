@@ -4,15 +4,17 @@ declare(strict_types=1);
 
 namespace Tests\Factories;
 
-use Cycle\ORM\TransactionInterface;
+use App\Repository\CurrencyRepository;
+use Cycle\ORM\EntityManagerInterface;
 
 abstract class AbstractFactory
 {
     /**
-     * @param \Cycle\ORM\TransactionInterface $transaction
+     * @param EntityManagerInterface $transaction
      */
     public function __construct(
-        protected TransactionInterface $transaction
+        protected EntityManagerInterface $transaction,
+        protected CurrencyRepository $currencyRepository,
     ) {
     }
 

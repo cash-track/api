@@ -5,13 +5,25 @@ declare(strict_types=1);
 namespace App\Controller\Wallets;
 
 use App\Database\Wallet;
+use App\Repository\WalletRepository;
+use App\Service\WalletService;
 use Psr\Http\Message\ResponseInterface;
-use Spiral\Prototype\Traits\PrototypeTrait;
+use Psr\Log\LoggerInterface;
+use Spiral\Auth\AuthScope;
+use Spiral\Http\ResponseWrapper;
 use Spiral\Router\Annotation\Route;
 
 final class ActiveController extends Controller
 {
-    use PrototypeTrait;
+    public function __construct(
+        AuthScope $auth,
+        private ResponseWrapper $response,
+        private LoggerInterface $logger,
+        private WalletService $walletService,
+        private WalletRepository $walletRepository,
+    ) {
+        parent::__construct($auth);
+    }
 
     /**
      * @Route(route="/wallets/<id>/activate", name="wallet.activate", methods="POST", group="auth")
@@ -21,7 +33,7 @@ final class ActiveController extends Controller
      */
     public function activate(int $id): ResponseInterface
     {
-        $wallet = $this->wallets->findByPKByUserPK($id, (int) $this->user->id);
+        $wallet = $this->walletRepository->findByPKByUserPK($id, (int) $this->user->id);
 
         if (! $wallet instanceof Wallet) {
             return $this->response->create(404);
@@ -53,7 +65,7 @@ final class ActiveController extends Controller
      */
     public function disable(int $id): ResponseInterface
     {
-        $wallet = $this->wallets->findByPKByUserPK($id, (int) $this->user->id);
+        $wallet = $this->walletRepository->findByPKByUserPK($id, (int) $this->user->id);
 
         if (! $wallet instanceof Wallet) {
             return $this->response->create(404);

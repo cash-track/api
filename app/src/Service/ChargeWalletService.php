@@ -6,7 +6,7 @@ namespace App\Service;
 
 use App\Database\Charge;
 use App\Database\Wallet;
-use Cycle\ORM\TransactionInterface;
+use Cycle\ORM\EntityManagerInterface;
 use Spiral\Prototype\Annotation\Prototyped;
 
 /**
@@ -15,16 +15,16 @@ use Spiral\Prototype\Annotation\Prototyped;
 class ChargeWalletService
 {
     /**
-     * @var \Cycle\ORM\TransactionInterface
+     * @var \Cycle\ORM\EntityManagerInterface
      */
     private $tr;
 
     /**
      * ChargeWalletService constructor.
      *
-     * @param \Cycle\ORM\TransactionInterface $tr
+     * @param \Cycle\ORM\EntityManagerInterface $tr
      */
-    public function __construct(TransactionInterface $tr)
+    public function __construct(EntityManagerInterface $tr)
     {
         $this->tr = $tr;
     }

@@ -4,102 +4,75 @@ declare(strict_types=1);
 
 namespace Tests;
 
-use PHPUnit\Framework\TestCase as BaseTestCase;
-use Spiral\Boot\DirectoriesInterface;
-use Spiral\Boot\Environment;
-use Spiral\Database\DatabaseInterface;
-use Spiral\Files\Files;
-use Spiral\Http\Http;
+use Cycle\Database\DatabaseInterface;
+use Spiral\Config\ConfiguratorInterface;
+use Spiral\Config\Patch\Set;
+use Spiral\Core\Container;
+use Spiral\Testing\TestableKernelInterface;
+use Spiral\Testing\TestCase as BaseTestCase;
 use Spiral\Translator\TranslatorInterface;
-use Spiral\Views\ViewsInterface;
-use Tests\Traits\InteractsWithConsole;
+use Tests\App\TestApp;
 use Tests\Traits\InteractsWithDatabase;
 use Tests\Traits\InteractsWithHttp;
 use Tests\Traits\ProvideAuth;
 
 abstract class TestCase extends BaseTestCase
 {
-    use InteractsWithConsole;
     use InteractsWithHttp;
     use InteractsWithDatabase;
     use ProvideAuth;
 
-    /**
-     * @var \Tests\TestApp
-     */
-    protected $app;
-
-    /**
-     * @var \Spiral\Http\Http
-     */
-    protected $http;
-
-    /**
-     * @var \Spiral\Views\ViewsInterface
-     */
-    protected $views;
-
-    /**
-     * @var \Spiral\Database\DatabaseInterface
-     */
-    protected DatabaseInterface $db;
-
     protected function setUp(): void
     {
-        $this->app = $this->makeApp();
-        $this->http = $this->app->get(HTTP::class);
-        $this->views = $this->app->get(ViewsInterface::class);
-        $this->db = $this->app->get(DatabaseInterface::class);
-        $this->app->get(TranslatorInterface::class)->setLocale('en');
+        $this->beforeStarting(static function (ConfiguratorInterface $config): void {
+            if (! $config->exists('session')) {
+                return;
+            }
+
+            $config->modify('session', new Set('handler', null));
+        });
+
+        parent::setUp();
+
+        $this->getContainer()->get(TranslatorInterface::class)->setLocale('en');
 
         if ($this instanceof DatabaseTransaction) {
-            $this->db->begin();
+            $this->getContainer()->get(DatabaseInterface::class)->begin();
         }
     }
 
     protected function tearDown(): void
     {
         if ($this instanceof DatabaseTransaction) {
-            $this->db->rollback();
+            $this->getContainer()->get(DatabaseInterface::class)->rollback();
         }
 
-        $fs = new Files();
-
-        $runtime = $this->app->get(DirectoriesInterface::class)->get('runtime');
-        if ($fs->isDirectory($runtime)) {
-            $fs->deleteDirectory($runtime);
-        }
-
-        if (! TestApp::$reuseApp) {
-            $this->db->getDriver()->disconnect();
-            unset($this->db);
-            $this->http = null;
-            $this->views = null;
-            $this->app->flushContainer();
-            $this->app = null;
-        }
-
-        if (in_array('--debug', $_SERVER['argv'], true)) {
-            $this->printMemoryUsage();
-        }
-    }
-
-    protected function makeApp(array $env = []): TestApp
-    {
-        $root = dirname(__DIR__);
-
-        return TestApp::getInstance(function () use ($root, $env): TestApp {
-            return TestApp::init([
-                'root' => $root,
-                'app' => $root . '/app',
-                'runtime' => $root . '/runtime/tests',
-                'cache' => $root . '/runtime/tests/cache',
-            ], new Environment($env), false);
-        });
+        // Uncomment this line if you want to clean up runtime directory.
+        // $this->cleanUpRuntimeDirectory();
     }
 
     protected function printMemoryUsage(string $title = 'memory usage now'): void
     {
-        echo $title . ' : ' . round(memory_get_usage() / 1024 / 1024) . 'MB' . PHP_EOL;
+        echo $title . ' : ' . round(memory_get_usage(true) / 1024 / 1024) . 'MB' . PHP_EOL;
     }
+
+    public function rootDirectory(): string
+    {
+        return __DIR__.'/..';
+    }
+
+    public function defineDirectories(string $root): array
+    {
+        return [
+            'root' => $root,
+        ];
+    }
+
+    public function createAppInstance(): TestableKernelInterface
+    {
+        return new TestApp(new Container(), $this->defineDirectories(
+            $this->rootDirectory()
+        ));
+    }
+
 }
