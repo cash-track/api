@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests;
 
 use Cycle\Database\DatabaseInterface;
+use Cycle\Database\DatabaseManager;
 use Spiral\Config\ConfiguratorInterface;
 use Spiral\Config\Patch\Set;
 use Spiral\Core\Container;
@@ -49,6 +50,10 @@ abstract class TestCase extends BaseTestCase
 
         // Uncomment this line if you want to clean up runtime directory.
         // $this->cleanUpRuntimeDirectory();
+
+        foreach ($this->getContainer()->get(DatabaseManager::class)->getDrivers() as $driver) {
+            $driver->disconnect();
+        }
     }
 
     protected function printMemoryUsage(string $title = 'memory usage now'): void
