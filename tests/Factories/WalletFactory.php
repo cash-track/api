@@ -65,7 +65,7 @@ class WalletFactory extends AbstractFactory
         return $wallet;
     }
 
-    public static function inactive(Wallet $wallet = null): Wallet
+    public static function disabled(Wallet $wallet = null): Wallet
     {
         if ($wallet === null) {
             $wallet = self::make();

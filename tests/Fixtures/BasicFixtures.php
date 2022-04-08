@@ -53,4 +53,9 @@ trait BasicFixtures
     {
         return (bool) rand(0, 1);
     }
+
+    public static function integer(int $min = 0, int $max = 100): int
+    {
+        return rand($min, $max);
+    }
 }
