@@ -10,7 +10,7 @@ use Cycle\ORM\Entity\Behavior;
 use Ramsey\Uuid\UuidInterface;
 
 #[ORM\Entity(repository: ChargeRepository::class)]
-#[Behavior\Uuid\Uuid4]
+#[Behavior\Uuid\Uuid4(field: 'id', column: 'id')]
 #[Behavior\CreatedAt(field: 'createdAt', column: 'created_at')]
 #[Behavior\UpdatedAt(field: 'updatedAt', column: 'updated_at')]
 class Charge
@@ -51,7 +51,7 @@ class Charge
     #[ORM\Relation\BelongsTo(target: Wallet::class, innerKey: 'wallet_id')]
     private Wallet $wallet;
 
-    #[ORM\Relation\BelongsTo(target: User::class)]
+    #[ORM\Relation\BelongsTo(target: User::class, innerKey: 'user_id')]
     private User $user;
 
     #[ORM\Relation\BelongsTo(target: CurrencyExchange::class, innerKey: 'currency_exchange_id', nullable: true, fkAction: 'SET NULL')]

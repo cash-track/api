@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Repository;
 
 use Cycle\ORM\Select\Repository;
-use Spiral\Database\Injection\Parameter;
+use Cycle\Database\Injection\Parameter;
 
 class ChargeRepository extends Repository
 {
@@ -79,6 +79,10 @@ class ChargeRepository extends Repository
      */
     public function sumTotalByTypeByCurrencyFromDate(string $type, array $walletIDs, \DateTimeImmutable $dateFrom = null): float
     {
+        if (count($walletIDs) === 0) {
+            return 0.0;
+        }
+
         $query = $this->select()
                       ->where('type', $type)
                       ->where('wallet_id', 'in', new Parameter($walletIDs));

@@ -45,14 +45,8 @@ class Wallet
     #[ORM\Column(type: 'datetime', name: 'updated_at')]
     public \DateTimeImmutable $updatedAt;
 
-    #[ORM\Relation\BelongsTo(target: Currency::class, innerKey: 'default_currency_code', load: 'eager')]
+    #[ORM\Relation\BelongsTo(target: Currency::class, innerKey: 'default_currency_code', cascade: true, load: 'eager')]
     private Currency $defaultCurrency;
-
-    /**
-     * @var \Doctrine\Common\Collections\ArrayCollection<int, \App\Database\Charge>
-     */
-    #[ORM\Relation\HasMany(target: Charge::class)]
-    public ArrayCollection $charges;
 
     /**
      * @var \Cycle\ORM\Collection\Pivoted\PivotedCollection<int, \App\Database\User, \App\Database\UserWallet>
@@ -68,7 +62,6 @@ class Wallet
     public function __construct()
     {
         $this->defaultCurrency = new Currency();
-        $this->charges = new ArrayCollection();
         $this->users = new PivotedCollection();
         $this->createdAt = new \DateTimeImmutable();
         $this->updatedAt = new \DateTimeImmutable();

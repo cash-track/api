@@ -69,6 +69,7 @@ class App extends Kernel
         CycleBridge\CycleOrmBootloader::class,
         CycleBridge\AnnotatedBootloader::class,
         CycleBridge\CommandBootloader::class,
+        Bootloader\EntityBehaviorBootloader::class,
 
         // Views and view translation
         Framework\Views\ViewsBootloader::class,

@@ -6,6 +6,7 @@ namespace Tests\Factories;
 
 use App\Repository\CurrencyRepository;
 use Cycle\ORM\EntityManagerInterface;
+use Doctrine\Common\Collections\ArrayCollection;
 
 abstract class AbstractFactory
 {
@@ -29,5 +30,16 @@ abstract class AbstractFactory
         $this->transaction->run();
 
         return $instance;
+    }
+
+    public function createMany(int $amount = 1): ArrayCollection
+    {
+        $items = new ArrayCollection();
+
+        for ($i = 0; $i < $amount; $i++) {
+            $items->add($this->create());
+        }
+
+        return $items;
     }
 }

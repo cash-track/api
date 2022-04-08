@@ -15,6 +15,7 @@ use Spiral\Translator\TranslatorInterface;
 use Tests\App\TestApp;
 use Tests\Traits\InteractsWithDatabase;
 use Tests\Traits\InteractsWithHttp;
+use Tests\Traits\InteractsWithMock;
 use Tests\Traits\ProvideAuth;
 
 abstract class TestCase extends BaseTestCase
@@ -22,6 +23,7 @@ abstract class TestCase extends BaseTestCase
     use InteractsWithHttp;
     use InteractsWithDatabase;
     use ProvideAuth;
+    use InteractsWithMock;
 
     protected function setUp(): void
     {
@@ -54,11 +56,6 @@ abstract class TestCase extends BaseTestCase
         foreach ($this->getContainer()->get(DatabaseManager::class)->getDrivers() as $driver) {
             $driver->disconnect();
         }
-    }
-
-    protected function printMemoryUsage(string $title = 'memory usage now'): void
-    {
-        echo $title . ' : ' . round(memory_get_usage(true) / 1024 / 1024) . 'MB' . PHP_EOL;
     }
 
     public function rootDirectory(): string
