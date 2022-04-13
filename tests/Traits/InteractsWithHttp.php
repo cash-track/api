@@ -60,6 +60,24 @@ trait InteractsWithHttp
         return $this->fakeHttp()->putJson($uri, $data, $this->getHeaders($headers), $cookies);
     }
 
+    public function patch(
+        $uri,
+        array $data = [],
+        array $headers = [],
+        array $cookies = []
+    ): TestResponse {
+        return $this->fakeHttp()->patchJson($uri, $data, $this->getHeaders($headers), $cookies);
+    }
+
+    public function delete(
+        $uri,
+        array $data = [],
+        array $headers = [],
+        array $cookies = []
+    ): TestResponse {
+        return $this->fakeHttp()->deleteJson($uri, $data, $this->getHeaders($headers), $cookies);
+    }
+
     public function getResponseBody(TestResponse $response): string
     {
         return (string) $response->getOriginalResponse()->getBody();

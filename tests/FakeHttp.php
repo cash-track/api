@@ -5,6 +5,7 @@ namespace Tests;
 use Laminas\Diactoros\ServerRequest;
 use Laminas\Diactoros\Stream;
 use Spiral\Testing\Http\FakeHttp as BaseFakeHttp;
+use Spiral\Testing\Http\TestResponse;
 
 class FakeHttp extends BaseFakeHttp
 {
@@ -28,5 +29,12 @@ class FakeHttp extends BaseFakeHttp
 
         return $this->createRequest($uri, $method, [], $headers, $cookies)
                     ->withBody(new Stream($body));
+    }
+
+    public function patchJson(string $uri, array $data = [], array $headers = [], array $cookies = []): TestResponse
+    {
+        return $this->handleRequest(
+            $this->createJsonRequest($uri, 'PATCH', $data, $headers, $cookies)
+        );
     }
 }

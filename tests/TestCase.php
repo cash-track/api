@@ -13,6 +13,7 @@ use Spiral\Testing\TestableKernelInterface;
 use Spiral\Testing\TestCase as BaseTestCase;
 use Spiral\Translator\TranslatorInterface;
 use Tests\App\TestApp;
+use Tests\Traits\AssertHelpers;
 use Tests\Traits\InteractsWithDatabase;
 use Tests\Traits\InteractsWithHttp;
 use Tests\Traits\InteractsWithMock;
@@ -24,6 +25,7 @@ abstract class TestCase extends BaseTestCase
     use InteractsWithDatabase;
     use ProvideAuth;
     use InteractsWithMock;
+    use AssertHelpers;
 
     protected function setUp(): void
     {
