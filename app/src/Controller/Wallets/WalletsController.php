@@ -173,6 +173,11 @@ final class WalletsController extends Controller
                 'id'     => $wallet->id,
                 'msg'    => $exception->getMessage(),
             ]);
+
+            return $this->response->json([
+                'message' => 'Unable to update wallet. Please try again later.',
+                'error'   => $exception->getMessage(),
+            ], 500);
         }
 
         try {

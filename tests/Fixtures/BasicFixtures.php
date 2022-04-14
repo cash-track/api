@@ -58,4 +58,9 @@ trait BasicFixtures
     {
         return rand($min, $max);
     }
+
+    public static function float(int $min = 0, int $max = 5000, int $precision = 2): float
+    {
+        return round(rand($min, $max) + (rand($min, $max) / (10 ^ $precision)), $precision);
+    }
 }

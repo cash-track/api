@@ -76,7 +76,7 @@ class ChargeFactory extends AbstractFactory
             Charge::TYPE_INCOME,
             Charge::TYPE_EXPENSE,
         ]);
-        $charge->amount = rand(0, 5000) + (rand(0, 100) / 100);
+        $charge->amount = Fixtures::float();
         $charge->title = Fixtures::string();
         $charge->description = Fixtures::boolean() ? Fixtures::string() : '';
 

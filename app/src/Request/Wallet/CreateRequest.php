@@ -44,9 +44,9 @@ class CreateRequest extends Filter
         $wallet = new Wallet();
 
         $wallet->name                = $this->getField('name');
-        $wallet->slug                = $this->getField('slug');
+        $wallet->slug                = $this->getField('slug', str_slug($wallet->name));
         $wallet->isPublic            = $this->getField('isPublic', false);
-        $wallet->defaultCurrencyCode = $this->getField('defaultCurrencyCode');
+        $wallet->defaultCurrencyCode = $this->getField('defaultCurrencyCode', Currency::DEFAULT_CURRENCY_CODE);
         $wallet->totalAmount         = 0;
 
         return $wallet;
