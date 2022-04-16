@@ -8,5 +8,4 @@ use App\Controller\AuthAwareController;
 
 class Controller extends AuthAwareController
 {
-
 }
