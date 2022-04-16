@@ -4,13 +4,21 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use App\Repository\CurrencyRepository;
+use App\View\CurrenciesView;
 use Psr\Http\Message\ResponseInterface;
-use Spiral\Prototype\Traits\PrototypeTrait;
+use Spiral\Auth\AuthScope;
 use Spiral\Router\Annotation\Route;
 
-final class CurrencyController
+final class CurrencyController extends AuthAwareController
 {
-    use PrototypeTrait;
+    public function __construct(
+        AuthScope $authScope,
+        protected CurrencyRepository $currencyRepository,
+        protected CurrenciesView $currenciesView,
+    ) {
+        parent::__construct($authScope);
+    }
 
     /**
      * @Route(route="/currencies", name="currency.list", methods="GET", group="auth")
@@ -20,7 +28,7 @@ final class CurrencyController
     public function list(): ResponseInterface
     {
         /** @var \App\Database\Currency[] $currencies */
-        $currencies = $this->currencies->findAll();
+        $currencies = $this->currencyRepository->findAll();
 
         return $this->currenciesView->json($currencies);
     }
@@ -33,7 +41,7 @@ final class CurrencyController
     public function featured(): ResponseInterface
     {
         /** @var \App\Database\Currency[] */
-        $currencies = $this->currencies->getFeatured();
+        $currencies = $this->currencyRepository->getFeatured();
 
         return $this->currenciesView->json($currencies);
     }

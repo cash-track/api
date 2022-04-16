@@ -6,38 +6,50 @@ namespace App\Controller;
 
 use App\Mail\TestMail;
 use App\Service\Mailer\MailerInterface;
-use Spiral\Prototype\Traits\PrototypeTrait;
+use Spiral\Auth\AuthScope;
+use Spiral\Boot\EnvironmentInterface;
 use Spiral\Router\Annotation\Route;
 
-final class MailsController
+final class MailsController extends AuthAwareController
 {
-    use PrototypeTrait;
+    public function __construct(
+        AuthScope $auth,
+        protected MailerInterface $mailer,
+        protected EnvironmentInterface $environment,
+    ) {
+        parent::__construct($auth);
+    }
 
     /**
      * @Route(route="/mails/test", name="mails.test", methods="GET", group="auth")
      *
-     * @param \App\Service\Mailer\MailerInterface $mailer
      * @return void
      */
-    public function test(MailerInterface $mailer)
+    public function test()
     {
-        /** @var \App\Database\User $user */
-        $user = $this->auth->getActor();
+        if ($this->isDebug()) {
+            return;
+        }
 
-        $mailer->send(new TestMail($user));
+        $this->mailer->send(new TestMail($this->user));
     }
 
     /**
      * @Route(route="/mails/preview", name="mails.preview", methods="GET", group="auth")
      *
-     * @param \App\Service\Mailer\MailerInterface $mailer
      * @return string
      */
-    public function preview(MailerInterface $mailer): string
+    public function preview(): string
     {
-        /** @var \App\Database\User $user */
-        $user = $this->auth->getActor();
+        if ($this->isDebug()) {
+            return 'ok';
+        }
 
-        return $mailer->render(new TestMail($user));
+        return $this->mailer->render(new TestMail($this->user));
+    }
+
+    private function isDebug(): bool
+    {
+        return (bool) $this->environment->get('DEBUG', false);
     }
 }

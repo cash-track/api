@@ -5,34 +5,24 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Database\User;
+use App\Repository\UserRepository;
+use App\View\UsersView;
+use App\View\UserView;
 use Psr\Http\Message\ResponseInterface;
 use Spiral\Auth\AuthScope;
-use Spiral\Prototype\Traits\PrototypeTrait;
+use Spiral\Http\ResponseWrapper;
 use Spiral\Router\Annotation\Route;
 
-final class UsersController
+final class UsersController extends AuthAwareController
 {
-    use PrototypeTrait;
-
-    /**
-     * @var \App\Database\User
-     */
-    private $user;
-
-    /**
-     * UsersController constructor.
-     *
-     * @param \Spiral\Auth\AuthScope $auth
-     */
-    public function __construct(AuthScope $auth)
-    {
-        $user = $auth->getActor();
-
-        if (! $user instanceof User) {
-            throw new \RuntimeException('Unable to get authenticated user');
-        }
-
-        $this->user = $user;
+    public function __construct(
+        AuthScope $authScope,
+        protected ResponseWrapper $response,
+        protected UserRepository $userRepository,
+        protected UserView $userView,
+        protected UsersView $usersView,
+    ) {
+        parent::__construct($authScope);
     }
 
     /**
@@ -47,7 +37,7 @@ final class UsersController
             return $this->response->json(['data' => null], 404);
         }
 
-        $user = $this->users->findByEmail($query);
+        $user = $this->userRepository->findByEmail($query);
 
         if (! $user instanceof User) {
             return $this->response->json(['data' => null], 404);
@@ -63,11 +53,8 @@ final class UsersController
      */
     public function findByCommonWallets(): ResponseInterface
     {
-        /** @var \App\Database\User $user */
-        $user = $this->auth->getActor();
-
         /** @var \App\Database\User[] $users */
-        $users = $this->users->findByCommonWallets($user);
+        $users = $this->userRepository->findByCommonWallets($this->user);
 
         return $this->usersView->json($users);
     }

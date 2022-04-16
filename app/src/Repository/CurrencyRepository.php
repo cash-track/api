@@ -6,7 +6,7 @@ namespace App\Repository;
 
 use App\Database\Currency;
 use Cycle\ORM\Select\Repository;
-use Spiral\Database\Injection\Parameter;
+use Cycle\Database\Injection\Parameter;
 
 class CurrencyRepository extends Repository
 {
