@@ -16,7 +16,7 @@ trait AssertHelpers
      */
     protected function assertArrayContains(mixed $needle, array $haystack, string $key): void
     {
-        $debug = "Path '{$key}' of an array " . print_r($haystack, true);
+        $debug = "Looking for value '{$needle}' by path '{$key}' of an array " . print_r($haystack, true);
 
         $value = data_get($haystack, $key, []);
 
@@ -38,10 +38,15 @@ trait AssertHelpers
      */
     protected function assertArrayNotContains(mixed $needle, array $haystack, string $key): void
     {
-        $this->assertNotContains(
-            $needle,
-            data_get($haystack, $key, []),
-            "Path '{$key}' of an array " . print_r($haystack, true)
-        );
+        $debug = "Looking for value '{$needle}' by path '{$key}' of an array " . print_r($haystack, true);
+
+        $value = data_get($haystack, $key, []);
+
+        if (is_array($value)) {
+            $this->assertNotContains($needle, $value, $debug);
+            return;
+        }
+
+        $this->assertNotEquals($needle, $value, $debug);
     }
 }

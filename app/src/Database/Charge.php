@@ -11,7 +11,6 @@ use Ramsey\Uuid\UuidInterface;
 
 #[ORM\Entity(repository: ChargeRepository::class)]
 #[Behavior\Uuid\Uuid4(field: 'id', column: 'id')]
-#[Behavior\CreatedAt(field: 'createdAt', column: 'created_at')]
 #[Behavior\UpdatedAt(field: 'updatedAt', column: 'updated_at')]
 class Charge
 {

@@ -10,7 +10,7 @@ use Spiral\Http\Middleware\ErrorHandlerMiddleware;
 use Spiral\Monolog\Bootloader\MonologBootloader;
 use Spiral\Monolog\LogFactory;
 use Spiral\Boot\EnvironmentInterface;
-use Spiral\Database\Driver\MySQL\MySQLDriver;
+use Cycle\Database\Driver\MySQL\MySQLDriver;
 
 class LoggingBootloader extends Bootloader
 {

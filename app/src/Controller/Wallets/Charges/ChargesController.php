@@ -54,10 +54,6 @@ class ChargesController extends Controller
             ->paginate($this->paginationFactory->createPaginator())
             ->findByWalletId((int) $wallet->id);
 
-        if (count($charges) === 0) {
-            return $this->response->json(['data' => []]);
-        }
-
         return $this->chargesView->jsonPaginated($charges, $this->chargeRepository->getPaginationState());
     }
 
