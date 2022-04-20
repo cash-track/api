@@ -27,12 +27,4 @@ abstract class AuthAwareController
 
         $this->user = $user;
     }
-
-    /**
-     * @return bool
-     */
-    protected function isAuthenticated(): bool
-    {
-        return $this->user instanceof User;
-    }
 }

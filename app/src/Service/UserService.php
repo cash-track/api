@@ -6,11 +6,7 @@ namespace App\Service;
 
 use App\Database\User;
 use Cycle\ORM\EntityManagerInterface;
-use Spiral\Prototype\Annotation\Prototyped;
 
-/**
- * @Prototyped(property="userService")
- */
 class UserService
 {
     /**

@@ -7,11 +7,7 @@ namespace App\Service;
 use App\Database\Charge;
 use App\Database\Wallet;
 use Cycle\ORM\EntityManagerInterface;
-use Spiral\Prototype\Annotation\Prototyped;
 
-/**
- * @Prototyped(property="chargeWalletService")
- */
 class ChargeWalletService
 {
     /**

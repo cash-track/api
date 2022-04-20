@@ -37,4 +37,11 @@ class FakeHttp extends BaseFakeHttp
             $this->createJsonRequest($uri, 'PATCH', $data, $headers, $cookies)
         );
     }
+
+    public function optionsJson(string $uri, array $headers = [], array $cookies = []): TestResponse
+    {
+        return $this->handleRequest(
+            $this->createJsonRequest($uri, 'OPTIONS', [], $headers, $cookies)
+        );
+    }
 }

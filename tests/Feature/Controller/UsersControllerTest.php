@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Tests\Feature;
+namespace Tests\Feature\Controller;
 
 use Tests\DatabaseTransaction;
 use Tests\Factories\UserFactory;

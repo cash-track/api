@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Tests\Feature\Wallets;
+namespace Tests\Feature\Controller\Wallets;
 
 use App\Service\Mailer\MailerInterface;
 use App\Service\WalletService;

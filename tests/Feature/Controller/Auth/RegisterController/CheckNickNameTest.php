@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Tests\Feature\Auth\RegisterController;
+namespace Tests\Feature\Controller\Auth\RegisterController;
 
 use Tests\DatabaseTransaction;
-use Tests\Fixtures;
 use Tests\Factories\UserFactory;
+use Tests\Fixtures;
 use Tests\TestCase;
 
 class CheckNickNameTest extends TestCase implements DatabaseTransaction

@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Tests\Feature\Profile;
+namespace Tests\Feature\Controller\Profile;
 
 use App\Service\UserService;
 use Tests\DatabaseTransaction;
 use Tests\Factories\UserFactory;
-use Tests\Feature\AuthAsserts;
+use Tests\Feature\Controller\AuthAsserts;
 use Tests\Fixtures;
 use Tests\TestCase;
 

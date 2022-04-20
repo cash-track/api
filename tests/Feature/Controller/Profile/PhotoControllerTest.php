@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Tests\Feature\Profile;
+namespace Tests\Feature\Controller\Profile;
 
 use App\Request\Profile\UpdatePhotoRequest;
 use App\Service\PhotoStorageService;

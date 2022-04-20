@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Tests\Feature\Auth;
+namespace Tests\Feature\Controller\Auth;
 
 use App\Database\User;
 use App\Mail\EmailConfirmationMail;

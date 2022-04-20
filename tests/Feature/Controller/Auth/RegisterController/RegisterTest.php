@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Tests\Feature\Auth\RegisterController;
+namespace Tests\Feature\Controller\Auth\RegisterController;
 
 use App\Service\Auth\EmailConfirmationService;
 use App\Service\UserService;
 use Tests\DatabaseTransaction;
-use Tests\Fixtures;
 use Tests\Factories\UserFactory;
+use Tests\Fixtures;
 use Tests\TestCase;
 
 class RegisterTest extends TestCase implements DatabaseTransaction

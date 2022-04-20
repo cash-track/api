@@ -97,7 +97,7 @@ class PhotoStorageService
      * @param string|null $fileName
      * @return string
      */
-    private function generateFileName(?string $fileName = ''): string
+    protected function generateFileName(?string $fileName = ''): string
     {
         return md5(((string) $fileName) . microtime());
     }
@@ -113,12 +113,12 @@ class PhotoStorageService
             return $default;
         }
 
-        $parts = explode('.', $fileName, 2);
+        $parts = explode('.', $fileName);
 
-        if (count($parts) !== 2) {
+        if (($count = count($parts)) <= 1) {
             return $default;
         }
 
-        return $parts[1] ?? $default;
+        return $parts[$count - 1] ?? $default;
     }
 }

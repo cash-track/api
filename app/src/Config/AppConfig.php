@@ -48,28 +48,20 @@ class AppConfig extends InjectableConfig
     }
 
     /**
-     * @param string|null $token
+     * @param string $token
      * @return string
      */
-    public function getEmailConfirmationLink(string $token = null): string
+    public function getEmailConfirmationLink(string $token): string
     {
-        if ($token === null) {
-            return $this->config['email_confirmation_link'];
-        }
-
         return str_replace('{token}', $token, $this->config['email_confirmation_link']);
     }
 
     /**
-     * @param string|null $code
+     * @param string $code
      * @return string
      */
-    public function getPasswordResetLink(string $code = null): string
+    public function getPasswordResetLink(string $code): string
     {
-        if ($code === null) {
-            return $this->config['password_reset_link'];
-        }
-
         return str_replace('{code}', $code, $this->config['password_reset_link']);
     }
 

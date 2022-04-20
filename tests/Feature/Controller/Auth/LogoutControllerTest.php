@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Tests\Feature\Auth;
+namespace Tests\Feature\Controller\Auth;
 
 use Tests\DatabaseTransaction;
 use Tests\Factories\UserFactory;

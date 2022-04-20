@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Tests\Feature\Auth;
+namespace Tests\Feature\Controller\Auth;
 
 use App\Database\User;
 use App\Mail\ForgotPasswordMail;
@@ -12,7 +12,7 @@ use App\Service\Mailer\MailerInterface;
 use Tests\DatabaseTransaction;
 use Tests\Factories\ForgotPasswordRequestFactory;
 use Tests\Factories\UserFactory;
-use Tests\Feature\AuthAsserts;
+use Tests\Feature\Controller\AuthAsserts;
 use Tests\Fixtures;
 use Tests\TestCase;
 

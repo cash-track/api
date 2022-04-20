@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Tests\Feature\Wallets;
+namespace Tests\Feature\Controller\Wallets;
 
 use App\Database\Wallet;
 use App\Service\WalletService;
