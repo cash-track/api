@@ -7,9 +7,13 @@ trait InteractsWithMock
     protected function mock(string $class, array $methods, \Closure $closure)
     {
         $mock = $this->getMockBuilder($class)
-                     ->disableOriginalConstructor()
-                     ->onlyMethods($methods)
-                     ->getMock();
+                     ->disableOriginalConstructor();
+
+        if (count($methods)) {
+            $mock = $mock->onlyMethods($methods);
+        }
+
+        $mock = $mock->getMock();
 
         $closure($mock);
 

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Traits;
 
 use JsonException;
+use Psr\Http\Message\ResponseInterface;
 use Spiral\Testing\Http\TestResponse;
 use Tests\FakeHttp;
 
@@ -78,12 +79,16 @@ trait InteractsWithHttp
         return $this->fakeHttp()->deleteJson($uri, $data, $this->getHeaders($headers), $cookies);
     }
 
-    public function getResponseBody(TestResponse $response): string
+    public function getResponseBody(TestResponse|ResponseInterface $response): string
     {
-        return (string) $response->getOriginalResponse()->getBody();
+        if ($response instanceof TestResponse) {
+            return (string) $response->getOriginalResponse()->getBody();
+        }
+
+        return (string) $response->getBody();
     }
 
-    public function getJsonResponseBody(TestResponse $response): array
+    public function getJsonResponseBody(TestResponse|ResponseInterface $response): array
     {
         try {
             $data = json_decode($this->getResponseBody($response), true, 512, JSON_THROW_ON_ERROR);

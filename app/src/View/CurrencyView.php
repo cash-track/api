@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\View;
 
 use App\Database\Currency;
-use Psr\Http\Message\ResponseInterface;
 use Spiral\Core\Container\SingletonInterface;
 use Spiral\Http\ResponseWrapper;
 
@@ -14,13 +13,6 @@ class CurrencyView implements SingletonInterface
     public function __construct(
         protected ResponseWrapper $response,
     ) {
-    }
-
-    public function json(Currency $currency): ResponseInterface
-    {
-        return $this->response->json([
-            'data' => $this->map($currency),
-        ], 200);
     }
 
     public function map(?Currency $currency): ?array

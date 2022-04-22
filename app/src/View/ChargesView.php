@@ -16,13 +16,6 @@ class ChargesView implements SingletonInterface
     ) {
     }
 
-    public function json(array $charges): ResponseInterface
-    {
-        return $this->response->json([
-            'data' => $this->map($charges),
-        ], 200);
-    }
-
     public function jsonPaginated(array $charges, array $paginationState): ResponseInterface
     {
         return $this->response->json([
