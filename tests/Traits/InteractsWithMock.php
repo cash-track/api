@@ -4,18 +4,21 @@ namespace Tests\Traits;
 
 trait InteractsWithMock
 {
-    protected function mock(string $class, array $methods, \Closure $closure)
+    protected function mock(string $class, array $methods, \Closure $setup, bool $constructorOff = true)
     {
-        $mock = $this->getMockBuilder($class)
-                     ->disableOriginalConstructor();
+        $mockBuilder = $this->getMockBuilder($class);
 
-        if (count($methods)) {
-            $mock = $mock->onlyMethods($methods);
+        if ($constructorOff) {
+            $mockBuilder = $mockBuilder->disableOriginalConstructor();
         }
 
-        $mock = $mock->getMock();
+        if (count($methods)) {
+            $mockBuilder = $mockBuilder->onlyMethods($methods);
+        }
 
-        $closure($mock);
+        $mock = $mockBuilder->getMock();
+
+        $setup($mock);
 
         $this->getContainer()->bind($class, fn() => $mock);
     }

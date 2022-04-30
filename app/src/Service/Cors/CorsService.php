@@ -238,12 +238,19 @@ class CorsService implements CorsInterface
         }
 
         foreach ($this->config->getAllowedOriginsPatterns() as $pattern) {
-            if (preg_match($pattern, $origin)) {
-                true;
+            if (preg_match($this->convertPatternToRegex($pattern), $origin)) {
+                return true;
             }
         }
 
         return false;
+    }
+
+    protected function convertPatternToRegex(string $pattern): string
+    {
+        $pattern = str_replace(['/', '.', '*'], ['\/', '\.', '.*'], $pattern);
+
+        return "/{$pattern}/";
     }
 
     /**

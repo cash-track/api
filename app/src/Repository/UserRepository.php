@@ -9,7 +9,7 @@ use Cycle\ORM\Select;
 use Cycle\ORM\Select\Repository;
 use Spiral\Auth\ActorProviderInterface;
 use Spiral\Auth\TokenInterface;
-use Spiral\Database\Query\SelectQuery;
+use Cycle\Database\Query\SelectQuery;
 
 class UserRepository extends Repository implements ActorProviderInterface
 {

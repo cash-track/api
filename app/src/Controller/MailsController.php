@@ -27,7 +27,7 @@ final class MailsController extends AuthAwareController
      */
     public function test()
     {
-        if ($this->isDebug()) {
+        if (! $this->isDebug()) {
             return;
         }
 
@@ -41,7 +41,7 @@ final class MailsController extends AuthAwareController
      */
     public function preview(): string
     {
-        if ($this->isDebug()) {
+        if (! $this->isDebug()) {
             return 'ok';
         }
 

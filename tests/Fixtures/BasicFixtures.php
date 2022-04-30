@@ -39,6 +39,11 @@ trait BasicFixtures
         return self::string() . '@' . self::string() . '.com';
     }
 
+    public static function domain(): string
+    {
+        return self::string() . '.' . self::arrayElement(['com', 'org', 'ua', 'net']);
+    }
+
     public static function fileName(string $extension = 'png'): string
     {
         return self::string(16) . '.' . $extension;
@@ -46,7 +51,7 @@ trait BasicFixtures
 
     public static function url(string $ends = ''): string
     {
-        return "https://" . self::string() . '.com/' . self::string() . '/' . $ends;
+        return "https://" . self::domain() . '/' . self::string() . '/' . $ends;
     }
 
     public static function boolean(): bool
