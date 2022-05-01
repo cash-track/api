@@ -30,9 +30,14 @@ class EmailConfirmationView implements SingletonInterface
         }
 
         return [
-            'type'      => 'emailConfirmation',
-            'email'     => $confirmation->email,
-            'createdAt' => $confirmation->createdAt->format(DATE_W3C),
+            'type'            => 'emailConfirmation',
+            'email'           => $confirmation->email,
+            'createdAt'       => $confirmation->createdAt->format(DATE_W3C),
+            'resendTimeLimit' => $confirmation->getResendTimeLimit(),
+            'validTimeLimit'  => $confirmation->getValidTimeLimit(),
+            'timeSentAgo'     => $confirmation->getTimeSentAgo(),
+            'isThrottled'     => $confirmation->getIsThrottled(),
+            'isValid'         => $confirmation->getIsValid(),
         ];
     }
 }

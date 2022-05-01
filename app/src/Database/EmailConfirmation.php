@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Database;
 
 use App\Repository\EmailConfirmationRepository;
+use App\Service\Auth\EmailConfirmationService;
 use Cycle\Annotated\Annotation as ORM;
 
 #[ORM\Entity(repository: EmailConfirmationRepository::class)]
@@ -26,5 +27,30 @@ class EmailConfirmation
     public function __construct()
     {
         $this->createdAt = new \DateTimeImmutable();
+    }
+
+    public function getResendTimeLimit(): int
+    {
+        return EmailConfirmationService::RESEND_TIME_LIMIT;
+    }
+
+    public function getValidTimeLimit(): int
+    {
+        return EmailConfirmationService::TTL;
+    }
+
+    public function getTimeSentAgo(): int
+    {
+        return time() - $this->createdAt->getTimestamp();
+    }
+
+    public function getIsThrottled(): bool
+    {
+        return $this->createdAt->getTimestamp() + $this->getResendTimeLimit() > time();
+    }
+
+    public function getIsValid(): bool
+    {
+        return $this->createdAt->getTimestamp() + $this->getValidTimeLimit() > time();
     }
 }
