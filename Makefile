@@ -34,8 +34,10 @@ start:
       -v $(WORKDIR):/app \
       --net cash-track-local \
       $(IMAGE_DEV) \
-      -o "http.workers.pool.maxJobs=1" \
-      -o "http.workers.pool.numWorkers=1"
+      -o "http.pool.debug=true" \
+      -o "logs.mode=development" \
+      -o "logs.encoding=console" \
+      -o "logs.level=debug"
 
 stop:
 	docker stop $(CONTAINER_NAME)
