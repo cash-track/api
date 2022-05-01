@@ -337,7 +337,7 @@ class WalletsControllerTest extends TestCase implements DatabaseTransaction
 
     public function testCreateStoreWallet(): void
     {
-        $auth = $this->makeAuth($this->userFactory->create());
+        $auth = $this->makeAuth($user = $this->userFactory->create());
 
         $wallet = WalletFactory::make();
 
@@ -356,11 +356,17 @@ class WalletsControllerTest extends TestCase implements DatabaseTransaction
         $this->assertArrayContains($wallet->slug, $body, 'data.slug');
         $this->assertArrayContains($wallet->isPublic, $body, 'data.isPublic');
         $this->assertArrayContains($wallet->defaultCurrencyCode, $body, 'data.defaultCurrencyCode');
+        $this->assertArrayHasKey('id', $body['data']);
 
         $this->assertDatabaseHas('wallets', [
             'name' => $wallet->name,
             'slug' => $wallet->slug,
             'default_currency_code' => $wallet->defaultCurrencyCode,
+        ]);
+
+        $this->assertDatabaseHas('user_wallets', [
+            'wallet_id' => $body['data']['id'],
+            'user_id' => $user->id,
         ]);
     }
 

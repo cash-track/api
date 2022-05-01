@@ -51,7 +51,7 @@ class Wallet
     /**
      * @var \Cycle\ORM\Collection\Pivoted\PivotedCollection<int, \App\Database\User, \App\Database\UserWallet>
      */
-    #[ORM\Relation\ManyToMany(target: User::class, through: UserWallet::class)]
+    #[ORM\Relation\ManyToMany(target: User::class, through: UserWallet::class, collection: 'doctrine')]
     public PivotedCollection $users;
 
     /**

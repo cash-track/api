@@ -54,16 +54,23 @@ class UserRepository extends Repository implements ActorProviderInterface
      */
     protected function byCommonWallets(User $user): Select
     {
+        $commonWallets = $this->select()
+                              ->getBuilder()
+                              ->getQuery()
+                              ->columns(['wallet_id'])
+                              ->from('user_wallets')
+                              ->where('user_id', '=', $user->id);
+
+        $commonUsers = $this->select()
+                            ->getBuilder()
+                            ->getQuery()
+                            ->columns(['user_id'])
+                            ->from('user_wallets')
+                            ->where('wallet_id', 'in', $commonWallets);
+
         return $this->select()
-                    ->where(
-                        'wallets.@.wallet_id',
-                        'in',
-                        $this->select()
-                             ->where('wallets.@.user_id', '=', $user->id)
-                             ->buildQuery()
-                             ->columns('wallet_id')
-                    )
-                    ->groupBy('user.id')
-                    ->orderBy('COUNT(user.id)', SelectQuery::SORT_DESC);
+            ->where('id', 'in', $commonUsers)
+            ->groupBy('id')
+            ->orderBy('COUNT(user.id)', SelectQuery::SORT_DESC);
     }
 }

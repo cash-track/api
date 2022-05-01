@@ -55,9 +55,6 @@ class User implements PasswordContainerInterface
     #[ORM\Relation\BelongsTo(target: Currency::class, innerKey: 'default_currency_code', cascade: true, load: 'eager')]
     private Currency $defaultCurrency;
 
-    #[ORM\Relation\ManyToMany(target: Wallet::class, through: UserWallet::class, collection: 'doctrine')]
-    public PivotedCollection $wallets;
-
     public function __construct()
     {
         $this->defaultCurrency = new Currency();
