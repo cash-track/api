@@ -13,7 +13,7 @@ RUN docker-php-ext-install zip mbstring pdo_mysql mysqli
 # Clear cache
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 
-COPY --from=spiralscout/roadrunner:1.9.2 /usr/bin/rr /usr/bin/rr
+COPY --from=spiralscout/roadrunner:2.9.2 /usr/bin/rr /usr/bin/rr
 
 COPY --from=composer /usr/bin/composer /usr/bin/composer
 
@@ -28,4 +28,4 @@ COPY . /app
 
 EXPOSE 8080
 
-ENTRYPOINT [ "rr", "serve", "-d", "-v", "-c", "/app/.rr.yaml" ]
+ENTRYPOINT [ "rr", "serve", "-c", "/app/.rr.yaml" ]
