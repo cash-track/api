@@ -6,16 +6,29 @@ namespace App\Controller\Auth;
 
 use App\Database\User;
 use App\Request\RefreshTokenRequest;
+use App\Service\Auth\AuthService;
+use App\Service\Auth\RefreshTokenService;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Spiral\Auth\TokenInterface;
-use Spiral\Prototype\Traits\PrototypeTrait;
+use Spiral\Http\ResponseWrapper;
 use Spiral\Router\Annotation\Route;
 
 final class RefreshController
 {
-    use PrototypeTrait;
     use AuthResponses;
+
+    /**
+     * @param \App\Service\Auth\AuthService $authService
+     * @param \Spiral\Http\ResponseWrapper $response
+     * @param \App\Service\Auth\RefreshTokenService $refreshTokenService
+     */
+    public function __construct(
+        protected AuthService $authService,
+        protected ResponseWrapper $response,
+        protected RefreshTokenService $refreshTokenService,
+    ) {
+    }
 
     /**
      * @Route(route="/auth/refresh", name="auth.refresh", methods="POST")
@@ -29,14 +42,9 @@ final class RefreshController
         $authContext = $this->refreshTokenService->getContextByRequest($request);
 
         $user = $authContext->getActor();
-
-        if (! $user instanceof User) {
-            return $this->responseUnauthenticated();
-        }
-
         $refreshToken = $authContext->getToken();
 
-        if (! $refreshToken instanceof TokenInterface) {
+        if (! $user instanceof User || ! $refreshToken instanceof TokenInterface) {
             return $this->responseUnauthenticated();
         }
 

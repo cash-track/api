@@ -6,20 +6,16 @@ namespace App\View;
 
 use Psr\Http\Message\ResponseInterface;
 use Spiral\Core\Container\SingletonInterface;
-use Spiral\Prototype\Annotation\Prototyped;
-use Spiral\Prototype\Traits\PrototypeTrait;
+use Spiral\Http\ResponseWrapper;
 
-/**
- * @Prototyped(property="currenciesView")
- */
 class CurrenciesView implements SingletonInterface
 {
-    use PrototypeTrait;
+    public function __construct(
+        protected ResponseWrapper $response,
+        protected CurrencyView $currencyView,
+    ) {
+    }
 
-    /**
-     * @param \App\Database\Currency[] $currencies
-     * @return \Psr\Http\Message\ResponseInterface
-     */
     public function json(array $currencies): ResponseInterface
     {
         return $this->response->json([
@@ -27,10 +23,6 @@ class CurrenciesView implements SingletonInterface
         ], 200);
     }
 
-    /**
-     * @param \App\Database\Currency[] $currencies
-     * @return array
-     */
     public function map(array $currencies): array
     {
         return array_map([$this->currencyView, 'map'], $currencies);

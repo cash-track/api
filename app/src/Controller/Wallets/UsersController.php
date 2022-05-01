@@ -6,13 +6,29 @@ namespace App\Controller\Wallets;
 
 use App\Database\User;
 use App\Database\Wallet;
+use App\Repository\UserRepository;
+use App\Repository\WalletRepository;
+use App\Service\WalletService;
+use App\View\UsersView;
 use Psr\Http\Message\ResponseInterface;
-use Spiral\Prototype\Traits\PrototypeTrait;
+use Psr\Log\LoggerInterface;
+use Spiral\Auth\AuthScope;
+use Spiral\Http\ResponseWrapper;
 use Spiral\Router\Annotation\Route;
 
 final class UsersController extends Controller
 {
-    use PrototypeTrait;
+    public function __construct(
+        AuthScope $auth,
+        private ResponseWrapper $response,
+        private LoggerInterface $logger,
+        private UsersView $usersView,
+        private UserRepository $userRepository,
+        private WalletRepository $walletRepository,
+        private WalletService $walletService,
+    ) {
+        parent::__construct($auth);
+    }
 
     /**
      * @Route(route="/wallets/<id>/users", name="wallet.users.list", methods="GET", group="auth")
@@ -22,7 +38,7 @@ final class UsersController extends Controller
      */
     public function users(int $id): ResponseInterface
     {
-        $wallet = $this->wallets->findByPKByUserPKWithUsers($id, (int) $this->user->id);
+        $wallet = $this->walletRepository->findByPKByUserPKWithUsers($id, (int) $this->user->id);
 
         if (! $wallet instanceof Wallet) {
             return $this->response->create(404);
@@ -40,13 +56,14 @@ final class UsersController extends Controller
      */
     public function patch(int $id, int $userId): ResponseInterface
     {
-        $wallet = $this->wallets->findByPKByUserPKWithUsers($id, (int) $this->user->id);
+        $wallet = $this->walletRepository->findByPKByUserPKWithUsers($id, (int) $this->user->id);
 
         if (! $wallet instanceof Wallet) {
             return $this->response->create(404);
         }
 
-        $user = $this->users->findByPK($userId);
+        /** @var \App\Database\User|null $user */
+        $user = $this->userRepository->findByPK($userId);
 
         if (! $user instanceof User) {
             return $this->response->create(404);
@@ -81,23 +98,28 @@ final class UsersController extends Controller
      */
     public function delete(int $id, int $userId): ResponseInterface
     {
-        $wallet = $this->wallets->findByPKByUserPKWithUsers($id, (int) $this->user->id);
+        $wallet = $this->walletRepository->findByPKByUserPKWithUsers($id, (int) $this->user->id);
 
         if (! $wallet instanceof Wallet) {
             return $this->response->create(404);
         }
 
-        $user = $this->users->findByPK($userId);
+        /** @var \App\Database\User|null $user */
+        $user = $this->userRepository->findByPK($userId);
 
         if (! $user instanceof User) {
             return $this->response->create(404);
         }
 
-        if ($wallet->users->count() === 1 && $wallet->users->first()->id === $this->user->id) {
-            return $this->response->json([
-                'message' => 'Unable to revoke user from wallet. You are only one member. Delete wallet if you do not need them anymore.',
-                'error'   => 'Current user is the one wallet owner.',
-            ], 403);
+        if ($wallet->users->count() === 1) {
+            if ($this->user->id === $userId) {
+                return $this->response->json([
+                    'message' => 'Unable to revoke user from wallet. You are only one member. Delete wallet if you do not need them anymore.',
+                    'error'   => 'Current user is the one wallet owner.',
+                ], 403);
+            }
+
+            return $this->response->create(200);
         }
 
         try {

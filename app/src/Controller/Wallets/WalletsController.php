@@ -7,15 +7,35 @@ namespace App\Controller\Wallets;
 use App\Database\Charge;
 use App\Database\Currency;
 use App\Database\Wallet;
+use App\Repository\ChargeRepository;
+use App\Repository\CurrencyRepository;
+use App\Repository\WalletRepository;
 use App\Request\Wallet\CreateRequest;
 use App\Request\Wallet\UpdateRequest;
+use App\Service\WalletService;
+use App\View\WalletsView;
+use App\View\WalletView;
 use Psr\Http\Message\ResponseInterface;
-use Spiral\Prototype\Traits\PrototypeTrait;
+use Psr\Log\LoggerInterface;
+use Spiral\Auth\AuthScope;
+use Spiral\Http\ResponseWrapper;
 use Spiral\Router\Annotation\Route;
 
 final class WalletsController extends Controller
 {
-    use PrototypeTrait;
+    public function __construct(
+        AuthScope $auth,
+        private ResponseWrapper $response,
+        private LoggerInterface $logger,
+        private WalletRepository $walletRepository,
+        private WalletService $walletService,
+        private WalletsView $walletsView,
+        private WalletView $walletView,
+        private CurrencyRepository $currencyRepository,
+        private ChargeRepository $chargeRepository,
+    ) {
+        parent::__construct($auth);
+    }
 
     /**
      * @Route(route="/wallets", name="wallet.list", methods="GET", group="auth")
@@ -24,7 +44,7 @@ final class WalletsController extends Controller
      */
     public function list(): ResponseInterface
     {
-        return $this->walletsView->json($this->wallets->findAllByUserPK((int) $this->user->id));
+        return $this->walletsView->json($this->walletRepository->findAllByUserPK((int) $this->user->id));
     }
 
     /**
@@ -34,7 +54,7 @@ final class WalletsController extends Controller
      */
     public function listUnArchived(): ResponseInterface
     {
-        return $this->walletsView->json($this->wallets->findAllByUserPKByArchived((int) $this->user->id, false));
+        return $this->walletsView->json($this->walletRepository->findAllByUserPKByArchived((int) $this->user->id, false));
     }
 
     /**
@@ -44,7 +64,7 @@ final class WalletsController extends Controller
      */
     public function listArchived(): ResponseInterface
     {
-        return $this->walletsView->json($this->wallets->findAllByUserPKByArchived((int) $this->user->id, true));
+        return $this->walletsView->json($this->walletRepository->findAllByUserPKByArchived((int) $this->user->id, true));
     }
 
     /**
@@ -55,7 +75,7 @@ final class WalletsController extends Controller
      */
     public function index(int $id): ResponseInterface
     {
-        $wallet = $this->wallets->findByPKByUserPK($id, (int) $this->user->id);
+        $wallet = $this->walletRepository->findByPKByUserPK($id, (int) $this->user->id);
 
         if (! $wallet instanceof Wallet) {
             return $this->response->create(404);
@@ -72,7 +92,7 @@ final class WalletsController extends Controller
      */
     public function indexTotal(int $id): ResponseInterface
     {
-        $wallet = $this->wallets->findByPKByUserPK($id, (int) $this->user->id);
+        $wallet = $this->walletRepository->findByPKByUserPK($id, (int) $this->user->id);
 
         if (! $wallet instanceof Wallet) {
             return $this->response->create(404);
@@ -81,8 +101,8 @@ final class WalletsController extends Controller
         return $this->response->json([
             'data' => [
                 'totalAmount' => $wallet->totalAmount,
-                'totalIncomeAmount' => $this->charges->totalByWalletPK($id, Charge::TYPE_INCOME),
-                'totalExpenseAmount' => $this->charges->totalByWalletPK($id, Charge::TYPE_EXPENSE),
+                'totalIncomeAmount' => $this->chargeRepository->totalByWalletPK($id, Charge::TYPE_INCOME),
+                'totalExpenseAmount' => $this->chargeRepository->totalByWalletPK($id, Charge::TYPE_EXPENSE),
             ],
         ]);
     }
@@ -122,7 +142,7 @@ final class WalletsController extends Controller
      */
     public function update(int $id, UpdateRequest $request): ResponseInterface
     {
-        $wallet = $this->wallets->findByPKByUserPK($id, (int) $this->user->id);
+        $wallet = $this->walletRepository->findByPKByUserPK($id, (int) $this->user->id);
 
         if (! $wallet instanceof Wallet) {
             return $this->response->create(404);
@@ -139,19 +159,25 @@ final class WalletsController extends Controller
         $wallet->defaultCurrencyCode = $request->getDefaultCurrencyCode();
 
         try {
-            $defaultCurrency = $this->currencies->findByPK($request->getDefaultCurrencyCode());
+            /** @var \App\Database\Currency|null $defaultCurrency */
+            $defaultCurrency = $this->currencyRepository->findByPK($request->getDefaultCurrencyCode());
 
             if (! $defaultCurrency instanceof Currency) {
                 throw new \RuntimeException('Unable to load default currency');
             }
 
-            $wallet->defaultCurrency = $defaultCurrency;
+            $wallet->setDefaultCurrency($defaultCurrency);
         } catch (\Throwable $exception) {
             $this->logger->warning('Unable to load currency entity', [
                 'action' => 'wallet.update',
                 'id'     => $wallet->id,
                 'msg'    => $exception->getMessage(),
             ]);
+
+            return $this->response->json([
+                'message' => 'Unable to update wallet. Please try again later.',
+                'error'   => $exception->getMessage(),
+            ], 500);
         }
 
         try {
@@ -180,7 +206,7 @@ final class WalletsController extends Controller
      */
     public function delete(int $id): ResponseInterface
     {
-        $wallet = $this->wallets->findByPKByUserPK($id, (int) $this->user->id);
+        $wallet = $this->walletRepository->findByPKByUserPK($id, (int) $this->user->id);
 
         if (! $wallet instanceof Wallet) {
             return $this->response->create(404);

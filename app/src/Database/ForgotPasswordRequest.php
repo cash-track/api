@@ -4,38 +4,25 @@ declare(strict_types=1);
 
 namespace App\Database;
 
-use Cycle\Annotated\Annotation as Cycle;
+use App\Repository\ForgotPasswordRequestRepository;
+use Cycle\Annotated\Annotation as ORM;
 
-/**
- * @Cycle\Entity(repository = "App\Repository\ForgotPasswordRequestRepository")
- * @Cycle\Table(indexes={
- *     @Cycle\Table\Index(columns = {"code"}),
- *     @Cycle\Table\Index(columns = {"email"}, unique = true)
- * })
- */
+#[ORM\Entity(repository: ForgotPasswordRequestRepository::class)]
+#[ORM\Table(indexes: [
+    new ORM\Table\Index(columns: ['code']),
+    new ORM\Table\Index(columns: ['email'], unique: true),
+])]
 class ForgotPasswordRequest
 {
-    /**
-     * @Cycle\Column(type = "string", primary = true)
-     * @var string|null
-     */
-    public $email;
+    #[ORM\Column(type: 'string', primary: true)]
+    public string|null $email = null;
 
-    /**
-     * @Cycle\Column(type = "string")
-     * @var string
-     */
-    public $code = '';
+    #[ORM\Column('string')]
+    public string $code = '';
 
-    /**
-     * @Cycle\Column(type = "datetime", name = "created_at")
-     * @var \DateTimeImmutable
-     */
-    public $createdAt;
+    #[ORM\Column(type: 'datetime', name: 'created_at')]
+    public \DateTimeImmutable $createdAt;
 
-    /**
-     * ForgotPasswordRequest constructor.
-     */
     public function __construct()
     {
         $this->createdAt = new \DateTimeImmutable();

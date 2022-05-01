@@ -5,22 +5,20 @@ declare(strict_types=1);
 namespace App\View;
 
 use App\Database\User;
+use App\Service\PhotoStorageService;
 use Psr\Http\Message\ResponseInterface;
 use Spiral\Core\Container\SingletonInterface;
-use Spiral\Prototype\Annotation\Prototyped;
-use Spiral\Prototype\Traits\PrototypeTrait;
+use Spiral\Http\ResponseWrapper;
 
-/**
- * @Prototyped(property="userView")
- */
 class UserView implements SingletonInterface
 {
-    use PrototypeTrait;
+    public function __construct(
+        protected ResponseWrapper $response,
+        protected CurrencyView $currencyView,
+        protected PhotoStorageService $photoStorageService,
+    ) {
+    }
 
-    /**
-     * @param \App\Database\User $user
-     * @return \Psr\Http\Message\ResponseInterface
-     */
     public function json(User $user): ResponseInterface
     {
         return $this->response->json([
@@ -28,10 +26,6 @@ class UserView implements SingletonInterface
         ], 200);
     }
 
-    /**
-     * @param \App\Database\User $user
-     * @return array
-     */
     public function head(User $user): array
     {
         return [
@@ -40,12 +34,12 @@ class UserView implements SingletonInterface
         ];
     }
 
-    /**
-     * @param \App\Database\User $user
-     * @return array
-     */
-    public function map(User $user): array
+    public function map(?User $user): ?array
     {
+        if ($user === null) {
+            return null;
+        }
+
         return [
             'type'             => 'user',
             'id'               => $user->id,
@@ -59,7 +53,7 @@ class UserView implements SingletonInterface
             'updatedAt'        => $user->updatedAt->format(DATE_W3C),
 
             'defaultCurrencyCode' => $user->defaultCurrencyCode,
-            'defaultCurrency'     => $this->currencyView->map($user->defaultCurrency),
+            'defaultCurrency'     => $this->currencyView->map($user->getDefaultCurrency()),
         ];
     }
 }

@@ -6,12 +6,7 @@ namespace App\Service;
 
 use App\Config\AppConfig;
 use App\Database\Wallet;
-use Spiral\Prototype\Annotation\Prototyped;
-use Spiral\Router\RouterInterface;
 
-/**
- * @Prototyped(property="uriService")
- */
 class UriService
 {
     /**
@@ -60,16 +55,5 @@ class UriService
     public function passwordReset(string $code): string
     {
         return $this->config->getWebSiteUrl() . $this->config->getPasswordResetLink($code);
-    }
-
-    /**
-     * Get home URI
-     *
-     * @param string $path
-     * @return string
-     */
-    public function home(string $path = ''): string
-    {
-        return $this->config->getUrl() . $path;
     }
 }

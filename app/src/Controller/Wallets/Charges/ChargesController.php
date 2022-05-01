@@ -7,14 +7,34 @@ namespace App\Controller\Wallets\Charges;
 use App\Controller\Wallets\Controller;
 use App\Database\Charge;
 use App\Database\Wallet;
+use App\Repository\ChargeRepository;
+use App\Repository\WalletRepository;
 use App\Request\Charge\CreateRequest;
+use App\Service\ChargeWalletService;
+use App\Service\Pagination\PaginationFactory;
+use App\View\ChargesView;
+use App\View\ChargeView;
 use Psr\Http\Message\ResponseInterface;
-use Spiral\Prototype\Traits\PrototypeTrait;
+use Psr\Log\LoggerInterface;
+use Spiral\Auth\AuthScope;
+use Spiral\Http\ResponseWrapper;
 use Spiral\Router\Annotation\Route;
 
 class ChargesController extends Controller
 {
-    use PrototypeTrait;
+    public function __construct(
+        AuthScope $auth,
+        private ResponseWrapper $response,
+        private LoggerInterface $logger,
+        private PaginationFactory $paginationFactory,
+        private ChargesView $chargesView,
+        private ChargeView $chargeView,
+        private ChargeWalletService $chargeWalletService,
+        private ChargeRepository $chargeRepository,
+        private WalletRepository $walletRepository,
+    ) {
+        parent::__construct($auth);
+    }
 
     /**
      * @Route(route="/wallets/<walletId>/charges", name="wallet.charge.list", methods="GET", group="auth")
@@ -24,21 +44,17 @@ class ChargesController extends Controller
      */
     public function list(int $walletId): ResponseInterface
     {
-        $wallet = $this->wallets->findByPKByUserPK($walletId, (int) $this->user->id);
+        $wallet = $this->walletRepository->findByPKByUserPK($walletId, (int) $this->user->id);
 
         if (! $wallet instanceof Wallet) {
             return $this->response->create(404);
         }
 
-        $charges = $this->charges
-            ->paginate($this->paginators->createPaginator())
+        $charges = $this->chargeRepository
+            ->paginate($this->paginationFactory->createPaginator())
             ->findByWalletId((int) $wallet->id);
 
-        if (count($charges) === 0) {
-            return $this->response->json(['data' => []]);
-        }
-
-        return $this->chargesView->jsonPaginated($charges, $this->charges->getPaginationState());
+        return $this->chargesView->jsonPaginated($charges, $this->chargeRepository->getPaginationState());
     }
 
     /**
@@ -50,7 +66,7 @@ class ChargesController extends Controller
      */
     public function create(int $walletId, CreateRequest $request): ResponseInterface
     {
-        $wallet = $this->wallets->findByPKByUserPK($walletId, (int) $this->user->id);
+        $wallet = $this->walletRepository->findByPKByUserPK($walletId, (int) $this->user->id);
 
         if (! $wallet instanceof Wallet) {
             return $this->response->create(404);
@@ -67,10 +83,8 @@ class ChargesController extends Controller
         $charge->amount = $request->getAmount();
         $charge->title = $request->getTitle();
         $charge->description = $request->getDescription();
-        $charge->wallet = $wallet;
-        $charge->walletId = (int) $wallet->id;
-        $charge->user = $this->user;
-        $charge->userId = (int) $this->user->id;
+        $charge->setWallet($wallet);
+        $charge->setUser($this->user);
 
         // TODO. Implement currency conversion when charge currency is different that wallet.
 
@@ -103,13 +117,13 @@ class ChargesController extends Controller
      */
     public function update(int $walletId, string $chargeId, CreateRequest $request): ResponseInterface
     {
-        $wallet = $this->wallets->findByPKByUserPK($walletId, (int) $this->user->id);
+        $wallet = $this->walletRepository->findByPKByUserPK($walletId, (int) $this->user->id);
 
         if (! $wallet instanceof Wallet) {
             return $this->response->create(404);
         }
 
-        $charge = $this->charges->findByPKByWalletPK($chargeId, $walletId);
+        $charge = $this->chargeRepository->findByPKByWalletPK($chargeId, $walletId);
 
         if (! $charge instanceof Charge) {
             return $this->response->create(404);
@@ -158,13 +172,13 @@ class ChargesController extends Controller
      */
     public function delete(int $walletId, string $chargeId): ResponseInterface
     {
-        $wallet = $this->wallets->findByPKByUserPK($walletId, (int) $this->user->id);
+        $wallet = $this->walletRepository->findByPKByUserPK($walletId, (int) $this->user->id);
 
         if (! $wallet instanceof Wallet) {
             return $this->response->create(404);
         }
 
-        $charge = $this->charges->findByPKByWalletPK($chargeId, $walletId);
+        $charge = $this->chargeRepository->findByPKByWalletPK($chargeId, $walletId);
 
         if (! $charge instanceof Charge) {
             return $this->response->create(404);

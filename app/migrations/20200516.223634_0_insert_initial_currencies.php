@@ -4,9 +4,8 @@ declare(strict_types=1);
 
 namespace App;
 
-use App\Database\Currency;
-use Spiral\Database\Injection\Parameter;
-use Spiral\Migrations\Migration;
+use Cycle\Database\Injection\Parameter;
+use Cycle\Migrations\Migration;
 
 class InsertInitialCurrenciesMigration extends Migration
 {

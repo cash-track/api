@@ -4,16 +4,41 @@ declare(strict_types=1);
 
 namespace App\Controller\Auth;
 
+use App\Database\Currency;
+use App\Repository\CurrencyRepository;
 use App\Request\CheckNickNameRequest;
 use App\Request\RegisterRequest;
+use App\Service\Auth\AuthService;
+use App\Service\Auth\EmailConfirmationService;
+use App\Service\Auth\RefreshTokenService;
+use App\Service\UserService;
+use App\View\UserView;
 use Psr\Http\Message\ResponseInterface;
-use Spiral\Prototype\Traits\PrototypeTrait;
+use Spiral\Http\ResponseWrapper;
 use Spiral\Router\Annotation\Route;
 
 final class RegisterController
 {
-    use PrototypeTrait;
     use AuthResponses;
+
+    /**
+     * @param \App\View\UserView $userView
+     * @param \App\Service\Auth\AuthService $authService
+     * @param \App\Service\UserService $userService
+     * @param \Spiral\Http\ResponseWrapper $response
+     * @param \App\Service\Auth\EmailConfirmationService $emailConfirmationService
+     * @param \App\Service\Auth\RefreshTokenService $refreshTokenService
+     */
+    public function __construct(
+        protected UserView $userView,
+        protected AuthService $authService,
+        protected UserService $userService,
+        protected ResponseWrapper $response,
+        protected EmailConfirmationService $emailConfirmationService,
+        protected RefreshTokenService $refreshTokenService,
+        private CurrencyRepository $currencyRepository,
+    ) {
+    }
 
     /**
      * @Route(route="/auth/register", name="auth.register", methods="POST")
@@ -30,6 +55,13 @@ final class RegisterController
         }
 
         $user = $request->createUser();
+
+        $currency = $this->currencyRepository->getDefault();
+
+        if ($currency instanceof Currency) {
+            $user->setDefaultCurrency($currency);
+        }
+
         $this->authService->hashPassword($user, $request->getField('password'));
 
         try {

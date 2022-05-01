@@ -7,7 +7,7 @@ namespace App\Service\Auth;
 use App\Repository\UserRepository;
 use App\Service\Mailer\MailerInterface;
 use App\Service\UriService;
-use Cycle\ORM\TransactionInterface;
+use Cycle\ORM\EntityManagerInterface;
 
 abstract class HelperService
 {
@@ -15,7 +15,7 @@ abstract class HelperService
     const RESEND_TIME_LIMIT = 60;
 
     /**
-     * @var \Cycle\ORM\TransactionInterface
+     * @var \Cycle\ORM\EntityManagerInterface
      */
     protected $tr;
 
@@ -37,13 +37,13 @@ abstract class HelperService
     /**
      * AuthService constructor.
      *
-     * @param \Cycle\ORM\TransactionInterface $tr
+     * @param \Cycle\ORM\EntityManagerInterface $tr
      * @param \App\Repository\UserRepository $userRepository
      * @param \App\Service\Mailer\MailerInterface $mailer
      * @param \App\Service\UriService $uri
      */
     public function __construct(
-        TransactionInterface $tr,
+        EntityManagerInterface $tr,
         UserRepository $userRepository,
         MailerInterface $mailer,
         UriService $uri

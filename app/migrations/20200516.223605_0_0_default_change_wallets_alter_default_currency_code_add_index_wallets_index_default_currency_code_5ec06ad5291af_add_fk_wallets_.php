@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Migration;
 
-use Spiral\Migrations\Migration;
+use Cycle\Migrations\Migration;
 
 class OrmDefault7af405532addf215012ad5dac76567ea extends Migration
 {

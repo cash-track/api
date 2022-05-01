@@ -8,55 +8,17 @@ use App\Database\Wallet;
 use Psr\Http\Message\ResponseInterface;
 use Spiral\Core\Container\SingletonInterface;
 use Spiral\Http\ResponseWrapper;
-use Spiral\Prototype\Annotation\Prototyped;
 
-/**
- * @Prototyped(property="walletView")
- */
 class WalletView implements SingletonInterface
 {
-    /**
-     * @var \Spiral\Http\ResponseWrapper
-     */
-    protected ResponseWrapper $response;
-
-    /**
-     * @var \App\View\CurrencyView
-     */
-    protected CurrencyView $currency;
-
-    /**
-     * @var \App\View\UsersView
-     */
-    protected UsersView $users;
-
-    /**
-     * @var \App\View\ChargesView
-     */
-    protected ChargesView $charges;
-
-    /**
-     * @param \Spiral\Http\ResponseWrapper $response
-     * @param \App\View\CurrencyView $currencyView
-     * @param \App\View\UsersView $usersView
-     * @param \App\View\ChargesView $chargesView
-     */
     public function __construct(
-        ResponseWrapper $response,
-        CurrencyView $currencyView,
-        UsersView $usersView,
-        ChargesView $chargesView
+        protected ResponseWrapper $response,
+        protected CurrencyView $currencyView,
+        protected UsersView $usersView,
+        protected ChargesView $chargesView,
     ) {
-        $this->response = $response;
-        $this->currency = $currencyView;
-        $this->users = $usersView;
-        $this->charges = $chargesView;
     }
 
-    /**
-     * @param \App\Database\Wallet $wallet
-     * @return \Psr\Http\Message\ResponseInterface
-     */
     public function json(Wallet $wallet): ResponseInterface
     {
         return $this->response->json([
@@ -64,12 +26,12 @@ class WalletView implements SingletonInterface
         ], 200);
     }
 
-    /**
-     * @param \App\Database\Wallet $wallet
-     * @return array
-     */
-    public function map(Wallet $wallet): array
+    public function map(?Wallet $wallet): ?array
     {
+        if ($wallet === null) {
+            return null;
+        }
+
         return [
             'type'        => 'wallet',
             'id'          => $wallet->id,
@@ -83,11 +45,11 @@ class WalletView implements SingletonInterface
             'updatedAt'   => $wallet->updatedAt->format(DATE_W3C),
 
             'defaultCurrencyCode' => $wallet->defaultCurrencyCode,
-            'defaultCurrency'     => $this->currency->map($wallet->defaultCurrency),
+            'defaultCurrency'     => $this->currencyView->map($wallet->getDefaultCurrency()),
 
-            'users' => $wallet->users->count() ? $this->users->map($wallet->users->getValues()) : [],
+            'users' => $this->usersView->map($wallet->getUsers()),
 
-            'latestCharges' => $wallet->latestCharges !== null ? $this->charges->map($wallet->latestCharges->getValues()) : [],
+            'latestCharges' => $this->chargesView->map($wallet->getLatestCharges()?->getValues() ?? []),
         ];
     }
 }

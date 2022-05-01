@@ -1,27 +1,22 @@
+version: '2.8'
+
+rpc:
+  listen: tcp://127.0.0.1:6001
+
+server:
+  command: "php app.php"
+  relay: pipes
+
 http:
   address: 0.0.0.0:8080
-  workers:
-    command: "php app.php"
+  middleware: [ "gzip" ]
+  pool:
+    supervisor:
+      max_worker_memory: 100
 
-jobs:
-  dispatch:
-    app-job-*.pipeline: "local"
-  pipelines:
-    local:
-      broker: "ephemeral"
-  consume: ["local"]
-  workers:
-    command: "php app.php"
-    pool.numWorkers: 2
-
-static:
-  dir:    "public"
-  forbid: [".php", ".htaccess"]
+logs:
+  mode: production
+  level: info
 
 metrics:
   address: localhost:2112
-
-limit:
-  services:
-    http.maxMemory: 100
-    jobs.maxMemory: 100

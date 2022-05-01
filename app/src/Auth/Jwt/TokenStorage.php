@@ -76,10 +76,11 @@ class TokenStorage implements TokenStorageInterface, SingletonInterface
         // TODO. Prevent hardcoded data, resolve those values somehow
 
         $payload = array_merge($payload, [
-            'iss' => 'https://api.cash-track.ml',
-            'aud' => 'https://api.cash-track.ml',
+            'iss' => 'https://api.cash-track.app',
+            'aud' => 'https://api.cash-track.app',
             'iat' => $now,
             'exp' => $expire,
+            'jti' => sha1((string) microtime(true)),
         ]);
 
 

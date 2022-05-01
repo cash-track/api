@@ -5,35 +5,22 @@ declare(strict_types=1);
 namespace App\View;
 
 use App\Database\Currency;
-use Psr\Http\Message\ResponseInterface;
 use Spiral\Core\Container\SingletonInterface;
-use Spiral\Prototype\Annotation\Prototyped;
-use Spiral\Prototype\Traits\PrototypeTrait;
+use Spiral\Http\ResponseWrapper;
 
-/**
- * @Prototyped(property="currencyView")
- */
 class CurrencyView implements SingletonInterface
 {
-    use PrototypeTrait;
-
-    /**
-     * @param \App\Database\Currency $currency
-     * @return \Psr\Http\Message\ResponseInterface
-     */
-    public function json(Currency $currency): ResponseInterface
-    {
-        return $this->response->json([
-            'data' => $this->map($currency),
-        ], 200);
+    public function __construct(
+        protected ResponseWrapper $response,
+    ) {
     }
 
-    /**
-     * @param \App\Database\Currency $currency
-     * @return array
-     */
-    public function map(Currency $currency): array
+    public function map(?Currency $currency): ?array
     {
+        if ($currency === null) {
+            return null;
+        }
+
         return [
             'type'      => 'currency',
             'id'        => $currency->code,

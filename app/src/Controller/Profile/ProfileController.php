@@ -4,38 +4,38 @@ declare(strict_types=1);
 
 namespace App\Controller\Profile;
 
+use App\Controller\AuthAwareController;
 use App\Database\Currency;
-use App\Database\User;
+use App\Repository\CurrencyRepository;
 use App\Request\CheckNickNameRequest;
 use App\Request\Profile\UpdateBasicRequest;
+use App\Service\UserService;
+use App\View\UserView;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Log\LoggerInterface;
 use Spiral\Auth\AuthScope;
-use Spiral\Prototype\Traits\PrototypeTrait;
+use Spiral\Http\ResponseWrapper;
 use Spiral\Router\Annotation\Route;
 
-class ProfileController
+class ProfileController extends AuthAwareController
 {
-    use PrototypeTrait;
-
     /**
-     * @var \App\Database\User
-     */
-    protected $user;
-
-    /**
-     * ProfileController constructor.
-     *
      * @param \Spiral\Auth\AuthScope $auth
+     * @param \App\View\UserView $userView
+     * @param \Psr\Log\LoggerInterface $logger
+     * @param \App\Service\UserService $userService
+     * @param \Spiral\Http\ResponseWrapper $response
+     * @param \App\Repository\CurrencyRepository $currencyRepository
      */
-    public function __construct(AuthScope $auth)
-    {
-        $user = $auth->getActor();
-
-        if (! $user instanceof User) {
-            throw new \RuntimeException('Unable to get authenticated user');
-        }
-
-        $this->user = $user;
+    public function __construct(
+        AuthScope $auth,
+        protected UserView $userView,
+        protected LoggerInterface $logger,
+        protected UserService $userService,
+        protected ResponseWrapper $response,
+        protected CurrencyRepository $currencyRepository,
+    ) {
+        parent::__construct($auth);
     }
 
     /**
@@ -91,13 +91,14 @@ class ProfileController
         $this->user->defaultCurrencyCode = $request->getDefaultCurrencyCode();
 
         try {
-            $defaultCurrency = $this->currencies->findByPK($request->getDefaultCurrencyCode());
+            /** @var \App\Database\Currency|null $defaultCurrency */
+            $defaultCurrency = $this->currencyRepository->findByPK($request->getDefaultCurrencyCode());
 
             if (! $defaultCurrency instanceof Currency) {
                 throw new \RuntimeException('Unable to load default currency');
             }
 
-            $this->user->defaultCurrency = $defaultCurrency;
+            $this->user->setDefaultCurrency($defaultCurrency);
         } catch (\Throwable $exception) {
             $this->logger->warning('Unable to load currency entity', [
                 'action' => 'profile.update',

@@ -4,14 +4,34 @@ declare(strict_types=1);
 
 namespace App\Controller\Auth;
 
+use App\Controller\AuthAwareController;
 use App\Database\EmailConfirmation;
+use App\Repository\EmailConfirmationRepository;
+use App\Service\Auth\EmailConfirmationService;
+use App\View\EmailConfirmationView;
 use Psr\Http\Message\ResponseInterface;
-use Spiral\Prototype\Traits\PrototypeTrait;
+use Spiral\Auth\AuthScope;
+use Spiral\Http\ResponseWrapper;
 use Spiral\Router\Annotation\Route;
 
-final class EmailConfirmationsController
+final class EmailConfirmationsController extends AuthAwareController
 {
-    use PrototypeTrait;
+    /**
+     * @param \Spiral\Auth\AuthScope $auth
+     * @param \Spiral\Http\ResponseWrapper $response
+     * @param \App\View\EmailConfirmationView $emailConfirmationView
+     * @param \App\Service\Auth\EmailConfirmationService $emailConfirmationService
+     * @param \App\Repository\EmailConfirmationRepository $emailConfirmationRepository
+     */
+    public function __construct(
+        protected AuthScope $auth,
+        protected ResponseWrapper $response,
+        protected EmailConfirmationView $emailConfirmationView,
+        protected EmailConfirmationService $emailConfirmationService,
+        protected EmailConfirmationRepository $emailConfirmationRepository,
+    ) {
+        parent::__construct($auth);
+    }
 
     /**
      * @Route(route="/auth/email/confirmation", name="auth.email.confirmation", methods="GET", group="auth")
@@ -20,10 +40,8 @@ final class EmailConfirmationsController
      */
     public function index(): ResponseInterface
     {
-        /** @var \App\Database\User $user */
-        $user = $this->auth->getActor();
-
-        $confirmation = $this->emailConfirmations->findByPK($user->email);
+        /** @var \App\Database\EmailConfirmation|null $confirmation */
+        $confirmation = $this->emailConfirmationRepository->findByPK($this->user->email);
 
         if (! $confirmation instanceof EmailConfirmation) {
             return $this->response->json([
@@ -35,7 +53,7 @@ final class EmailConfirmationsController
     }
 
     /**
-     * @Route(route="/auth/email/confirmation/<token>", name="auth.email.confirm")
+     * @Route(route="/auth/email/confirmation/confirm/<token>", name="auth.email.confirm")
      *
      * @param string $token
      * @return \Psr\Http\Message\ResponseInterface
@@ -63,11 +81,8 @@ final class EmailConfirmationsController
      */
     public function reSend(): ResponseInterface
     {
-        /** @var \App\Database\User $user */
-        $user = $this->auth->getActor();
-
         try {
-            $this->emailConfirmationService->reSend($user);
+            $this->emailConfirmationService->reSend($this->user);
         } catch (\Throwable $exception) {
             return $this->response->json([
                 'message' => 'Error on trying to send new confirmation link.',

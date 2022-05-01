@@ -7,20 +7,16 @@ namespace App\View;
 use App\Database\Charge;
 use Psr\Http\Message\ResponseInterface;
 use Spiral\Core\Container\SingletonInterface;
-use Spiral\Prototype\Annotation\Prototyped;
-use Spiral\Prototype\Traits\PrototypeTrait;
+use Spiral\Http\ResponseWrapper;
 
-/**
- * @Prototyped(property="chargeView")
- */
 class ChargeView implements SingletonInterface
 {
-    use PrototypeTrait;
+    public function __construct(
+        protected ResponseWrapper $response,
+        protected UserView $userView,
+    ) {
+    }
 
-    /**
-     * @param \App\Database\Charge $charge
-     * @return \Psr\Http\Message\ResponseInterface
-     */
     public function json(Charge $charge): ResponseInterface
     {
         return $this->response->json([
@@ -28,12 +24,12 @@ class ChargeView implements SingletonInterface
         ], 200);
     }
 
-    /**
-     * @param \App\Database\Charge $charge
-     * @return array
-     */
-    public function map(Charge $charge): array
+    public function map(?Charge $charge): ?array
     {
+        if ($charge === null) {
+            return null;
+        }
+
         return [
             'type'        => 'charge',
             'id'          => $charge->id,
@@ -42,7 +38,7 @@ class ChargeView implements SingletonInterface
             'title'       => $charge->title,
             'description' => $charge->description,
             'userId'      => $charge->userId,
-            'user'        => $this->userView->map($charge->user),
+            'user'        => $this->userView->map($charge->getUser()),
             'walletId'    => $charge->walletId,
             'createdAt'   => $charge->createdAt->format(DATE_W3C),
             'updatedAt'   => $charge->updatedAt->format(DATE_W3C),

@@ -27,6 +27,7 @@ class UpdatePhotoRequest extends Filter
     /**
      * @return \Psr\Http\Message\UploadedFileInterface
      * @throws \Laminas\Diactoros\Exception\UploadedFileErrorException
+     * @throws \Spiral\Models\Exception\EntityExceptionInterface
      */
     public function getPhoto(): UploadedFileInterface
     {

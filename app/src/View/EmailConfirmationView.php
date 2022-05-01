@@ -7,20 +7,15 @@ namespace App\View;
 use App\Database\EmailConfirmation;
 use Psr\Http\Message\ResponseInterface;
 use Spiral\Core\Container\SingletonInterface;
-use Spiral\Prototype\Annotation\Prototyped;
-use Spiral\Prototype\Traits\PrototypeTrait;
+use Spiral\Http\ResponseWrapper;
 
-/**
- * @Prototyped(property="emailConfirmationView")
- */
 class EmailConfirmationView implements SingletonInterface
 {
-    use PrototypeTrait;
+    public function __construct(
+        protected ResponseWrapper $response,
+    ) {
+    }
 
-    /**
-     * @param \App\Database\EmailConfirmation $confirmation
-     * @return \Psr\Http\Message\ResponseInterface
-     */
     public function json(EmailConfirmation $confirmation): ResponseInterface
     {
         return $this->response->json([
@@ -28,16 +23,21 @@ class EmailConfirmationView implements SingletonInterface
         ], 200);
     }
 
-    /**
-     * @param \App\Database\EmailConfirmation $confirmation
-     * @return array
-     */
-    public function map(EmailConfirmation $confirmation): array
+    public function map(?EmailConfirmation $confirmation): ?array
     {
+        if ($confirmation === null) {
+            return null;
+        }
+
         return [
-            'type'      => 'emailConfirmation',
-            'email'     => $confirmation->email,
-            'createdAt' => $confirmation->createdAt->format(DATE_W3C),
+            'type'            => 'emailConfirmation',
+            'email'           => $confirmation->email,
+            'createdAt'       => $confirmation->createdAt->format(DATE_W3C),
+            'resendTimeLimit' => $confirmation->getResendTimeLimit(),
+            'validTimeLimit'  => $confirmation->getValidTimeLimit(),
+            'timeSentAgo'     => $confirmation->getTimeSentAgo(),
+            'isThrottled'     => $confirmation->getIsThrottled(),
+            'isValid'         => $confirmation->getIsValid(),
         ];
     }
 }

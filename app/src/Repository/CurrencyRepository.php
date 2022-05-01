@@ -6,7 +6,7 @@ namespace App\Repository;
 
 use App\Database\Currency;
 use Cycle\ORM\Select\Repository;
-use Spiral\Database\Injection\Parameter;
+use Cycle\Database\Injection\Parameter;
 
 class CurrencyRepository extends Repository
 {
@@ -21,6 +21,7 @@ class CurrencyRepository extends Repository
      */
     public function getDefault(): ?Currency
     {
+        /** @var \App\Database\Currency|null $currency */
         $currency = $this->findByPK(Currency::DEFAULT_CURRENCY_CODE);
 
         if ($currency instanceof Currency) {

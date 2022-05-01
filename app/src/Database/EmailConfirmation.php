@@ -4,40 +4,53 @@ declare(strict_types=1);
 
 namespace App\Database;
 
-use Cycle\Annotated\Annotation as Cycle;
+use App\Repository\EmailConfirmationRepository;
+use App\Service\Auth\EmailConfirmationService;
+use Cycle\Annotated\Annotation as ORM;
 
-/**
- * @Cycle\Entity(repository = "App\Repository\EmailConfirmationRepository")
- * @Cycle\Table(indexes={
- *     @Cycle\Table\Index(columns = {"token"}),
- *     @Cycle\Table\Index(columns = {"email"}, unique = true)
- * })
- */
+#[ORM\Entity(repository: EmailConfirmationRepository::class)]
+#[ORM\Table(indexes: [
+    new ORM\Table\Index(columns: ['token']),
+    new ORM\Table\Index(columns: ['email'], unique: true),
+])]
 class EmailConfirmation
 {
-    /**
-     * @Cycle\Column(type = "string", primary = true)
-     * @var string|null
-     */
-    public $email;
+    #[ORM\Column(type: 'string', primary: true)]
+    public string|null $email = null;
 
-    /**
-     * @Cycle\Column(type = "string")
-     * @var string
-     */
-    public $token = '';
+    #[ORM\Column('string')]
+    public string $token = '';
 
-    /**
-     * @Cycle\Column(type = "datetime", name = "created_at")
-     * @var \DateTimeImmutable
-     */
-    public $createdAt;
+    #[ORM\Column(type: 'datetime', name: 'created_at')]
+    public \DateTimeImmutable $createdAt;
 
-    /**
-     * EmailConfirmation constructor.
-     */
     public function __construct()
     {
         $this->createdAt = new \DateTimeImmutable();
+    }
+
+    public function getResendTimeLimit(): int
+    {
+        return EmailConfirmationService::RESEND_TIME_LIMIT;
+    }
+
+    public function getValidTimeLimit(): int
+    {
+        return EmailConfirmationService::TTL;
+    }
+
+    public function getTimeSentAgo(): int
+    {
+        return time() - $this->createdAt->getTimestamp();
+    }
+
+    public function getIsThrottled(): bool
+    {
+        return $this->createdAt->getTimestamp() + $this->getResendTimeLimit() > time();
+    }
+
+    public function getIsValid(): bool
+    {
+        return $this->createdAt->getTimestamp() + $this->getValidTimeLimit() > time();
     }
 }

@@ -39,13 +39,33 @@ trait BasicFixtures
         return self::string() . '@' . self::string() . '.com';
     }
 
+    public static function domain(): string
+    {
+        return self::string() . '.' . self::arrayElement(['com', 'org', 'ua', 'net']);
+    }
+
     public static function fileName(string $extension = 'png'): string
     {
         return self::string(16) . '.' . $extension;
     }
 
+    public static function url(string $ends = ''): string
+    {
+        return "https://" . self::domain() . '/' . self::string() . '/' . $ends;
+    }
+
     public static function boolean(): bool
     {
         return (bool) rand(0, 1);
+    }
+
+    public static function integer(int $min = 0, int $max = 100): int
+    {
+        return rand($min, $max);
+    }
+
+    public static function float(int $min = 0, int $max = 5000, int $precision = 2): float
+    {
+        return round(rand($min, $max) + (rand($min, $max) / (10 ^ $precision)), $precision);
     }
 }

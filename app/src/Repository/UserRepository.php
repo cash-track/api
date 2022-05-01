@@ -9,7 +9,7 @@ use Cycle\ORM\Select;
 use Cycle\ORM\Select\Repository;
 use Spiral\Auth\ActorProviderInterface;
 use Spiral\Auth\TokenInterface;
-use Spiral\Database\Query\SelectQuery;
+use Cycle\Database\Query\SelectQuery;
 
 class UserRepository extends Repository implements ActorProviderInterface
 {
@@ -54,16 +54,25 @@ class UserRepository extends Repository implements ActorProviderInterface
      */
     protected function byCommonWallets(User $user): Select
     {
+        $commonWallets = $this->select()->getBuilder()->getQuery();
+
+        if ($commonWallets !== null) {
+            $commonWallets->columns(['wallet_id'])
+                          ->from('user_wallets')
+                          ->where('user_id', '=', $user->id);
+        }
+
+        $commonUsers = $this->select()->getBuilder()->getQuery();
+
+        if ($commonUsers !== null) {
+            $commonUsers->columns(['user_id'])
+                        ->from('user_wallets')
+                        ->where('wallet_id', 'in', $commonWallets);
+        }
+
         return $this->select()
-                    ->where(
-                        'wallets.@.wallet_id',
-                        'in',
-                        $this->select()
-                             ->where('wallets.@.user_id', '=', $user->id)
-                             ->buildQuery()
-                             ->columns('wallet_id')
-                    )
-                    ->groupBy('user.id')
-                    ->orderBy('COUNT(user.id)', SelectQuery::SORT_DESC);
+            ->where('id', 'in', $commonUsers)
+            ->groupBy('id')
+            ->orderBy('COUNT(user.id)', SelectQuery::SORT_DESC);
     }
 }
