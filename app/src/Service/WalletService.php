@@ -7,172 +7,200 @@ namespace App\Service;
 use App\Database\Currency;
 use App\Database\User;
 use App\Database\Wallet;
-use Cycle\ORM\TransactionInterface;
-use Spiral\Prototype\Annotation\Prototyped;
+use App\Mail\WalletShareMail;
+use App\Repository\CurrencyRepository;
+use App\Service\Mailer\MailerInterface;
+use Cycle\ORM\EntityManagerInterface;
 
-/**
- * @Prototyped(property="walletService")
- */
 class WalletService
 {
-    /**
-     * @var \Cycle\ORM\TransactionInterface
-     */
-    private $tr;
-
-    /**
-     * WalletService constructor.
-     *
-     * @param \Cycle\ORM\TransactionInterface $tr
-     */
-    public function __construct(TransactionInterface $tr)
-    {
-        $this->tr = $tr;
+    public function __construct(
+        private EntityManagerInterface $tr,
+        private CurrencyRepository $currencyRepository,
+        private UriService $uri,
+        private MailerInterface $mailer
+    ) {
     }
 
     /**
      * Creates new Wallet and link to creator
      *
+     * @param \App\Database\Wallet $wallet
      * @param \App\Database\User $user
-     * @param string $name
-     * @param bool $isPublic
-     * @param \App\Database\Currency|null $defaultCurrency
      * @return \App\Database\Wallet
      * @throws \Throwable
      */
-    public function create(User $user, string $name, bool $isPublic = false, Currency $defaultCurrency = null): Wallet
+    public function create(Wallet $wallet, User $user): Wallet
     {
-        $wallet = new Wallet();
-        $wallet->name = $name;
-        $wallet->slug = str_slug($name);
-        $wallet->isPublic = $isPublic;
+        if (empty($wallet->slug)) {
+            $this->setSlugByName($wallet);
+        }
+
+        $this->setDefaultCurrency($wallet, $user->defaultCurrencyCode);
+
         $wallet->users->add($user);
 
-        if ($defaultCurrency instanceof Currency) {
-            $wallet->defaultCurrency = $defaultCurrency;
-        } else {
-            $wallet->defaultCurrency = $user->defaultCurrency;
-        }
-
-        $this->tr->persist($wallet);
-        $this->tr->run();
-
-        return $wallet;
+        return $this->store($wallet);
     }
 
-    public function update(Wallet $wallet, array $data): Wallet
+    /**
+     * @param \App\Database\Wallet $wallet
+     * @return \App\Database\Wallet
+     * @throws \Throwable
+     */
+    public function store(Wallet $wallet): Wallet
     {
-        if (count($data) == 0) {
-            return $wallet;
-        }
-
-        foreach ($data as $key => $value) {
-            switch ($key) {
-                case 'name':
-                    $wallet->name = $value;
-                    break;
-                case 'slug':
-                    $wallet->slug = $value;
-                    break;
-            }
-        }
-
         $this->tr->persist($wallet);
         $this->tr->run();
 
         return $wallet;
     }
 
+    /**
+     * @param \App\Database\Wallet $wallet
+     * @throws \Throwable
+     */
     public function delete(Wallet $wallet): void
     {
         $this->tr->delete($wallet);
         $this->tr->run();
     }
 
-    public function share(Wallet $wallet, User $user): Wallet
+    /**
+     * @param \App\Database\Wallet $wallet
+     * @return \App\Database\Wallet
+     * @throws \Throwable
+     */
+    public function activate(Wallet $wallet): Wallet
+    {
+        if ($wallet->isActive) {
+            return $wallet;
+        }
+
+        $wallet->isActive = true;
+
+        return $this->store($wallet);
+    }
+
+    /**
+     * @param \App\Database\Wallet $wallet
+     * @return \App\Database\Wallet
+     * @throws \Throwable
+     */
+    public function disable(Wallet $wallet): Wallet
+    {
+        if (! $wallet->isActive) {
+            return $wallet;
+        }
+
+        $wallet->isActive = false;
+
+        return $this->store($wallet);
+    }
+
+    /**
+     * @param \App\Database\Wallet $wallet
+     * @return \App\Database\Wallet
+     * @throws \Throwable
+     */
+    public function archive(Wallet $wallet): Wallet
+    {
+        if ($wallet->isArchived) {
+            return $wallet;
+        }
+
+        $wallet->isArchived = true;
+
+        return $this->store($wallet);
+    }
+
+    /**
+     * @param \App\Database\Wallet $wallet
+     * @return \App\Database\Wallet
+     * @throws \Throwable
+     */
+    public function unArchive(Wallet $wallet): Wallet
+    {
+        if (! $wallet->isArchived) {
+            return $wallet;
+        }
+
+        $wallet->isArchived = false;
+
+        return $this->store($wallet);
+    }
+
+    /**
+     * @param \App\Database\Wallet $wallet
+     * @param \App\Database\User $user
+     * @param \App\Database\User $sharer
+     * @return \App\Database\Wallet
+     * @throws \Throwable
+     */
+    public function share(Wallet $wallet, User $user, User $sharer): Wallet
     {
         if ($wallet->users->contains($user)) {
             return $wallet;
         }
 
         $wallet->users->add($user);
+        $wallet = $this->store($wallet);
 
-        $this->tr->persist($wallet);
-        $this->tr->run();
+        $this->mailer->send(new WalletShareMail($user, $sharer, $wallet, $this->uri->wallet($wallet)));
 
         return $wallet;
     }
 
+    /**
+     * @param \App\Database\Wallet $wallet
+     * @param \App\Database\User $user
+     * @return \App\Database\Wallet
+     * @throws \Throwable
+     */
     public function revoke(Wallet $wallet, User $user): Wallet
     {
-        if (!$wallet->users->contains($user)) {
+        if (! $wallet->users->contains($user)) {
             return $wallet;
         }
 
         $wallet->users->removeElement($user);
 
-        $this->tr->persist($wallet);
-        $this->tr->run();
+        return $this->store($wallet);
+    }
+
+    /**
+     * @param \App\Database\Wallet $wallet
+     * @return \App\Database\Wallet
+     * @throws \Exception
+     */
+    protected function setSlugByName(Wallet $wallet): Wallet
+    {
+        $wallet->slug = str_slug($wallet->name . ' ' . bin2hex(random_bytes(3)));
 
         return $wallet;
     }
 
-    public function archive(Wallet $wallet): Wallet
+    /**
+     * @param \App\Database\Wallet $wallet
+     * @param string|null $defaultCurrencyCode
+     * @return \App\Database\Wallet
+     */
+    protected function setDefaultCurrency(Wallet $wallet, ?string $defaultCurrencyCode): Wallet
     {
-        $wallet->isArchived = true;
+        $code = $defaultCurrencyCode ?? Currency::DEFAULT_CURRENCY_CODE;
 
-        $this->tr->persist($wallet);
-        $this->tr->run();
+        if (!empty($wallet->defaultCurrencyCode)) {
+            $code = $wallet->defaultCurrencyCode;
+        }
 
-        return $wallet;
-    }
+        /** @var \App\Database\Currency|null $currency */
+        $currency = $this->currencyRepository->findByPK($code);
 
-    public function unArchive(Wallet $wallet): Wallet
-    {
-        $wallet->isArchived = false;
+        if (! $currency instanceof Currency) {
+            throw new \RuntimeException("Unable to get currency by code [{$code}]");
+        }
 
-        $this->tr->persist($wallet);
-        $this->tr->run();
-
-        return $wallet;
-    }
-
-    public function publish(Wallet $wallet): Wallet
-    {
-        $wallet->isPublic = true;
-
-        $this->tr->persist($wallet);
-        $this->tr->run();
-
-        return $wallet;
-    }
-
-    public function private(Wallet $wallet): Wallet
-    {
-        $wallet->isPublic = false;
-
-        $this->tr->persist($wallet);
-        $this->tr->run();
-
-        return $wallet;
-    }
-
-    public function activate(Wallet $wallet): Wallet
-    {
-        $wallet->isActive = true;
-
-        $this->tr->persist($wallet);
-        $this->tr->run();
-
-        return $wallet;
-    }
-
-    public function disable(Wallet $wallet): Wallet
-    {
-        $wallet->isActive = false;
-
-        $this->tr->persist($wallet);
-        $this->tr->run();
+        $wallet->setDefaultCurrency($currency);
 
         return $wallet;
     }

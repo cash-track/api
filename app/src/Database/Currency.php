@@ -4,47 +4,31 @@ declare(strict_types=1);
 
 namespace App\Database;
 
-use Cycle\Annotated\Annotation as Cycle;
+use App\Repository\CurrencyRepository;
+use Cycle\Annotated\Annotation as ORM;
 
-/**
- * @Cycle\Entity(repository = "App\Repository\CurrencyRepository")
- */
+#[ORM\Entity(repository: CurrencyRepository::class)]
 class Currency
 {
     const DEFAULT_CURRENCY_CODE = 'USD';
 
-    const FIELD_CODE = 'code';
-    const FIELD_NAME = 'name';
-    const FIELD_CHAR = 'char';
-    const FIELD_RATE = 'rate';
+    #[ORM\Column(type: 'string(3)', primary: true)]
+    public string|null $code = null;
 
-    /**
-     * @Cycle\Column(type = "string(3)", primary = true)
-     * @var string
-     */
-    public $code;
+    #[ORM\Column('string')]
+    public string $name = '';
 
-    /**
-     * @Cycle\Column(type = "string")
-     * @var string
-     */
-    public $name;
+    #[ORM\Column('string(1)')]
+    public string $char = '';
 
-    /**
-     * @Cycle\Column(type = "string(1)")
-     * @var string
-     */
-    public $char;
+    #[ORM\Column('decimal(8,4)')]
+    public float $rate = 0.0;
 
-    /**
-     * @Cycle\Column(type = "decimal(8,4)")
-     * @var double
-     */
-    public $rate;
+    #[ORM\Column(type: 'datetime', name: 'updated_at')]
+    public \DateTimeImmutable $updatedAt;
 
-    /**
-     * @Cycle\Column(type = "datetime", name = "updated_at")
-     * @var \DateTimeImmutable
-     */
-    public $updatedAt;
+    public function __construct()
+    {
+        $this->updatedAt = new \DateTimeImmutable();
+    }
 }

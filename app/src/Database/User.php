@@ -4,97 +4,92 @@ declare(strict_types=1);
 
 namespace App\Database;
 
-use Cycle\Annotated\Annotation as Cycle;
-use Cycle\ORM\Relation\Pivoted\PivotedCollection;
+use App\Repository\UserRepository;
+use App\Security\PasswordContainerInterface;
+use Cycle\Annotated\Annotation as ORM;
+use Cycle\ORM\Collection\Pivoted\PivotedCollection;
+use Cycle\ORM\Entity\Behavior;
 
-/**
- * @Cycle\Entity(repository = "App\Repository\UserRepository", mapper = "App\Mapper\TimestampedMapper")
- * @Cycle\Table(indexes={
- *     @Cycle\Table\Index(columns = {"nick_name"}, unique = true),
- *     @Cycle\Table\Index(columns = {"email"}, unique = true)
- * })
- */
-class User
+#[ORM\Entity(repository: UserRepository::class)]
+#[ORM\Table(indexes: [
+    new ORM\Table\Index(columns: ['nick_name'], unique: true),
+    new ORM\Table\Index(columns: ['email'], unique: true),
+])]
+#[Behavior\CreatedAt(field: 'createdAt', column: 'created_at')]
+#[Behavior\UpdatedAt(field: 'updatedAt', column: 'updated_at')]
+class User implements PasswordContainerInterface
 {
-    /**
-     * @Cycle\Column(type = "primary")
-     * @var int
-     */
-    public $id;
+    #[ORM\Column('primary')]
+    public int|null $id = null;
 
-    /**
-     * @Cycle\Column(type = "string")
-     * @var string
-     */
-    public $name;
+    #[ORM\Column('string')]
+    public string $name = '';
 
-    /**
-     * @Cycle\Column(type = "string", nullable = true, name = "last_name")
-     * @var string
-     */
-    public $lastName;
+    #[ORM\Column(type: 'string', name: 'last_name', nullable: true)]
+    public string|null $lastName = null;
 
-    /**
-     * @Cycle\Column(type = "string", name = "nick_name")
-     * @var string
-     */
-    public $nickName;
+    #[ORM\Column(type: 'string', name: 'nick_name')]
+    public string $nickName = '';
 
-    /**
-     * @Cycle\Column(type = "string")
-     *
-     * @var string
-     */
-    public $email;
+    #[ORM\Column('string')]
+    public string $email = '';
 
-    /**
-     * @Cycle\Column(type = "string(255)", nullable = true, name = "photo_url")
-     * @var string|null
-     */
-    public $photoUrl;
+    #[ORM\Column(type: 'boolean', name: 'is_email_confirmed', default: false)]
+    public bool $isEmailConfirmed = false;
 
-    /**
-     * @Cycle\Column(type = "string(3)", nullable = true, name = "default_currency_code")
-     * @var string|null
-     */
-    public $defaultCurrencyCode;
+    #[ORM\Column(type: 'string(255)', name: 'photo', nullable: true)]
+    public string|null $photo = null;
 
-    /**
-     * @Cycle\Column(type = "string")
-     * @var string
-     */
-    public $password;
+    #[ORM\Column(type: 'string(3)', name: 'default_currency_code')]
+    public string|null $defaultCurrencyCode = null;
 
-    /**
-     * @Cycle\Column(type = "datetime", name = "created_at")
-     * @var \DateTimeImmutable
-     */
-    public $createdAt;
+    #[ORM\Column('string')]
+    public string $password = '';
 
-    /**
-     * @Cycle\Column(type = "datetime", name = "updated_at")
-     * @var \DateTimeImmutable
-     */
-    public $updatedAt;
+    #[ORM\Column(type: 'datetime', name: 'created_at')]
+    public \DateTimeImmutable $createdAt;
 
-    /**
-     * @Cycle\Relation\BelongsTo(target = "App\Database\Currency", innerKey = "default_currency_code", cascade = false)
-     * @var \App\Database\Currency
-     */
-    public $defaultCurrency;
+    #[ORM\Column(type: 'datetime', name: 'updated_at')]
+    public \DateTimeImmutable $updatedAt;
 
-    /**
-     * @Cycle\Relation\ManyToMany(target = "App\Database\Wallet", though = "App\Database\UserWallet")
-     * @var \Cycle\ORM\Relation\Pivoted\PivotedCollection
-     */
-    public $wallets;
+    #[ORM\Relation\BelongsTo(target: Currency::class, innerKey: 'default_currency_code', cascade: true, load: 'eager')]
+    private Currency $defaultCurrency;
 
-    /**
-     * User constructor.
-     */
     public function __construct()
     {
-       $this->defaultCurrency = new Currency();
-       $this->wallets = new PivotedCollection();
+        $this->defaultCurrency = new Currency();
+        $this->createdAt = new \DateTimeImmutable();
+        $this->updatedAt = new \DateTimeImmutable();
+    }
+
+    public function getDefaultCurrency(): Currency
+    {
+        return $this->defaultCurrency;
+    }
+
+    public function setDefaultCurrency(Currency $currency): void
+    {
+        $this->defaultCurrency = $currency;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function getPasswordHash(): string
+    {
+        return $this->password;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function setPasswordHash(string $password): void
+    {
+        $this->password = $password;
+    }
+
+    public function fullName(): string
+    {
+        return "{$this->name} {$this->lastName}";
     }
 }

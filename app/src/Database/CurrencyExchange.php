@@ -4,78 +4,72 @@ declare(strict_types=1);
 
 namespace App\Database;
 
-use Cycle\Annotated\Annotation as Cycle;
+use App\Repository\CurrencyExchangeRepository;
+use Cycle\Annotated\Annotation as ORM;
+use Cycle\ORM\Entity\Behavior;
 
-/**
- * @Cycle\Entity(repository = "App\Repository\CurrencyExchangeRepository", mapper = "App\Mapper\TimestampedMapper")
- */
+#[ORM\Entity(repository: CurrencyExchangeRepository::class)]
+#[Behavior\CreatedAt(field: 'createdAt', column: 'created_at')]
+#[Behavior\UpdatedAt(field: 'updatedAt', column: 'updated_at')]
 class CurrencyExchange
 {
-    /**
-     * @Cycle\Column(type = "primary")
-     */
-    public $id;
+    #[ORM\Column(type: 'primary')]
+    public int|null $id = null;
 
-    /**
-     * @Cycle\Column(type = "string(3)", name = "src_currency_code")
-     * @var string
-     */
-    public $srcCurrencyCode;
+    #[ORM\Column(type: 'string(3)', name: 'src_currency_code')]
+    public string $srcCurrencyCode = '';
 
-    /**
-     * @Cycle\Column(type = "decimal(13,2)", name = "src_amount")
-     * @var float
-     */
-    public $srcAmount;
+    #[ORM\Column(type: 'decimal(13,2)', name: 'src_amount')]
+    public float $srcAmount = 0.0;
 
-    /**
-     * @Cycle\Column(type = "decimal(8,4)")
-     * @var double
-     */
-    public $rate;
+    #[ORM\Column(type: 'decimal(8,4)')]
+    public float $rate = 0.0;
 
-    /**
-     * @Cycle\Column(type = "string(3)", name = "dst_currency_code")
-     * @var string
-     */
-    public $dstCurrencyCode;
+    #[ORM\Column(type: 'string(3)', name: 'dst_currency_code')]
+    public string $dstCurrencyCode = '';
 
-    /**
-     * @Cycle\Column(type = "decimal(13,2)", name = "dst_amount")
-     * @var float
-     */
-    public $dstAmount;
+    #[ORM\Column(type: 'decimal(13,2)', name: 'dst_amount')]
+    public float $dstAmount = 0.0;
 
-    /**
-     * @Cycle\Column(type = "datetime", name = "created_at")
-     * @var \DateTimeImmutable
-     */
-    public $createdAt;
+    #[ORM\Column(type: 'datetime', name: 'created_at')]
+    public \DateTimeImmutable $createdAt;
 
-    /**
-     * @Cycle\Column(type = "datetime", name = "updated_at")
-     * @var \DateTimeImmutable
-     */
-    public $updatedAt;
+    #[ORM\Column(type: 'datetime', name: 'updated_at')]
+    public \DateTimeImmutable $updatedAt;
 
-    /**
-     * @Cycle\Relation\BelongsTo(target = "App\Database\Currency", innerKey = "src_currency_code")
-     * @var \App\Database\Currency
-     */
-    public $srcCurrency;
+    #[ORM\Relation\BelongsTo(target: Currency::class, innerKey: 'src_currency_code')]
+    private Currency $srcCurrency;
 
-    /**
-     * @Cycle\Relation\BelongsTo(target = "App\Database\Currency", innerKey = "dst_currency_code")
-     * @var \App\Database\Currency
-     */
-    public $dstCurrency;
+    #[ORM\Relation\BelongsTo(target: Currency::class, innerKey: 'dst_currency_code')]
+    private Currency $dstCurrency;
 
-    /**
-     * CurrencyExchange constructor.
-     */
     public function __construct()
     {
         $this->srcCurrency = new Currency();
         $this->dstCurrency = new Currency();
+        $this->createdAt = new \DateTimeImmutable();
+        $this->updatedAt = new \DateTimeImmutable();
+    }
+
+    public function getSrcCurrency(): Currency
+    {
+        return $this->srcCurrency;
+    }
+
+    public function setSrcCurrency(Currency $srcCurrency): void
+    {
+        $this->srcCurrency = $srcCurrency;
+        $this->srcCurrencyCode = (string) $srcCurrency->code;
+    }
+
+    public function getDstCurrency(): Currency
+    {
+        return $this->dstCurrency;
+    }
+
+    public function setDstCurrency(Currency $dstCurrency): void
+    {
+        $this->dstCurrency = $dstCurrency;
+        $this->dstCurrencyCode = (string) $dstCurrency->code;
     }
 }

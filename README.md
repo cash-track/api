@@ -1,5 +1,7 @@
 # API
 
+[![build](https://github.com/cash-track/api/actions/workflows/build.yml/badge.svg)](https://github.com/cash-track/api/actions/workflows/build.yml) [![Release](https://github.com/cash-track/api/actions/workflows/release.yml/badge.svg)](https://github.com/cash-track/api/actions/workflows/release.yml) [![codecov](https://codecov.io/gh/cash-track/api/branch/master/graph/badge.svg?token=FHDLE3MWW6)](https://codecov.io/gh/cash-track/api)
+
 Core service to handle requests from clients like web UI, mobile app, etc.
 
 ## Push to registry
@@ -17,5 +19,7 @@ $ composer install
 $ php app.php encrypt:key -m .env
 $ php app.php configure -vv
 $ vendor/bin/spiral get-binary
+$ php app.php migrate:init
+$ php app.php migrate
 ```
 

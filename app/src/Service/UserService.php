@@ -5,34 +5,23 @@ declare(strict_types=1);
 namespace App\Service;
 
 use App\Database\User;
-use Cycle\ORM\ORM;
-use Cycle\ORM\TransactionInterface;
-use Spiral\Prototype\Annotation\Prototyped;
+use Cycle\ORM\EntityManagerInterface;
 
-/**
- * @Prototyped(property="userService")
- */
 class UserService
 {
     /**
-     * @var \Cycle\ORM\TransactionInterface
+     * @var \Cycle\ORM\EntityManagerInterface
      */
     private $tr;
 
     /**
-     * @var \Cycle\ORM\ORM
-     */
-    private $orm;
-
-    /**
      * UserService constructor.
      *
-     * @param \Cycle\ORM\TransactionInterface $tr
+     * @param \Cycle\ORM\EntityManagerInterface $tr
      */
-    public function __construct(TransactionInterface $tr, ORM $orm)
+    public function __construct(EntityManagerInterface $tr)
     {
         $this->tr = $tr;
-        $this->orm = $orm;
     }
 
     /**
@@ -44,18 +33,6 @@ class UserService
     {
         $this->tr->persist($user);
         $this->tr->run();
-
-        return $user;
-    }
-
-    /**
-     * @param \App\Database\User $user
-     * @param string $password
-     * @return \App\Database\User
-     */
-    public function hashPassword(User $user, string $password): User
-    {
-        $user->password = password_hash($password, PASSWORD_ARGON2ID);
 
         return $user;
     }

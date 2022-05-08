@@ -11,8 +11,11 @@ use Spiral\Framework\Kernel;
 use Spiral\Monolog\Bootloader as Monolog;
 use Spiral\Nyholm\Bootloader as Nyholm;
 use Spiral\Prototype\Bootloader as Prototype;
+use Spiral\Router\Bootloader as Router;
 use Spiral\Scaffolder\Bootloader as Scaffolder;
 use Spiral\Stempler\Bootloader as Stempler;
+use Spiral\Cycle\Bootloader as CycleBridge;
+use Spiral\RoadRunnerBridge\Bootloader as RoadRunnerBridge;
 
 class App extends Kernel
 {
@@ -21,6 +24,12 @@ class App extends Kernel
      * within system container on application start.
      */
     protected const LOAD = [
+        RoadRunnerBridge\CacheBootloader::class,
+        RoadRunnerBridge\GRPCBootloader::class,
+        RoadRunnerBridge\HttpBootloader::class,
+        RoadRunnerBridge\QueueBootloader::class,
+        RoadRunnerBridge\RoadRunnerBootloader::class,
+
         // Base extensions
         DotEnv\DotenvBootloader::class,
         Monolog\MonologBootloader::class,
@@ -41,6 +50,8 @@ class App extends Kernel
         // HTTP extensions
         Nyholm\NyholmBootloader::class,
         Framework\Http\RouterBootloader::class,
+        Bootloader\CorsBootloader::class,
+        Router\AnnotatedRoutesBootloader::class,
         Framework\Http\ErrorHandlerBootloader::class,
         Framework\Http\JsonPayloadsBootloader::class,
         Framework\Http\CookiesBootloader::class,
@@ -49,20 +60,23 @@ class App extends Kernel
         Framework\Http\PaginationBootloader::class,
 
         // Databases
-        Framework\Database\DatabaseBootloader::class,
-        Framework\Database\MigrationsBootloader::class,
+        CycleBridge\DatabaseBootloader::class,
+        CycleBridge\MigrationsBootloader::class,
+        // CycleBridge\DisconnectsBootloader::class,
 
         // ORM
-        Framework\Cycle\CycleBootloader::class,
-        Framework\Cycle\ProxiesBootloader::class,
-        Framework\Cycle\AnnotatedBootloader::class,
+        CycleBridge\SchemaBootloader::class,
+        CycleBridge\CycleOrmBootloader::class,
+        CycleBridge\AnnotatedBootloader::class,
+        CycleBridge\CommandBootloader::class,
+        Bootloader\EntityBehaviorBootloader::class,
 
         // Views and view translation
         Framework\Views\ViewsBootloader::class,
         Framework\Views\TranslatedCacheBootloader::class,
 
         // Additional dispatchers
-        Framework\Jobs\JobsBootloader::class,
+        // Framework\Jobs\JobsBootloader::class,
 
         // Extensions and bridges
         Stempler\StemplerBootloader::class,
@@ -74,15 +88,30 @@ class App extends Kernel
         // Debug and debug extensions
         Framework\DebugBootloader::class,
         Framework\Debug\LogCollectorBootloader::class,
-        Framework\Debug\HttpCollectorBootloader::class
+        Framework\Debug\HttpCollectorBootloader::class,
+
+        // Authentication
+        Framework\Auth\HttpAuthBootloader::class,
+        Auth\Jwt\TokensBootloader::class,
+
+        Service\Pagination\PaginationBootloader::class,
+
+        RoadRunnerBridge\CommandBootloader::class,
     ];
 
     /*
      * Application specific services and extensions.
      */
     protected const APP = [
+        Auth\AuthBootloader::class,
+        Bootloader\RouteGroupsBootloader::class,
+        Bootloader\UserBootloader::class,
         Bootloader\LocaleSelectorBootloader::class,
-        Bootloader\RoutesBootloader::class,
+        Bootloader\CheckerBootloader::class,
+
+        Bootloader\FirebaseBootloader::class,
+        Bootloader\S3Bootloader::class,
+        Bootloader\MailerBootloader::class,
 
         // fast code prototyping
         Prototype\PrototypeBootloader::class,
