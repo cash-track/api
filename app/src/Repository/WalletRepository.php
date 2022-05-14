@@ -117,16 +117,4 @@ class WalletRepository extends Repository
     {
         return $this->select()->wherePK($id)->where('users.id', $userID)->with('users')->fetchOne();
     }
-
-    /**
-     * @param array<array-key, int> $ids
-     * @return \App\Database\Wallet[]
-     */
-    public function findAllByPK(array $ids): array
-    {
-        /** @var \App\Database\Wallet[] $wallets */
-        $wallets = $this->select()->where('id', 'in', new Parameter($ids))->fetchAll();
-
-        return $wallets;
-    }
 }
