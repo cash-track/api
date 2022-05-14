@@ -55,7 +55,7 @@ jobs:
         run: composer install --no-progress --no-interaction --prefer-dist --optimize-autoloader
 
       - name: Run Psalm
-        run: ./vendor/bin/psalm --php-version=8.0 --show-info=true --no-cache
+        run: ./vendor/bin/psalm --php-version=8.1 --show-info=true --no-cache
 
   coding-standards:
     name: Coding Standards
