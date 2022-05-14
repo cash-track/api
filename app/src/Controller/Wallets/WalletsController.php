@@ -87,7 +87,8 @@ final class WalletsController extends Controller
         try {
             $this->sortService->set($this->user, SortType::Wallets, $request->getSort());
             $this->userService->store($this->user);
-        } catch (\Throwable) { }
+        } catch (\Throwable) {
+        }
 
         return $this->response->create(200);
     }

@@ -14,9 +14,8 @@ final class JsonTypecast implements CastableInterface, UncastableInterface
 
     private array $rules = [];
 
-    public function __construct(
-       private LoggerInterface $logger
-    ) {
+    public function __construct(private LoggerInterface $logger)
+    {
     }
 
     /**
@@ -39,22 +38,22 @@ final class JsonTypecast implements CastableInterface, UncastableInterface
     }
 
     /**
-     * @param array $values
+     * @param array $data
      * @return array
      */
-    public function cast(array $values): array
+    public function cast(array $data): array
     {
         foreach ($this->rules as $column => $rule) {
-            if (! isset($values[$column])) {
+            if (! isset($data[$column]) || !is_string($data[$column])) {
                 continue;
             }
 
             try {
-                $values[$column] = json_decode($values[$column], true, 512, JSON_THROW_ON_ERROR);
+                $data[$column] = json_decode($data[$column], true, 512, JSON_THROW_ON_ERROR);
             } catch (\JsonException $exception) {
-                $original = $values[$column];
+                $original = $data[$column];
 
-                $values[$column] = [];
+                $data[$column] = [];
 
                 // avoid unnecessary logs for empty string
                 if (empty($original)) {
@@ -64,40 +63,38 @@ final class JsonTypecast implements CastableInterface, UncastableInterface
                 $this->logger->warning('Unable to decode database json', [
                     'column' => $column,
                     'message' => $exception->getMessage(),
-                    'json' => $values[$column],
+                    'json' => $data[$column],
                 ]);
             }
-
         }
 
-        return $values;
+        return $data;
     }
 
     /**
-     * @param array $values
+     * @param array $data
      * @return array
      */
-    public function uncast(array $values): array
+    public function uncast(array $data): array
     {
         foreach ($this->rules as $column => $rule) {
-            if (! isset($values[$column]) || !is_array($values[$column])) {
+            if ( ! isset($data[$column]) || !is_array($data[$column])) {
                 continue;
             }
 
             try {
-                $values[$column] = json_encode($values[$column], JSON_THROW_ON_ERROR);
+                $data[$column] = json_encode($data[$column], JSON_THROW_ON_ERROR);
             } catch (\JsonException $exception) {
                 $this->logger->warning('Unable to encode json for database', [
                     'column' => $column,
                     'message' => $exception->getMessage(),
-                    'json' => print_r($values[$column], true),
+                    'json' => print_r($data[$column], true),
                 ]);
 
-                $values[$column] = '[]';
+                $data[$column] = '[]';
             }
-
         }
 
-        return $values;
+        return $data;
     }
 }
