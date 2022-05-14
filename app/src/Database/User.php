@@ -4,13 +4,17 @@ declare(strict_types=1);
 
 namespace App\Database;
 
+use App\Database\Typecast\JsonTypecast;
 use App\Repository\UserRepository;
 use App\Security\PasswordContainerInterface;
 use Cycle\Annotated\Annotation as ORM;
-use Cycle\ORM\Collection\Pivoted\PivotedCollection;
 use Cycle\ORM\Entity\Behavior;
+use Cycle\ORM\Parser\Typecast;
 
-#[ORM\Entity(repository: UserRepository::class)]
+#[ORM\Entity(repository: UserRepository::class, typecast: [
+    Typecast::class,
+    JsonTypecast::class,
+])]
 #[ORM\Table(indexes: [
     new ORM\Table\Index(columns: ['nick_name'], unique: true),
     new ORM\Table\Index(columns: ['email'], unique: true),
@@ -54,6 +58,9 @@ class User implements PasswordContainerInterface
 
     #[ORM\Relation\BelongsTo(target: Currency::class, innerKey: 'default_currency_code', cascade: true, load: 'eager')]
     private Currency $defaultCurrency;
+
+    #[ORM\Column(type: 'json', name: 'options', typecast: JsonTypecast::RULE)]
+    public array $options = [];
 
     public function __construct()
     {
