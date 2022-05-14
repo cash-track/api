@@ -78,7 +78,7 @@ final class JsonTypecast implements CastableInterface, UncastableInterface
     public function uncast(array $data): array
     {
         foreach ($this->rules as $column => $rule) {
-            if ( ! isset($data[$column]) || !is_array($data[$column])) {
+            if (! isset($data[$column]) || !is_array($data[$column])) {
                 continue;
             }
 
