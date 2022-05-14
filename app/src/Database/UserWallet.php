@@ -7,6 +7,7 @@ namespace App\Database;
 use Cycle\Annotated\Annotation as ORM;
 
 #[ORM\Entity]
+#[ORM\Table\Index(['user_id', 'wallet_id'], true)]
 class UserWallet
 {
     #[ORM\Column('primary')]

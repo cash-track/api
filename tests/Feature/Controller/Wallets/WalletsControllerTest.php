@@ -7,6 +7,8 @@ namespace Tests\Feature\Controller\Wallets;
 use App\Database\Charge;
 use App\Database\Wallet;
 use App\Repository\CurrencyRepository;
+use App\Repository\UserRepository;
+use App\Service\Sort\SortService;
 use App\Service\WalletService;
 use PHPUnit\Framework\MockObject\MockObject;
 use Tests\DatabaseTransaction;
@@ -96,7 +98,7 @@ class WalletsControllerTest extends TestCase implements DatabaseTransaction
         $response->assertUnauthorized();
     }
 
-    public function testListUnArchivedReturnArchivedWallets(): void
+    public function testListUnArchivedReturnUnArchivedWallets(): void
     {
         $auth = $this->makeAuth($user = $this->userFactory->create());
 
@@ -116,6 +118,114 @@ class WalletsControllerTest extends TestCase implements DatabaseTransaction
         $this->assertArrayNotContains($archived->id, $body, 'data.*.id');
         $this->assertArrayNotContains($archived->name, $body, 'data.*.name');
         $this->assertArrayNotContains($archived->slug, $body, 'data.*.slug');
+    }
+
+    public function testListUnArchivedWithSortReturnSortedUnArchivedWallets(): void
+    {
+        $auth = $this->makeAuth($user = $this->userFactory->create());
+
+        $wallets = $this->walletFactory->forUser($user)->createMany(3);
+        $wallet = $wallets->first();
+
+        $order = $wallets->map(fn ($wallet) => $wallet->id)->toArray();
+        shuffle($order);
+
+        $missed = array_pop($order);
+
+        $response = $this->withAuth($auth)->post('/wallets/unarchived/sort', [
+            'sort' => $order,
+        ]);
+
+        $response->assertOk();
+
+        $archived = $this->walletFactory->forUser($user)->create(WalletFactory::archived());
+
+        $response = $this->withAuth($auth)->get('/wallets/unarchived');
+
+        $response->assertOk();
+
+        $body = $this->getJsonResponseBody($response);
+
+        $this->assertArrayContains($wallet->id, $body, 'data.*.id');
+        $this->assertArrayContains($wallet->name, $body, 'data.*.name');
+        $this->assertArrayContains($wallet->slug, $body, 'data.*.slug');
+
+        $this->assertArrayNotContains($archived->id, $body, 'data.*.id');
+        $this->assertArrayNotContains($archived->name, $body, 'data.*.name');
+        $this->assertArrayNotContains($archived->slug, $body, 'data.*.slug');
+
+        $ids = array_map(fn($item) => $item['id'] ?? 0 , $body['data']);
+
+        // make sure unordered wallets get's prepended to the order
+        array_unshift($order, $missed);
+
+        $this->assertEquals($order, $ids);
+    }
+
+    public function testSortUnArchivedRequireAuth(): void
+    {
+        $response = $this->post('/wallets/unarchived/sort');
+
+        $response->assertUnauthorized();
+    }
+
+    public function testSortUnArchivedValidationFailsDueToWalletDoesNotExists(): void
+    {
+        $auth = $this->makeAuth($user = $this->userFactory->create());
+
+        $wallets = $this->walletFactory->forUser($user)->createMany(3);
+
+        $walletIDs = $wallets->map(fn($wallet) => $wallet->id)->toArray();
+
+        array_push($walletIDs, 9999);
+
+        $response = $this->withAuth($auth)->post('/wallets/unarchived/sort', [
+            'sort' => $walletIDs,
+        ]);
+
+        $response->assertUnprocessable();
+
+        $body = $this->getJsonResponseBody($response);
+
+        $this->assertArrayHasKey('errors', $body);
+    }
+
+    public function testSortUnArchivedUpdateOptions(): void
+    {
+        $auth = $this->makeAuth($user = $this->userFactory->create());
+
+        $wallets = $this->walletFactory->forUser($user)->createMany(3);
+
+        $walletIDs = $wallets->map(fn($wallet) => $wallet->id)->toArray();
+
+        $response = $this->withAuth($auth)->post('/wallets/unarchived/sort', [
+            'sort' => $walletIDs,
+        ]);
+
+        $response->assertOk();
+
+        $user = $this->getContainer()->get(UserRepository::class)->findByPK($user->id);
+
+        $this->assertEquals($walletIDs, $user->options['sort']['wallet'] ?? []);
+    }
+
+    public function testSortUnArchivedThrownException(): void
+    {
+        $auth = $this->makeAuth($user = $this->userFactory->create());
+
+        $wallets = $this->walletFactory->forUser($user)->createMany(3);
+
+        $walletIDs = $wallets->map(fn($wallet) => $wallet->id)->toArray();
+
+        $this->mock(SortService::class, ['set'], function (MockObject $mock) {
+            $mock->expects($this->once())->method('set')->willThrowException(new \RuntimeException());
+        });
+
+        $response = $this->withAuth($auth)->post('/wallets/unarchived/sort', [
+            'sort' => $walletIDs,
+        ]);
+
+        $response->assertOk();
     }
 
     public function testIndexRequireAuth(): void

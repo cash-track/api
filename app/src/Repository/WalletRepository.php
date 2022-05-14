@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Repository;
 
 use App\Database\Currency;
+use Cycle\Database\Injection\Parameter;
 use Cycle\ORM\Select;
 use Cycle\ORM\Select\Repository;
 
@@ -115,5 +116,17 @@ class WalletRepository extends Repository
     public function findByPKByUserPKWithUsers(int $id, int $userID)
     {
         return $this->select()->wherePK($id)->where('users.id', $userID)->with('users')->fetchOne();
+    }
+
+    /**
+     * @param array<array-key, int> $ids
+     * @return \App\Database\Wallet[]
+     */
+    public function findAllByPK(array $ids): array
+    {
+        /** @var \App\Database\Wallet[] $wallets */
+        $wallets = $this->select()->where('id', 'in', new Parameter($ids))->fetchAll();
+
+        return $wallets;
     }
 }

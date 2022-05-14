@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Database;
 
 use App\Repository\WalletRepository;
+use App\Service\Sort\Sortable;
 use Cycle\Annotated\Annotation as ORM;
 use Cycle\ORM\Collection\Pivoted\PivotedCollection;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -13,7 +14,7 @@ use Cycle\ORM\Entity\Behavior;
 #[ORM\Entity(repository: WalletRepository::class)]
 #[Behavior\CreatedAt(field: 'createdAt', column: 'created_at')]
 #[Behavior\UpdatedAt(field: 'updatedAt', column: 'updated_at')]
-class Wallet
+class Wallet implements Sortable
 {
     #[ORM\Column('primary')]
     public int|null $id = null;
@@ -109,5 +110,13 @@ class Wallet
     public function setLatestCharges(array $latestCharges): void
     {
         $this->latestCharges = new ArrayCollection($latestCharges);
+    }
+
+    /**
+     * @return int|string
+     */
+    public function getSortIndex(): int|string
+    {
+        return $this->id ?? 0;
     }
 }
