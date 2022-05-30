@@ -62,6 +62,9 @@ class User implements PasswordContainerInterface
     #[ORM\Column(type: 'json', name: 'options', typecast: JsonTypecast::RULE)]
     public array $options = [];
 
+    #[ORM\Relation\HasMany(target: Tag::class, outerKey: 'user_id')]
+    private array $tags = [];
+
     public function __construct()
     {
         $this->defaultCurrency = new Currency();
