@@ -39,14 +39,14 @@ class UpdateRequest extends Filter
         return (string) $this->getField('name');
     }
 
-    public function getIcon():? string
+    public function getIcon(): ?string
     {
         $value = $this->getField('icon');
 
         return is_string($value) ? $value : null;
     }
 
-    public function getColor():? string
+    public function getColor(): ?string
     {
         $value = $this->getField('color');
 

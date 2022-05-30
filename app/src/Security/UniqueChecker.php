@@ -24,6 +24,11 @@ class UniqueChecker extends AbstractChecker
 
         $exceptValues = $this->withValues($exceptFields);
 
+        if (empty($role)) {
+            return false;
+        }
+
+        /** @var \Cycle\ORM\Select\Repository $repository */
         $repository = $this->orm->getRepository($role);
 
         $select = $repository->select();
@@ -33,7 +38,7 @@ class UniqueChecker extends AbstractChecker
         }
 
         foreach ($exceptValues as $field => $value) {
-            $select->where($field, '!=',  $value);
+            $select->where($field, '!=', $value);
         }
 
         return $select->fetchOne() === null;
