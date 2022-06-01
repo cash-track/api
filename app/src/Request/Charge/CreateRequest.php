@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Request\Charge;
 
 use App\Database\Charge;
+use App\Database\Tag;
 use Spiral\Filters\Filter;
 
 class CreateRequest extends Filter
@@ -16,6 +17,7 @@ class CreateRequest extends Filter
         'amount'      => 'data:amount',
         'title'       => 'data:title',
         'description' => 'data:description',
+        'tagIDs'      => 'data:tagIDs',
     ];
 
     protected const VALIDATES = [
@@ -34,6 +36,9 @@ class CreateRequest extends Filter
         ],
         'description' => [
             'is_string',
+        ],
+        'tagIDs' => [
+            ['array::of', ['entity:exists', Tag::class, 'id']],
         ],
     ];
 
@@ -55,5 +60,14 @@ class CreateRequest extends Filter
     public function getDescription(): string
     {
         return (string) $this->getField('description');
+    }
+
+    /**
+     * @return array<array-key, int>
+     * @throws \Spiral\Models\Exception\EntityExceptionInterface
+     */
+    public function getTagIDs(): array
+    {
+        return (array) $this->getField('tagIDs');
     }
 }

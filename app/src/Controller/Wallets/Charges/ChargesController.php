@@ -8,6 +8,7 @@ use App\Controller\Wallets\Controller;
 use App\Database\Charge;
 use App\Database\Wallet;
 use App\Repository\ChargeRepository;
+use App\Repository\TagRepository;
 use App\Repository\WalletRepository;
 use App\Request\Charge\CreateRequest;
 use App\Service\ChargeWalletService;
@@ -32,6 +33,7 @@ class ChargesController extends Controller
         private ChargeWalletService $chargeWalletService,
         private ChargeRepository $chargeRepository,
         private WalletRepository $walletRepository,
+        private TagRepository $tagRepository,
     ) {
         parent::__construct($auth);
     }
@@ -85,6 +87,12 @@ class ChargesController extends Controller
         $charge->description = $request->getDescription();
         $charge->setWallet($wallet);
         $charge->setUser($this->user);
+
+        $tags = $this->tagRepository->findAllByPKsAndUserPKs($request->getTagIDs(), $wallet->getUserIDs());
+
+        foreach ($tags as $tag) {
+            $charge->tags->add($tag);
+        }
 
         // TODO. Implement currency conversion when charge currency is different that wallet.
 

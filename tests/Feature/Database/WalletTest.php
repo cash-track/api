@@ -16,4 +16,12 @@ class WalletTest extends TestCase
 
         $this->assertCount(0, $wallet->getUsers());
     }
+
+    public function testGetUserIDsVerifyType(): void
+    {
+        $wallet = new Wallet();
+        $wallet->users->add(null);
+
+        $this->assertCount(0, $wallet->getUserIDs());
+    }
 }

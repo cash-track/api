@@ -97,6 +97,24 @@ class Wallet implements Sortable
     }
 
     /**
+     * @return array<array-key, int>
+     */
+    public function getUserIDs(): array
+    {
+        $userIDs = [];
+
+        foreach ($this->users->getValues() as $user) {
+            if (! $user instanceof User || $user->id === null) {
+                continue;
+            }
+
+            $userIDs[] = $user->id;
+        }
+
+        return $userIDs;
+    }
+
+    /**
      * @return \Doctrine\Common\Collections\ArrayCollection<int, \App\Database\Charge>|null
      */
     public function getLatestCharges(): ?ArrayCollection

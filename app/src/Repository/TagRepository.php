@@ -6,6 +6,7 @@ namespace App\Repository;
 
 use Cycle\ORM\Select;
 use Cycle\ORM\Select\Repository;
+use Cycle\Database\Injection\Parameter;
 
 class TagRepository extends Repository
 {
@@ -17,6 +18,26 @@ class TagRepository extends Repository
     {
         /** @var \App\Database\Tag[] $tags */
         $tags = $this->allByUserPK($userID)->fetchAll();
+
+        return $tags;
+    }
+
+    /**
+     * @param array<array-key, int> $ids
+     * @param array<array-key, int> $userIDs
+     * @return \App\Database\Tag[]
+     */
+    public function findAllByPKsAndUserPKs(array $ids, array $userIDs): array
+    {
+        if (! count($ids) || ! count($userIDs)) {
+            return [];
+        }
+
+        /** @var \App\Database\Tag[] $tags */
+        $tags = $this->select()->where([
+            'id' => ['in' => new Parameter($ids)],
+            'user_id' => ['in' => new Parameter($userIDs)],
+        ])->fetchAll();
 
         return $tags;
     }
