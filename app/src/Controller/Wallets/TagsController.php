@@ -34,7 +34,7 @@ final class TagsController extends Controller
             return $this->response->create(404);
         }
 
-        $tags = $this->tagRepository->findAllByWalletPK($wallet->id);
+        $tags = $this->tagRepository->findAllByWalletPK((int) $wallet->id);
 
         return $this->tagsView->json($tags);
     }

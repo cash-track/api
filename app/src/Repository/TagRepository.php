@@ -50,7 +50,11 @@ class TagRepository extends Repository
      */
     public function findAllByWalletPK(int $walletID): array
     {
-        /** @var \App\Database\Tag[] $tags */
+        /**
+         * @var \App\Database\Tag[] $tags
+         * @psalm-suppress InternalClass
+         * @psalm-suppress UndefinedMagicMethod
+         */
         $tags = $this->select()
                      ->with('charges.wallet', [
                          'method' => Select\AbstractLoader::LEFT_JOIN,
