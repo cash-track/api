@@ -6,6 +6,7 @@ namespace App\Database;
 
 use App\Repository\TagRepository;
 use Cycle\Annotated\Annotation as ORM;
+use Cycle\ORM\Collection\Pivoted\PivotedCollection;
 use Cycle\ORM\Entity\Behavior;
 
 #[ORM\Entity(repository: TagRepository::class)]
@@ -37,9 +38,16 @@ class Tag
     #[ORM\Column(type: 'datetime', name: 'updated_at')]
     public \DateTimeImmutable $updatedAt;
 
+    /**
+     * @var \Cycle\ORM\Collection\Pivoted\PivotedCollection<int, \App\Database\Charge, \App\Database\TagCharge>
+     */
+    #[ORM\Relation\ManyToMany(target: Charge::class, through: TagCharge::class, collection: 'doctrine', load: 'lazy')]
+    public PivotedCollection $charges;
+
     public function __construct()
     {
         $this->user = new User();
+        $this->charges = new PivotedCollection();
         $this->createdAt = new \DateTimeImmutable();
         $this->updatedAt = new \DateTimeImmutable();
     }

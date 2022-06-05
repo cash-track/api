@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Repository;
 
+use Cycle\Database\Injection\Expression;
+use Cycle\Database\Query\SelectQuery;
 use Cycle\ORM\Select;
 use Cycle\ORM\Select\Repository;
 use Cycle\Database\Injection\Parameter;
@@ -38,6 +40,25 @@ class TagRepository extends Repository
             'id' => ['in' => new Parameter($ids)],
             'user_id' => ['in' => new Parameter($userIDs)],
         ])->fetchAll();
+
+        return $tags;
+    }
+
+    /**
+     * @param int $walletID
+     * @return \App\Database\Tag[]
+     */
+    public function findAllByWalletPK(int $walletID): array
+    {
+        /** @var \App\Database\Tag[] $tags */
+        $tags = $this->select()
+                     ->with('charges.wallet', [
+                         'method' => Select\AbstractLoader::LEFT_JOIN,
+                     ])
+                     ->where('charges.wallet.id', $walletID)
+                     ->groupBy('tag.id')
+                     ->orderBy(new Expression('count(tag.id)'), SelectQuery::SORT_DESC)
+                     ->fetchAll();
 
         return $tags;
     }
