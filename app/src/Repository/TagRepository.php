@@ -25,6 +25,31 @@ class TagRepository extends Repository
     }
 
     /**
+     * @param array<array-key, int> $userIDs
+     * @param string $query
+     * @param int $limit
+     * @return \App\Database\Tag[]
+     */
+    public function findAllByUsersPK(array $userIDs, string $query = '', int $limit = 10): array
+    {
+        /**
+         * @var \App\Database\Tag[] $tags
+         * @psalm-suppress InternalClass
+         * @psalm-suppress UndefinedMagicMethod
+         */
+        $tags = $this->select()
+                     ->where(['user_id' => ['in' => new Parameter($userIDs)]])
+                     ->where('name', 'like', "{$query}%")
+                     ->with('charges')
+                     ->groupBy('tag.id')
+                     ->orderBy(new Expression('count(tag.id)'), SelectQuery::SORT_DESC)
+                     ->limit($limit)
+                     ->fetchAll();
+
+        return $tags;
+    }
+
+    /**
      * @param array<array-key, int> $ids
      * @param array<array-key, int> $userIDs
      * @return \App\Database\Tag[]
@@ -60,8 +85,8 @@ class TagRepository extends Repository
                          'method' => Select\AbstractLoader::LEFT_JOIN,
                      ])
                      ->where('charges.wallet.id', $walletID)
-                     ->groupBy('tag.id')
                      ->orderBy(new Expression('count(tag.id)'), SelectQuery::SORT_DESC)
+                     ->groupBy('tag.id')
                      ->fetchAll();
 
         return $tags;
@@ -75,6 +100,16 @@ class TagRepository extends Repository
     public function findByPKByUserPK(int $id, int $userID)
     {
         return $this->select()->wherePK($id)->where('user_id', $userID)->fetchOne();
+    }
+
+    /**
+     * @param int $id
+     * @param array<array-key, int> $userIDs
+     * @return \App\Database\Tag|object|null
+     */
+    public function findByPKByUsersPK(int $id, array $userIDs)
+    {
+        return $this->select()->wherePK($id)->where(['user_id' => ['in' => new Parameter($userIDs)],])->fetchOne();
     }
 
     /**

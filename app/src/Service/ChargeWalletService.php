@@ -76,6 +76,16 @@ class ChargeWalletService
     }
 
     /**
+     * @param float $income
+     * @param float $expense
+     * @return float
+     */
+    public function totalByIncomeAndExpense(float $income, float $expense): float
+    {
+        return $income - $expense;
+    }
+
+    /**
      * @param \App\Database\Wallet $wallet
      * @param \App\Database\Charge $charge
      * @return \App\Database\Wallet

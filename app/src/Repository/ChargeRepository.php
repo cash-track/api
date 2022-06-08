@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Repository;
 
+use Cycle\ORM\Select\AbstractLoader;
 use Cycle\ORM\Select\Repository;
 use Cycle\Database\Injection\Parameter;
 
@@ -60,12 +61,19 @@ class ChargeRepository extends Repository
      * @param string|null $type
      * @return float
      */
-    public function totalByWalletPK(int $walletId, string $type = null): float
+    public function totalByWalletPK(int $walletId, string $type = null, int $tagId = null): float
     {
         $query = $this->select()->where('wallet_id', $walletId);
 
         if (! empty($type)) {
             $query = $query->where('type', $type);
+        }
+
+        if ($tagId !== null) {
+            /** @psalm-suppress InternalClass */
+            $query = $query->with('tags', [
+                'method' => AbstractLoader::LEFT_JOIN,
+            ])->where('tags.id', $tagId);
         }
 
         return (float) $query->sum('amount');
