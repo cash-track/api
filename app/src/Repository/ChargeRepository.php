@@ -14,14 +14,19 @@ class ChargeRepository extends Repository
 
     /**
      * @param int $walletId
+     * @param int|null $tagId
      * @return array
      */
-    public function findByWalletId(int $walletId)
+    public function findByWalletId(int $walletId, int $tagId = null)
     {
         $query = $this->select()
                       ->load('user')
                       ->where('wallet_id', $walletId)
                       ->orderBy('created_at', 'DESC');
+
+        if ($tagId !== null) {
+            $query = $query->where('tags.id', $tagId);
+        }
 
         $query = $this->injectPaginator($query);
 
