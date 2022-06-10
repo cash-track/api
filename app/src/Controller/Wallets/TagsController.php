@@ -60,8 +60,8 @@ final class TagsController extends Controller
             return $this->response->create(404);
         }
 
-        $income = $this->chargeRepository->totalByWalletPK($walletId, Charge::TYPE_INCOME, $tagId);
-        $expense = $this->chargeRepository->totalByWalletPK($walletId, Charge::TYPE_EXPENSE, $tagId);
+        $income = $this->chargeRepository->totalByWalletPKAndTagId($walletId, $tagId, Charge::TYPE_INCOME);
+        $expense = $this->chargeRepository->totalByWalletPKAndTagId($walletId, $tagId, Charge::TYPE_EXPENSE);
 
         return $this->response->json([
             'data' => [

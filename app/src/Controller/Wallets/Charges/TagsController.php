@@ -46,7 +46,7 @@ class TagsController extends Controller
 
         $charges = $this->chargeRepository
             ->paginate($this->paginationFactory->createPaginator())
-            ->findByWalletId((int) $wallet->id, (int) $tag->id);
+            ->findByWalletIdAndTagIdWithPagination((int) $wallet->id, (int) $tag->id);
 
         return $this->chargesView->jsonPaginated($charges, $this->chargeRepository->getPaginationState());
     }
