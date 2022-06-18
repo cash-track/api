@@ -87,6 +87,7 @@ class ChargeRepository extends Repository
     {
         $query = $this->select()
                       ->load('user')
+                      ->load('tags')
                       ->where('wallet_id', $walletId)
                       ->where('tags.id', $tagId)
                       ->orderBy('created_at', 'DESC');
