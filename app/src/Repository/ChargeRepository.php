@@ -19,7 +19,12 @@ class ChargeRepository extends Repository
      */
     public function findByPKByWalletPK(string $chargeId, int $walletId)
     {
-        return $this->select()->load('user')->wherePK($chargeId)->where('wallet_id', $walletId)->fetchOne();
+        return $this->select()
+                    ->load('user')
+                    ->load('tags')
+                    ->wherePK($chargeId)
+                    ->where('wallet_id', $walletId)
+                    ->fetchOne();
     }
 
     /**
@@ -48,6 +53,7 @@ class ChargeRepository extends Repository
     {
         $query = $this->select()
                       ->load('user')
+                      ->load('tags')
                       ->where('wallet_id', $walletId)
                       ->orderBy('created_at', 'DESC');
 

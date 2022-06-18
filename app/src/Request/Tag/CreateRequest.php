@@ -21,12 +21,12 @@ class CreateRequest extends Filter
             ['is_string'],
             ['string::range', 3, 255],
             ['type::notEmpty'],
-            ['string::regexp', '/^[a-zA-Z0-9\-_]*$/'],
+            ['string::regexp', '/^[^\s]*$/'],
             ['entity::unique', Tag::class, 'name', ['user_id']],
         ],
         'icon' => [
             ['is_string'],
-            ['string::length', 2]
+            ['string::range', 1, 7],
         ],
         'color' => [
             ['is_string'],

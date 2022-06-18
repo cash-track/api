@@ -84,7 +84,7 @@ class TagsControllerTest extends TestCase implements DatabaseTransaction
             ], ['name', 'icon', 'color']],
             [[
                 'name' => 't',
-                'icon' => '123',
+                'icon' => '12345678',
                 'color' => '#123abcg'
             ], ['name', 'icon', 'color']],
             [[
@@ -246,7 +246,7 @@ class TagsControllerTest extends TestCase implements DatabaseTransaction
             ], ['name', 'icon', 'color']],
             [[
                 'name' => 't',
-                'icon' => '123',
+                'icon' => '12345678',
                 'color' => '#123abcg'
             ], ['name', 'icon', 'color']],
             [[

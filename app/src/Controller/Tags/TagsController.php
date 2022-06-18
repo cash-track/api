@@ -32,23 +32,13 @@ final class TagsController extends AuthAwareController
         parent::__construct($auth);
     }
 
-    #[Route(
-        route: '/tags',
-        name: 'tag.list',
-        methods: 'GET',
-        group: 'auth',
-    )]
+    #[Route(route: '/tags', name: 'tag.list', methods: 'GET', group: 'auth')]
     public function list(): ResponseInterface
     {
         return $this->tagsView->json($this->tagRepository->findAllByUserPK((int) $this->user->id));
     }
 
-    #[Route(
-        route: '/tags',
-        name: 'tag.create',
-        methods: 'POST',
-        group: 'auth',
-    )]
+    #[Route(route: '/tags', name: 'tag.create', methods: 'POST', group: 'auth')]
     public function create(CreateRequest $request): ResponseInterface
     {
         $request->setFields(['user_id' => $this->user->id]);
@@ -71,12 +61,7 @@ final class TagsController extends AuthAwareController
         return $this->tagView->json($tag);
     }
 
-    #[Route(
-        route: '/tags/<id>',
-        name: 'tag.update',
-        methods: 'PUT',
-        group: 'auth',
-    )]
+    #[Route(route: '/tags/<id>', name: 'tag.update', methods: 'PUT', group: 'auth')]
     public function update(int $id, UpdateRequest $request): ResponseInterface
     {
         $tag = $this->tagRepository->findByPKByUserPK($id, (int) $this->user->id);
@@ -118,12 +103,7 @@ final class TagsController extends AuthAwareController
         return $this->tagView->json($tag);
     }
 
-    #[Route(
-        route: '/tags/<id>',
-        name: 'tag.delete',
-        methods: 'DELETE',
-        group: 'auth',
-    )]
+    #[Route(route: '/tags/<id>', name: 'tag.delete', methods: 'DELETE', group: 'auth')]
     public function delete(int $id): ResponseInterface
     {
         $tag = $this->tagRepository->findByPKByUserPK($id, (int) $this->user->id);

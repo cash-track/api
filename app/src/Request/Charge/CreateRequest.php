@@ -17,7 +17,7 @@ class CreateRequest extends Filter
         'amount'      => 'data:amount',
         'title'       => 'data:title',
         'description' => 'data:description',
-        'tagIDs'      => 'data:tagIDs',
+        'tags'        => 'data:tags',
     ];
 
     protected const VALIDATES = [
@@ -37,7 +37,7 @@ class CreateRequest extends Filter
         'description' => [
             'is_string',
         ],
-        'tagIDs' => [
+        'tags' => [
             ['array::of', ['entity:exists', Tag::class, 'id']],
         ],
     ];
@@ -66,8 +66,8 @@ class CreateRequest extends Filter
      * @return array<array-key, int>
      * @throws \Spiral\Models\Exception\EntityExceptionInterface
      */
-    public function getTagIDs(): array
+    public function getTags(): array
     {
-        return (array) $this->getField('tagIDs');
+        return (array) $this->getField('tags');
     }
 }

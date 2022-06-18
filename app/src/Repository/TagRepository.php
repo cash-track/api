@@ -40,7 +40,12 @@ class TagRepository extends Repository
         $tags = $this->select()
                      ->where(['user_id' => ['in' => new Parameter($userIDs)]])
                      ->where('name', 'like', "{$query}%")
-                     ->with('charges')
+                     ->with('tagCharges', [
+                         'method' => Select\JoinableLoader::LEFT_JOIN
+                     ])
+                     ->with('tagCharges.charge', [
+                         'method' => Select\JoinableLoader::LEFT_JOIN
+                     ])
                      ->groupBy('tag.id')
                      ->orderBy(new Expression('count(tag.id)'), SelectQuery::SORT_DESC)
                      ->limit($limit)
@@ -81,10 +86,10 @@ class TagRepository extends Repository
          * @psalm-suppress UndefinedMagicMethod
          */
         $tags = $this->select()
-                     ->with('charges.wallet', [
+                     ->with('tagCharges.charge.wallet', [
                          'method' => Select\AbstractLoader::LEFT_JOIN,
                      ])
-                     ->where('charges.wallet.id', $walletID)
+                     ->where('tagCharges.charge.wallet.id', $walletID)
                      ->orderBy(new Expression('count(tag.id)'), SelectQuery::SORT_DESC)
                      ->groupBy('tag.id')
                      ->fetchAll();

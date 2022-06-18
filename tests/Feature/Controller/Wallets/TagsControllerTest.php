@@ -274,12 +274,14 @@ class TagsControllerTest extends TestCase implements DatabaseTransaction
         $tagUser1 = TagFactory::make();
         $tagUser2 = TagFactory::make();
         $tagUser3 = TagFactory::make();
+        $tagUser4 = TagFactory::make();
         $tagSharedUser1 = TagFactory::make();
         $tagOtherUser1 = TagFactory::make();
 
         $tagUser1->name = 'Tag-name-1';
         $tagUser2->name = 'Tag-name-2';
-        $tagUser3->name = 'Other-Tag-name-2';
+        $tagUser3->name = 'Other-Tag-name-3';
+        $tagUser4->name = 'Tag-name-4-without-charge';
         $tagSharedUser1->name = 'Tag-name-shared-1';
         $tagOtherUser1->name = 'Tag-name-other-1';
         $query = 'Tag-';
@@ -287,6 +289,7 @@ class TagsControllerTest extends TestCase implements DatabaseTransaction
         $tagUser1 = $this->tagFactory->forUser($user)->create($tagUser1);
         $tagUser2 = $this->tagFactory->forUser($user)->create($tagUser2);
         $tagUser3 = $this->tagFactory->forUser($user)->create($tagUser3);
+        $tagUser4 = $this->tagFactory->forUser($user)->create($tagUser4);
         $tagSharedUser1 = $this->tagFactory->forUser($sharedUser)->create($tagSharedUser1);
         $tagOtherUser1 = $this->tagFactory->forUser($otherUser)->create($tagOtherUser1);
 
@@ -302,9 +305,9 @@ class TagsControllerTest extends TestCase implements DatabaseTransaction
 
         $this->assertIsArray($body);
         $this->assertArrayHasKey('data', $body);
-        $this->assertCount(3, $body['data']);
+        $this->assertCount(4, $body['data']);
 
-        foreach ([$tagUser2, $tagUser1, $tagSharedUser1] as $index => $tag) {
+        foreach ([$tagUser2, $tagUser1, $tagUser4, $tagSharedUser1] as $index => $tag) {
             $this->assertArrayHasKey($index, $body['data']);
             $this->assertArrayHasKey('id', $body['data'][$index]);
             $this->assertEquals($tag->id, $body['data'][$index]['id']);

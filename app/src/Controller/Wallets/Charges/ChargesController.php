@@ -88,7 +88,7 @@ class ChargesController extends Controller
         $charge->setWallet($wallet);
         $charge->setUser($this->user);
 
-        $tags = $this->tagRepository->findAllByPKsAndUserPKs($request->getTagIDs(), $wallet->getUserIDs());
+        $tags = $this->tagRepository->findAllByPKsAndUserPKs($request->getTags(), $wallet->getUserIDs());
 
         foreach ($tags as $tag) {
             $charge->tags->add($tag);
@@ -149,6 +149,13 @@ class ChargesController extends Controller
         $charge->amount = $request->getAmount();
         $charge->title = $request->getTitle();
         $charge->description = $request->getDescription();
+
+        $charge->tags->clear();
+        $tags = $this->tagRepository->findAllByPKsAndUserPKs($request->getTags(), $wallet->getUserIDs());
+
+        foreach ($tags as $tag) {
+            $charge->tags->add($tag);
+        }
 
         // TODO. Implement currency conversion when charge currency is different that wallet.
 
