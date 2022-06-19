@@ -6,6 +6,7 @@ namespace App\Database;
 
 use App\Repository\ChargeRepository;
 use Cycle\Annotated\Annotation as ORM;
+use Cycle\ORM\Collection\Pivoted\PivotedCollection;
 use Cycle\ORM\Entity\Behavior;
 use Ramsey\Uuid\UuidInterface;
 
@@ -56,10 +57,17 @@ class Charge
     #[ORM\Relation\BelongsTo(target: CurrencyExchange::class, innerKey: 'currency_exchange_id', nullable: true, fkAction: 'SET NULL')]
     private CurrencyExchange|null $currencyExchange = null;
 
+    /**
+     * @var \Cycle\ORM\Collection\Pivoted\PivotedCollection<int, \App\Database\Tag, \App\Database\TagCharge>
+     */
+    #[ORM\Relation\ManyToMany(target: Tag::class, through: TagCharge::class, collection: 'doctrine')]
+    public PivotedCollection $tags;
+
     public function __construct()
     {
         $this->wallet = new Wallet();
         $this->user = new User();
+        $this->tags = new PivotedCollection();
         $this->createdAt = new \DateTimeImmutable();
         $this->updatedAt = new \DateTimeImmutable();
     }
@@ -84,6 +92,24 @@ class Charge
     {
         $this->user = $user;
         $this->userId = (int) $user->id;
+    }
+
+    /**
+     * @return array<int, \App\Database\Tag>
+     */
+    public function getTags(): array
+    {
+        $tags = [];
+
+        foreach ($this->tags->getValues() as $tag) {
+            if (! $tag instanceof Tag) {
+                continue;
+            }
+
+            $tags[] = $tag;
+        }
+
+        return $tags;
     }
 
     public function getCurrencyExchange(): ?CurrencyExchange

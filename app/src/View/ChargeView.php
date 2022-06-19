@@ -14,6 +14,7 @@ class ChargeView implements SingletonInterface
     public function __construct(
         protected ResponseWrapper $response,
         protected UserView $userView,
+        protected TagsView $tagsView,
     ) {
     }
 
@@ -21,7 +22,7 @@ class ChargeView implements SingletonInterface
     {
         return $this->response->json([
             'data' => $this->map($charge),
-        ], 200);
+        ]);
     }
 
     public function map(?Charge $charge): ?array
@@ -40,6 +41,7 @@ class ChargeView implements SingletonInterface
             'userId'      => $charge->userId,
             'user'        => $this->userView->map($charge->getUser()),
             'walletId'    => $charge->walletId,
+            'tags'        => $this->tagsView->map($charge->getTags()),
             'createdAt'   => $charge->createdAt->format(DATE_W3C),
             'updatedAt'   => $charge->updatedAt->format(DATE_W3C),
         ];

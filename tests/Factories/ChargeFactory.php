@@ -16,6 +16,11 @@ class ChargeFactory extends AbstractFactory
 
     protected ?User $user = null;
 
+    /**
+     * @var array<array-key, \App\Database\Tag>
+     */
+    protected array $tags = [];
+
     public function forWallet(?Wallet $wallet): ChargeFactory
     {
         $this->wallet = $wallet;
@@ -26,6 +31,13 @@ class ChargeFactory extends AbstractFactory
     public function forUser(?User $user): ChargeFactory
     {
         $this->user = $user;
+
+        return $this;
+    }
+
+    public function withTags(array $tags = []): ChargeFactory
+    {
+        $this->tags = $tags;
 
         return $this;
     }
@@ -61,6 +73,10 @@ class ChargeFactory extends AbstractFactory
 
         if ($this->user !== null) {
             $charge->setUser($this->user);
+        }
+
+        foreach ($this->tags as $tag) {
+            $charge->tags->add($tag);
         }
 
         $this->persist($charge);

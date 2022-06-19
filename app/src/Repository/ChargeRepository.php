@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Repository;
 
+use Cycle\ORM\Select\AbstractLoader;
 use Cycle\ORM\Select\Repository;
 use Cycle\Database\Injection\Parameter;
 
@@ -12,19 +13,18 @@ class ChargeRepository extends Repository
     use Paginator;
 
     /**
+     * @param string $chargeId
      * @param int $walletId
-     * @return array
+     * @return object|null
      */
-    public function findByWalletId(int $walletId)
+    public function findByPKByWalletPK(string $chargeId, int $walletId)
     {
-        $query = $this->select()
-                      ->load('user')
-                      ->where('wallet_id', $walletId)
-                      ->orderBy('created_at', 'DESC');
-
-        $query = $this->injectPaginator($query);
-
-        return $query->fetchAll();
+        return $this->select()
+                    ->load('user')
+                    ->load('tags')
+                    ->wherePK($chargeId)
+                    ->where('wallet_id', $walletId)
+                    ->fetchOne();
     }
 
     /**
@@ -36,23 +36,65 @@ class ChargeRepository extends Repository
     {
         /** @var \App\Database\Charge[] $charges */
         $charges = $this->select()
-                    ->load('user')
-                    ->where('wallet_id', $walletId)
-                    ->orderBy('created_at', 'DESC')
-                    ->limit($limit)
-                    ->fetchAll();
+                        ->load('user')
+                        ->where('wallet_id', $walletId)
+                        ->orderBy('created_at', 'DESC')
+                        ->limit($limit)
+                        ->fetchAll();
 
         return $charges;
     }
 
     /**
-     * @param string $chargeId
      * @param int $walletId
-     * @return object|null
+     * @return array
      */
-    public function findByPKByWalletPK(string $chargeId, int $walletId)
+    public function findByWalletIdWithPagination(int $walletId)
     {
-        return $this->select()->load('user')->wherePK($chargeId)->where('wallet_id', $walletId)->fetchOne();
+        $query = $this->select()
+                      ->load('user')
+                      ->load('tags')
+                      ->where('wallet_id', $walletId)
+                      ->orderBy('created_at', 'DESC');
+
+        $query = $this->injectPaginator($query);
+
+        return $query->fetchAll();
+    }
+
+    /**
+     * @param int $tagId
+     * @return array
+     */
+    public function findByTagIdWithPagination(int $tagId)
+    {
+        $query = $this->select()
+                      ->load('user')
+                      ->where('tags.id', $tagId)
+                      ->orderBy('created_at', 'DESC');
+
+        $query = $this->injectPaginator($query);
+
+        return $query->fetchAll();
+    }
+
+    /**
+     * @param int $walletId
+     * @param int $tagId
+     * @return array
+     */
+    public function findByWalletIdAndTagIdWithPagination(int $walletId, int $tagId = null)
+    {
+        $query = $this->select()
+                      ->load('user')
+                      ->load('tags')
+                      ->where('wallet_id', $walletId)
+                      ->where('tags.id', $tagId)
+                      ->orderBy('created_at', 'DESC');
+
+        $query = $this->injectPaginator($query);
+
+        return $query->fetchAll();
     }
 
     /**
@@ -63,6 +105,45 @@ class ChargeRepository extends Repository
     public function totalByWalletPK(int $walletId, string $type = null): float
     {
         $query = $this->select()->where('wallet_id', $walletId);
+
+        if (! empty($type)) {
+            $query = $query->where('type', $type);
+        }
+
+        return (float) $query->sum('amount');
+    }
+
+    /**
+     * @param int $tagId
+     * @param string|null $type
+     * @return float
+     */
+    public function totalByTagPK(int $tagId, string $type = null): float
+    {
+        /** @psalm-suppress InternalClass */
+        $query = $this->select()->with('tags', [
+            'method' => AbstractLoader::LEFT_JOIN,
+        ])->where('tags.id', $tagId);
+
+        if (! empty($type)) {
+            $query = $query->where('type', $type);
+        }
+
+        return (float) $query->sum('amount');
+    }
+
+    /**
+     * @param int $walletId
+     * @param int $tagId
+     * @param string|null $type
+     * @return float
+     */
+    public function totalByWalletPKAndTagId(int $walletId, int $tagId, string $type = null): float
+    {
+        /** @psalm-suppress InternalClass */
+        $query = $this->select()->where('wallet_id', $walletId)->with('tags', [
+            'method' => AbstractLoader::LEFT_JOIN,
+        ])->where('tags.id', $tagId);
 
         if (! empty($type)) {
             $query = $query->where('type', $type);

@@ -28,4 +28,12 @@ class ChargeTest extends TestCase
 
         $this->assertInstanceOf(CurrencyExchange::class, $charge->getCurrencyExchange());
     }
+
+    public function testGetTagsVerifyType(): void
+    {
+        $charge = new Charge();
+        $charge->tags->add(null);
+
+        $this->assertCount(0, $charge->getTags());
+    }
 }

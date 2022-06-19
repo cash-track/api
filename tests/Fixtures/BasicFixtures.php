@@ -21,6 +21,26 @@ trait BasicFixtures
         return implode('', $pieces);
     }
 
+    public static function hex(int $length = 6): string
+    {
+        $keyspace = '0123456789abcdef';
+
+        $pieces = [];
+
+        $max = mb_strlen($keyspace, '8bit') - 1;
+
+        for ($i = 0; $i < $length; ++$i) {
+            $pieces[] = $keyspace[rand(0, $max)];
+        }
+
+        return strtoupper(implode('', $pieces));
+    }
+
+    public static function colorHex(): string
+    {
+        return '#' . self::hex(6);
+    }
+
     public static function arrayElement(array $arr): mixed
     {
         $keys = array_keys($arr);

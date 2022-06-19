@@ -5,11 +5,13 @@ declare(strict_types=1);
 namespace Tests\Feature\Controller\Wallets\Charges;
 
 use App\Database\Charge;
+use App\Database\Tag;
 use App\Service\ChargeWalletService;
 use Doctrine\Common\Collections\ArrayCollection;
 use PHPUnit\Framework\MockObject\MockObject;
 use Tests\DatabaseTransaction;
 use Tests\Factories\ChargeFactory;
+use Tests\Factories\TagFactory;
 use Tests\Factories\UserFactory;
 use Tests\Factories\WalletFactory;
 use Tests\Fixtures;
@@ -23,6 +25,8 @@ class ChargesControllerTest extends TestCase implements DatabaseTransaction
 
     protected ChargeFactory $chargeFactory;
 
+    protected TagFactory $tagFactory;
+
     const LIST_PER_PAGE = 25;
 
     protected function setUp(): void
@@ -32,6 +36,7 @@ class ChargesControllerTest extends TestCase implements DatabaseTransaction
         $this->userFactory = $this->getContainer()->get(UserFactory::class);
         $this->walletFactory = $this->getContainer()->get(WalletFactory::class);
         $this->chargeFactory = $this->getContainer()->get(ChargeFactory::class);
+        $this->tagFactory = $this->getContainer()->get(TagFactory::class);
     }
 
     public function testListRequireAuth(): void
@@ -291,6 +296,74 @@ class ChargesControllerTest extends TestCase implements DatabaseTransaction
         ]);
     }
 
+    public function testCreateStoreChargeWithTag(): void
+    {
+        $auth = $this->makeAuth($user = $this->userFactory->create());
+
+        $wallet = $this->walletFactory->forUser($user)->create();
+
+        $charge = ChargeFactory::make();
+
+        $tags = $this->tagFactory->forUser($user)->createMany(3);
+
+        $response = $this->withAuth($auth)->post("/wallets/{$wallet->id}/charges", [
+            'type' => $charge->type,
+            'amount' => $charge->amount,
+            'title' => $charge->title,
+            'tags' => $tags->map(fn(Tag $tag) => $tag->id)->getValues(),
+        ]);
+
+        $response->assertOk();
+
+        $body = $this->getJsonResponseBody($response);
+
+        $this->assertNotEmpty($body['data']['id'] ?? null);
+
+        foreach ($tags as $tag) {
+            $this->assertArrayContains($tag->id, $body, 'data.tags.*.id');
+            $this->assertArrayContains($tag->name, $body, 'data.tags.*.name');
+
+            $this->assertDatabaseHas('tag_charges', [
+                'tag_id' => $tag->id,
+                'charge_id' => $body['data']['id'],
+            ]);
+        }
+    }
+
+    public function testCreateStoreChargeWithForeignTag(): void
+    {
+        $auth = $this->makeAuth($user = $this->userFactory->create());
+
+        $wallet = $this->walletFactory->forUser($user)->create();
+
+        $charge = ChargeFactory::make();
+
+        $tags = $this->tagFactory->forUser($this->userFactory->create())->createMany(3);
+
+        $response = $this->withAuth($auth)->post("/wallets/{$wallet->id}/charges", [
+            'type' => $charge->type,
+            'amount' => $charge->amount,
+            'title' => $charge->title,
+            'tags' => $tags->map(fn(Tag $tag) => $tag->id)->getValues(),
+        ]);
+
+        $response->assertOk();
+
+        $body = $this->getJsonResponseBody($response);
+
+        $this->assertNotEmpty($body['data']['id'] ?? null);
+
+        foreach ($tags as $tag) {
+            $this->assertArrayNotContains($tag->id, $body, 'data.tags.*.id');
+            $this->assertArrayNotContains($tag->name, $body, 'data.tags.*.name');
+
+            $this->assertDatabaseMissing('tag_charges', [
+                'tag_id' => $tag->id,
+                'charge_id' => $body['data']['id'],
+            ]);
+        }
+    }
+
     public function testCreateThrownException(): void
     {
         $auth = $this->makeAuth($user = $this->userFactory->create());
@@ -519,6 +592,64 @@ class ChargesControllerTest extends TestCase implements DatabaseTransaction
             'id' => $wallet->id,
             'total_amount' => $updatedCharge->type === Charge::TYPE_INCOME ? $updatedCharge->amount : -1 * $updatedCharge->amount,
         ]);
+    }
+
+    public function testUpdateStoreChargeWithTag(): void
+    {
+        $auth = $this->makeAuth($user = $this->userFactory->create());
+        $wallet = $this->walletFactory->forUser($user)->create();
+
+        $charge = ChargeFactory::make();
+
+        $tags = $this->tagFactory->forUser($user)->createMany(3);
+        $newTags = $this->tagFactory->forUser($user)->createMany(2);
+        $newTags->add($tags->first());
+
+        $response = $this->withAuth($auth)->post("/wallets/{$wallet->id}/charges", [
+            'type' => $charge->type,
+            'amount' => $charge->amount,
+            'title' => $charge->title,
+            'description' => $charge->description,
+            'tags' => $tags->map(fn(Tag $tag) => $tag->id)->getValues(),
+        ]);
+
+        $response->assertOk();
+
+        $chargeId = $this->getJsonResponseBody($response)['data']['id'] ?? null;
+
+        $updatedCharge = ChargeFactory::make();
+
+        $response = $this->withAuth($auth)->put("/wallets/{$wallet->id}/charges/{$chargeId}", [
+            'type' => $updatedCharge->type,
+            'amount' => $updatedCharge->amount,
+            'title' => $updatedCharge->title,
+            'description' => $updatedCharge->description,
+            'tags' => $newTags->map(fn(Tag $tag) => $tag->id)->getValues(),
+        ]);
+
+        $response->assertOk();
+
+        $body = $this->getJsonResponseBody($response);
+
+        foreach ($newTags as $tag) {
+            $this->assertArrayContains($tag->id, $body, 'data.tags.*.id');
+            $this->assertArrayContains($tag->name, $body, 'data.tags.*.name');
+
+            $this->assertDatabaseHas('tag_charges', [
+                'tag_id' => $tag->id,
+                'charge_id' => $body['data']['id'],
+            ]);
+        }
+
+        foreach ($tags->slice(1, 2) as $tag) {
+            $this->assertArrayNotContains($tag->id, $body, 'data.tags.*.id');
+            $this->assertArrayNotContains($tag->name, $body, 'data.tags.*.name');
+
+            $this->assertDatabaseMissing('tag_charges', [
+                'tag_id' => $tag->id,
+                'charge_id' => $body['data']['id'],
+            ]);
+        }
     }
 
     public function testUpdateThrownException(): void
