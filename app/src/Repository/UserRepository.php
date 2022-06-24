@@ -48,6 +48,18 @@ class UserRepository extends Repository implements ActorProviderInterface
     }
 
     /**
+     * @param \App\Database\User $user
+     * @return \App\Database\User[]
+     */
+    public function findAllByCommonWallets(User $user): array
+    {
+        /** @var \App\Database\User[] $users */
+        $users = $this->byCommonWallets($user)->fetchAll();
+
+        return $users;
+    }
+
+    /**
      * @psalm-suppress UndefinedMagicMethod
      * @param \App\Database\User $user
      * @return \Cycle\ORM\Select

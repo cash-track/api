@@ -6,7 +6,9 @@ namespace App\Controller\Tags;
 
 use App\Controller\AuthAwareController;
 use App\Database\Tag;
+use App\Database\User;
 use App\Repository\TagRepository;
+use App\Repository\UserRepository;
 use App\Request\Tag\CreateRequest;
 use App\Request\Tag\UpdateRequest;
 use App\Service\TagService;
@@ -28,6 +30,7 @@ final class TagsController extends AuthAwareController
         private TagService $tagService,
         private TagsView $tagsView,
         private TagView $tagView,
+        private UserRepository $userRepository,
     ) {
         parent::__construct($auth);
     }
@@ -36,6 +39,16 @@ final class TagsController extends AuthAwareController
     public function list(): ResponseInterface
     {
         return $this->tagsView->json($this->tagRepository->findAllByUserPK((int) $this->user->id));
+    }
+
+    #[Route(route: '/tags/common', name: 'tag.list.common', methods: 'GET', group: 'auth')]
+    public function listCommon(): ResponseInterface
+    {
+        $users = $this->userRepository->findAllByCommonWallets($this->user);
+
+        $userIDs = array_map(fn (User $user) => (int) $user->id, $users);
+
+        return $this->tagsView->json($this->tagRepository->findAllByUsersPK($userIDs));
     }
 
     #[Route(route: '/tags', name: 'tag.create', methods: 'POST', group: 'auth')]
