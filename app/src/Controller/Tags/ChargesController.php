@@ -9,9 +9,11 @@ use App\Database\Charge;
 use App\Database\Tag;
 use App\Repository\ChargeRepository;
 use App\Repository\TagRepository;
+use App\Repository\UserRepository;
 use App\Service\ChargeWalletService;
 use App\Service\Pagination\PaginationFactory;
 use App\View\ChargesView;
+use App\View\CurrencyView;
 use Psr\Http\Message\ResponseInterface;
 use Spiral\Auth\AuthScope;
 use Spiral\Http\ResponseWrapper;
@@ -27,6 +29,8 @@ final class ChargesController extends AuthAwareController
         private PaginationFactory $paginationFactory,
         private ChargesView $chargesView,
         private ChargeWalletService $chargeWalletService,
+        private UserRepository $userRepository,
+        private CurrencyView $currencyView,
     ) {
         parent::__construct($auth);
     }
@@ -34,7 +38,7 @@ final class ChargesController extends AuthAwareController
     #[Route(route: '/tags/<id:\d+>/charges', name: 'tag.charges', methods: 'GET', group: 'auth')]
     public function list(int $id): ResponseInterface
     {
-        $tag = $this->tagRepository->findByPKByUserPK($id, (int) $this->user->id);
+        $tag = $this->tagRepository->findByPKByUsersPK($id, $this->userRepository->getCommonUserIDs($this->user));
         if (! $tag instanceof Tag) {
             return $this->response->create(404);
         }
@@ -49,7 +53,7 @@ final class ChargesController extends AuthAwareController
     #[Route(route: '/tags/<id:\d+>/charges/total', name: 'tag.charges.total', methods: 'GET', group: 'auth')]
     public function total(int $id): ResponseInterface
     {
-        $tag = $this->tagRepository->findByPKByUserPK($id, (int) $this->user->id);
+        $tag = $this->tagRepository->findByPKByUsersPK($id, $this->userRepository->getCommonUserIDs($this->user));
         if (! $tag instanceof Tag) {
             return $this->response->create(404);
         }
@@ -62,6 +66,7 @@ final class ChargesController extends AuthAwareController
                 'totalAmount' => $this->chargeWalletService->totalByIncomeAndExpense($income, $expense),
                 'totalIncomeAmount' => $income,
                 'totalExpenseAmount' => $expense,
+                'currency' => $this->currencyView->map($this->user->getDefaultCurrency()),
             ],
         ]);
     }

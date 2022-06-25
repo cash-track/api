@@ -37,6 +37,7 @@ class ChargeRepository extends Repository
         /** @var \App\Database\Charge[] $charges */
         $charges = $this->select()
                         ->load('user')
+                        ->load('tags')
                         ->where('wallet_id', $walletId)
                         ->orderBy('created_at', 'DESC')
                         ->limit($limit)
@@ -70,6 +71,7 @@ class ChargeRepository extends Repository
     {
         $query = $this->select()
                       ->load('user')
+                      ->load('tags')
                       ->where('tags.id', $tagId)
                       ->orderBy('created_at', 'DESC');
 

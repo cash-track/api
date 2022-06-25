@@ -81,7 +81,7 @@ final class TagsController extends Controller
             return $this->response->create(404);
         }
 
-        $tags = $this->tagRepository->findAllByUsersPK($wallet->getUserIDs(), urldecode($query));
+        $tags = $this->tagRepository->searchAllByUsersPK($wallet->getUserIDs(), urldecode($query));
 
         return $this->tagsView->json($tags);
     }

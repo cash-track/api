@@ -30,28 +30,54 @@ class TagRepository extends Repository
      * @param int $limit
      * @return \App\Database\Tag[]
      */
-    public function findAllByUsersPK(array $userIDs, string $query = '', int $limit = 10): array
+    public function searchAllByUsersPK(array $userIDs, string $query = '', int $limit = 10): array
     {
         /**
          * @var \App\Database\Tag[] $tags
-         * @psalm-suppress InternalClass
-         * @psalm-suppress UndefinedMagicMethod
          */
-        $tags = $this->select()
+        $tags = $this->selectAllOrderedByCharges()
                      ->where(['user_id' => ['in' => new Parameter($userIDs)]])
                      ->where('name', 'like', "{$query}%")
-                     ->with('tagCharges', [
-                         'method' => Select\JoinableLoader::LEFT_JOIN
-                     ])
-                     ->with('tagCharges.charge', [
-                         'method' => Select\JoinableLoader::LEFT_JOIN
-                     ])
-                     ->groupBy('tag.id')
-                     ->orderBy(new Expression('count(tag.id)'), SelectQuery::SORT_DESC)
                      ->limit($limit)
                      ->fetchAll();
 
         return $tags;
+    }
+
+    /**
+     * @param array<array-key, int> $userIDs
+     * @return \App\Database\Tag[]
+     */
+    public function findAllByUsersPK(array $userIDs): array
+    {
+        /**
+         * @var \App\Database\Tag[] $tags
+         */
+        $tags = $this->selectAllOrderedByCharges()
+                     ->where(['user_id' => ['in' => new Parameter($userIDs)]])
+                     ->fetchAll();
+
+        return $tags;
+    }
+
+    /**
+     * @return \Cycle\ORM\Select
+     */
+    protected function selectAllOrderedByCharges(): Select
+    {
+        /**
+         * @psalm-suppress InternalClass
+         * @psalm-suppress UndefinedMagicMethod
+         */
+        return $this->select()
+                    ->with('tagCharges', [
+                        'method' => Select\JoinableLoader::LEFT_JOIN
+                    ])
+                    ->with('tagCharges.charge', [
+                        'method' => Select\JoinableLoader::LEFT_JOIN
+                    ])
+                    ->groupBy('tag.id')
+                    ->orderBy(new Expression('count(tag.id)'), SelectQuery::SORT_DESC);
     }
 
     /**

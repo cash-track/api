@@ -7,14 +7,20 @@ namespace Tests\Feature\Controller\Tags;
 use App\Service\TagService;
 use PHPUnit\Framework\MockObject\MockObject;
 use Tests\DatabaseTransaction;
+use Tests\Factories\ChargeFactory;
 use Tests\Factories\TagFactory;
 use Tests\Factories\UserFactory;
+use Tests\Factories\WalletFactory;
 use Tests\Fixtures;
 use Tests\TestCase;
 
 class TagsControllerTest extends TestCase implements DatabaseTransaction
 {
     protected UserFactory $userFactory;
+
+    protected WalletFactory $walletFactory;
+
+    protected ChargeFactory $chargeFactory;
 
     protected TagFactory $tagFactory;
 
@@ -23,6 +29,8 @@ class TagsControllerTest extends TestCase implements DatabaseTransaction
         parent::setUp();
 
         $this->userFactory = $this->getContainer()->get(UserFactory::class);
+        $this->walletFactory = $this->getContainer()->get(WalletFactory::class);
+        $this->chargeFactory = $this->getContainer()->get(ChargeFactory::class);
         $this->tagFactory = $this->getContainer()->get(TagFactory::class);
     }
 
@@ -64,6 +72,79 @@ class TagsControllerTest extends TestCase implements DatabaseTransaction
         $body = $this->getJsonResponseBody($response);
 
         $this->assertEquals([], $body['data']);
+    }
+
+    public function testListCommonRequireAuth(): void
+    {
+        $response = $this->get('/tags/common');
+
+        $response->assertUnauthorized();
+    }
+
+    public function testListCommonReturnTags(): void
+    {
+        $auth = $this->makeAuth($user = $this->userFactory->create());
+
+        [$tag1, $tag2, $tag3] = $this->tagFactory->forUser($user)->createMany(3)->toArray();
+
+        $wallet = $this->walletFactory->forUser($user)->create();
+
+        $this->chargeFactory->forWallet($wallet)->forUser($user)->withTags([$tag1])->createMany(3);
+        $this->chargeFactory->forWallet($wallet)->forUser($user)->withTags([$tag2])->create();
+
+        $response = $this->withAuth($auth)->get('/tags/common');
+
+        $response->assertOk();
+
+        $body = $this->getJsonResponseBody($response);
+
+        $this->assertIsArray($body);
+        $this->assertArrayHasKey('data', $body);
+        $this->assertCount(3, $body['data']);
+
+        foreach ([$tag1, $tag2, $tag3] as $index => $tag) {
+            $this->assertArrayHasKey($index, $body['data']);
+            $this->assertArrayHasKey('id', $body['data'][$index]);
+            $this->assertEquals($tag->id, $body['data'][$index]['id']);
+            $this->assertArrayHasKey('name', $body['data'][$index]);
+            $this->assertEquals($tag->name, $body['data'][$index]['name']);
+        }
+    }
+
+    public function testListCommonReturnCommonTagsOrderedByChargesCount(): void
+    {
+        $auth = $this->makeAuth($user = $this->userFactory->create());
+        $friend = $this->userFactory->create();
+
+        [$tag1, $tag2, $tag3] = $this->tagFactory->forUser($user)->createMany(3)->toArray();
+        $commonTag = $this->tagFactory->forUser($user)->create();
+
+        $wallet = WalletFactory::make();
+        $wallet->users->add($user);
+        $wallet->users->add($friend);
+        $wallet = $this->walletFactory->create($wallet);
+
+        $this->chargeFactory->forWallet($wallet)->forUser($friend)->withTags([$commonTag])->createMany(2);
+        $this->chargeFactory->forWallet($wallet)->forUser($user)->withTags([$tag1])->createMany(3);
+        $this->chargeFactory->forWallet($wallet)->forUser($user)->withTags([$tag2])->create();
+
+        $response = $this->withAuth($auth)->get('/tags/common');
+
+        $response->assertOk();
+
+        $body = $this->getJsonResponseBody($response);
+
+        $this->assertIsArray($body);
+        $this->assertArrayHasKey('data', $body);
+        $this->assertCount(4, $body['data']);
+
+        foreach ([$tag1, $commonTag, $tag2, $tag3] as $index => $tag) {
+            $this->assertArrayHasKey($index, $body['data']);
+            $this->assertArrayHasKey('id', $body['data'][$index]);
+            $this->assertEquals($tag->id, $body['data'][$index]['id']);
+            $this->assertArrayHasKey('name', $body['data'][$index]);
+            $this->assertEquals($tag->name, $body['data'][$index]['name']);
+        }
     }
 
     public function testCreateRequireAuth(): void
