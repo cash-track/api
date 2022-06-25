@@ -44,11 +44,9 @@ final class TagsController extends AuthAwareController
     #[Route(route: '/tags/common', name: 'tag.list.common', methods: 'GET', group: 'auth')]
     public function listCommon(): ResponseInterface
     {
-        $users = $this->userRepository->findAllByCommonWallets($this->user);
-
-        $userIDs = array_map(fn (User $user) => (int) $user->id, $users);
-
-        return $this->tagsView->json($this->tagRepository->findAllByUsersPK($userIDs));
+        return $this->tagsView->json($this->tagRepository->findAllByUsersPK(
+            $this->userRepository->getCommonUserIDs($this->user)
+        ));
     }
 
     #[Route(route: '/tags', name: 'tag.create', methods: 'POST', group: 'auth')]

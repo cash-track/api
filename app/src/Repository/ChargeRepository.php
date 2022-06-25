@@ -71,6 +71,7 @@ class ChargeRepository extends Repository
     {
         $query = $this->select()
                       ->load('user')
+                      ->load('tags')
                       ->where('tags.id', $tagId)
                       ->orderBy('created_at', 'DESC');
 
