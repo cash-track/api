@@ -23,7 +23,7 @@ class UserView implements SingletonInterface
     {
         return $this->response->json([
             'data' => $this->map($user),
-        ], 200);
+        ]);
     }
 
     public function head(User $user): array

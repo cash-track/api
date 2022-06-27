@@ -7,6 +7,7 @@ namespace App\Controller\Tags;
 use App\Controller\AuthAwareController;
 use App\Database\Charge;
 use App\Database\Tag;
+use App\Database\Wallet;
 use App\Repository\ChargeRepository;
 use App\Repository\TagRepository;
 use App\Repository\UserRepository;
@@ -47,7 +48,8 @@ final class ChargesController extends AuthAwareController
             ->paginate($this->paginationFactory->createPaginator())
             ->findByTagIdWithPagination((int) $tag->id);
 
-        return $this->chargesView->jsonPaginated($charges, $this->chargeRepository->getPaginationState());
+        return $this->chargesView->withRelation(Wallet::class)
+                                 ->jsonPaginated($charges, $this->chargeRepository->getPaginationState());
     }
 
     #[Route(route: '/tags/<id:\d+>/charges/total', name: 'tag.charges.total', methods: 'GET', group: 'auth')]

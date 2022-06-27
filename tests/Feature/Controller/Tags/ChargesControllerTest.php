@@ -142,6 +142,8 @@ class ChargesControllerTest extends TestCase implements DatabaseTransaction
             $this->assertArrayContains((string) $charge->id, $body, 'data.*.id');
             $this->assertArrayContains($charge->title, $body, 'data.*.title');
             $this->assertArrayContains($charge->type, $body, 'data.*.operation');
+            $this->assertArrayContains($wallet->id, $body, 'data.*.wallet.id');
+            $this->assertArrayContains($wallet->name, $body, 'data.*.wallet.name');
         }
 
         foreach ($charges->slice(self::LIST_PER_PAGE, 1) as $charge) {

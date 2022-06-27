@@ -112,7 +112,7 @@ class ChargesController extends Controller
             ], 500);
         }
 
-        return $this->chargeView->json($charge);
+        return $this->chargeView->withRelation(Wallet::class)->json($charge);
     }
 
     /**
@@ -175,7 +175,7 @@ class ChargesController extends Controller
             ], 500);
         }
 
-        return $this->chargeView->json($charge);
+        return $this->chargeView->withRelation(Wallet::class)->json($charge);
     }
 
     /**

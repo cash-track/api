@@ -65,19 +65,23 @@ class ChargeRepository extends Repository
 
     /**
      * @param int $tagId
-     * @return array
+     * @return \App\Database\Charge[]
      */
-    public function findByTagIdWithPagination(int $tagId)
+    public function findByTagIdWithPagination(int $tagId): array
     {
         $query = $this->select()
                       ->load('user')
                       ->load('tags')
+                      ->load('wallet')
                       ->where('tags.id', $tagId)
                       ->orderBy('created_at', 'DESC');
 
         $query = $this->injectPaginator($query);
 
-        return $query->fetchAll();
+        /** @var \App\Database\Charge[] $charges */
+        $charges = $query->fetchAll();
+
+        return $charges;
     }
 
     /**
