@@ -17,6 +17,7 @@ use App\View\ChargesView;
 use App\View\CurrencyView;
 use Psr\Http\Message\ResponseInterface;
 use Spiral\Auth\AuthScope;
+use Spiral\Http\Request\InputManager;
 use Spiral\Http\ResponseWrapper;
 use Spiral\Router\Annotation\Route;
 
@@ -37,7 +38,7 @@ final class ChargesController extends AuthAwareController
     }
 
     #[Route(route: '/tags/<id:\d+>/charges', name: 'tag.charges', methods: 'GET', group: 'auth')]
-    public function list(int $id): ResponseInterface
+    public function list(int $id, InputManager $input): ResponseInterface
     {
         $tag = $this->tagRepository->findByPKByUsersPK($id, $this->userRepository->getCommonUserIDs($this->user));
         if (! $tag instanceof Tag) {
@@ -45,6 +46,7 @@ final class ChargesController extends AuthAwareController
         }
 
         $charges = $this->chargeRepository
+            ->filter($input->query->all())
             ->paginate($this->paginationFactory->createPaginator())
             ->findByTagIdWithPagination((int) $tag->id);
 
@@ -53,12 +55,14 @@ final class ChargesController extends AuthAwareController
     }
 
     #[Route(route: '/tags/<id:\d+>/charges/total', name: 'tag.charges.total', methods: 'GET', group: 'auth')]
-    public function total(int $id): ResponseInterface
+    public function total(int $id, InputManager $input): ResponseInterface
     {
         $tag = $this->tagRepository->findByPKByUsersPK($id, $this->userRepository->getCommonUserIDs($this->user));
         if (! $tag instanceof Tag) {
             return $this->response->create(404);
         }
+
+        $this->chargeRepository->filter($input->query->all());
 
         $income = $this->chargeRepository->totalByTagPK((int) $tag->id, Charge::TYPE_INCOME);
         $expense = $this->chargeRepository->totalByTagPK((int) $tag->id, Charge::TYPE_EXPENSE);

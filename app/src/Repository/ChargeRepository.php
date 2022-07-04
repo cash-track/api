@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Repository;
 
+use App\Service\Filter\Filter;
 use Cycle\ORM\Select\AbstractLoader;
 use Cycle\ORM\Select\Repository;
 use Cycle\Database\Injection\Parameter;
@@ -11,6 +12,7 @@ use Cycle\Database\Injection\Parameter;
 class ChargeRepository extends Repository
 {
     use Paginator;
+    use Filter;
 
     /**
      * @param string $chargeId
@@ -76,6 +78,7 @@ class ChargeRepository extends Repository
                       ->where('tags.id', $tagId)
                       ->orderBy('created_at', 'DESC');
 
+        $query = $this->injectFilter($query);
         $query = $this->injectPaginator($query);
 
         /** @var \App\Database\Charge[] $charges */
@@ -134,6 +137,8 @@ class ChargeRepository extends Repository
         if (! empty($type)) {
             $query = $query->where('type', $type);
         }
+
+        $query = $this->injectFilter($query);
 
         return (float) $query->sum('amount');
     }
