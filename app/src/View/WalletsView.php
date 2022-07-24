@@ -23,7 +23,7 @@ class WalletsView implements SingletonInterface
     {
         return $this->response->json([
             'data' => $this->map($this->applySort($wallets, $sort)),
-        ], 200);
+        ]);
     }
 
     public function map(array $wallets): array

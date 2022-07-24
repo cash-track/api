@@ -9,13 +9,11 @@ use Psr\Http\Message\ResponseInterface;
 use Spiral\Core\Container\SingletonInterface;
 use Spiral\Http\ResponseWrapper;
 
-class WalletView implements SingletonInterface
+class WalletShortView implements SingletonInterface
 {
     public function __construct(
         protected ResponseWrapper $response,
         protected CurrencyView $currencyView,
-        protected UsersView $usersView,
-        protected ChargesView $chargesView,
     ) {
     }
 
@@ -33,7 +31,7 @@ class WalletView implements SingletonInterface
         }
 
         return [
-            'type'        => 'wallet',
+            'type'        => 'walletShort',
             'id'          => $wallet->id,
             'name'        => $wallet->name,
             'slug'        => $wallet->slug,
@@ -46,10 +44,6 @@ class WalletView implements SingletonInterface
 
             'defaultCurrencyCode' => $wallet->defaultCurrencyCode,
             'defaultCurrency'     => $this->currencyView->map($wallet->getDefaultCurrency()),
-
-            'users' => $this->usersView->map($wallet->getUsers()),
-
-            'latestCharges' => $this->chargesView->map($wallet->getLatestCharges()?->getValues() ?? []),
         ];
     }
 }

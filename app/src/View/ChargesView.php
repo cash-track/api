@@ -4,16 +4,21 @@ declare(strict_types=1);
 
 namespace App\View;
 
+use App\Database\Tag;
+use App\Database\User;
 use Psr\Http\Message\ResponseInterface;
 use Spiral\Core\Container\SingletonInterface;
 use Spiral\Http\ResponseWrapper;
 
 class ChargesView implements SingletonInterface
 {
+    use Relations;
+
     public function __construct(
         protected ResponseWrapper $response,
         protected ChargeView $chargeView,
     ) {
+        $this->withRelations([User::class, Tag::class]);
     }
 
     public function jsonPaginated(array $charges, array $paginationState): ResponseInterface
@@ -21,11 +26,13 @@ class ChargesView implements SingletonInterface
         return $this->response->json([
             'data' => $this->map($charges),
             'pagination' => $paginationState,
-        ], 200);
+        ]);
     }
 
     public function map(array $charges): array
     {
+        $this->chargeView->withRelations($this->relations);
+
         return array_map([$this->chargeView, 'map'], $charges);
     }
 }
