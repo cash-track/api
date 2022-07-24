@@ -13,6 +13,7 @@ use App\Repository\TagRepository;
 use App\Repository\UserRepository;
 use App\Service\ChargeWalletService;
 use App\Service\Pagination\PaginationFactory;
+use App\Service\Statistics\ChargeAmountGraph;
 use App\View\ChargesView;
 use App\View\CurrencyView;
 use Psr\Http\Message\ResponseInterface;
@@ -25,14 +26,14 @@ final class ChargesController extends AuthAwareController
 {
     public function __construct(
         AuthScope $auth,
-        private ResponseWrapper $response,
-        private TagRepository $tagRepository,
-        private ChargeRepository $chargeRepository,
-        private PaginationFactory $paginationFactory,
-        private ChargesView $chargesView,
-        private ChargeWalletService $chargeWalletService,
-        private UserRepository $userRepository,
-        private CurrencyView $currencyView,
+        private readonly ResponseWrapper $response,
+        private readonly TagRepository $tagRepository,
+        private readonly ChargeRepository $chargeRepository,
+        private readonly PaginationFactory $paginationFactory,
+        private readonly ChargesView $chargesView,
+        private readonly ChargeWalletService $chargeWalletService,
+        private readonly UserRepository $userRepository,
+        private readonly CurrencyView $currencyView,
     ) {
         parent::__construct($auth);
     }
@@ -46,7 +47,7 @@ final class ChargesController extends AuthAwareController
         }
 
         $charges = $this->chargeRepository
-            ->filter($input->query->all())
+            ->filter($input->query->fetch(['date-from', 'date-to']))
             ->paginate($this->paginationFactory->createPaginator())
             ->findByTagIdWithPagination((int) $tag->id);
 
@@ -62,7 +63,7 @@ final class ChargesController extends AuthAwareController
             return $this->response->create(404);
         }
 
-        $this->chargeRepository->filter($input->query->all());
+        $this->chargeRepository->filter($input->query->fetch(['date-from', 'date-to']));
 
         $income = $this->chargeRepository->totalByTagPK((int) $tag->id, Charge::TYPE_INCOME);
         $expense = $this->chargeRepository->totalByTagPK((int) $tag->id, Charge::TYPE_EXPENSE);
@@ -74,6 +75,22 @@ final class ChargesController extends AuthAwareController
                 'totalExpenseAmount' => $expense,
                 'currency' => $this->currencyView->map($this->user->getDefaultCurrency()),
             ],
+        ]);
+    }
+
+    #[Route(route: '/tags/<id:\d+>/charges/graph', name: 'tag.charges.graph', methods: 'GET', group: 'auth')]
+    public function graph(int $id, InputManager $input, ChargeAmountGraph $graph): ResponseInterface
+    {
+        $tag = $this->tagRepository->findByPKByUsersPK($id, $this->userRepository->getCommonUserIDs($this->user));
+        if (! $tag instanceof Tag) {
+            return $this->response->create(404);
+        }
+
+        $graph->filter($input->query->fetch(['date-from', 'date-to']));
+        $graph->groupBy($input->query('group-by'));
+
+        return $this->response->json([
+            'data' => $graph->getGraphByTag($tag),
         ]);
     }
 }

@@ -422,4 +422,194 @@ class ChargesControllerTest extends TestCase implements DatabaseTransaction
         $this->assertArrayContains($total['income'], $body, 'data.totalIncomeAmount');
         $this->assertArrayContains($total['expense'], $body, 'data.totalExpenseAmount');
     }
+
+    public function testGraphRequireAuth(): void
+    {
+        $user = $this->userFactory->create();
+        $wallet = $this->walletFactory->forUser($user)->create();
+        $tag = $this->tagFactory->forUser($user)->create();
+        $this->chargeFactory->forUser($user)->forWallet($wallet)->withTags([$tag])->create();
+
+        $response = $this->get("/tags/{$tag->id}/charges/graph");
+
+        $response->assertUnauthorized();
+    }
+
+    public function testGraphOfMissingTagNotFound(): void
+    {
+        $auth = $this->makeAuth($this->userFactory->create());
+        $tagId = Fixtures::integer();
+
+        $response = $this->withAuth($auth)->get("/tags/{$tagId}/charges/graph");
+
+        $response->assertNotFound();
+    }
+
+    public function testGraphOfForeignTagReturnNotFound(): void
+    {
+        $auth = $this->makeAuth($user = $this->userFactory->create());
+        $wallet = $this->walletFactory->forUser($user)->create();
+        $tag = $this->tagFactory->forUser($this->userFactory->create())->create();
+        $this->chargeFactory->forUser($user)->forWallet($wallet)->withTags([$tag])->create();
+
+        $response = $this->withAuth($auth)->get("/tags/{$tag->id}/charges/graph");
+
+        $response->assertNotFound();
+    }
+
+    public function testGraphOfNoChargesWithTag(): void
+    {
+        $auth = $this->makeAuth($user = $this->userFactory->create());
+        $wallet = $this->walletFactory->forUser($user)->create();
+        $this->chargeFactory->forUser($user)->forWallet($wallet)->createMany(3);
+        $tag = $this->tagFactory->forUser($user)->create();
+
+        $response = $this->withAuth($auth)->get("/tags/{$tag->id}/charges/graph");
+
+        $response->assertOk();
+
+        $body = $this->getJsonResponseBody($response);
+
+        $this->assertArrayHasKey('data', $body);
+        $this->assertCount(0, $body['data']);
+    }
+
+    public function graphReturnsGraphDataByTagDataProvider(): array
+    {
+        $charges = [
+            [
+                'date' => '2022-05-31',
+                'type' => Charge::TYPE_INCOME,
+                'amount' => 2060,
+            ],
+            [
+                'date' => '2022-06-01',
+                'type' => Charge::TYPE_EXPENSE,
+                'amount' => 150.99,
+            ],
+            [
+                'date' => '2022-06-02',
+                'type' => Charge::TYPE_EXPENSE,
+                'amount' => 51.02,
+            ],
+            [
+                'date' => '2022-06-03',
+                'type' => Charge::TYPE_INCOME,
+                'amount' => 30.99,
+            ],
+        ];
+
+        return [
+            [
+                $charges,
+                [],
+                [
+                    // date, income, expense
+                    ['2022-05-01', 2060, 0],
+                    ['2022-06-01', 30.99, 202.01],
+                ]
+            ],
+            [
+                $charges,
+                [
+                    'group-by' => 'day'
+                ],
+                [
+                    ['2022-05-31', 2060, 0],
+                    ['2022-06-01', 0, 150.99],
+                    ['2022-06-02', 0, 51.02],
+                    ['2022-06-03', 30.99, 0],
+                ]
+            ],
+            [
+                $charges,
+                [
+                    'date-from' => '2022-06-01',
+                    'date-to' => '2022-06-04',
+                ],
+                [
+                    ['2022-06-01', 30.99, 202.01],
+                ]
+            ],
+            [
+                $charges,
+                [
+                    'date-from' => '2022-06-01',
+                    'date-to' => '2022-06-04',
+                    'group-by' => 'day'
+                ],
+                [
+                    ['2022-06-01', 0, 150.99],
+                    ['2022-06-02', 0, 51.02],
+                    ['2022-06-03', 30.99, 0],
+                    ['2022-06-04', 0, 0],
+                ]
+            ],
+            [
+                $charges,
+                [
+                    'group-by' => 'year'
+                ],
+                [
+                    ['2022-01-01', 2090.99, 202.01],
+                ]
+            ],
+            [
+                $charges,
+                [
+                    'date-from' => '2021-12-31',
+                    'date-to' => '2022-06-04',
+                    'group-by' => 'year'
+                ],
+                [
+                    ['2022-01-01', 2090.99, 202.01],
+                    ['2021-01-01', 0, 0],
+                ]
+            ],
+        ];
+    }
+
+    /**
+     * @dataProvider graphReturnsGraphDataByTagDataProvider
+     * @param array $setCharges
+     * @param array $query
+     * @param array $expectedData
+     * @return void
+     * @throws \Exception
+     */
+    public function testGraphReturnsGraphDataByTag(array $setCharges, array $query, array $expectedData): void
+    {
+        $auth = $this->makeAuth($user = $this->userFactory->create());
+        $wallet = $this->walletFactory->forUser($user)->create();
+        $tag = $this->tagFactory->forUser($user)->create();
+
+        $this->chargeFactory->forUser($user)->forWallet($wallet);
+
+        foreach ($setCharges as $item) {
+            $charge = ChargeFactory::make();
+            $charge->createdAt = new \DateTimeImmutable($item['date']);
+            $this->chargeFactory->withTags([])->create($charge);
+
+            $charge = ChargeFactory::make();
+            $charge->createdAt = new \DateTimeImmutable($item['date']);
+            $charge->type = $item['type'];
+            $charge->amount = $item['amount'];
+            $this->chargeFactory->withTags([$tag])->create($charge);
+        }
+
+        $response = $this->withAuth($auth)->get("/tags/{$tag->id}/charges/graph", $query);
+
+        $response->assertOk();
+
+        $body = $this->getJsonResponseBody($response);
+
+        $this->assertArrayHasKey('data', $body);
+        $this->assertCount(count($expectedData), $body['data']);
+
+        foreach ($expectedData as $expected) {
+            $this->assertArrayContains($expected[0], $body, 'data.*.date');
+            $this->assertArrayContains($expected[1], $body, 'data.*.income');
+            $this->assertArrayContains($expected[2], $body, 'data.*.expense');
+        }
+    }
 }

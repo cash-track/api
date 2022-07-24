@@ -78,7 +78,7 @@ class ChargeRepository extends Repository
                       ->where('tags.id', $tagId)
                       ->orderBy('created_at', 'DESC');
 
-        $query = $this->injectFilter($query);
+        $this->injectFilter($query);
         $query = $this->injectPaginator($query);
 
         /** @var \App\Database\Charge[] $charges */
@@ -138,7 +138,7 @@ class ChargeRepository extends Repository
             $query = $query->where('type', $type);
         }
 
-        $query = $this->injectFilter($query);
+        $this->injectFilter($query);
 
         return (float) $query->sum('amount');
     }

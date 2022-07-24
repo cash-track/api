@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Service\Filter;
 
+use Cycle\Database\Query\SelectQuery;
 use Cycle\ORM\Select;
 
 trait Filter
@@ -26,9 +27,7 @@ trait Filter
                 continue;
             }
 
-            try {
-                new \DateTimeImmutable($query[$type->value]);
-            } catch (\Throwable) {
+            if (! $type->validate($query[$type->value])) {
                 continue;
             }
 
@@ -38,20 +37,36 @@ trait Filter
         return $this;
     }
 
-    protected function injectFilter(Select $query): Select
+    public function hasFilter(FilterType $filter): bool
+    {
+        return array_key_exists($filter->value, $this->filter);
+    }
+
+    public function getFilterValue(FilterType $filter): ?string
+    {
+        return $this->filter[$filter->value] ?? null;
+    }
+
+    protected function filterColumnsMapping(): array
+    {
+        return [
+            FilterType::ByDateFrom->value => 'created_at',
+            FilterType::ByDateTo->value => 'created_at',
+        ];
+    }
+
+    protected function injectFilter(Select|SelectQuery $query): void
     {
         if (! count($this->filter)) {
-            return $query;
+            return;
         }
 
         foreach ($this->filter as $type => $value) {
             try {
-                $query = FilterType::from($type)->inject($query, $value);
+                FilterType::from($type)->inject($query, $value, $this->filterColumnsMapping());
             } catch (\ValueError) {
                 continue;
             }
         }
-
-        return $query;
     }
 }
