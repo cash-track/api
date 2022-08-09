@@ -6,8 +6,10 @@ on:
 
 env:
   REPO: cashtrack/api
-  CONTAINER_NAME: cashtrack_api
-  WORKDIR: /var/www/cash-track.app/api
+  INFRA_REPO: cash-track/infra
+  INFRA_REPO_REF: main
+  CLUSTER: k8s-cash-track
+  NAMESPACE: cash-track
 
 jobs:
   build:
@@ -59,6 +61,21 @@ jobs:
       packages: write
 
     steps:
+      - name: Checkout infra repository
+        uses: actions/checkout@v2
+        with:
+          repository: ${{ env.INFRA_REPO }}
+          ref: ${{ env.INFRA_REPO_REF }}
+          path: deploy
+
+      - name: Install doctl
+        uses: digitalocean/action-doctl@v2
+        with:
+          token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+
+      - name: Configure kubectl
+        run: doctl kubernetes cluster kubeconfig save --expiry-seconds 600 ${{ env.CLUSTER }}
+
       # Extract metadata (tags, labels) for Docker
       # https://github.com/docker/metadata-action
       - name: Extract Docker metadata
@@ -70,28 +87,22 @@ jobs:
           tags: |
             type=semver,pattern={{version}}
 
-      # Execute deployment script on the server
-      # https://github.com/appleboy/ssh-action
-      - name: Deploy
-        uses: appleboy/ssh-action@master
+      - name: Update deployment
         env:
           IMAGE: ${{ env.REPO }}:${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.version'] }}
-        with:
-          host: ${{ secrets.PRODUCTION_SSH_HOST }}
-          username: ${{ secrets.PRODUCTION_SSH_USER }}
-          key: ${{ secrets.PRODUCTION_SSH_PRIVATE_KEY }}
-          script: |
-            cd ${{ env.WORKDIR }}
-            docker pull ${{ env.IMAGE }}
-            docker stop ${{ env.CONTAINER_NAME }}
-            docker run -d \
-              --rm \
-              --name ${{ env.CONTAINER_NAME }} \
-              -p 3002:8080 \
-              --net host \
-              -v ${{ env.WORKDIR }}/runtime/logs:/app/runtime/logs \
-              -v ${{ env.WORKDIR }}/runtime/snapshots:/app/runtime/snapshots \
-              --env-file ${{ env.WORKDIR }}/.env \
-              ${{ env.IMAGE }}
-            ./api_run.sh ${{ env.IMAGE }} app.php cache:clean
-            ./api_run.sh ${{ env.IMAGE }} app.php migrate
+        run: sed -i 's|${{ env.REPO }}:latest|'${IMAGE}'|' $GITHUB_WORKSPACE/deploy/services/api/deployment.yml
+
+      - name: Update definition
+        run: kubectl apply -f $GITHUB_WORKSPACE/deploy/services/api/
+
+      - name: Verify deployment
+        run: kubectl -n ${{ env.NAMESPACE }} rollout status deployment/api
+
+      - name: Verify service ready
+        run: kubectl -n ${{ env.NAMESPACE }} wait pods -l app=api --for condition=Ready --timeout=60s
+
+      - name: Clear cache
+        run: kubectl -n ${{ env.NAMESPACE }} exec deployments/api -it -- php app.php cache:clean
+
+      - name: Clear cache
+        run: kubectl -n ${{ env.NAMESPACE }} exec deployments/api -it -- php app.php migrate
