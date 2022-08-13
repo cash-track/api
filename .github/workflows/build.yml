@@ -143,7 +143,6 @@ jobs:
 
       - name: Setup Application
         run: |
-          ss -ltnp
           ./usr/local/bin/docker ps -a
           cp .env.actions .env
           composer install --no-progress --no-interaction --prefer-dist --optimize-autoloader
