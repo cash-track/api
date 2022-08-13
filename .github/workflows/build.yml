@@ -26,12 +26,15 @@ jobs:
   static-analysis:
     name: Static Analysis
     runs-on: [self-hosted, Linux, x64]
+    container: shivammathur/node:latest
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
+        env:
+          runner: self-hosted
         with:
           php-version: '8.1'
           extensions: zip, mbstring, pdo_mysql, mysqli
@@ -59,12 +62,15 @@ jobs:
   coding-standards:
     name: Coding Standards
     runs-on: [self-hosted, Linux, x64]
+    container: shivammathur/node:latest
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
+        env:
+          runner: self-hosted
         with:
           php-version: '8.1'
           extensions: zip, mbstring, pdo_mysql, mysqli
@@ -92,6 +98,7 @@ jobs:
   tests:
     name: Tests
     runs-on: [self-hosted, Linux, x64]
+    container: shivammathur/node:latest
     permissions:
       contents: read
       packages: write
