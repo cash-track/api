@@ -8,7 +8,7 @@ on:
 jobs:
   security:
     name: Security
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, Linux, x64]
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2
@@ -25,7 +25,7 @@ jobs:
 
   static-analysis:
     name: Static Analysis
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, Linux, x64]
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2
@@ -58,7 +58,7 @@ jobs:
 
   coding-standards:
     name: Coding Standards
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, Linux, x64]
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2
@@ -91,7 +91,7 @@ jobs:
 
   tests:
     name: Tests
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, Linux, x64]
     permissions:
       contents: read
       packages: write
