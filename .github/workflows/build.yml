@@ -9,6 +9,7 @@ jobs:
   security:
     name: Security
     runs-on: [self-hosted, Linux, x64]
+    if: false
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2
@@ -25,6 +26,7 @@ jobs:
 
   static-analysis:
     name: Static Analysis
+    if: false
     runs-on: [self-hosted, Linux, x64]
     container: shivammathur/node:latest
     steps:
@@ -61,6 +63,7 @@ jobs:
 
   coding-standards:
     name: Coding Standards
+    if: false
     runs-on: [self-hosted, Linux, x64]
     container: shivammathur/node:latest
     steps:
@@ -125,7 +128,7 @@ jobs:
         with:
           php-version: '8.1'
           coverage: pcov
-          extensions: zip, mbstring, pdo_mysql, mysqli
+          extensions: zip, mbstring, pdo_mysql, mysqli, openssl
           tools: composer, phpunit
 
       - name: Get Composer Cache Directory
