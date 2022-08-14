@@ -147,7 +147,6 @@ jobs:
       - name: Setup Application
         run: |
           cp .env.actions .env
-          docker ps -a
           composer install --no-progress --no-interaction --prefer-dist --optimize-autoloader
           php app.php encrypt:key -m .env
           php app.php rsa:gen -m .env
