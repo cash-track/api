@@ -106,22 +106,19 @@ jobs:
       contents: read
       packages: write
 
-#    services:
-#      mysql:
-#        image: cashtrack/mysql:latest
-#        env:
-#          MYSQL_ROOT_PASSWORD: secret
-#          MYSQL_DATABASE: cashtrack
-#          MYSQL_USER: cashtrack
-#          MYSQL_PASSWORD: secret
-#        ports:
-#          - 3307:3306
-#        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+    services:
+      database:
+        image: cashtrack/mysql:latest
+        env:
+          MYSQL_ROOT_PASSWORD: secret
+          MYSQL_DATABASE: cashtrack
+          MYSQL_USER: cashtrack
+          MYSQL_PASSWORD: secret
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
 
     steps:
-      - name: Stop initial DB
-        run: sudo /etc/init.d/mysql stop
-
       - name: Checkout Repository
         uses: actions/checkout@v2
 
