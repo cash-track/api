@@ -17,6 +17,7 @@ return [
                 env('DB_PASSWORD'),
                 [
                     PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES "utf8mb4"',
+                    PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT => false,
                 ]
             ),
             queryCache: true,
