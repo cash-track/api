@@ -114,7 +114,7 @@ jobs:
           MYSQL_ROOT_PASSWORD: secret
           MYSQL_DATABASE: cashtrack
         ports:
-          - 3306
+          - 33060:3306
         options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
 
     steps:
@@ -147,8 +147,8 @@ jobs:
       - name: Setup Application
         run: |
           cp .env.actions .env
-          sed -i 's|DB_HOST=127.0.0.1:3306|'DB_HOST=127.0.0.1:${{ job.services.mysql.ports[3306] }}'|' .env
-          cat .env
+#          sed -i 's|DB_HOST=127.0.0.1:3306|'DB_HOST=127.0.0.1:${{ job.services.mysql.ports[3306] }}'|' .env
+#          cat .env
           composer install --no-progress --no-interaction --prefer-dist --optimize-autoloader
           php app.php encrypt:key -m .env
           php app.php rsa:gen -m .env
