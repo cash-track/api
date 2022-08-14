@@ -8,7 +8,7 @@ on:
 jobs:
   security:
     name: Security
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, Linux, x64]
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2
@@ -25,13 +25,16 @@ jobs:
 
   static-analysis:
     name: Static Analysis
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, Linux, x64]
+    container: shivammathur/node:latest
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
+        env:
+          runner: self-hosted
         with:
           php-version: '8.1'
           extensions: zip, mbstring, pdo_mysql, mysqli
@@ -58,13 +61,16 @@ jobs:
 
   coding-standards:
     name: Coding Standards
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, Linux, x64]
+    container: shivammathur/node:latest
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
+        env:
+          runner: self-hosted
         with:
           php-version: '8.1'
           extensions: zip, mbstring, pdo_mysql, mysqli
@@ -91,20 +97,22 @@ jobs:
 
   tests:
     name: Tests
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, Linux, x64]
+    container: shivammathur/node:latest
     permissions:
       contents: read
       packages: write
 
     services:
-      mysql:
-        image: mysql:8.0
+      database:
+        image: cashtrack/mysql:latest
         env:
-          MYSQL_ALLOW_EMPTY_PASSWORD: false
           MYSQL_ROOT_PASSWORD: secret
           MYSQL_DATABASE: cashtrack
+          MYSQL_USER: cashtrack
+          MYSQL_PASSWORD: secret
         ports:
-          - 33060:3306
+          - 3306
         options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
 
     steps:
@@ -113,6 +121,8 @@ jobs:
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
+        env:
+          runner: self-hosted
         with:
           php-version: '8.1'
           coverage: pcov
