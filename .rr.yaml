@@ -19,4 +19,4 @@ logs:
   level: info
 
 metrics:
-  address: localhost:2112
+  address: 0.0.0.0:2112
