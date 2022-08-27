@@ -2,8 +2,8 @@
 
 namespace Tests;
 
-use Laminas\Diactoros\ServerRequest;
 use Laminas\Diactoros\Stream;
+use Nyholm\Psr7\ServerRequest;
 use Spiral\Testing\Http\FakeHttp as BaseFakeHttp;
 use Spiral\Testing\Http\TestResponse;
 
@@ -12,9 +12,11 @@ class FakeHttp extends BaseFakeHttp
     protected function createJsonRequest(
         string $uri,
         string $method,
-        array $data,
+        $data,
         array $headers,
-        array $cookies
+        array $cookies,
+        array $files = [],
+        array $query = [],
     ): ServerRequest {
         $content = \json_encode($data);
 
@@ -27,8 +29,15 @@ class FakeHttp extends BaseFakeHttp
         $body = fopen('php://temp', 'r+');
         fwrite($body, $content);
 
-        return $this->createRequest($uri, $method, [], $headers, $cookies)
+        return $this->createRequest($uri, $method, $query, $headers, $cookies, $files)
                     ->withBody(new Stream($body));
+    }
+
+    public function getJson(string $uri, array $query = [], array $headers = [], array $cookies = []): TestResponse
+    {
+        return $this->handleRequest(
+            $this->createJsonRequest($uri, 'GET', [], $headers, $cookies, [], $query)
+        );
     }
 
     public function patchJson(string $uri, array $data = [], array $headers = [], array $cookies = []): TestResponse

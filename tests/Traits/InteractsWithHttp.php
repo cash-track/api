@@ -23,6 +23,7 @@ trait InteractsWithHttp
     {
         return new FakeHttp(
             $this->getContainer(),
+            $this->getFileFactory(),
             function (\Closure $closure, array $bindings = []) {
                 return $this->runScoped($closure, $bindings);
             }
@@ -40,7 +41,7 @@ trait InteractsWithHttp
         array $headers = [],
         array $cookies = []
     ): TestResponse {
-        return $this->fakeHttp()->get($uri, $query, $this->getHeaders($headers), $cookies);
+        return $this->fakeHttp()->getJson($uri, $query, $this->getHeaders($headers), $cookies);
     }
 
     public function post(
