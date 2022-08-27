@@ -9,7 +9,7 @@ server:
 
 http:
   address: 0.0.0.0:8080
-  middleware: [ "gzip" ]
+  middleware: [ "gzip", "http_metrics" ]
   pool:
     supervisor:
       max_worker_memory: 100
