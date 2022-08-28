@@ -117,4 +117,6 @@ jobs:
         run: kubectl -n ${{ env.NAMESPACE }} wait pods -l app=api --for condition=Ready --timeout=60s
 
       - name: Migrate database
-        run: kubectl -n ${{ env.NAMESPACE }} exec deployments/api -- php app.php migrate
+        run: |
+          kubectl -n ${{ env.NAMESPACE }} exec deployments/api -i -- php app.php list
+          kubectl -n ${{ env.NAMESPACE }} exec deployments/api -i -- php app.php migrate
