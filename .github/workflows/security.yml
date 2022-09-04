@@ -1,0 +1,24 @@
+name: security
+
+on:
+  pull_request:
+  schedule:
+    - cron: '0 0 * * *'
+
+jobs:
+  security:
+    name: Security
+    runs-on: [self-hosted, Linux, x64]
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Prepare Cache For Vulnerability Database
+        uses: actions/cache@v2
+        id: vulnerability-db-cache
+        with:
+          path: ~/.vulnerability-db/cache
+          key: vulnerability-db
+
+      - name: Scan Packages For Vulnerability
+        uses: symfonycorp/security-checker-action@v3
