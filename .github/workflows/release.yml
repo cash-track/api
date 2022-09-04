@@ -119,4 +119,5 @@ jobs:
       - name: Migrate database
         run: |
           export API_ACTIVE_POD=$(kubectl get pod -n ${{ env.NAMESPACE }} | grep 'api' | awk 'END {print $1}')
+          echo $API_ACTIVE_POD
           kubectl -n ${{ env.NAMESPACE }} exec pods/$API_ACTIVE_POD -- php app.php migrate -s
