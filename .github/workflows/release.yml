@@ -10,7 +10,7 @@ env:
   INFRA_REPO_REF: main
   CLUSTER: k8s-cash-track
   NAMESPACE: cash-track
-  KUBECTL_BIN: https://storage.googleapis.com/kubernetes-release/release/v1.23.9/bin/linux/amd64/kubectl
+  KUBECTL_BIN: https://storage.googleapis.com/kubernetes-release/release/v1.24.4/bin/linux/amd64/kubectl
 
 jobs:
   build:
@@ -118,5 +118,5 @@ jobs:
 
       - name: Migrate database
         run: |
-          kubectl -n ${{ env.NAMESPACE }} exec deployments/api -i -- php app.php list
-          kubectl -n ${{ env.NAMESPACE }} exec deployments/api -i -- php app.php migrate
+          kubectl -n ${{ env.NAMESPACE }} exec deployments/api -- php app.php list
+          kubectl -n ${{ env.NAMESPACE }} exec deployments/api -- php app.php migrate -s
