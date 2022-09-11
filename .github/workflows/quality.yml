@@ -1,6 +1,9 @@
-name: build
+name: quality
 
 on:
+  push:
+    branches:
+      - master
   pull_request:
 
 jobs:
