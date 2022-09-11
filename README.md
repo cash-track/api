@@ -1,6 +1,6 @@
 # API
 
-[![security](https://github.com/cash-track/api/actions/workflows/security.yml/badge.svg)](https://github.com/cash-track/api/actions/workflows/security.yml) [![Release](https://github.com/cash-track/api/actions/workflows/release.yml/badge.svg)](https://github.com/cash-track/api/actions/workflows/release.yml) [![codecov](https://codecov.io/gh/cash-track/api/branch/master/graph/badge.svg?token=FHDLE3MWW6)](https://codecov.io/gh/cash-track/api)
+[![quality](https://github.com/cash-track/api/actions/workflows/quality.yml/badge.svg)](https://github.com/cash-track/api/actions/workflows/quality.yml) [![security](https://github.com/cash-track/api/actions/workflows/security.yml/badge.svg)](https://github.com/cash-track/api/actions/workflows/security.yml) [![Release](https://github.com/cash-track/api/actions/workflows/release.yml/badge.svg)](https://github.com/cash-track/api/actions/workflows/release.yml) [![codecov](https://codecov.io/gh/cash-track/api/branch/master/graph/badge.svg?token=FHDLE3MWW6)](https://codecov.io/gh/cash-track/api)
 
 Core service to handle requests from clients like web UI, mobile app, etc.
 
