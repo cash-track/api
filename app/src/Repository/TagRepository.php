@@ -46,6 +46,26 @@ class TagRepository extends Repository
 
     /**
      * @param array<array-key, int> $userIDs
+     * @param string $query
+     * @param int $limit
+     * @return \App\Database\Tag[]
+     */
+    public function searchAllByChargesByUsersPK(array $userIDs, string $query = '', int $limit = 10): array
+    {
+        /**
+         * @var \App\Database\Tag[] $tags
+         */
+        $tags = $this->selectAllOrderedByCharges()
+                     ->where(['user_id' => ['in' => new Parameter($userIDs)]])
+                     ->where('tagCharges.charge.title', 'like', "%{$query}%")
+                     ->limit($limit)
+                     ->fetchAll();
+
+        return $tags;
+    }
+
+    /**
+     * @param array<array-key, int> $userIDs
      * @return \App\Database\Tag[]
      */
     public function findAllByUsersPK(array $userIDs): array

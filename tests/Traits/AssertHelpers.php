@@ -25,6 +25,12 @@ trait AssertHelpers
             return;
         }
 
+        // unit test float weird precision fix
+        if (is_float($value)) {
+            $value = (string) $value;
+            $needle = (string) $needle;
+        }
+
         $this->assertEquals($needle, $value, $debug);
     }
 

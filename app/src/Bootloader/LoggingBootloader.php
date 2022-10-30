@@ -8,12 +8,19 @@ use Monolog\Logger;
 use Spiral\Boot\Bootloader\Bootloader;
 use Spiral\Http\Middleware\ErrorHandlerMiddleware;
 use Spiral\Monolog\Bootloader\MonologBootloader;
-use Spiral\Monolog\LogFactory;
+use Spiral\Monolog\Config\MonologConfig;
 use Spiral\Boot\EnvironmentInterface;
 use Cycle\Database\Driver\MySQL\MySQLDriver;
 
 class LoggingBootloader extends Bootloader
 {
+    /**
+     * Default log channel
+     *
+     * @see \Spiral\Monolog\Config\MonologConfig::DEFAULT_CHANNEL
+     */
+    const DEFAULT_CHANNEL = 'default';
+
     /**
      * @param \Spiral\Monolog\Bootloader\MonologBootloader $monolog
      */
@@ -32,7 +39,7 @@ class LoggingBootloader extends Bootloader
     private function configureCommonHandlers(MonologBootloader $monolog): void
     {
         // app level errors
-        $monolog->addHandler(LogFactory::DEFAULT, $monolog->logRotate(
+        $monolog->addHandler(self::DEFAULT_CHANNEL, $monolog->logRotate(
             directory('runtime') . 'logs/error.log',
             Logger::ERROR,
             25,
@@ -51,7 +58,7 @@ class LoggingBootloader extends Bootloader
     private function configureDebugHandlers(MonologBootloader $monolog): void
     {
         // debug and info messages via global LoggerInterface
-        $monolog->addHandler(LogFactory::DEFAULT, $monolog->logRotate(
+        $monolog->addHandler(self::DEFAULT_CHANNEL, $monolog->logRotate(
             directory('runtime') . 'logs/debug.log'
         ));
 
