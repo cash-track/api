@@ -90,7 +90,7 @@ final class ChargesController extends AuthAwareController
         $graph->groupBy($input->query('group-by'));
 
         return $this->response->json([
-            'data' => $graph->getGraphByTag($tag),
+            'data' => $graph->getGraph(tag: $tag),
         ]);
     }
 }

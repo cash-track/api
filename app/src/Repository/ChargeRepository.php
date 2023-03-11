@@ -60,6 +60,7 @@ class ChargeRepository extends Repository
                       ->where('wallet_id', $walletId)
                       ->orderBy('created_at', 'DESC');
 
+        $this->injectFilter($query);
         $query = $this->injectPaginator($query);
 
         return $query->fetchAll();
@@ -101,6 +102,7 @@ class ChargeRepository extends Repository
                       ->where('tags.id', $tagId)
                       ->orderBy('created_at', 'DESC');
 
+        $this->injectFilter($query);
         $query = $this->injectPaginator($query);
 
         return $query->fetchAll();
@@ -118,6 +120,8 @@ class ChargeRepository extends Repository
         if (! empty($type)) {
             $query = $query->where('type', $type);
         }
+
+        $this->injectFilter($query);
 
         return (float) $query->sum('amount');
     }
@@ -159,6 +163,8 @@ class ChargeRepository extends Repository
         if (! empty($type)) {
             $query = $query->where('type', $type);
         }
+
+        $this->injectFilter($query);
 
         return (float) $query->sum('amount');
     }

@@ -13,11 +13,13 @@ use App\Repository\WalletRepository;
 use App\Request\Charge\CreateRequest;
 use App\Service\ChargeWalletService;
 use App\Service\Pagination\PaginationFactory;
+use App\Service\Statistics\ChargeAmountGraph;
 use App\View\ChargesView;
 use App\View\ChargeView;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Log\LoggerInterface;
 use Spiral\Auth\AuthScope;
+use Spiral\Http\Request\InputManager;
 use Spiral\Http\ResponseWrapper;
 use Spiral\Router\Annotation\Route;
 
@@ -38,13 +40,8 @@ class ChargesController extends Controller
         parent::__construct($auth);
     }
 
-    /**
-     * @Route(route="/wallets/<walletId>/charges", name="wallet.charge.list", methods="GET", group="auth")
-     *
-     * @param int $walletId
-     * @return \Psr\Http\Message\ResponseInterface
-     */
-    public function list(int $walletId): ResponseInterface
+    #[Route(route: '/wallets/<walletId:\d+>/charges', name: 'wallet.charge.list', methods: 'GET', group: 'auth')]
+    public function list(int $walletId, InputManager $input): ResponseInterface
     {
         $wallet = $this->walletRepository->findByPKByUserPK($walletId, (int) $this->user->id);
 
@@ -53,19 +50,31 @@ class ChargesController extends Controller
         }
 
         $charges = $this->chargeRepository
+            ->filter($input->query->fetch(['date-from', 'date-to']))
             ->paginate($this->paginationFactory->createPaginator())
             ->findByWalletIdWithPagination((int) $wallet->id);
 
         return $this->chargesView->jsonPaginated($charges, $this->chargeRepository->getPaginationState());
     }
 
-    /**
-     * @Route(route="/wallets/<walletId>/charges", name="wallet.charge.create", methods="POST", group="auth")
-     *
-     * @param int $walletId
-     * @param \App\Request\Charge\CreateRequest $request
-     * @return \Psr\Http\Message\ResponseInterface
-     */
+    #[Route(route: '/wallets/<walletId:\d+>/charges/graph', name: 'wallet.charge.graph', methods: 'GET', group: 'auth')]
+    public function graph(int $walletId, InputManager $input, ChargeAmountGraph $graph)
+    {
+        $wallet = $this->walletRepository->findByPKByUserPK($walletId, (int) $this->user->id);
+
+        if (! $wallet instanceof Wallet) {
+            return $this->response->create(404);
+        }
+
+        $graph->filter($input->query->fetch(['date-from', 'date-to']));
+        $graph->groupBy($input->query('group-by'));
+
+        return $this->response->json([
+            'data' => $graph->getGraph(wallet: $wallet),
+        ]);
+    }
+
+    #[Route(route: '/wallets/<walletId:\d+>/charges', name: 'wallet.charge.create', methods: 'POST', group: 'auth')]
     public function create(int $walletId, CreateRequest $request): ResponseInterface
     {
         $wallet = $this->walletRepository->findByPKByUserPK($walletId, (int) $this->user->id);
@@ -115,14 +124,7 @@ class ChargesController extends Controller
         return $this->chargeView->withRelation(Wallet::class)->json($charge);
     }
 
-    /**
-     * @Route(route="/wallets/<walletId>/charges/<chargeId>", name="wallet.charge.update", methods="PUT", group="auth")
-     *
-     * @param int $walletId
-     * @param string $chargeId
-     * @param \App\Request\Charge\CreateRequest $request
-     * @return \Psr\Http\Message\ResponseInterface
-     */
+    #[Route(route: '/wallets/<walletId:\d+>/charges/<chargeId>', name: 'wallet.charge.update', methods: 'PUT', group: 'auth')]
     public function update(int $walletId, string $chargeId, CreateRequest $request): ResponseInterface
     {
         $wallet = $this->walletRepository->findByPKByUserPK($walletId, (int) $this->user->id);
@@ -178,13 +180,7 @@ class ChargesController extends Controller
         return $this->chargeView->withRelation(Wallet::class)->json($charge);
     }
 
-    /**
-     * @Route(route="/wallets/<walletId>/charges/<chargeId>", name="wallet.charge.delete", methods="DELETE", group="auth")
-     *
-     * @param int $walletId
-     * @param string $chargeId
-     * @return \Psr\Http\Message\ResponseInterface
-     */
+    #[Route(route: '/wallets/<walletId:\d+>/charges/<chargeId>', name: 'wallet.charge.delete', methods: 'DELETE', group: 'auth')]
     public function delete(int $walletId, string $chargeId): ResponseInterface
     {
         $wallet = $this->walletRepository->findByPKByUserPK($walletId, (int) $this->user->id);

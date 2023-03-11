@@ -6,6 +6,7 @@ namespace App\Service\Statistics;
 
 use App\Database\Charge;
 use App\Database\Tag;
+use App\Database\Wallet;
 use App\Repository\ChargeRepository;
 use App\Service\Filter\Filter;
 use App\Service\Filter\FilterType;
@@ -30,9 +31,9 @@ class ChargeAmountGraph
         return $this;
     }
 
-    public function getGraphByTag(Tag $tag): array
+    public function getGraph(Tag $tag = null, Wallet $wallet = null): array
     {
-        $query = $this->buildQueryByTag($tag);
+        $query = $this->buildQueryByTagAndWallet($tag, $wallet);
 
         $data = new ChargeAmountData($this->grouping);
         $data->filter($this->filter);
@@ -42,9 +43,19 @@ class ChargeAmountGraph
         return $data->format();
     }
 
-    protected function buildQueryByTag(Tag $tag): SelectQuery
+    protected function buildQueryByTagAndWallet(Tag $tag = null, Wallet $wallet = null): SelectQuery
     {
-        return $this->buildQuery()->where('tag_charges.tag_id', $tag->id);
+        $query = $this->buildQuery();
+
+        if ($tag !== null) {
+            $query = $query->where('tag_charges.tag_id', $tag->id);
+        }
+
+        if ($wallet !== null) {
+            $query = $query->where('charges.wallet_id', $wallet->id);
+        }
+
+        return $query;
     }
 
     protected function buildQuery(): SelectQuery
