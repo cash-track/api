@@ -178,4 +178,101 @@ class IndexControllerTest extends TestCase implements DatabaseTransaction
         $this->assertArrayContains($totalIncome, $body, 'data.totalIncomeAmount');
         $this->assertArrayContains($totalExpense, $body, 'data.totalExpenseAmount');
     }
+
+    public function totalWithDateFiltersReturnsFilteredTotalByTagDataProvider(): array
+    {
+        return [
+            [
+                [
+                    'total' => 200,
+                    'income' => 410,
+                    'expense' => 210,
+                ],
+                [
+                    'date-from' => '00-13-2022',
+                    'date-to' => '40-00-2022',
+                ]
+            ],
+            [
+                [
+                    'total' => 200,
+                    'income' => 410,
+                    'expense' => 210,
+                ],
+                [
+                    'date-from' => '01-06-2022',
+                    'date-to' => '04-06-2022',
+                ]
+            ],
+            [
+                [
+                    'total' => 100,
+                    'income' => 205,
+                    'expense' => 105,
+                ],
+                [
+                    'date-from' => '02-06-2022',
+                    'date-to' => '03-06-2022',
+                ]
+            ],
+            [
+                [
+                    'total' => 150,
+                    'income' => 309,
+                    'expense' => 159,
+                ],
+                [
+                    'date-from' => '02-06-2022',
+                ]
+            ],
+            [
+                [
+                    'total' => 150,
+                    'income' => 306,
+                    'expense' => 156,
+                ],
+                [
+                    'date-to' => '03-06-2022',
+                ]
+            ],
+        ];
+    }
+
+    /**
+     * @dataProvider totalWithDateFiltersReturnsFilteredTotalByTagDataProvider
+     * @param array $total
+     * @param array $query
+     * @return void
+     */
+    public function testTotalWithDateFiltersReturnsFilteredTotalByTag(array $total, array $query): void
+    {
+        $auth = $this->makeAuth($user = $this->userFactory->create());
+        $wallet = $this->walletFactory->forUser($user)->create();
+
+        for ($i = 1; $i <= 4; $i++) {
+            $charge = ChargeFactory::make();
+            $charge->type = Charge::TYPE_INCOME;
+            $charge->amount = 100 + $i;
+            $charge->createdAt = new \DateTimeImmutable("0{$i}-06-2022");
+            $this->chargeFactory->forUser($user)->forWallet($wallet)->create($charge);
+        }
+
+        for ($i = 1; $i <= 4; $i++) {
+            $charge = ChargeFactory::make();
+            $charge->type = Charge::TYPE_EXPENSE;
+            $charge->amount = 50 + $i;
+            $charge->createdAt = new \DateTimeImmutable("0{$i}-06-2022");
+            $this->chargeFactory->forUser($user)->forWallet($wallet)->create($charge);
+        }
+
+        $response = $this->withAuth($auth)->get("/wallets/{$wallet->id}/total", $query);
+
+        $response->assertOk();
+
+        $body = $this->getJsonResponseBody($response);
+
+        $this->assertArrayContains($total['total'], $body, 'data.totalAmount');
+        $this->assertArrayContains($total['income'], $body, 'data.totalIncomeAmount');
+        $this->assertArrayContains($total['expense'], $body, 'data.totalExpenseAmount');
+    }
 }

@@ -6,6 +6,7 @@ namespace App\Auth\Jwt;
 
 use App\Config\JwtConfig;
 use Firebase\JWT\JWT;
+use Firebase\JWT\Key;
 use Spiral\Auth\Exception\TokenStorageException;
 use Spiral\Auth\TokenInterface;
 use Spiral\Auth\TokenStorageInterface;
@@ -52,7 +53,7 @@ class TokenStorage implements TokenStorageInterface, SingletonInterface
         // TODO. Validate token for the blacklisted
 
         try {
-            $payload = JWT::decode($id, $this->getVerifyKey(), [$this->alg]);
+            $payload = JWT::decode($id, new Key($this->getVerifyKey(), $this->alg));
             return Token::fromPayload($id, (array) $payload);
         } catch (\Throwable $exception) {
             return null;
@@ -82,7 +83,6 @@ class TokenStorage implements TokenStorageInterface, SingletonInterface
             'exp' => $expire,
             'jti' => sha1((string) microtime(true)),
         ]);
-
 
         $jwt = JWT::encode($payload, $this->getSigningKey(), $this->alg);
 

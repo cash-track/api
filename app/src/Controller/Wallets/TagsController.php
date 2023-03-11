@@ -14,6 +14,7 @@ use App\Service\ChargeWalletService;
 use App\View\TagsView;
 use Psr\Http\Message\ResponseInterface;
 use Spiral\Auth\AuthScope;
+use Spiral\Http\Request\InputManager;
 use Spiral\Http\ResponseWrapper;
 use Spiral\Router\Annotation\Route;
 
@@ -46,7 +47,7 @@ final class TagsController extends Controller
     }
 
     #[Route(route: '/wallets/<walletId:\d+>/tags/<tagId:\d+>/total', name: 'wallet.tags.total', methods: 'GET', group: 'auth')]
-    public function total(int $walletId, int $tagId): ResponseInterface
+    public function total(int $walletId, int $tagId, InputManager $input): ResponseInterface
     {
         $wallet = $this->walletRepository->findByPKByUserPK($walletId, (int) $this->user->id);
 
@@ -59,6 +60,8 @@ final class TagsController extends Controller
         if (! $tag instanceof Tag) {
             return $this->response->create(404);
         }
+
+        $this->chargeRepository->filter($input->query->fetch(['date-from', 'date-to']));
 
         $income = $this->chargeRepository->totalByWalletPKAndTagId($walletId, $tagId, Charge::TYPE_INCOME);
         $expense = $this->chargeRepository->totalByWalletPKAndTagId($walletId, $tagId, Charge::TYPE_EXPENSE);
