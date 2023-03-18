@@ -127,7 +127,7 @@ jobs:
           php app.php encrypt:key -m .env
           php app.php rsa:gen -m .env
           php app.php configure -vv
-          vendor/bin/spiral get-binary
+          vendor/bin/rr get --quiet
           php app.php migrate:init
           php app.php migrate
 
