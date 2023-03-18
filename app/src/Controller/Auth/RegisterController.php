@@ -85,20 +85,9 @@ final class RegisterController
         return $this->responseTokensWithUser($accessToken, $refreshToken, $user);
     }
 
-    /**
-     * @Route(route="/auth/register/check/nick-name", name="auth.register.check.nickname", methods="POST")
-     *
-     * @param \App\Request\CheckNickNameRequest $request
-     * @return \Psr\Http\Message\ResponseInterface
-     */
-    public function checkNickName(CheckNickNameRequest $request): ResponseInterface
+    #[Route(route: '/auth/register/check/nick-name', name: 'auth.register.check.nickname', methods: 'POST')]
+    public function checkNickName(CheckNickNameRequest $_): ResponseInterface
     {
-        if (! $request->isValid()) {
-            return $this->response->json([
-                'errors' => $request->getErrors(),
-            ], 422);
-        }
-
         return $this->response->json([
             'message' => 'Nick name are free to register'
         ]);

@@ -31,9 +31,9 @@ final class ActiveController extends Controller
      * @param int $id
      * @return \Psr\Http\Message\ResponseInterface
      */
-    public function activate(int $id): ResponseInterface
+    public function activate($id): ResponseInterface
     {
-        $wallet = $this->walletRepository->findByPKByUserPK($id, (int) $this->user->id);
+        $wallet = $this->walletRepository->findByPKByUserPK((int) $id, (int) $this->user->id);
 
         if (! $wallet instanceof Wallet) {
             return $this->response->create(404);
@@ -63,9 +63,9 @@ final class ActiveController extends Controller
      * @param int $id
      * @return \Psr\Http\Message\ResponseInterface
      */
-    public function disable(int $id): ResponseInterface
+    public function disable($id): ResponseInterface
     {
-        $wallet = $this->walletRepository->findByPKByUserPK($id, (int) $this->user->id);
+        $wallet = $this->walletRepository->findByPKByUserPK((int) $id, (int) $this->user->id);
 
         if (! $wallet instanceof Wallet) {
             return $this->response->create(404);

@@ -12,7 +12,7 @@ use Spiral\Core\Container;
 use Spiral\Testing\TestableKernelInterface;
 use Spiral\Testing\TestCase as BaseTestCase;
 use Spiral\Translator\TranslatorInterface;
-use Tests\App\TestApp;
+use Tests\App\TestKernel;
 use Tests\Traits\AssertHelpers;
 use Tests\Traits\InteractsWithDatabase;
 use Tests\Traits\InteractsWithHttp;
@@ -29,7 +29,7 @@ abstract class TestCase extends BaseTestCase
 
     protected function setUp(): void
     {
-        $this->beforeStarting(static function (ConfiguratorInterface $config): void {
+        $this->beforeBooting(static function (ConfiguratorInterface $config): void {
             if (! $config->exists('session')) {
                 return;
             }
@@ -72,11 +72,14 @@ abstract class TestCase extends BaseTestCase
         ];
     }
 
-    public function createAppInstance(): TestableKernelInterface
+    public function createAppInstance(Container $container = new Container()): TestableKernelInterface
     {
-        return new TestApp(new Container(), $this->defineDirectories(
-            $this->rootDirectory()
-        ));
+        return TestKernel::create(
+            directories: $this->defineDirectories(
+                $this->rootDirectory(),
+            ),
+            handleErrors: false,
+            container: $container,
+        );
     }
-
 }

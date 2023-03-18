@@ -31,9 +31,9 @@ final class ArchiveController extends Controller
      * @param int $id
      * @return \Psr\Http\Message\ResponseInterface
      */
-    public function archive(int $id): ResponseInterface
+    public function archive($id): ResponseInterface
     {
-        $wallet = $this->walletRepository->findByPKByUserPK($id, (int) $this->user->id);
+        $wallet = $this->walletRepository->findByPKByUserPK((int) $id, (int) $this->user->id);
 
         if (! $wallet instanceof Wallet) {
             return $this->response->create(404);
@@ -63,9 +63,9 @@ final class ArchiveController extends Controller
      * @param int $id
      * @return \Psr\Http\Message\ResponseInterface
      */
-    public function unArchive(int $id): ResponseInterface
+    public function unArchive($id): ResponseInterface
     {
-        $wallet = $this->walletRepository->findByPKByUserPK($id, (int) $this->user->id);
+        $wallet = $this->walletRepository->findByPKByUserPK((int) $id, (int) $this->user->id);
 
         if (! $wallet instanceof Wallet) {
             return $this->response->create(404);

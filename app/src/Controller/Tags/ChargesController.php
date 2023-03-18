@@ -39,9 +39,9 @@ final class ChargesController extends AuthAwareController
     }
 
     #[Route(route: '/tags/<id:\d+>/charges', name: 'tag.charges', methods: 'GET', group: 'auth')]
-    public function list(int $id, InputManager $input): ResponseInterface
+    public function list($id, InputManager $input): ResponseInterface
     {
-        $tag = $this->tagRepository->findByPKByUsersPK($id, $this->userRepository->getCommonUserIDs($this->user));
+        $tag = $this->tagRepository->findByPKByUsersPK((int) $id, $this->userRepository->getCommonUserIDs($this->user));
         if (! $tag instanceof Tag) {
             return $this->response->create(404);
         }
@@ -56,9 +56,9 @@ final class ChargesController extends AuthAwareController
     }
 
     #[Route(route: '/tags/<id:\d+>/charges/total', name: 'tag.charges.total', methods: 'GET', group: 'auth')]
-    public function total(int $id, InputManager $input): ResponseInterface
+    public function total($id, InputManager $input): ResponseInterface
     {
-        $tag = $this->tagRepository->findByPKByUsersPK($id, $this->userRepository->getCommonUserIDs($this->user));
+        $tag = $this->tagRepository->findByPKByUsersPK((int) $id, $this->userRepository->getCommonUserIDs($this->user));
         if (! $tag instanceof Tag) {
             return $this->response->create(404);
         }
@@ -79,9 +79,9 @@ final class ChargesController extends AuthAwareController
     }
 
     #[Route(route: '/tags/<id:\d+>/charges/graph', name: 'tag.charges.graph', methods: 'GET', group: 'auth')]
-    public function graph(int $id, InputManager $input, ChargeAmountGraph $graph): ResponseInterface
+    public function graph($id, InputManager $input, ChargeAmountGraph $graph): ResponseInterface
     {
-        $tag = $this->tagRepository->findByPKByUsersPK($id, $this->userRepository->getCommonUserIDs($this->user));
+        $tag = $this->tagRepository->findByPKByUsersPK((int) $id, $this->userRepository->getCommonUserIDs($this->user));
         if (! $tag instanceof Tag) {
             return $this->response->create(404);
         }

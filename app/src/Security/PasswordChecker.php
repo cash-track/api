@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Security;
 
 use App\Service\Auth\AuthService;
-use Spiral\Validation\AbstractChecker;
+use Spiral\Validator\AbstractChecker;
 
 class PasswordChecker extends AbstractChecker
 {

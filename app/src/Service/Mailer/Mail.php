@@ -5,11 +5,13 @@ declare(strict_types=1);
 namespace App\Service\Mailer;
 
 use Spiral\Views\ViewsInterface;
+use Symfony\Component\Mime\Address;
+use Symfony\Component\Mime\Email;
 
 abstract class Mail
 {
     /**
-     * @var \Swift_Message
+     * @var \Symfony\Component\Mime\Email
      */
     private $message;
 
@@ -23,7 +25,7 @@ abstract class Mail
      */
     public function __construct()
     {
-        $this->message = new \Swift_Message();
+        $this->message = new Email();
     }
 
     /**
@@ -34,9 +36,9 @@ abstract class Mail
     abstract public function build(): Mail;
 
     /**
-     * @return \Swift_Message
+     * @return \Symfony\Component\Mime\Email
      */
-    public function getSwiftMessage(): \Swift_Message
+    public function getEmailMessage(): Email
     {
         return $this->message;
     }
@@ -49,7 +51,7 @@ abstract class Mail
      */
     public function subject(string $subject): Mail
     {
-        $this->message->setSubject($subject);
+        $this->message->subject($subject);
 
         return $this;
     }
@@ -61,7 +63,7 @@ abstract class Mail
      */
     public function from(string $address, string $fullName = null): Mail
     {
-        $this->message->addFrom($address, $fullName);
+        $this->message->from(new Address($address, $fullName));
 
         return $this;
     }
@@ -73,7 +75,7 @@ abstract class Mail
      */
     public function to(string $address, string $fullName = null): Mail
     {
-        $this->message->addTo($address, $fullName);
+        $this->message->to(new Address($address, $fullName));
 
         return $this;
     }
@@ -85,7 +87,7 @@ abstract class Mail
      */
     public function replyTo(string $address, string $fullName = null): Mail
     {
-        $this->message->addReplyTo($address, $fullName);
+        $this->message->replyTo(new Address($address, $fullName));
 
         return $this;
     }
@@ -97,7 +99,7 @@ abstract class Mail
      */
     public function cc(string $address, string $fullName = null): Mail
     {
-        $this->message->addCc($address, $fullName);
+        $this->message->cc(new Address($address, $fullName));
 
         return $this;
     }
@@ -109,7 +111,7 @@ abstract class Mail
      */
     public function bcc(string $address, string $fullName = null): Mail
     {
-        $this->message->addBcc($address, $fullName);
+        $this->message->bcc(new Address($address, $fullName));
 
         return $this;
     }
@@ -131,11 +133,7 @@ abstract class Mail
      */
     public function render(ViewsInterface $views): Mail
     {
-        $this->message->setBody(
-            $views->render($this->viewName, $this->buildRenderData()),
-            'text/html',
-            'utf-8',
-        );
+        $this->message->html($views->render($this->viewName, $this->buildRenderData()));
 
         return $this;
     }

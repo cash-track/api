@@ -14,8 +14,11 @@ use App\View\UserView;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Log\LoggerInterface;
 use Spiral\Auth\AuthScope;
+use Spiral\Http\Request\InputManager;
 use Spiral\Http\ResponseWrapper;
 use Spiral\Router\Annotation\Route;
+use Spiral\Validation\ValidationProviderInterface;
+use Spiral\Validator\FilterDefinition;
 
 class ProfileController extends AuthAwareController
 {
@@ -54,13 +57,15 @@ class ProfileController extends AuthAwareController
      * @param \App\Request\CheckNickNameRequest $request
      * @return \Psr\Http\Message\ResponseInterface
      */
-    public function checkNickName(CheckNickNameRequest $request): ResponseInterface
+    public function checkNickName(InputManager $input, ValidationProviderInterface $provider): ResponseInterface
     {
-        $request->setContext($this->user);
+        $validator = $provider->getValidation(FilterDefinition::class)->validate([
+            'nickName' => $input->data('nickName'),
+        ], CheckNickNameRequest::validationRules())->withContext($this->user);
 
-        if (! $request->isValid()) {
+        if (! $validator->isValid()) {
             return $this->response->json([
-                'errors' => $request->getErrors(),
+                'errors' => $validator->getErrors(),
             ], 422);
         }
 

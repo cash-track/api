@@ -1,93 +1,98 @@
 {
-  "name": "cash-track/api",
-  "type": "project",
-  "description": "The core service to handle API requests from different clients",
-  "license": "MIT",
-  "support": {
-    "issues": "https://github.com/cash-track/api/issues",
-    "source": "https://github.com/cash-track/api"
-  },
-  "authors": [
-    {
-      "name": "Volodymyr Komarov",
-      "email": "vovikems@gmail.com"
-    }
-  ],
-  "require": {
-    "php": ">=8.1",
-    "ext-mbstring": "*",
-    "ext-openssl": "*",
-    "ext-pdo": "*",
-    "aws/aws-sdk-php": "^3.190",
-    "cycle/entity-behavior": "^1.1",
-    "cycle/entity-behavior-uuid": "^1.0",
-    "doctrine/collections": "^1.6",
-    "firebase/php-jwt": "^6.0",
-    "illuminate/collections": "^9.8",
-    "kreait/firebase-php": "^5.0",
-    "laminas/laminas-diactoros": "^2.6",
-    "lcobucci/jwt": "4.1.5",
-    "ramsey/uuid": "^4.2",
-    "spiral/cycle-bridge": "^v1.2",
-    "spiral/framework": "^2.11",
-    "spiral/nyholm-bridge": "^1.1",
-    "spiral/roadrunner-bridge": "^1.0",
-    "swiftmailer/swiftmailer": "^6.2",
-    "voku/portable-utf8": "^5.4"
-  },
-  "require-dev": {
-    "phpunit/phpunit": "^9.5",
-    "squizlabs/php_codesniffer": "3.*",
-    "spiral/testing": "^1.1",
-    "vimeo/psalm": "^4.9"
-  },
-  "scripts": {
-    "post-create-project-cmd": [
-      "php -r \"copy('.env.sample', '.env');\"",
-      "php app.php encrypt:key -m .env",
-      "php app.php configure -vv",
-      "spiral get-binary"
-    ],
-    "checks": [
-      "./vendor/bin/phpunit",
-      "./vendor/bin/phpcs -p -n --standard=PSR12 --colors --report=code ./app/src",
-      "./vendor/bin/psalm --php-version=8.0 --show-info=true --no-cache"
-    ],
-    "phpunit": [
-      "./vendor/bin/phpunit"
-    ],
-    "phpcs": [
-      "./vendor/bin/phpcs -p -n --standard=PSR12 --colors --report=code ./app/src"
-    ],
-    "psalm": [
-      "./vendor/bin/psalm --php-version=8.1 --show-info=true --no-cache"
-    ]
-  },
-  "autoload": {
-    "files": [
-      "app/helpers/str.php"
-    ],
-    "psr-4": {
-      "App\\": "app/src/"
-    }
-  },
-  "autoload-dev": {
-    "psr-4": {
-      "Tests\\": "tests/"
-    }
-  },
-  "extra": {
-    "publish-cmd": "php app.php publish",
-    "branch-alias": {
-      "dev-master": "1.4.x-dev"
-    }
-  },
-  "config": {
-    "sort-packages": true,
-    "allow-plugins": {
-      "spiral/composer-publish-plugin": true
-    }
-  },
-  "minimum-stability": "dev",
-  "prefer-stable": true
+    "name": "cash-track/api",
+    "type": "project",
+    "license": "MIT",
+    "description": "The core service to handle API requests from different clients",
+    "homepage": "https://cash-track.app",
+    "support": {
+        "issues": "https://github.com/cash-track/api/issues",
+        "source": "https://github.com/cash-track/api"
+    },
+    "require": {
+        "php": ">=8.1",
+        "ext-mbstring": "*",
+        "ext-openssl": "*",
+        "ext-pdo": "*",
+        "ext-sockets": "*",
+        "aws/aws-sdk-php": "^3.190",
+        "cycle/entity-behavior": "^1.1",
+        "cycle/entity-behavior-uuid": "^1.0",
+        "doctrine/collections": "^1.8",
+        "firebase/php-jwt": "^6.0",
+        "illuminate/collections": "^9.8",
+        "kreait/firebase-php": "^7.0",
+        "laminas/laminas-diactoros": "^2.6",
+        "lcobucci/jwt": "^4.1",
+        "ramsey/uuid": "^4.2",
+        "spiral-packages/league-event": "^1.0",
+        "spiral-packages/scheduler": "^2.1",
+        "spiral/cycle-bridge": "^2.1",
+        "spiral/filters-bridge": "^1.0",
+        "spiral/framework": "^3.6",
+        "spiral/nyholm-bridge": "^1.3",
+        "spiral/roadrunner-bridge": "^2.1",
+        "spiral/roadrunner-cli": "^2.4",
+        "spiral/stempler-bridge": "^3.2",
+        "spiral/validator": "^1.1",
+        "symfony/mailer": "^6.2",
+        "voku/portable-utf8": "^5.4"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^9.5",
+        "qossmic/deptrac-shim": "^1.0",
+        "squizlabs/php_codesniffer": "3.*",
+        "spiral/testing": "^2.2",
+        "symfony/var-dumper": "^6.1",
+        "vimeo/psalm": "^4.9"
+    },
+    "scripts": {
+        "post-create-project-cmd": [
+            "php -r \"copy('.env.sample', '.env');\"",
+            "php app.php encrypt:key -m .env",
+            "php app.php configure -vv",
+            "spiral get-binary"
+        ],
+        "checks": [
+            "./vendor/bin/phpunit",
+            "./vendor/bin/phpcs -p -n --standard=PSR12 --colors --report=code ./app/src",
+            "./vendor/bin/psalm --php-version=8.0 --show-info=true --no-cache"
+        ],
+        "phpunit": [
+            "./vendor/bin/phpunit"
+        ],
+        "phpcs": [
+            "./vendor/bin/phpcs -p -n --standard=PSR12 --colors --report=code ./app/src"
+        ],
+        "psalm": [
+            "./vendor/bin/psalm --php-version=8.1 --show-info=true --no-cache"
+        ]
+    },
+    "autoload": {
+        "files": [
+            "app/helpers/debug.php",
+            "app/helpers/str.php"
+        ],
+        "psr-4": {
+            "App\\": "app/src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
+        }
+    },
+    "extra": {
+        "publish-cmd": "php app.php publish",
+        "branch-alias": {
+            "dev-master": "1.4.x-dev"
+        }
+    },
+    "config": {
+        "sort-packages": true,
+        "allow-plugins": {
+            "spiral/composer-publish-plugin": true
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
 }

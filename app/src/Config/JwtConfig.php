@@ -13,7 +13,7 @@ class JwtConfig extends InjectableConfig
     /**
      * @internal For internal usage. Will be hydrated in the constructor.
      */
-    protected $config = [
+    protected array $config = [
         'secret' => null,
         'ttl' => null,
         'refreshTtl' => null,

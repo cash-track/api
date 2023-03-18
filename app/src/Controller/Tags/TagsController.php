@@ -62,16 +62,16 @@ final class TagsController extends AuthAwareController
     }
 
     #[Route(route: '/tags/<id>', name: 'tag.update', methods: 'PUT', group: 'auth')]
-    public function update(int $id, UpdateRequest $request): ResponseInterface
+    public function update($id, UpdateRequest $request): ResponseInterface
     {
-        $tag = $this->tagRepository->findByPKByUserPK($id, (int) $this->user->id);
+        $tag = $this->tagRepository->findByPKByUserPK((int) $id, (int) $this->user->id);
 
         if (! $tag instanceof Tag) {
             return $this->response->create(404);
         }
 
         $request->setValue([
-            'id' => $id,
+            'id' => $tag->id,
             'user_id' => $this->user->id
         ]);
 
@@ -104,9 +104,9 @@ final class TagsController extends AuthAwareController
     }
 
     #[Route(route: '/tags/<id>', name: 'tag.delete', methods: 'DELETE', group: 'auth')]
-    public function delete(int $id): ResponseInterface
+    public function delete($id): ResponseInterface
     {
-        $tag = $this->tagRepository->findByPKByUserPK($id, (int) $this->user->id);
+        $tag = $this->tagRepository->findByPKByUserPK((int) $id, (int) $this->user->id);
 
         if (! $tag instanceof Tag) {
             return $this->response->create(404);

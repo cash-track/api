@@ -14,7 +14,7 @@ return [
          * false - Schema won't be stored in a cache after compilation.
          * It will be automatically changed after entity modification. (Development mode)
          */
-        'cache' => true,
+        'cache' => env('CYCLE_SCHEMA_CACHE', true),
 
         /**
          * The CycleORM provides the ability to manage default settings for
@@ -25,7 +25,7 @@ return [
             // SchemaInterface::REPOSITORY => \Cycle\ORM\Select\Repository::class,
             // SchemaInterface::SCOPE => null,
             // SchemaInterface::TYPECAST_HANDLER => [
-            //    \Cycle\ORM\Parser\Typecast::class
+            //    \Cycle\ORM\Parser\Typecast::class, \App\Infrastructure\CycleORM\Typecaster\UuidTypecast::class,
             // ],
         ],
 
@@ -57,6 +57,8 @@ return [
         //        \Cycle\Schema\Generator\GenerateTypecast::class,
         // ],
     ],
+
+    'warmup' => env('CYCLE_SCHEMA_WARMUP', false),
 
     /**
      * Custom relation types for entities

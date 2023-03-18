@@ -36,9 +36,9 @@ final class UsersController extends Controller
      * @param int $id
      * @return \Psr\Http\Message\ResponseInterface
      */
-    public function users(int $id): ResponseInterface
+    public function users($id): ResponseInterface
     {
-        $wallet = $this->walletRepository->findByPKByUserPKWithUsers($id, (int) $this->user->id);
+        $wallet = $this->walletRepository->findByPKByUserPKWithUsers((int) $id, (int) $this->user->id);
 
         if (! $wallet instanceof Wallet) {
             return $this->response->create(404);
@@ -54,16 +54,16 @@ final class UsersController extends Controller
      * @param int $userId
      * @return \Psr\Http\Message\ResponseInterface
      */
-    public function patch(int $id, int $userId): ResponseInterface
+    public function patch($id, $userId): ResponseInterface
     {
-        $wallet = $this->walletRepository->findByPKByUserPKWithUsers($id, (int) $this->user->id);
+        $wallet = $this->walletRepository->findByPKByUserPKWithUsers((int) $id, (int) $this->user->id);
 
         if (! $wallet instanceof Wallet) {
             return $this->response->create(404);
         }
 
         /** @var \App\Database\User|null $user */
-        $user = $this->userRepository->findByPK($userId);
+        $user = $this->userRepository->findByPK((int) $userId);
 
         if (! $user instanceof User) {
             return $this->response->create(404);
@@ -96,23 +96,23 @@ final class UsersController extends Controller
      * @param int $userId
      * @return \Psr\Http\Message\ResponseInterface
      */
-    public function delete(int $id, int $userId): ResponseInterface
+    public function delete($id, $userId): ResponseInterface
     {
-        $wallet = $this->walletRepository->findByPKByUserPKWithUsers($id, (int) $this->user->id);
+        $wallet = $this->walletRepository->findByPKByUserPKWithUsers((int) $id, (int) $this->user->id);
 
         if (! $wallet instanceof Wallet) {
             return $this->response->create(404);
         }
 
         /** @var \App\Database\User|null $user */
-        $user = $this->userRepository->findByPK($userId);
+        $user = $this->userRepository->findByPK((int) $userId);
 
         if (! $user instanceof User) {
             return $this->response->create(404);
         }
 
         if ($wallet->users->count() === 1) {
-            if ($this->user->id === $userId) {
+            if ($this->user->id === (int) $userId) {
                 return $this->response->json([
                     'message' => 'Unable to revoke user from wallet. You are only one member. Delete wallet if you do not need them anymore.',
                     'error'   => 'Current user is the one wallet owner.',

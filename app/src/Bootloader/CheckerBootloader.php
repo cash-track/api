@@ -7,14 +7,14 @@ namespace App\Bootloader;
 use App\Security\PasswordChecker;
 use App\Security\UniqueChecker;
 use Spiral\Boot\Bootloader\Bootloader;
-use Spiral\Bootloader\Security\ValidationBootloader;
+use Spiral\Validator\Bootloader\ValidatorBootloader;
 
 class CheckerBootloader extends Bootloader
 {
     /**
-     * @param \Spiral\Bootloader\Security\ValidationBootloader $validation
+     * @param \Spiral\Validator\Bootloader\ValidatorBootloader $validation
      */
-    public function boot(ValidationBootloader $validation): void
+    public function boot(ValidatorBootloader $validation): void
     {
         $validation->addChecker('password', PasswordChecker::class);
         $validation->addChecker('unique', UniqueChecker::class);

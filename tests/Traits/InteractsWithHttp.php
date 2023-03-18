@@ -19,7 +19,7 @@ trait InteractsWithHttp
 
     protected array $authHeaders = [];
 
-    protected function fakeHttp(): FakeHttp
+    protected function http(): FakeHttp
     {
         return new FakeHttp(
             $this->getContainer(),
@@ -41,7 +41,7 @@ trait InteractsWithHttp
         array $headers = [],
         array $cookies = []
     ): TestResponse {
-        return $this->fakeHttp()->getJson($uri, $query, $this->getHeaders($headers), $cookies);
+        return $this->http()->getJson($uri, $query, $this->getHeaders($headers), $cookies);
     }
 
     public function post(
@@ -50,7 +50,7 @@ trait InteractsWithHttp
         array $headers = [],
         array $cookies = []
     ): TestResponse {
-        return $this->fakeHttp()->postJson($uri, $data, $this->getHeaders($headers), $cookies);
+        return $this->http()->postJson($uri, $data, $this->getHeaders($headers), $cookies);
     }
 
     public function put(
@@ -59,7 +59,7 @@ trait InteractsWithHttp
         array $headers = [],
         array $cookies = []
     ): TestResponse {
-        return $this->fakeHttp()->putJson($uri, $data, $this->getHeaders($headers), $cookies);
+        return $this->http()->putJson($uri, $data, $this->getHeaders($headers), $cookies);
     }
 
     public function patch(
@@ -68,7 +68,7 @@ trait InteractsWithHttp
         array $headers = [],
         array $cookies = []
     ): TestResponse {
-        return $this->fakeHttp()->patchJson($uri, $data, $this->getHeaders($headers), $cookies);
+        return $this->http()->patchJson($uri, $data, $this->getHeaders($headers), $cookies);
     }
 
     public function delete(
@@ -77,7 +77,7 @@ trait InteractsWithHttp
         array $headers = [],
         array $cookies = []
     ): TestResponse {
-        return $this->fakeHttp()->deleteJson($uri, $data, $this->getHeaders($headers), $cookies);
+        return $this->http()->deleteJson($uri, $data, $this->getHeaders($headers), $cookies);
     }
 
     public function getResponseBody(TestResponse|ResponseInterface $response): string

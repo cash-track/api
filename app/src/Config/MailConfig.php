@@ -14,7 +14,7 @@ class MailConfig extends InjectableConfig
     /**
      * @internal For internal usage. Will be hydrated in the constructor.
      */
-    protected $config = [
+    protected array $config = [
         'sender' => [
             'name'    => null,
             'address' => null,

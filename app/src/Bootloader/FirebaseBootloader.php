@@ -6,7 +6,6 @@ namespace App\Bootloader;
 
 use App\Config\FirebaseConfig;
 use Kreait\Firebase\Factory;
-use Kreait\Firebase\Storage;
 use Spiral\Boot\Bootloader\Bootloader;
 use Spiral\Core\Container;
 

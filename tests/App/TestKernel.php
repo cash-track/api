@@ -8,7 +8,7 @@ use App\App;
 use Spiral\Testing\TestableKernelInterface;
 use Spiral\Testing\Traits\TestableKernel;
 
-class TestApp extends App implements TestableKernelInterface
+class TestKernel extends App implements TestableKernelInterface
 {
     use TestableKernel;
 }

@@ -10,6 +10,8 @@ use App\Service\Mailer\MailerInterface;
 use Spiral\Boot\Bootloader\Bootloader;
 use Spiral\Core\Container;
 use Spiral\Views\ViewsInterface;
+use Symfony\Component\Mailer\Transport;
+use Symfony\Component\Mailer\Mailer as SymfonyMailer;
 
 class MailerBootloader extends Bootloader
 {
@@ -35,7 +37,7 @@ class MailerBootloader extends Bootloader
     public function boot(Container $container): void
     {
         $container->bind(MailerInterface::class, function (ViewsInterface $views): MailerInterface {
-            $mailer = new Mailer(new \Swift_Mailer($this->getTransport()), $views);
+            $mailer = new Mailer(new SymfonyMailer($this->getTransport()), $views);
 
             $mailer->setDefaultFromName($this->config->getSenderName());
             $mailer->setDefaultFromAddress($this->config->getSenderAddress());
@@ -45,9 +47,9 @@ class MailerBootloader extends Bootloader
     }
 
     /**
-     * @return \Swift_Transport
+     * @return \Symfony\Component\Mailer\Transport\TransportInterface
      */
-    private function getTransport(): \Swift_Transport
+    private function getTransport(): Transport\TransportInterface
     {
         switch ($this->config->getDriver()) {
             case MailConfig::DRIVER_SMTP:
@@ -58,16 +60,18 @@ class MailerBootloader extends Bootloader
     }
 
     /**
-     * @return \Swift_SmtpTransport
+     * @return \Symfony\Component\Mailer\Transport\TransportInterface
      */
-    private function getSmtpTransport(): \Swift_SmtpTransport
+    private function getSmtpTransport(): Transport\TransportInterface
     {
-        $transport = new \Swift_SmtpTransport();
+        $transport = new Transport\Smtp\EsmtpTransport(
+            host: $this->config->getSmtpHost(),
+            port: (int) $this->config->getSmtpPort(),
+        );
 
-        return $transport->setHost($this->config->getSmtpHost())
-                         ->setPort((int) $this->config->getSmtpPort())
-                         ->setUsername($this->config->getSmtpUsername())
-                         ->setPassword($this->config->getSmtpPassword())
-                         ->setEncryption($this->config->getSmtpEncryption());
+        $transport->setUsername($this->config->getSmtpUsername());
+        $transport->setPassword($this->config->getSmtpPassword());
+
+        return $transport;
     }
 }

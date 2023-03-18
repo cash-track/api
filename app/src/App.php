@@ -5,85 +5,127 @@ declare(strict_types=1);
 namespace App;
 
 use App\Bootloader;
+use Spiral\Boot\Bootloader\CoreBootloader;
 use Spiral\Bootloader as Framework;
-use Spiral\DotEnv\Bootloader as DotEnv;
+use Spiral\Bootloader\Views\TranslatedCacheBootloader;
+use Spiral\Cache\Bootloader\CacheBootloader;
+use Spiral\Distribution\Bootloader\DistributionBootloader;
+use Spiral\DotEnv\Bootloader\DotenvBootloader;
+use Spiral\Events\Bootloader\EventsBootloader;
 use Spiral\Framework\Kernel;
+use Spiral\Filters\Bootloader\FiltersBootloader;
+use Spiral\League\Event\Bootloader\EventBootloader;
 use Spiral\Monolog\Bootloader as Monolog;
-use Spiral\Nyholm\Bootloader as Nyholm;
+use Spiral\Nyholm\Bootloader\NyholmBootloader;
 use Spiral\Prototype\Bootloader as Prototype;
+use Spiral\Queue\Bootloader\QueueBootloader;
 use Spiral\Router\Bootloader as Router;
-use Spiral\Scaffolder\Bootloader as Scaffolder;
-use Spiral\Stempler\Bootloader as Stempler;
+use Spiral\Scaffolder\Bootloader\ScaffolderBootloader;
+use Spiral\Scheduler\Bootloader\SchedulerBootloader;
+use Spiral\SendIt\Bootloader\MailerBootloader;
 use Spiral\Cycle\Bootloader as CycleBridge;
 use Spiral\RoadRunnerBridge\Bootloader as RoadRunnerBridge;
+use Spiral\Stempler\Bootloader\StemplerBootloader;
+use Spiral\Storage\Bootloader\StorageBootloader;
+use Spiral\Tokenizer\Bootloader\TokenizerListenerBootloader;
+use Spiral\Validation\Bootloader\ValidationBootloader;
+use Spiral\Validator\Bootloader\ValidatorBootloader;
+use Spiral\Views\Bootloader\ViewsBootloader;
 
 class App extends Kernel
 {
+    protected const SYSTEM = [
+        CoreBootloader::class,
+        TokenizerListenerBootloader::class,
+        DotenvBootloader::class,
+    ];
+
     /*
      * List of components and extensions to be automatically registered
      * within system container on application start.
      */
     protected const LOAD = [
+        // Logging and exceptions handling
+        Bootloader\LoggingBootloader::class,
+        Monolog\MonologBootloader::class,
+        Bootloader\ExceptionHandlerBootloader::class,
+
+        // RoadRunner
+        RoadRunnerBridge\LoggerBootloader::class,
+        RoadRunnerBridge\QueueBootloader::class,
+        RoadRunnerBridge\HttpBootloader::class,
         RoadRunnerBridge\CacheBootloader::class,
         RoadRunnerBridge\GRPCBootloader::class,
-        RoadRunnerBridge\HttpBootloader::class,
-        RoadRunnerBridge\QueueBootloader::class,
-        RoadRunnerBridge\RoadRunnerBootloader::class,
-
-        // Base extensions
-        DotEnv\DotenvBootloader::class,
-        Monolog\MonologBootloader::class,
-
-        // Application specific logs
-        Bootloader\LoggingBootloader::class,
 
         // Core Services
         Framework\SnapshotsBootloader::class,
-        Framework\I18nBootloader::class,
 
         // Security and validation
         Framework\Security\EncrypterBootloader::class,
-        Framework\Security\ValidationBootloader::class,
         Framework\Security\FiltersBootloader::class,
         Framework\Security\GuardBootloader::class,
 
         // HTTP extensions
-        Nyholm\NyholmBootloader::class,
         Framework\Http\RouterBootloader::class,
-        Bootloader\CorsBootloader::class,
-        Router\AnnotatedRoutesBootloader::class,
-        Framework\Http\ErrorHandlerBootloader::class,
         Framework\Http\JsonPayloadsBootloader::class,
         Framework\Http\CookiesBootloader::class,
         Framework\Http\SessionBootloader::class,
         Framework\Http\CsrfBootloader::class,
         Framework\Http\PaginationBootloader::class,
+        Framework\Http\ErrorHandlerBootloader::class,
+
+        Bootloader\CorsBootloader::class,
+        Router\AnnotatedRoutesBootloader::class,
 
         // Databases
         CycleBridge\DatabaseBootloader::class,
         CycleBridge\MigrationsBootloader::class,
-        // CycleBridge\DisconnectsBootloader::class,
 
         // ORM
         CycleBridge\SchemaBootloader::class,
         CycleBridge\CycleOrmBootloader::class,
         CycleBridge\AnnotatedBootloader::class,
-        CycleBridge\CommandBootloader::class,
+        CycleBridge\ValidationBootloader::class,
         Bootloader\EntityBehaviorBootloader::class,
 
+        // Event Dispatcher
+        EventsBootloader::class,
+        EventBootloader::class,
+
+        // Scheduler
+        SchedulerBootloader::class,
+
         // Views and view translation
-        Framework\Views\ViewsBootloader::class,
-        Framework\Views\TranslatedCacheBootloader::class,
+        ViewsBootloader::class,
+        TranslatedCacheBootloader::class,
+        StemplerBootloader::class,
 
-        // Additional dispatchers
-        // Framework\Jobs\JobsBootloader::class,
+        // Queue
+        QueueBootloader::class,
 
-        // Extensions and bridges
-        Stempler\StemplerBootloader::class,
+        // Cache
+        CacheBootloader::class,
 
-        // Framework commands
+        // Mailer
+        MailerBootloader::class,
+
+        // Storage
+        StorageBootloader::class,
+        DistributionBootloader::class,
+
+        ValidationBootloader::class,
+        ValidatorBootloader::class,
+
+        RoadRunnerBridge\MetricsBootloader::class,
+
+        NyholmBootloader::class,
+
+        // Console commands
         Framework\CommandBootloader::class,
-        Scaffolder\ScaffolderBootloader::class,
+        RoadRunnerBridge\CommandBootloader::class,
+        CycleBridge\CommandBootloader::class,
+        ScaffolderBootloader::class,
+        CycleBridge\ScaffolderBootloader::class,
 
         // Debug and debug extensions
         Framework\DebugBootloader::class,
@@ -95,8 +137,7 @@ class App extends Kernel
         Auth\Jwt\TokensBootloader::class,
 
         Service\Pagination\PaginationBootloader::class,
-
-        RoadRunnerBridge\CommandBootloader::class,
+        FiltersBootloader::class,
     ];
 
     /*
@@ -104,7 +145,7 @@ class App extends Kernel
      */
     protected const APP = [
         Auth\AuthBootloader::class,
-        Bootloader\RouteGroupsBootloader::class,
+        Bootloader\RoutesBootloader::class,
         Bootloader\UserBootloader::class,
         Bootloader\LocaleSelectorBootloader::class,
         Bootloader\CheckerBootloader::class,

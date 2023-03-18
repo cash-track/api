@@ -13,7 +13,7 @@ class FirebaseConfig extends InjectableConfig
     /**
      * @internal For internal usage. Will be hydrated in the constructor.
      */
-    protected $config = [
+    protected array $config = [
         'databaseUri'             => null,
         'storageBucket'           => null,
         'projectId'               => null,

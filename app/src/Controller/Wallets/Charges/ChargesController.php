@@ -41,9 +41,9 @@ class ChargesController extends Controller
     }
 
     #[Route(route: '/wallets/<walletId:\d+>/charges', name: 'wallet.charge.list', methods: 'GET', group: 'auth')]
-    public function list(int $walletId, InputManager $input): ResponseInterface
+    public function list($walletId, InputManager $input): ResponseInterface
     {
-        $wallet = $this->walletRepository->findByPKByUserPK($walletId, (int) $this->user->id);
+        $wallet = $this->walletRepository->findByPKByUserPK((int) $walletId, (int) $this->user->id);
 
         if (! $wallet instanceof Wallet) {
             return $this->response->create(404);
@@ -58,9 +58,9 @@ class ChargesController extends Controller
     }
 
     #[Route(route: '/wallets/<walletId:\d+>/charges/graph', name: 'wallet.charge.graph', methods: 'GET', group: 'auth')]
-    public function graph(int $walletId, InputManager $input, ChargeAmountGraph $graph)
+    public function graph($walletId, InputManager $input, ChargeAmountGraph $graph)
     {
-        $wallet = $this->walletRepository->findByPKByUserPK($walletId, (int) $this->user->id);
+        $wallet = $this->walletRepository->findByPKByUserPK((int) $walletId, (int) $this->user->id);
 
         if (! $wallet instanceof Wallet) {
             return $this->response->create(404);
@@ -75,9 +75,9 @@ class ChargesController extends Controller
     }
 
     #[Route(route: '/wallets/<walletId:\d+>/charges', name: 'wallet.charge.create', methods: 'POST', group: 'auth')]
-    public function create(int $walletId, CreateRequest $request): ResponseInterface
+    public function create($walletId, CreateRequest $request): ResponseInterface
     {
-        $wallet = $this->walletRepository->findByPKByUserPK($walletId, (int) $this->user->id);
+        $wallet = $this->walletRepository->findByPKByUserPK((int) $walletId, (int) $this->user->id);
 
         if (! $wallet instanceof Wallet) {
             return $this->response->create(404);
@@ -125,15 +125,15 @@ class ChargesController extends Controller
     }
 
     #[Route(route: '/wallets/<walletId:\d+>/charges/<chargeId>', name: 'wallet.charge.update', methods: 'PUT', group: 'auth')]
-    public function update(int $walletId, string $chargeId, CreateRequest $request): ResponseInterface
+    public function update($walletId, string $chargeId, CreateRequest $request): ResponseInterface
     {
-        $wallet = $this->walletRepository->findByPKByUserPK($walletId, (int) $this->user->id);
+        $wallet = $this->walletRepository->findByPKByUserPK((int) $walletId, (int) $this->user->id);
 
         if (! $wallet instanceof Wallet) {
             return $this->response->create(404);
         }
 
-        $charge = $this->chargeRepository->findByPKByWalletPK($chargeId, $walletId);
+        $charge = $this->chargeRepository->findByPKByWalletPK($chargeId, (int) $wallet->id);
 
         if (! $charge instanceof Charge) {
             return $this->response->create(404);
@@ -181,15 +181,15 @@ class ChargesController extends Controller
     }
 
     #[Route(route: '/wallets/<walletId:\d+>/charges/<chargeId>', name: 'wallet.charge.delete', methods: 'DELETE', group: 'auth')]
-    public function delete(int $walletId, string $chargeId): ResponseInterface
+    public function delete($walletId, string $chargeId): ResponseInterface
     {
-        $wallet = $this->walletRepository->findByPKByUserPK($walletId, (int) $this->user->id);
+        $wallet = $this->walletRepository->findByPKByUserPK((int) $walletId, (int) $this->user->id);
 
         if (! $wallet instanceof Wallet) {
             return $this->response->create(404);
         }
 
-        $charge = $this->chargeRepository->findByPKByWalletPK($chargeId, $walletId);
+        $charge = $this->chargeRepository->findByPKByWalletPK($chargeId, (int) $wallet->id);
 
         if (! $charge instanceof Charge) {
             return $this->response->create(404);

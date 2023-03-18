@@ -34,12 +34,7 @@ final class LoginController
     ) {
     }
 
-    /**
-     * @Route(route="/auth/login", name="auth.login", methods="POST")
-     *
-     * @param \App\Request\LoginRequest $request
-     * @return \Psr\Http\Message\ResponseInterface
-     */
+    #[Route(route: '/auth/login', name: 'auth.login', methods: 'POST')]
     public function login(LoginRequest $request): ResponseInterface
     {
         if (! $request->isValid()) {
