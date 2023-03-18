@@ -38,8 +38,8 @@ final class ChargesController extends AuthAwareController
         parent::__construct($auth);
     }
 
-    #[Route(route: '/tags/<id:\d+>/charges', name: 'tag.charges', methods: 'GET', group: 'auth')]
-    public function list($id, InputManager $input): ResponseInterface
+    #[Route(route: '/tags/<id>/charges', name: 'tag.charges', methods: 'GET', group: 'auth')]
+    public function list(string $id, InputManager $input): ResponseInterface
     {
         $tag = $this->tagRepository->findByPKByUsersPK((int) $id, $this->userRepository->getCommonUserIDs($this->user));
         if (! $tag instanceof Tag) {
@@ -55,8 +55,8 @@ final class ChargesController extends AuthAwareController
                                  ->jsonPaginated($charges, $this->chargeRepository->getPaginationState());
     }
 
-    #[Route(route: '/tags/<id:\d+>/charges/total', name: 'tag.charges.total', methods: 'GET', group: 'auth')]
-    public function total($id, InputManager $input): ResponseInterface
+    #[Route(route: '/tags/<id>/charges/total', name: 'tag.charges.total', methods: 'GET', group: 'auth')]
+    public function total(string $id, InputManager $input): ResponseInterface
     {
         $tag = $this->tagRepository->findByPKByUsersPK((int) $id, $this->userRepository->getCommonUserIDs($this->user));
         if (! $tag instanceof Tag) {
@@ -78,8 +78,8 @@ final class ChargesController extends AuthAwareController
         ]);
     }
 
-    #[Route(route: '/tags/<id:\d+>/charges/graph', name: 'tag.charges.graph', methods: 'GET', group: 'auth')]
-    public function graph($id, InputManager $input, ChargeAmountGraph $graph): ResponseInterface
+    #[Route(route: '/tags/<id>/charges/graph', name: 'tag.charges.graph', methods: 'GET', group: 'auth')]
+    public function graph(string $id, InputManager $input, ChargeAmountGraph $graph): ResponseInterface
     {
         $tag = $this->tagRepository->findByPKByUsersPK((int) $id, $this->userRepository->getCommonUserIDs($this->user));
         if (! $tag instanceof Tag) {

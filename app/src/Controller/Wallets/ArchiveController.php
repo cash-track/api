@@ -28,10 +28,10 @@ final class ArchiveController extends Controller
     /**
      * @Route(route="/wallets/<id>/archive", name="wallet.archive", methods="POST", group="auth")
      *
-     * @param int $id
+     * @param string $id
      * @return \Psr\Http\Message\ResponseInterface
      */
-    public function archive($id): ResponseInterface
+    public function archive(string $id): ResponseInterface
     {
         $wallet = $this->walletRepository->findByPKByUserPK((int) $id, (int) $this->user->id);
 
@@ -60,10 +60,10 @@ final class ArchiveController extends Controller
     /**
      * @Route(route="/wallets/<id>/un-archive", name="wallet.unarchive", methods="POST", group="auth")
      *
-     * @param int $id
+     * @param string $id
      * @return \Psr\Http\Message\ResponseInterface
      */
-    public function unArchive($id): ResponseInterface
+    public function unArchive(string $id): ResponseInterface
     {
         $wallet = $this->walletRepository->findByPKByUserPK((int) $id, (int) $this->user->id);
 

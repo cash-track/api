@@ -29,8 +29,8 @@ final class IndexController extends Controller
         parent::__construct($auth);
     }
 
-    #[Route(route: '/wallets/<id:\d+>', name: 'wallet.index', methods: 'GET', group: 'auth')]
-    public function index($id): ResponseInterface
+    #[Route(route: '/wallets/<id>', name: 'wallet.index', methods: 'GET', group: 'auth')]
+    public function index(string $id): ResponseInterface
     {
         $wallet = $this->walletRepository->findByPKByUserPK((int) $id, (int) $this->user->id);
 
@@ -42,7 +42,7 @@ final class IndexController extends Controller
     }
 
     #[Route(route: '/wallets/<id>/total', name: 'wallet.index.total', methods: 'GET', group: 'auth')]
-    public function indexTotal($id, InputManager $input): ResponseInterface
+    public function indexTotal(string $id, InputManager $input): ResponseInterface
     {
         $wallet = $this->walletRepository->findByPKByUserPK((int) $id, (int) $this->user->id);
 

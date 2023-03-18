@@ -14,7 +14,7 @@ use Spiral\Validator\FilterDefinition;
 class CheckNickNameRequest extends Filter implements HasFilterDefinition
 {
     #[Data]
-    public string $nickName;
+    public string $nickName = '';
 
     public function filterDefinition(): FilterDefinitionInterface
     {

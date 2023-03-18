@@ -33,10 +33,10 @@ final class UsersController extends Controller
     /**
      * @Route(route="/wallets/<id>/users", name="wallet.users.list", methods="GET", group="auth")
      *
-     * @param int $id
+     * @param string $id
      * @return \Psr\Http\Message\ResponseInterface
      */
-    public function users($id): ResponseInterface
+    public function users(string $id): ResponseInterface
     {
         $wallet = $this->walletRepository->findByPKByUserPKWithUsers((int) $id, (int) $this->user->id);
 
@@ -50,11 +50,11 @@ final class UsersController extends Controller
     /**
      * @Route(route="/wallets/<id>/users/<userId>", name="wallet.users.add", methods="PATCH", group="auth")
      *
-     * @param int $id
-     * @param int $userId
+     * @param string $id
+     * @param string $userId
      * @return \Psr\Http\Message\ResponseInterface
      */
-    public function patch($id, $userId): ResponseInterface
+    public function patch(string $id, string $userId): ResponseInterface
     {
         $wallet = $this->walletRepository->findByPKByUserPKWithUsers((int) $id, (int) $this->user->id);
 
@@ -92,11 +92,11 @@ final class UsersController extends Controller
     /**
      * @Route(route="/wallets/<id>/users/<userId>", name="wallet.users.delete", methods="DELETE", group="auth")
      *
-     * @param int $id
-     * @param int $userId
+     * @param string $id
+     * @param string $userId
      * @return \Psr\Http\Message\ResponseInterface
      */
-    public function delete($id, $userId): ResponseInterface
+    public function delete(string $id, string $userId): ResponseInterface
     {
         $wallet = $this->walletRepository->findByPKByUserPKWithUsers((int) $id, (int) $this->user->id);
 

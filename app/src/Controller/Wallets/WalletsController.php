@@ -54,7 +54,7 @@ final class WalletsController extends Controller
     }
 
     #[Route(route: '/wallets/<id>', name: 'wallet.update', methods: 'PUT', group: 'auth')]
-    public function update($id, UpdateRequest $request): ResponseInterface
+    public function update(string $id, UpdateRequest $request): ResponseInterface
     {
         $wallet = $this->walletRepository->findByPKByUserPK((int) $id, (int) $this->user->id);
 
@@ -112,8 +112,8 @@ final class WalletsController extends Controller
         return $this->walletView->json($wallet);
     }
 
-    #[Route(route: '/wallets/<id:\d+>', name: 'wallet.delete', methods: 'DELETE', group: 'auth')]
-    public function delete($id): ResponseInterface
+    #[Route(route: '/wallets/<id>', name: 'wallet.delete', methods: 'DELETE', group: 'auth')]
+    public function delete(string $id): ResponseInterface
     {
         $wallet = $this->walletRepository->findByPKByUserPK((int) $id, (int) $this->user->id);
 

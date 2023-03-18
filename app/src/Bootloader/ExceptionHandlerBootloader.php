@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Bootloader;
 
-use App\Application\Exception\Renderer\ViewRenderer;
+use App\Exception\ViewRenderer;
 use Spiral\Boot\AbstractKernel;
 use Spiral\Boot\Bootloader\Bootloader;
 use Spiral\Exceptions\ExceptionHandler;

@@ -62,7 +62,7 @@ final class TagsController extends AuthAwareController
     }
 
     #[Route(route: '/tags/<id>', name: 'tag.update', methods: 'PUT', group: 'auth')]
-    public function update($id, UpdateRequest $request): ResponseInterface
+    public function update(string $id, UpdateRequest $request): ResponseInterface
     {
         $tag = $this->tagRepository->findByPKByUserPK((int) $id, (int) $this->user->id);
 
@@ -104,7 +104,7 @@ final class TagsController extends AuthAwareController
     }
 
     #[Route(route: '/tags/<id>', name: 'tag.delete', methods: 'DELETE', group: 'auth')]
-    public function delete($id): ResponseInterface
+    public function delete(string $id): ResponseInterface
     {
         $tag = $this->tagRepository->findByPKByUserPK((int) $id, (int) $this->user->id);
 

@@ -84,7 +84,7 @@ class Mailer implements MailerInterface
      */
     public function render(Mail $mail): string
     {
-        return $this->build($mail)->getHtmlBody();
+        return (string) $this->build($mail)->getHtmlBody();
     }
 
     /**

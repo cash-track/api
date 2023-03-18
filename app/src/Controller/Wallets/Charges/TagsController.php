@@ -36,7 +36,7 @@ class TagsController extends Controller
     }
 
     #[Route(route: '/wallets/<walletId>/tags/<tagId>/charges', name: 'wallet.tag.charge.list', methods: 'GET', group: 'auth')]
-    public function list($walletId, $tagId, InputManager $input): ResponseInterface
+    public function list(string $walletId, string $tagId, InputManager $input): ResponseInterface
     {
         $wallet = $this->walletRepository->findByPKByUserPK((int) $walletId, (int) $this->user->id);
         if (! $wallet instanceof Wallet) {
@@ -57,7 +57,7 @@ class TagsController extends Controller
     }
 
     #[Route(route: '/wallets/<walletId>/tags/<tagId>/charges/graph', name: 'wallet.tag.charge.graph', methods: 'GET', group: 'auth')]
-    public function graph($walletId, $tagId, InputManager $input, ChargeAmountGraph $graph): ResponseInterface
+    public function graph(string $walletId, string $tagId, InputManager $input, ChargeAmountGraph $graph): ResponseInterface
     {
         $wallet = $this->walletRepository->findByPKByUserPK((int) $walletId, (int) $this->user->id);
         if (! $wallet instanceof Wallet) {

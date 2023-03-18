@@ -70,7 +70,7 @@ class ProfileStatistics
 
         foreach ($metrics as $metricName => $dateFrom) {
             foreach ($data as $type => &$value) {
-                if ($dateFrom === false) {
+                if ($dateFrom === null) {
                     continue;
                 }
 

@@ -28,10 +28,10 @@ final class ActiveController extends Controller
     /**
      * @Route(route="/wallets/<id>/activate", name="wallet.activate", methods="POST", group="auth")
      *
-     * @param int $id
+     * @param string $id
      * @return \Psr\Http\Message\ResponseInterface
      */
-    public function activate($id): ResponseInterface
+    public function activate(string $id): ResponseInterface
     {
         $wallet = $this->walletRepository->findByPKByUserPK((int) $id, (int) $this->user->id);
 
@@ -60,10 +60,10 @@ final class ActiveController extends Controller
     /**
      * @Route(route="/wallets/<id>/disable", name="wallet.disable", methods="POST", group="auth")
      *
-     * @param int $id
+     * @param string $id
      * @return \Psr\Http\Message\ResponseInterface
      */
-    public function disable($id): ResponseInterface
+    public function disable(string $id): ResponseInterface
     {
         $wallet = $this->walletRepository->findByPKByUserPK((int) $id, (int) $this->user->id);
 

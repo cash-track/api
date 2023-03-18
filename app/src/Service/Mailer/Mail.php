@@ -58,10 +58,10 @@ abstract class Mail
 
     /**
      * @param string $address
-     * @param string|null $fullName
+     * @param string $fullName
      * @return \App\Service\Mailer\Mail
      */
-    public function from(string $address, string $fullName = null): Mail
+    public function from(string $address, string $fullName = ''): Mail
     {
         $this->message->from(new Address($address, $fullName));
 
@@ -70,10 +70,10 @@ abstract class Mail
 
     /**
      * @param string $address
-     * @param string|null $fullName
+     * @param string $fullName
      * @return \App\Service\Mailer\Mail
      */
-    public function to(string $address, string $fullName = null): Mail
+    public function to(string $address, string $fullName = ''): Mail
     {
         $this->message->to(new Address($address, $fullName));
 
@@ -82,10 +82,10 @@ abstract class Mail
 
     /**
      * @param string $address
-     * @param string|null $fullName
+     * @param string $fullName
      * @return \App\Service\Mailer\Mail
      */
-    public function replyTo(string $address, string $fullName = null): Mail
+    public function replyTo(string $address, string $fullName = ''): Mail
     {
         $this->message->replyTo(new Address($address, $fullName));
 
@@ -94,10 +94,10 @@ abstract class Mail
 
     /**
      * @param string $address
-     * @param string|null $fullName
+     * @param string $fullName
      * @return \App\Service\Mailer\Mail
      */
-    public function cc(string $address, string $fullName = null): Mail
+    public function cc(string $address, string $fullName = ''): Mail
     {
         $this->message->cc(new Address($address, $fullName));
 
@@ -106,10 +106,10 @@ abstract class Mail
 
     /**
      * @param string $address
-     * @param string|null $fullName
+     * @param string $fullName
      * @return \App\Service\Mailer\Mail
      */
-    public function bcc(string $address, string $fullName = null): Mail
+    public function bcc(string $address, string $fullName = ''): Mail
     {
         $this->message->bcc(new Address($address, $fullName));
 

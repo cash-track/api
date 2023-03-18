@@ -40,8 +40,8 @@ class ChargesController extends Controller
         parent::__construct($auth);
     }
 
-    #[Route(route: '/wallets/<walletId:\d+>/charges', name: 'wallet.charge.list', methods: 'GET', group: 'auth')]
-    public function list($walletId, InputManager $input): ResponseInterface
+    #[Route(route: '/wallets/<walletId>/charges', name: 'wallet.charge.list', methods: 'GET', group: 'auth')]
+    public function list(string $walletId, InputManager $input): ResponseInterface
     {
         $wallet = $this->walletRepository->findByPKByUserPK((int) $walletId, (int) $this->user->id);
 
@@ -57,8 +57,8 @@ class ChargesController extends Controller
         return $this->chargesView->jsonPaginated($charges, $this->chargeRepository->getPaginationState());
     }
 
-    #[Route(route: '/wallets/<walletId:\d+>/charges/graph', name: 'wallet.charge.graph', methods: 'GET', group: 'auth')]
-    public function graph($walletId, InputManager $input, ChargeAmountGraph $graph)
+    #[Route(route: '/wallets/<walletId>/charges/graph', name: 'wallet.charge.graph', methods: 'GET', group: 'auth')]
+    public function graph(string $walletId, InputManager $input, ChargeAmountGraph $graph): ResponseInterface
     {
         $wallet = $this->walletRepository->findByPKByUserPK((int) $walletId, (int) $this->user->id);
 
@@ -75,7 +75,7 @@ class ChargesController extends Controller
     }
 
     #[Route(route: '/wallets/<walletId:\d+>/charges', name: 'wallet.charge.create', methods: 'POST', group: 'auth')]
-    public function create($walletId, CreateRequest $request): ResponseInterface
+    public function create(string $walletId, CreateRequest $request): ResponseInterface
     {
         $wallet = $this->walletRepository->findByPKByUserPK((int) $walletId, (int) $this->user->id);
 
@@ -124,8 +124,8 @@ class ChargesController extends Controller
         return $this->chargeView->withRelation(Wallet::class)->json($charge);
     }
 
-    #[Route(route: '/wallets/<walletId:\d+>/charges/<chargeId>', name: 'wallet.charge.update', methods: 'PUT', group: 'auth')]
-    public function update($walletId, string $chargeId, CreateRequest $request): ResponseInterface
+    #[Route(route: '/wallets/<walletId>/charges/<chargeId>', name: 'wallet.charge.update', methods: 'PUT', group: 'auth')]
+    public function update(string $walletId, string $chargeId, CreateRequest $request): ResponseInterface
     {
         $wallet = $this->walletRepository->findByPKByUserPK((int) $walletId, (int) $this->user->id);
 
@@ -180,8 +180,8 @@ class ChargesController extends Controller
         return $this->chargeView->withRelation(Wallet::class)->json($charge);
     }
 
-    #[Route(route: '/wallets/<walletId:\d+>/charges/<chargeId>', name: 'wallet.charge.delete', methods: 'DELETE', group: 'auth')]
-    public function delete($walletId, string $chargeId): ResponseInterface
+    #[Route(route: '/wallets/<walletId>/charges/<chargeId>', name: 'wallet.charge.delete', methods: 'DELETE', group: 'auth')]
+    public function delete(string $walletId, string $chargeId): ResponseInterface
     {
         $wallet = $this->walletRepository->findByPKByUserPK((int) $walletId, (int) $this->user->id);
 

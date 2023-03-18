@@ -32,8 +32,8 @@ final class TagsController extends Controller
         parent::__construct($auth);
     }
 
-    #[Route(route: '/wallets/<id:\d+>/tags', name: 'wallet.tags.list', methods: 'GET', group: 'auth')]
-    public function list($id): ResponseInterface
+    #[Route(route: '/wallets/<id>/tags', name: 'wallet.tags.list', methods: 'GET', group: 'auth')]
+    public function list(string $id): ResponseInterface
     {
         $wallet = $this->walletRepository->findByPKByUserPK((int) $id, (int) $this->user->id);
 
@@ -46,8 +46,8 @@ final class TagsController extends Controller
         return $this->tagsView->json($tags);
     }
 
-    #[Route(route: '/wallets/<walletId:\d+>/tags/<tagId:\d+>/total', name: 'wallet.tags.total', methods: 'GET', group: 'auth')]
-    public function total($walletId, $tagId, InputManager $input): ResponseInterface
+    #[Route(route: '/wallets/<walletId>/tags/<tagId>/total', name: 'wallet.tags.total', methods: 'GET', group: 'auth')]
+    public function total(string $walletId, string $tagId, InputManager $input): ResponseInterface
     {
         $wallet = $this->walletRepository->findByPKByUserPK((int) $walletId, (int) $this->user->id);
 
@@ -75,8 +75,8 @@ final class TagsController extends Controller
         ]);
     }
 
-    #[Route(route: '/wallets/<walletId:\d+>/tags/find/<query>', name: 'wallet.tags.find', methods: 'GET', group: 'auth')]
-    public function find($walletId, string $query = ''): ResponseInterface
+    #[Route(route: '/wallets/<walletId>/tags/find/<query>', name: 'wallet.tags.find', methods: 'GET', group: 'auth')]
+    public function find(string $walletId, string $query = ''): ResponseInterface
     {
         $wallet = $this->walletRepository->findByPKByUserPK((int) $walletId, (int) $this->user->id);
 
