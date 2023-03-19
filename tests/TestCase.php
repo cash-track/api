@@ -72,6 +72,17 @@ abstract class TestCase extends BaseTestCase
 
     protected function tearDown(): void
     {
+        parent::tearDown();
+
+        $container = $this->app->getContainer();
+        unset($this->app);
+
+        if ($container instanceof Container) {
+            $container->destruct();
+        }
+
+        unset($container);
+
         // Uncomment this line if you want to clean up runtime directory.
         // $this->cleanUpRuntimeDirectory();
     }
