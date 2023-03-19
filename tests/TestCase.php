@@ -74,7 +74,7 @@ abstract class TestCase extends BaseTestCase
     {
         parent::tearDown();
 
-        $container = $this->app->getContainer();
+        $container = $this->getContainer();
         unset($this->app);
 
         if ($container instanceof Container) {
