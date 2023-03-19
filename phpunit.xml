@@ -10,7 +10,7 @@
          convertNoticesToExceptions="true"
          convertWarningsToExceptions="true"
          processIsolation="false"
-         stopOnFailure="false"
+         stopOnFailure="true"
          stopOnError="false"
          stderr="true">
     <coverage processUncoveredFiles="true">
