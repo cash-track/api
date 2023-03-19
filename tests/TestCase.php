@@ -4,8 +4,9 @@ declare(strict_types=1);
 
 namespace Tests;
 
+use Aws\S3\S3ClientInterface;
 use Cycle\Database\DatabaseInterface;
-use Cycle\Database\DatabaseManager;
+use Spiral\Boot\FinalizerInterface;
 use Spiral\Config\ConfiguratorInterface;
 use Spiral\Config\Patch\Set;
 use Spiral\Core\Container;
@@ -27,6 +28,11 @@ abstract class TestCase extends BaseTestCase
     use InteractsWithMock;
     use AssertHelpers;
 
+    protected function getFakeS3(): S3ClientInterface
+    {
+        return $this->getMockBuilder(S3ClientInterface::class)->getMock();
+    }
+
     protected function setUp(): void
     {
         $this->beforeBooting(static function (ConfiguratorInterface $config): void {
@@ -39,25 +45,35 @@ abstract class TestCase extends BaseTestCase
 
         parent::setUp();
 
+        $this->getContainer()->bindSingleton(S3ClientInterface::class, $this->getFakeS3());
+
         $this->getContainer()->get(TranslatorInterface::class)->setLocale('en');
 
-        if ($this instanceof DatabaseTransaction) {
-            $this->getContainer()->get(DatabaseInterface::class)->begin();
+        $this->scopedDatabase();
+    }
+
+    /**
+     * @return void
+     * @throws \Throwable
+     */
+    protected function scopedDatabase(): void
+    {
+        if (! $this instanceof DatabaseTransaction) {
+            return;
         }
+
+        /** @var \Cycle\Database\DatabaseInterface $db */
+        $db = $this->getContainer()->get(DatabaseInterface::class);
+
+        $this->getContainer()->get(FinalizerInterface::class)->addFinalizer(static function () use ($db) {
+            $db->rollback();
+        });
     }
 
     protected function tearDown(): void
     {
-        if ($this instanceof DatabaseTransaction) {
-            $this->getContainer()->get(DatabaseInterface::class)->rollback();
-        }
-
         // Uncomment this line if you want to clean up runtime directory.
         // $this->cleanUpRuntimeDirectory();
-
-        foreach ($this->getContainer()->get(DatabaseManager::class)->getDrivers() as $driver) {
-            $driver->disconnect();
-        }
     }
 
     public function rootDirectory(): string

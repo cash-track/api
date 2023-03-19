@@ -36,7 +36,7 @@ final class ListController extends Controller
         return $this->walletsView->json($this->walletRepository->findAllByUserPK((int) $this->user->id));
     }
 
-    #[Route(route: '/wallets/unarchived', name: 'wallet.list.unarchived', methods: 'GET', group: 'auth', priority: 0)]
+    #[Route(route: '/wallets/unarchived', name: 'wallet.list.unarchived', methods: 'GET', group: 'auth', priority: -1)]
     public function listUnArchived(): ResponseInterface
     {
         return $this->walletsView->json(
@@ -45,7 +45,7 @@ final class ListController extends Controller
         );
     }
 
-    #[Route(route: '/wallets/unarchived/sort', name: 'wallet.sort.unarchived.set', methods: 'POST', group: 'auth', priority: 0)]
+    #[Route(route: '/wallets/unarchived/sort', name: 'wallet.sort.unarchived.set', methods: 'POST', group: 'auth')]
     public function sortUnArchived(SortSetRequest $request): ResponseInterface
     {
         if (! $request->isValid()) {
@@ -63,7 +63,7 @@ final class ListController extends Controller
         return $this->response->create(200);
     }
 
-    #[Route(route: '/wallets/archived', name: 'wallet.list.archived', methods: 'GET', group: 'auth', priority: 0)]
+    #[Route(route: '/wallets/archived', name: 'wallet.list.archived', methods: 'GET', group: 'auth', priority: -1)]
     public function listArchived(): ResponseInterface
     {
         return $this->walletsView->json(
