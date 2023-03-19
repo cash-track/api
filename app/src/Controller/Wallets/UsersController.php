@@ -65,6 +65,8 @@ final class UsersController extends Controller
         /** @var \App\Database\User|null $user */
         $user = $this->userRepository->findByPK((int) $userId);
 
+        var_dump(gettype($user));
+
         if (! $user instanceof User) {
             return $this->response->create(404);
         }
@@ -106,6 +108,8 @@ final class UsersController extends Controller
 
         /** @var \App\Database\User|null $user */
         $user = $this->userRepository->findByPK((int) $userId);
+
+        var_dump(gettype($user));
 
         if (! $user instanceof User) {
             return $this->response->create(404);

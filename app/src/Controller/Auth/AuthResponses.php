@@ -5,23 +5,11 @@ declare(strict_types=1);
 namespace App\Controller\Auth;
 
 use App\Database\User;
-use App\View\UserView;
 use Psr\Http\Message\ResponseInterface;
 use Spiral\Auth\TokenInterface;
-use Spiral\Http\ResponseWrapper;
 
 trait AuthResponses
 {
-    /**
-     * @param \Spiral\Http\ResponseWrapper $response
-     * @param \App\View\UserView $userView
-     */
-    public function __construct(
-        protected ResponseWrapper $response,
-        protected UserView $userView,
-    ) {
-    }
-
     /**
      * @param \Spiral\Auth\TokenInterface $accessToken
      * @param \Spiral\Auth\TokenInterface $refreshToken
@@ -29,14 +17,11 @@ trait AuthResponses
      */
     protected function responseTokens(TokenInterface $accessToken, TokenInterface $refreshToken): ResponseInterface
     {
-        $accessTokenExpiredAt = $accessToken->getExpiresAt();
-        $refreshTokenExpiredAt = $refreshToken->getExpiresAt();
-
         return $this->response->json([
             'accessToken' => $accessToken->getID(),
-            'accessTokenExpiredAt' => $accessTokenExpiredAt ? $accessTokenExpiredAt->format(DATE_RFC3339) : null,
+            'accessTokenExpiredAt' => $accessToken->getExpiresAt()?->format(DATE_RFC3339),
             'refreshToken' => $refreshToken->getID(),
-            'refreshTokenExpiredAt' => $refreshTokenExpiredAt ? $refreshTokenExpiredAt->format(DATE_RFC3339) : null,
+            'refreshTokenExpiredAt' => $refreshToken->getExpiresAt()?->format(DATE_RFC3339),
         ], 200);
     }
 
@@ -48,15 +33,12 @@ trait AuthResponses
      */
     protected function responseTokensWithUser(TokenInterface $accessToken, TokenInterface $refreshToken, User $user): ResponseInterface
     {
-        $accessTokenExpiredAt = $accessToken->getExpiresAt();
-        $refreshTokenExpiredAt = $refreshToken->getExpiresAt();
-
         return $this->response->json([
             'data' => $this->userView->head($user),
             'accessToken' => $accessToken->getID(),
-            'accessTokenExpiredAt' => $accessTokenExpiredAt ? $accessTokenExpiredAt->format(DATE_RFC3339) : null,
+            'accessTokenExpiredAt' => $accessToken->getExpiresAt()?->format(DATE_RFC3339),
             'refreshToken' => $refreshToken->getID(),
-            'refreshTokenExpiredAt' => $refreshTokenExpiredAt ? $refreshTokenExpiredAt->format(DATE_RFC3339) : null,
+            'refreshTokenExpiredAt' => $refreshToken->getExpiresAt()?->format(DATE_RFC3339),
         ], 200);
     }
 

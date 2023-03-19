@@ -129,7 +129,7 @@ class UsersControllerTest extends TestCase implements DatabaseTransaction
         $auth = $this->makeAuth($user = $this->userFactory->create());
 
         $wallet = $this->walletFactory->forUser($user)->create();
-        $otherUserId = Fixtures::integer(100, 1000);
+        $otherUserId = Fixtures::integer();
 
         $response = $this->withAuth($auth)->patch("/wallets/{$wallet->id}/users/{$otherUserId}");
 
@@ -231,7 +231,7 @@ class UsersControllerTest extends TestCase implements DatabaseTransaction
         $auth = $this->makeAuth($user = $this->userFactory->create());
 
         $wallet = $this->walletFactory->forUser($user)->create();
-        $otherUserId = Fixtures::integer(100, 1000);
+        $otherUserId = Fixtures::integer();
 
         $response = $this->withAuth($auth)->delete("/wallets/{$wallet->id}/users/{$otherUserId}");
 

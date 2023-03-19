@@ -72,7 +72,6 @@ class App extends Kernel
         Framework\Http\SessionBootloader::class,
         Framework\Http\CsrfBootloader::class,
         Framework\Http\PaginationBootloader::class,
-        Framework\Http\ErrorHandlerBootloader::class,
 
         Bootloader\CorsBootloader::class,
         Router\AnnotatedRoutesBootloader::class,
