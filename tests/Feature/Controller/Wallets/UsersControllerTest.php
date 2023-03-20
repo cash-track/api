@@ -129,11 +129,13 @@ class UsersControllerTest extends TestCase implements DatabaseTransaction
         $auth = $this->makeAuth($user = $this->userFactory->create());
 
         $wallet = $this->walletFactory->forUser($user)->create();
-        $otherUserId = Fixtures::integer();
+        $otherUserId = Fixtures::integer() * -1;
+
+        $this->mock(MailerInterface::class, ['send', 'render'], function (MockObject $mock) {
+            $mock->expects($this->never())->method('send');
+        });
 
         $response = $this->withAuth($auth)->patch("/wallets/{$wallet->id}/users/{$otherUserId}");
-
-        print_r($this->getJsonResponseBody($response));
 
         $response->assertNotFound();
     }
@@ -233,11 +235,9 @@ class UsersControllerTest extends TestCase implements DatabaseTransaction
         $auth = $this->makeAuth($user = $this->userFactory->create());
 
         $wallet = $this->walletFactory->forUser($user)->create();
-        $otherUserId = Fixtures::integer();
+        $otherUserId = Fixtures::integer() * -1;
 
         $response = $this->withAuth($auth)->delete("/wallets/{$wallet->id}/users/{$otherUserId}");
-
-        print_r($this->getJsonResponseBody($response));
 
         $response->assertNotFound();
     }
