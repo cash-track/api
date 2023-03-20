@@ -14,10 +14,8 @@ use Psr\Http\Message\ResponseInterface;
 use Spiral\Http\ResponseWrapper;
 use Spiral\Router\Annotation\Route;
 
-final class LoginController
+final class LoginController extends Controller
 {
-    use AuthResponses;
-
     /**
      * @param \App\View\UserView $userView
      * @param \App\Service\Auth\AuthService $authService
@@ -32,6 +30,7 @@ final class LoginController
         protected UserRepository $userRepository,
         protected RefreshTokenService $refreshTokenService,
     ) {
+        parent::__construct($userView, $response);
     }
 
     #[Route(route: '/auth/login', name: 'auth.login', methods: 'POST')]

@@ -17,10 +17,8 @@ use Psr\Http\Message\ResponseInterface;
 use Spiral\Http\ResponseWrapper;
 use Spiral\Router\Annotation\Route;
 
-final class RegisterController
+final class RegisterController extends Controller
 {
-    use AuthResponses;
-
     /**
      * @param \App\View\UserView $userView
      * @param \App\Service\Auth\AuthService $authService
@@ -38,6 +36,7 @@ final class RegisterController
         protected RefreshTokenService $refreshTokenService,
         private CurrencyRepository $currencyRepository,
     ) {
+        parent::__construct($userView, $response);
     }
 
     /**

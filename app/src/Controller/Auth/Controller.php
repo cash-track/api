@@ -5,16 +5,19 @@ declare(strict_types=1);
 namespace App\Controller\Auth;
 
 use App\Database\User;
+use App\View\UserView;
 use Psr\Http\Message\ResponseInterface;
 use Spiral\Auth\TokenInterface;
+use Spiral\Http\ResponseWrapper;
 
-trait AuthResponses
+abstract class Controller
 {
-    /**
-     * @param \Spiral\Auth\TokenInterface $accessToken
-     * @param \Spiral\Auth\TokenInterface $refreshToken
-     * @return \Psr\Http\Message\ResponseInterface
-     */
+    public function __construct(
+        protected UserView $userView,
+        protected ResponseWrapper $response,
+    ) {
+    }
+
     protected function responseTokens(TokenInterface $accessToken, TokenInterface $refreshToken): ResponseInterface
     {
         return $this->response->json([
@@ -25,12 +28,6 @@ trait AuthResponses
         ], 200);
     }
 
-    /**
-     * @param \Spiral\Auth\TokenInterface $accessToken
-     * @param \Spiral\Auth\TokenInterface $refreshToken
-     * @param \App\Database\User $user
-     * @return \Psr\Http\Message\ResponseInterface
-     */
     protected function responseTokensWithUser(TokenInterface $accessToken, TokenInterface $refreshToken, User $user): ResponseInterface
     {
         return $this->response->json([
@@ -42,9 +39,6 @@ trait AuthResponses
         ], 200);
     }
 
-    /**
-     * @return \Psr\Http\Message\ResponseInterface
-     */
     protected function responseAuthenticationFailure(): ResponseInterface
     {
         return $this->response->json([
@@ -52,9 +46,6 @@ trait AuthResponses
         ], 400);
     }
 
-    /**
-     * @return \Psr\Http\Message\ResponseInterface
-     */
     protected function responseUnauthenticated(): ResponseInterface
     {
         return $this->response->json([
