@@ -58,6 +58,9 @@ return [
         // ],
     ],
 
+    /**
+     * Prepare all internal ORM services (mappers, repositories, typecasters...)
+     */
     'warmup' => env('CYCLE_SCHEMA_WARMUP', false),
 
     /**

@@ -20,8 +20,8 @@ jobs:
         env:
           runner: self-hosted
         with:
-          php-version: '8.1'
-          extensions: zip, mbstring, pdo_mysql, mysqli
+          php-version: '8.2'
+          extensions: zip xsl dom exif intl pcntl bcmath sockets mbstring pdo_mysql mysqli
           tools: composer
 
       - name: Get Composer Cache Directory
@@ -39,7 +39,7 @@ jobs:
         run: composer install --no-progress --no-interaction --prefer-dist --optimize-autoloader
 
       - name: Run Psalm
-        run: ./vendor/bin/psalm --php-version=8.1 --show-info=true --no-cache
+        run: ./vendor/bin/psalm --php-version=8.2 --show-info=true --no-cache
 
   coding-standards:
     name: Coding Standards
@@ -54,8 +54,8 @@ jobs:
         env:
           runner: self-hosted
         with:
-          php-version: '8.1'
-          extensions: zip, mbstring, pdo_mysql, mysqli
+          php-version: '8.2'
+          extensions: zip xsl dom exif intl pcntl bcmath sockets mbstring pdo_mysql mysqli
           tools: composer
 
       - name: Get Composer Cache Directory
@@ -104,9 +104,9 @@ jobs:
         env:
           runner: self-hosted
         with:
-          php-version: '8.1'
+          php-version: '8.2'
           coverage: pcov
-          extensions: zip, mbstring, pdo_mysql, mysqli
+          extensions: zip xsl dom exif intl pcntl bcmath sockets mbstring pdo_mysql mysqli
           tools: composer, phpunit
 
       - name: Get Composer Cache Directory

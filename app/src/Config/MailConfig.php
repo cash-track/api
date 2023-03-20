@@ -86,12 +86,4 @@ class MailConfig extends InjectableConfig
     {
         return (string) $this->config['drivers'][self::DRIVER_SMTP]['password'];
     }
-
-    /**
-     * @return string
-     */
-    public function getSmtpEncryption(): string
-    {
-        return (string) $this->config['drivers'][self::DRIVER_SMTP]['encryption'];
-    }
 }
