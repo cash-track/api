@@ -65,7 +65,7 @@ final class UsersController extends Controller
         /** @var \App\Database\User|null $user */
         $user = $this->userRepository->findByPK((int) $userId);
 
-        var_dump(gettype($user));
+        $this->logger->info("Debug patch user => " . print_r($user, true));
 
         if (! $user instanceof User) {
             return $this->response->create(404);
@@ -109,7 +109,7 @@ final class UsersController extends Controller
         /** @var \App\Database\User|null $user */
         $user = $this->userRepository->findByPK((int) $userId);
 
-        var_dump(gettype($user));
+        $this->logger->info("Debug delete user => " . print_r($user, true));
 
         if (! $user instanceof User) {
             return $this->response->create(404);

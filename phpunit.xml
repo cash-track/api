@@ -33,7 +33,7 @@
         <env name="CYCLE_SCHEMA_CACHE" value="true"/>
         <env name="CYCLE_SCHEMA_WARMUP" value="false"/>
         <env name="QUEUE_CONNECTION" value="sync"/>
-        <env name="MONOLOG_DEFAULT_CHANNEL" value="default"/>
+        <env name="MONOLOG_DEFAULT_CHANNEL" value="stderr"/>
         <env name="CACHE_STORAGE" value="file"/>
         <env name="SCHEDULER_MUTEX_CACHE_STORAGE" value="file"/>
     </php>

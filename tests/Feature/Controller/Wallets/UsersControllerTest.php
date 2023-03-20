@@ -133,6 +133,8 @@ class UsersControllerTest extends TestCase implements DatabaseTransaction
 
         $response = $this->withAuth($auth)->patch("/wallets/{$wallet->id}/users/{$otherUserId}");
 
+        print_r($this->getJsonResponseBody($response));
+
         $response->assertNotFound();
     }
 
@@ -234,6 +236,8 @@ class UsersControllerTest extends TestCase implements DatabaseTransaction
         $otherUserId = Fixtures::integer();
 
         $response = $this->withAuth($auth)->delete("/wallets/{$wallet->id}/users/{$otherUserId}");
+
+        print_r($this->getJsonResponseBody($response));
 
         $response->assertNotFound();
     }
