@@ -5,43 +5,38 @@ declare(strict_types=1);
 namespace App\Request\Wallet;
 
 use App\Database\Currency;
-use Spiral\Filters\Filter;
+use Spiral\Filters\Attribute\Input\Data;
+use Spiral\Filters\Model\Filter;
+use Spiral\Filters\Model\FilterDefinitionInterface;
+use Spiral\Filters\Model\HasFilterDefinition;
+use Spiral\Validator\FilterDefinition;
 
-class UpdateRequest extends Filter
+class UpdateRequest extends Filter implements HasFilterDefinition
 {
-    protected const SCHEMA = [
-        'name'                => 'data:name',
-        'isPublic'            => 'data:isPublic',
-        'defaultCurrencyCode' => 'data:defaultCurrencyCode',
-    ];
+    #[Data]
+    public string $name = '';
 
-    protected const VALIDATES = [
-        'name'                => [
-            'is_string',
-            'type::notEmpty',
-        ],
-        'isPublic'            => [
-            'type::boolean',
-        ],
-        'defaultCurrencyCode' => [
-            'is_string',
-            'type::notEmpty',
-            ['entity::exists', Currency::class, 'code',],
-        ],
-    ];
+    #[Data]
+    public bool $isPublic = false;
 
-    public function getName(): string
+    #[Data]
+    public string $defaultCurrencyCode = '';
+
+    public function filterDefinition(): FilterDefinitionInterface
     {
-        return (string) $this->getField('name');
-    }
-
-    public function getIsPublic(): bool
-    {
-        return (bool) $this->getField('isPublic', false);
-    }
-
-    public function getDefaultCurrencyCode(): string
-    {
-        return (string) $this->getField('defaultCurrencyCode');
+        return new FilterDefinition(validationRules: [
+            'name' => [
+                'is_string',
+                'type::notEmpty',
+            ],
+            'isPublic' => [
+                'type::boolean',
+            ],
+            'defaultCurrencyCode' => [
+                'is_string',
+                'type::notEmpty',
+                ['entity::exists', Currency::class, 'code',],
+            ],
+        ]);
     }
 }

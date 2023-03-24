@@ -6,57 +6,73 @@ namespace App\Request;
 
 use App\Database\Currency;
 use App\Database\User;
-use Spiral\Filters\Filter;
+use Spiral\Filters\Attribute\Input\Data;
+use Spiral\Filters\Model\Filter;
+use Spiral\Filters\Model\FilterDefinitionInterface;
+use Spiral\Filters\Model\HasFilterDefinition;
+use Spiral\Validator\FilterDefinition;
 
-class RegisterRequest extends Filter
+class RegisterRequest extends Filter implements HasFilterDefinition
 {
-    protected const SCHEMA = [
-        'name' => 'data:name',
-        'lastName' => 'data:lastName',
-        'nickName' => 'data:nickName',
-        'email' => 'data:email',
-        'password' => 'data:password',
-        'passwordConfirmation' => 'data:passwordConfirmation'
-    ];
+    #[Data]
+    public string $name = '';
 
-    protected const VALIDATES = [
-        'name' => [
-            'is_string',
-            'type::notEmpty',
-        ],
-        'lastName' => [
-            'is_string',
-        ],
-        'nickName' => [
-            'is_string',
-            'type::notEmpty',
-            ['string::longer', 3],
-            ['string::regexp', '/^[a-zA-Z0-9_]*$/'],
-            ['entity::unique', User::class, 'nickName'],
-        ],
-        'email' => [
-            'address::email',
-            'type::notEmpty',
-            ['entity::unique', User::class, 'email'],
-        ],
-        'password' => [
-            'type::notEmpty',
-            ['string::longer', 6],
-        ],
-        'passwordConfirmation' => [
-            ['notEmpty', 'if' => ['withAll' => ['password']]],
-            ['match', 'password', 'error' => 'Password confirmation does not match']
-        ],
-    ];
+    #[Data]
+    public string $lastName = '';
+
+    #[Data]
+    public string $nickName = '';
+
+    #[Data]
+    public string $email = '';
+
+    #[Data]
+    public string $password = '';
+
+    #[Data]
+    public string $passwordConfirmation = '';
+
+    public function filterDefinition(): FilterDefinitionInterface
+    {
+        return new FilterDefinition(validationRules: [
+            'name' => [
+                'is_string',
+                'type::notEmpty',
+            ],
+            'lastName' => [
+                'is_string',
+            ],
+            'nickName' => [
+                'is_string',
+                'type::notEmpty',
+                ['string::longer', 3],
+                ['string::regexp', '/^[a-zA-Z0-9_]*$/'],
+                ['entity::unique', User::class, 'nickName'],
+            ],
+            'email' => [
+                'address::email',
+                'type::notEmpty',
+                ['entity::unique', User::class, 'email'],
+            ],
+            'password' => [
+                'type::notEmpty',
+                ['string::longer', 6],
+            ],
+            'passwordConfirmation' => [
+                ['notEmpty', 'if' => ['withAll' => ['password']]],
+                ['match', 'password', 'error' => 'Password confirmation does not match']
+            ],
+        ]);
+    }
 
     public function createUser(): User
     {
         $user = new User();
 
-        $user->name = $this->getField('name');
-        $user->lastName = $this->getField('lastName');
-        $user->nickName = $this->getField('nickName');
-        $user->email = $this->getField('email');
+        $user->name = $this->name;
+        $user->lastName = $this->lastName;
+        $user->nickName = $this->nickName;
+        $user->email = $this->email;
         $user->defaultCurrencyCode = Currency::DEFAULT_CURRENCY_CODE;
 
         return $user;

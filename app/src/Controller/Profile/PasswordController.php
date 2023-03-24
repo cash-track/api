@@ -16,13 +16,6 @@ use Spiral\Router\Annotation\Route;
 
 final class PasswordController extends AuthAwareController
 {
-    /**
-     * @param \Spiral\Auth\AuthScope $auth
-     * @param \Spiral\Http\ResponseWrapper $response
-     * @param \App\Service\Auth\AuthService $authService
-     * @param \App\Service\UserService $userService
-     * @param \Psr\Log\LoggerInterface $logger
-     */
     public function __construct(
         AuthScope $auth,
         protected ResponseWrapper $response,
@@ -33,23 +26,10 @@ final class PasswordController extends AuthAwareController
         parent::__construct($auth);
     }
 
-    /**
-     * @Route(route="/profile/password", name="profile.update.password", methods="PUT", group="auth")
-     *
-     * @param \App\Request\Profile\UpdatePasswordRequest $request
-     * @return \Psr\Http\Message\ResponseInterface
-     */
+    #[Route(route: '/profile/password', name: 'profile.update.password', methods: 'PUT', group: 'auth')]
     public function updatePassword(UpdatePasswordRequest $request): ResponseInterface
     {
-        $request->setContext($this->user);
-
-        if (! $request->isValid()) {
-            return $this->response->json([
-                'errors' => $request->getErrors(),
-            ], 422);
-        }
-
-        $this->authService->hashPassword($this->user, $request->getNewPassword());
+        $this->authService->hashPassword($this->user, $request->newPassword);
 
         try {
             $this->userService->store($this->user);

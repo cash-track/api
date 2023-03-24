@@ -22,14 +22,6 @@ use Spiral\Validator\FilterDefinition;
 
 class ProfileController extends AuthAwareController
 {
-    /**
-     * @param \Spiral\Auth\AuthScope $auth
-     * @param \App\View\UserView $userView
-     * @param \Psr\Log\LoggerInterface $logger
-     * @param \App\Service\UserService $userService
-     * @param \Spiral\Http\ResponseWrapper $response
-     * @param \App\Repository\CurrencyRepository $currencyRepository
-     */
     public function __construct(
         AuthScope $auth,
         protected UserView $userView,
@@ -41,63 +33,31 @@ class ProfileController extends AuthAwareController
         parent::__construct($auth);
     }
 
-    /**
-     * @Route(route="/profile", name="profile.index", methods="GET", group="auth")
-     *
-     * @return \Psr\Http\Message\ResponseInterface
-     */
+    #[Route(route: '/profile', name: 'profile.index', methods: 'GET', group: 'auth')]
     public function index(): ResponseInterface
     {
         return $this->userView->json($this->user);
     }
 
-    /**
-     * @Route(route="/profile/check/nick-name", name="profile.check.nickname", methods="POST", group="auth")
-     *
-     * @param \App\Request\CheckNickNameRequest $request
-     * @return \Psr\Http\Message\ResponseInterface
-     */
-    public function checkNickName(InputManager $input, ValidationProviderInterface $provider): ResponseInterface
+    #[Route(route: '/profile/check/nick-name', name: 'profile.check.nickname', methods: 'POST', group: 'auth')]
+    public function checkNickName(CheckNickNameRequest $_): ResponseInterface
     {
-        $validator = $provider->getValidation(FilterDefinition::class)->validate([
-            'nickName' => $input->data('nickName'),
-        ], CheckNickNameRequest::validationRules())->withContext($this->user);
-
-        if (! $validator->isValid()) {
-            return $this->response->json([
-                'errors' => $validator->getErrors(),
-            ], 422);
-        }
-
         return $this->response->json([
             'message' => 'Nick name are free to use'
         ]);
     }
 
-    /**
-     * @Route(route="/profile", name="profile.update", methods="PUT", group="auth")
-     *
-     * @param \App\Request\Profile\UpdateBasicRequest $request
-     * @return \Psr\Http\Message\ResponseInterface
-     */
+    #[Route(route: '/profile', name: 'profile.update', methods: 'PUT', group: 'auth')]
     public function update(UpdateBasicRequest $request): ResponseInterface
     {
-        $request->setContext($this->user);
-
-        if (! $request->isValid()) {
-            return $this->response->json([
-                'errors' => $request->getErrors(),
-            ], 422);
-        }
-
-        $this->user->name = $request->getName();
-        $this->user->lastName = $request->getLastName();
-        $this->user->nickName = $request->getNickName();
-        $this->user->defaultCurrencyCode = $request->getDefaultCurrencyCode();
+        $this->user->name = $request->name;
+        $this->user->lastName = $request->lastName;
+        $this->user->nickName = $request->nickName;
+        $this->user->defaultCurrencyCode = $request->defaultCurrencyCode;
 
         try {
             /** @var \App\Database\Currency|null $defaultCurrency */
-            $defaultCurrency = $this->currencyRepository->findByPK($request->getDefaultCurrencyCode());
+            $defaultCurrency = $this->currencyRepository->findByPK($request->defaultCurrencyCode);
 
             if (! $defaultCurrency instanceof Currency) {
                 throw new \RuntimeException('Unable to load default currency');

@@ -13,26 +13,18 @@ class UpdatePhotoRequestTest extends TestCase
 {
     public function testGetPhoto(): void
     {
-        $request = $this->getMockBuilder(UpdatePhotoRequest::class)
-                        ->disableOriginalConstructor()
-                        ->onlyMethods(['getField'])
-                        ->getMock();
+        $request = new UpdatePhotoRequest();
 
         $file = $this->getMockBuilder(UploadedFileInterface::class)->getMock();
 
-        $request->method('getField')->with('photo')->willReturn($file);
+        $request->photo = $file;
 
         $this->assertEquals($file, $request->getPhoto());
     }
 
     public function testGetPhotoThrownException(): void
     {
-        $request = $this->getMockBuilder(UpdatePhotoRequest::class)
-                        ->disableOriginalConstructor()
-                        ->onlyMethods(['getField'])
-                        ->getMock();
-
-        $request->method('getField')->with('photo')->willReturn(null);
+        $request = new UpdatePhotoRequest();
 
         $this->expectException(UploadedFileErrorException::class);
 

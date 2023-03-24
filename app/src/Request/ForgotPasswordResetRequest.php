@@ -5,38 +5,38 @@ declare(strict_types=1);
 namespace App\Request;
 
 use App\Database\ForgotPasswordRequest;
-use Spiral\Filters\Filter;
+use Spiral\Filters\Attribute\Input\Data;
+use Spiral\Filters\Model\Filter;
+use Spiral\Filters\Model\FilterDefinitionInterface;
+use Spiral\Filters\Model\HasFilterDefinition;
+use Spiral\Validator\FilterDefinition;
 
-class ForgotPasswordResetRequest extends Filter
+class ForgotPasswordResetRequest extends Filter implements HasFilterDefinition
 {
-    protected const SCHEMA = [
-        'code' => 'data:code',
-        'password' => 'data:password',
-        'passwordConfirmation' => 'data:passwordConfirmation',
-    ];
+    #[Data]
+    public string $code = '';
 
-    protected const VALIDATES = [
-        'code' => [
-            'type::notEmpty',
-            ['entity::exists', ForgotPasswordRequest::class, 'code'],
-        ],
-        'password' => [
-            'type::notEmpty',
-            ['string::longer', 6],
-        ],
-        'passwordConfirmation' => [
-            ['notEmpty', 'if' => ['withAll' => ['password']]],
-            ['match', 'password', 'error' => 'Password confirmation does not match']
-        ],
-    ];
+    #[Data]
+    public string $password = '';
 
-    public function getCode(): string
+    #[Data]
+    public string $passwordConfirmation = '';
+
+    public function filterDefinition(): FilterDefinitionInterface
     {
-        return $this->getField('code');
-    }
-
-    public function getPassword(): string
-    {
-        return $this->getField('password');
+        return new FilterDefinition(validationRules: [
+            'code' => [
+                'type::notEmpty',
+                ['entity::exists', ForgotPasswordRequest::class, 'code'],
+            ],
+            'password' => [
+                'type::notEmpty',
+                ['string::longer', 6],
+            ],
+            'passwordConfirmation' => [
+                ['notEmpty', 'if' => ['withAll' => ['password']]],
+                ['match', 'password', 'error' => 'Password confirmation does not match']
+            ],
+        ]);
     }
 }

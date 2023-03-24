@@ -48,14 +48,8 @@ final class ListController extends Controller
     #[Route(route: '/wallets/unarchived/sort', name: 'wallet.sort.unarchived.set', methods: 'POST', group: 'auth')]
     public function sortUnArchived(SortSetRequest $request): ResponseInterface
     {
-        if (! $request->isValid()) {
-            return $this->response->json([
-                'errors' => $request->getErrors(),
-            ], 422);
-        }
-
         try {
-            $this->sortService->set($this->user, SortType::Wallets, $request->getSort());
+            $this->sortService->set($this->user, SortType::Wallets, $request->sort);
             $this->userService->store($this->user);
         } catch (\Throwable) {
         }

@@ -35,12 +35,6 @@ final class WalletsController extends Controller
     #[Route(route: '/wallets', name: 'wallet.create', methods: 'POST', group: 'auth')]
     public function create(CreateRequest $request): ResponseInterface
     {
-        if (! $request->isValid()) {
-            return $this->response->json([
-                'errors' => $request->getErrors(),
-            ], 422);
-        }
-
         try {
             $wallet = $this->walletService->create($request->createWallet(), $this->user);
         } catch (\Throwable $exception) {
@@ -62,19 +56,13 @@ final class WalletsController extends Controller
             return $this->response->create(404);
         }
 
-        if (! $request->isValid()) {
-            return $this->response->json([
-                'errors' => $request->getErrors(),
-            ], 422);
-        }
-
-        $wallet->name = $request->getName();
-        $wallet->isPublic = $request->getIsPublic();
-        $wallet->defaultCurrencyCode = $request->getDefaultCurrencyCode();
+        $wallet->name = $request->name;
+        $wallet->isPublic = $request->isPublic;
+        $wallet->defaultCurrencyCode = $request->defaultCurrencyCode;
 
         try {
             /** @var \App\Database\Currency|null $defaultCurrency */
-            $defaultCurrency = $this->currencyRepository->findByPK($request->getDefaultCurrencyCode());
+            $defaultCurrency = $this->currencyRepository->findByPK($request->defaultCurrencyCode);
 
             if (! $defaultCurrency instanceof Currency) {
                 throw new \RuntimeException('Unable to load default currency');

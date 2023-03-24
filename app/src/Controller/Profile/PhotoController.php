@@ -19,13 +19,6 @@ final class PhotoController extends AuthAwareController
 {
     use PrototypeTrait;
 
-    /**
-     * @param \Spiral\Auth\AuthScope $auth
-     * @param \Psr\Log\LoggerInterface $logger
-     * @param \App\Service\UserService $userService
-     * @param \Spiral\Http\ResponseWrapper $response
-     * @param \App\Service\PhotoStorageService $photoStorageService
-     */
     public function __construct(
         AuthScope $auth,
         protected LoggerInterface $logger,
@@ -36,23 +29,9 @@ final class PhotoController extends AuthAwareController
         parent::__construct($auth);
     }
 
-
-    /**
-     * @Route(route="/profile/photo", name="profile.update.photo", methods="PUT", group="auth")
-     *
-     * @param \App\Request\Profile\UpdatePhotoRequest $request
-     * @return \Psr\Http\Message\ResponseInterface
-     */
+    #[Route(route: '/profile/photo', name: 'profile.update.photo', methods: 'PUT', group: 'auth')]
     public function updatePhoto(UpdatePhotoRequest $request): ResponseInterface
     {
-        $request->setContext($this->user);
-
-        if (! $request->isValid()) {
-            return $this->response->json([
-                'errors' => $request->getErrors(),
-            ], 422);
-        }
-
         $file = $request->getPhoto();
 
         $fileName = $this->photoStorageService->storeUploadedProfilePhoto($file);

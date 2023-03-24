@@ -41,14 +41,6 @@ final class TagsController extends AuthAwareController
     #[Route(route: '/tags', name: 'tag.create', methods: 'POST', group: 'auth')]
     public function create(CreateRequest $request): ResponseInterface
     {
-        $request->setFields(['user_id' => $this->user->id]);
-
-        if (! $request->isValid()) {
-            return $this->response->json([
-                'errors' => $request->getErrors(),
-            ], 422);
-        }
-
         try {
             $tag = $this->tagService->create($request->createTag(), $this->user);
         } catch (\Throwable $exception) {
@@ -70,20 +62,9 @@ final class TagsController extends AuthAwareController
             return $this->response->create(404);
         }
 
-        $request->setValue([
-            'id' => $tag->id,
-            'user_id' => $this->user->id
-        ]);
-
-        if (! $request->isValid()) {
-            return $this->response->json([
-                'errors' => $request->getErrors(),
-            ], 422);
-        }
-
-        $tag->name = $request->getName();
-        $tag->icon = $request->getIcon();
-        $tag->color = $request->getColor();
+        $tag->name = $request->name;
+        $tag->icon = $request->icon;
+        $tag->color = $request->color;
 
         try {
             $tag = $this->tagService->store($tag);

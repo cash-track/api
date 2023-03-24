@@ -6,68 +6,58 @@ namespace App\Request\Charge;
 
 use App\Database\Charge;
 use App\Database\Tag;
-use Spiral\Filters\Filter;
+use Spiral\Filters\Attribute\Input\Data;
+use Spiral\Filters\Attribute\Setter;
+use Spiral\Filters\Model\Filter;
+use Spiral\Filters\Model\FilterDefinitionInterface;
+use Spiral\Filters\Model\HasFilterDefinition;
+use Spiral\Validator\FilterDefinition;
 
-class CreateRequest extends Filter
+class CreateRequest extends Filter implements HasFilterDefinition
 {
     // TODO. Support custom currency with custom rate
 
-    protected const SCHEMA = [
-        'type'        => 'data:type',
-        'amount'      => 'data:amount',
-        'title'       => 'data:title',
-        'description' => 'data:description',
-        'tags'        => 'data:tags',
-    ];
+    #[Data]
+    public string $type = '';
 
-    protected const VALIDATES = [
-        'type'        => [
-            'type::notEmpty',
-            ['in_array', [Charge::TYPE_EXPENSE, Charge::TYPE_INCOME], true],
-        ],
-        'amount'      => [
-            'is_numeric',
-            'type::notEmpty',
-            ['number::higher', 0]
-        ],
-        'title'       => [
-            'is_string',
-            'type::notEmpty',
-        ],
-        'description' => [
-            'is_string',
-        ],
-        'tags' => [
-            ['array::of', ['entity:exists', Tag::class, 'id']],
-        ],
-    ];
+    #[Data]
+    #[Setter(filter: 'floatval')]
+    public float $amount = 0.0;
 
-    public function getType(): string
-    {
-        return (string) $this->getField('type', Charge::TYPE_EXPENSE);
-    }
+    #[Data]
+    public string $title = '';
 
-    public function getAmount(): float
-    {
-        return floatval($this->getField('amount', 0));
-    }
-
-    public function getTitle(): string
-    {
-        return (string) $this->getField('title');
-    }
-
-    public function getDescription(): string
-    {
-        return (string) $this->getField('description');
-    }
+    #[Data]
+    public string $description = '';
 
     /**
-     * @return array<array-key, int>
-     * @throws \Spiral\Models\Exception\EntityExceptionInterface
+     * @var array<array-key, int>
      */
-    public function getTags(): array
+    #[Data]
+    public array $tags = [];
+
+    public function filterDefinition(): FilterDefinitionInterface
     {
-        return (array) $this->getField('tags');
+        return new FilterDefinition(validationRules: [
+            'type'        => [
+                'type::notEmpty',
+                ['in_array', [Charge::TYPE_EXPENSE, Charge::TYPE_INCOME], true],
+            ],
+            'amount'      => [
+                'is_numeric',
+                'type::notEmpty',
+                ['number::higher', 0]
+            ],
+            'title'       => [
+                'is_string',
+                'type::notEmpty',
+            ],
+            'description' => [
+                'is_string',
+            ],
+            'tags' => [
+                ['array::of', ['entity:exists', Tag::class, 'id']],
+            ],
+        ]);
     }
 }

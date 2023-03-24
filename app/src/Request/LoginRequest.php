@@ -4,17 +4,25 @@ declare(strict_types=1);
 
 namespace App\Request;
 
-use Spiral\Filters\Filter;
+use Spiral\Filters\Attribute\Input\Data;
+use Spiral\Filters\Model\Filter;
+use Spiral\Filters\Model\FilterDefinitionInterface;
+use Spiral\Filters\Model\HasFilterDefinition;
+use Spiral\Validator\FilterDefinition;
 
-class LoginRequest extends Filter
+class LoginRequest extends Filter implements HasFilterDefinition
 {
-    protected const SCHEMA = [
-        'email' => 'data:email',
-        'password' => 'data:password',
-    ];
+    #[Data]
+    public string $email = '';
 
-    protected const VALIDATES = [
-        'email' => ['type::notEmpty'],
-        'password' => ['type::notEmpty'],
-    ];
+    #[Data]
+    public string $password = '';
+
+    public function filterDefinition(): FilterDefinitionInterface
+    {
+        return new FilterDefinition(validationRules: [
+            'email' => ['type::notEmpty'],
+            'password' => ['type::notEmpty'],
+        ]);
+    }
 }

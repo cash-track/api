@@ -14,32 +14,17 @@ use Spiral\Router\Annotation\Route;
 
 final class ForgotPasswordController
 {
-    /**
-     * @param \Spiral\Http\ResponseWrapper $response
-     * @param \App\Service\Auth\ForgotPasswordService $forgotPasswordService
-     */
     public function __construct(
-        protected ResponseWrapper $response,
-        protected ForgotPasswordService $forgotPasswordService,
+        protected readonly ResponseWrapper $response,
+        protected readonly ForgotPasswordService $forgotPasswordService,
     ) {
     }
 
-    /**
-     * @Route(route="/auth/password/forgot", name="auth.password.forgot", methods="POST")
-     *
-     * @param \App\Request\ForgotPasswordCreateRequest $request
-     * @return \Psr\Http\Message\ResponseInterface
-     */
+    #[Route(route: '/auth/password/forgot', name: 'auth.password.forgot', methods: 'POST')]
     public function create(ForgotPasswordCreateRequest $request): ResponseInterface
     {
-        if (! $request->isValid()) {
-            return $this->response->json([
-                'errors' => $request->getErrors(),
-            ], 422);
-        }
-
         try {
-            $this->forgotPasswordService->create($request->getEmail());
+            $this->forgotPasswordService->create($request->email);
         } catch (ForgotPasswordThrottledException $exception) {
             return $this->response->json([
                 'message' => $exception->getMessage(),
@@ -56,22 +41,11 @@ final class ForgotPasswordController
         ], 200);
     }
 
-    /**
-     * @Route(route="/auth/password/reset", name="auth.password.reset", methods="POST")
-     *
-     * @param \App\Request\ForgotPasswordResetRequest $request
-     * @return \Psr\Http\Message\ResponseInterface
-     */
+    #[Route(route: '/auth/password/reset', name: 'auth.password.reset', methods: 'POST')]
     public function reset(ForgotPasswordResetRequest $request): ResponseInterface
     {
-        if (! $request->isValid()) {
-            return $this->response->json([
-                'errors' => $request->getErrors(),
-            ], 422);
-        }
-
         try {
-            $this->forgotPasswordService->reset($request->getCode(), $request->getPassword());
+            $this->forgotPasswordService->reset($request->code, $request->password);
         } catch (\Throwable $exception) {
             return $this->response->json([
                 'message' => 'Unable to reset your password.',

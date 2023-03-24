@@ -19,14 +19,6 @@ use Spiral\Router\Annotation\Route;
 
 final class RegisterController extends Controller
 {
-    /**
-     * @param \App\View\UserView $userView
-     * @param \App\Service\Auth\AuthService $authService
-     * @param \App\Service\UserService $userService
-     * @param \Spiral\Http\ResponseWrapper $response
-     * @param \App\Service\Auth\EmailConfirmationService $emailConfirmationService
-     * @param \App\Service\Auth\RefreshTokenService $refreshTokenService
-     */
     public function __construct(
         protected UserView $userView,
         protected AuthService $authService,
@@ -39,20 +31,9 @@ final class RegisterController extends Controller
         parent::__construct($userView, $response);
     }
 
-    /**
-     * @Route(route="/auth/register", name="auth.register", methods="POST")
-     *
-     * @param \App\Request\RegisterRequest $request
-     * @return \Psr\Http\Message\ResponseInterface
-     */
+    #[Route(route: '/auth/register', name: 'auth.register', methods: 'POST')]
     public function register(RegisterRequest $request): ResponseInterface
     {
-        if (! $request->isValid()) {
-            return $this->response->json([
-                'errors' => $request->getErrors(),
-            ], 422);
-        }
-
         $user = $request->createUser();
 
         $currency = $this->currencyRepository->getDefault();
@@ -61,7 +42,7 @@ final class RegisterController extends Controller
             $user->setDefaultCurrency($currency);
         }
 
-        $this->authService->hashPassword($user, $request->getField('password'));
+        $this->authService->hashPassword($user, $request->password);
 
         try {
             $user = $this->userService->store($user);

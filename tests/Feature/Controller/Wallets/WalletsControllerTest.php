@@ -8,6 +8,7 @@ use App\Repository\CurrencyRepository;
 use App\Service\WalletService;
 use PHPUnit\Framework\MockObject\MockObject;
 use Tests\DatabaseTransaction;
+use Tests\Factories\CurrencyFactory;
 use Tests\Factories\UserFactory;
 use Tests\Factories\WalletFactory;
 use Tests\Fixtures;
@@ -184,7 +185,10 @@ class WalletsControllerTest extends TestCase implements DatabaseTransaction
 
         $walletId = Fixtures::integer();
 
-        $response = $this->withAuth($auth)->put("/wallets/{$walletId}");
+        $response = $this->withAuth($auth)->put("/wallets/{$walletId}", [
+            'name' => Fixtures::string(),
+            'defaultCurrencyCode' => CurrencyFactory::code(),
+        ]);
 
         $response->assertNotFound();
     }
@@ -195,7 +199,10 @@ class WalletsControllerTest extends TestCase implements DatabaseTransaction
 
         $wallet = $this->walletFactory->create();
 
-        $response = $this->withAuth($auth)->put("/wallets/{$wallet->id}");
+        $response = $this->withAuth($auth)->put("/wallets/{$wallet->id}", [
+            'name' => Fixtures::string(),
+            'defaultCurrencyCode' => CurrencyFactory::code(),
+        ]);
 
         $response->assertNotFound();
     }

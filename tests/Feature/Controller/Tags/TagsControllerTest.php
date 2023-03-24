@@ -227,7 +227,9 @@ class TagsControllerTest extends TestCase implements DatabaseTransaction
 
         $tagId = Fixtures::integer();
 
-        $response = $this->withAuth($auth)->put("/tags/{$tagId}");
+        $response = $this->withAuth($auth)->put("/tags/{$tagId}", [
+            'name' => Fixtures::string()
+        ]);
 
         $response->assertNotFound();
     }
@@ -238,7 +240,9 @@ class TagsControllerTest extends TestCase implements DatabaseTransaction
 
         $tag = $this->tagFactory->forUser($this->userFactory->create())->create();
 
-        $response = $this->withAuth($auth)->put("/tags/{$tag->id}");
+        $response = $this->withAuth($auth)->put("/tags/{$tag->id}", [
+            'name' => Fixtures::string()
+        ]);
 
         $response->assertNotFound();
     }

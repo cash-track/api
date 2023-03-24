@@ -36,14 +36,8 @@ final class LoginController extends Controller
     #[Route(route: '/auth/login', name: 'auth.login', methods: 'POST')]
     public function login(LoginRequest $request): ResponseInterface
     {
-        if (! $request->isValid()) {
-            return $this->response->json([
-                'errors' => $request->getErrors(),
-            ], 422);
-        }
-
         try {
-            $user = $this->userRepository->findByEmail($request->getField('email'));
+            $user = $this->userRepository->findByEmail($request->email);
         } catch (\Throwable $exception) {
             return $this->response->json([
                 'error' => $exception->getMessage(),
@@ -55,7 +49,7 @@ final class LoginController extends Controller
             return $this->responseAuthenticationFailure();
         }
 
-        if (! $this->authService->verifyPassword($user, $request->getField('password'))) {
+        if (! $this->authService->verifyPassword($user, $request->password)) {
             return $this->responseAuthenticationFailure();
         }
 

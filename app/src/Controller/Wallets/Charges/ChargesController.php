@@ -83,21 +83,15 @@ class ChargesController extends Controller
             return $this->response->create(404);
         }
 
-        if (! $request->isValid()) {
-            return $this->response->json([
-                'errors' => $request->getErrors(),
-            ], 422);
-        }
-
         $charge = new Charge();
-        $charge->type = $request->getType();
-        $charge->amount = $request->getAmount();
-        $charge->title = $request->getTitle();
-        $charge->description = $request->getDescription();
+        $charge->type = $request->type;
+        $charge->amount = $request->amount;
+        $charge->title = $request->title;
+        $charge->description = $request->description;
         $charge->setWallet($wallet);
         $charge->setUser($this->user);
 
-        $tags = $this->tagRepository->findAllByPKsAndUserPKs($request->getTags(), $wallet->getUserIDs());
+        $tags = $this->tagRepository->findAllByPKsAndUserPKs($request->tags, $wallet->getUserIDs());
 
         foreach ($tags as $tag) {
             $charge->tags->add($tag);
@@ -139,21 +133,15 @@ class ChargesController extends Controller
             return $this->response->create(404);
         }
 
-        if (! $request->isValid()) {
-            return $this->response->json([
-                'errors' => $request->getErrors(),
-            ], 422);
-        }
-
         $oldCharge = clone $charge;
 
-        $charge->type = $request->getType();
-        $charge->amount = $request->getAmount();
-        $charge->title = $request->getTitle();
-        $charge->description = $request->getDescription();
+        $charge->type = $request->type;
+        $charge->amount = $request->amount;
+        $charge->title = $request->title;
+        $charge->description = $request->description;
 
         $charge->tags->clear();
-        $tags = $this->tagRepository->findAllByPKsAndUserPKs($request->getTags(), $wallet->getUserIDs());
+        $tags = $this->tagRepository->findAllByPKsAndUserPKs($request->tags, $wallet->getUserIDs());
 
         foreach ($tags as $tag) {
             $charge->tags->add($tag);

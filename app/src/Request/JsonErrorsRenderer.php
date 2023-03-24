@@ -6,10 +6,10 @@ use Psr\Http\Message\ResponseInterface;
 use Spiral\Filters\ErrorsRendererInterface;
 use Spiral\Http\ResponseWrapper;
 
-class JsonErrorsRenderer implements ErrorsRendererInterface
+readonly class JsonErrorsRenderer implements ErrorsRendererInterface
 {
     public function __construct(
-        private readonly ResponseWrapper $wrapper
+        private ResponseWrapper $wrapper
     ) {
     }
 
