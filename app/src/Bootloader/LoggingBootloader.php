@@ -21,10 +21,7 @@ class LoggingBootloader extends Bootloader
      */
     const DEFAULT_CHANNEL = 'default';
 
-    /**
-     * @param \Spiral\Monolog\Bootloader\MonologBootloader $monolog
-     */
-    public function boot(MonologBootloader $monolog, EnvironmentInterface $env): void
+    public function init(MonologBootloader $monolog, EnvironmentInterface $env): void
     {
         $this->configureCommonHandlers($monolog);
 
@@ -33,9 +30,6 @@ class LoggingBootloader extends Bootloader
         }
     }
 
-    /**
-     * @param \Spiral\Monolog\Bootloader\MonologBootloader $monolog
-     */
     private function configureCommonHandlers(MonologBootloader $monolog): void
     {
         // app level errors
@@ -58,9 +52,6 @@ class LoggingBootloader extends Bootloader
         );
     }
 
-    /**
-     * @param \Spiral\Monolog\Bootloader\MonologBootloader $monolog
-     */
     private function configureDebugHandlers(MonologBootloader $monolog): void
     {
         // debug and info messages via global LoggerInterface

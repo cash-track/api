@@ -7,10 +7,19 @@ namespace Tests\Feature\Request\Profile;
 use App\Request\Profile\UpdatePhotoRequest;
 use Laminas\Diactoros\Exception\UploadedFileErrorException;
 use Psr\Http\Message\UploadedFileInterface;
+use Spiral\Validator\FilterDefinition;
 use Tests\TestCase;
 
 class UpdatePhotoRequestTest extends TestCase
 {
+    public function testFilterDefinition(): void
+    {
+        $request = new UpdatePhotoRequest();
+
+        $filter = $request->filterDefinition();
+        $this->assertInstanceOf(FilterDefinition::class, $filter);
+    }
+
     public function testGetPhoto(): void
     {
         $request = new UpdatePhotoRequest();
