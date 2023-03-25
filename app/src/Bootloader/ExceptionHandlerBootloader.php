@@ -38,11 +38,7 @@ final class ExceptionHandlerBootloader extends Bootloader
         // is running in the console.
         $this->handler->addRenderer(new ConsoleRenderer());
 
-        $kernel->running(function (): void {
-            // Register the JSON renderer, that will be used when the application is
-            // running in the HTTP context and a JSON response is expected.
-            $this->handler->addRenderer(new JsonRenderer());
-        });
+        $kernel->running(\Closure::fromCallable([$this, 'addRenderer']));
     }
 
     public function boot(LoggerReporter $logger, FileReporter $files): void
@@ -54,5 +50,12 @@ final class ExceptionHandlerBootloader extends Bootloader
         // Register the file reporter. It allows you to save detailed information about an exception to a file
         // known as snapshot.
         $this->handler->addReporter($files);
+    }
+
+    public function addRenderer(): void
+    {
+        // Register the JSON renderer, that will be used when the application is
+        // running in the HTTP context and a JSON response is expected.
+        $this->handler->addRenderer(new JsonRenderer());
     }
 }
