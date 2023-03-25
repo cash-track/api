@@ -10,6 +10,9 @@ use Aws\S3\S3ClientInterface;
 use Spiral\Boot\Bootloader\Bootloader;
 use Spiral\Core\Container;
 
+/**
+ * Note: It uses ~10MB of memory
+ */
 class S3Bootloader extends Bootloader
 {
     /**

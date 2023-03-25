@@ -28,11 +28,6 @@ abstract class TestCase extends BaseTestCase
     use InteractsWithMock;
     use AssertHelpers;
 
-    protected function getFakeS3(): S3ClientInterface
-    {
-        return $this->getMockBuilder(S3ClientInterface::class)->getMock();
-    }
-
     protected function setUp(): void
     {
         $this->beforeBooting(static function (ConfiguratorInterface $config): void {
@@ -44,8 +39,6 @@ abstract class TestCase extends BaseTestCase
         });
 
         parent::setUp();
-
-        $this->getContainer()->bindSingleton(S3ClientInterface::class, $this->getFakeS3());
 
         $this->getContainer()->get(TranslatorInterface::class)->setLocale('en');
 
