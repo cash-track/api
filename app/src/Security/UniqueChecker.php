@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Security;
 
 use Cycle\ORM\ORMInterface;
-use Spiral\Validation\AbstractChecker;
+use Spiral\Validator\AbstractChecker;
 
 class UniqueChecker extends AbstractChecker
 {

@@ -8,7 +8,6 @@ use App\Service\Mailer\MailerInterface;
 use App\Service\WalletService;
 use PHPUnit\Framework\MockObject\MockObject;
 use Tests\DatabaseTransaction;
-use Tests\Factories\ChargeFactory;
 use Tests\Factories\UserFactory;
 use Tests\Factories\WalletFactory;
 use Tests\Fixtures;
@@ -19,8 +18,6 @@ class UsersControllerTest extends TestCase implements DatabaseTransaction
     protected UserFactory $userFactory;
 
     protected WalletFactory $walletFactory;
-
-    protected ChargeFactory $chargeFactory;
 
     protected function setUp(): void
     {
@@ -132,7 +129,11 @@ class UsersControllerTest extends TestCase implements DatabaseTransaction
         $auth = $this->makeAuth($user = $this->userFactory->create());
 
         $wallet = $this->walletFactory->forUser($user)->create();
-        $otherUserId = Fixtures::integer();
+        $otherUserId = Fixtures::integer() * -1;
+
+        $this->mock(MailerInterface::class, ['send', 'render'], function (MockObject $mock) {
+            $mock->expects($this->never())->method('send');
+        });
 
         $response = $this->withAuth($auth)->patch("/wallets/{$wallet->id}/users/{$otherUserId}");
 
@@ -234,7 +235,7 @@ class UsersControllerTest extends TestCase implements DatabaseTransaction
         $auth = $this->makeAuth($user = $this->userFactory->create());
 
         $wallet = $this->walletFactory->forUser($user)->create();
-        $otherUserId = Fixtures::integer();
+        $otherUserId = Fixtures::integer() * -1;
 
         $response = $this->withAuth($auth)->delete("/wallets/{$wallet->id}/users/{$otherUserId}");
 

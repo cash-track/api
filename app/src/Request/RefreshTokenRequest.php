@@ -4,23 +4,21 @@ declare(strict_types=1);
 
 namespace App\Request;
 
-use Spiral\Filters\Filter;
+use Spiral\Filters\Attribute\Input\Data;
+use Spiral\Filters\Model\Filter;
+use Spiral\Filters\Model\FilterDefinitionInterface;
+use Spiral\Filters\Model\HasFilterDefinition;
+use Spiral\Validator\FilterDefinition;
 
-class RefreshTokenRequest extends Filter
+class RefreshTokenRequest extends Filter implements HasFilterDefinition
 {
-    protected const SCHEMA = [
-        'accessToken' => 'data:accessToken',
-    ];
+    #[Data]
+    public string $accessToken = '';
 
-    protected const VALIDATES = [
-        'accessToken' => ['type::notEmpty'],
-    ];
-
-    /**
-     * @return string
-     */
-    public function getAccessToken(): string
+    public function filterDefinition(): FilterDefinitionInterface
     {
-        return (string) $this->getField('accessToken');
+        return new FilterDefinition(validationRules: [
+            'accessToken' => ['is_string'],
+        ]);
     }
 }

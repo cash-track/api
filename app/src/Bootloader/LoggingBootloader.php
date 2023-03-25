@@ -21,10 +21,7 @@ class LoggingBootloader extends Bootloader
      */
     const DEFAULT_CHANNEL = 'default';
 
-    /**
-     * @param \Spiral\Monolog\Bootloader\MonologBootloader $monolog
-     */
-    public function boot(MonologBootloader $monolog, EnvironmentInterface $env): void
+    public function init(MonologBootloader $monolog, EnvironmentInterface $env): void
     {
         $this->configureCommonHandlers($monolog);
 
@@ -33,38 +30,44 @@ class LoggingBootloader extends Bootloader
         }
     }
 
-    /**
-     * @param \Spiral\Monolog\Bootloader\MonologBootloader $monolog
-     */
     private function configureCommonHandlers(MonologBootloader $monolog): void
     {
         // app level errors
-        $monolog->addHandler(self::DEFAULT_CHANNEL, $monolog->logRotate(
-            directory('runtime') . 'logs/error.log',
-            Logger::ERROR,
-            25,
-            false
-        ));
+        $monolog->addHandler(
+            channel: self::DEFAULT_CHANNEL,
+            handler: $monolog->logRotate(
+                filename: directory('runtime') . 'logs/error.log',
+                level: Logger::ERROR,
+                maxFiles: 25,
+                bubble: false
+            )
+        );
 
         // http level errors
-        $monolog->addHandler(ErrorHandlerMiddleware::class, $monolog->logRotate(
-            directory('runtime') . 'logs/http.log'
-        ));
+        $monolog->addHandler(
+            channel: ErrorHandlerMiddleware::class,
+            handler: $monolog->logRotate(
+                filename: directory('runtime') . 'logs/http.log'
+            )
+        );
     }
 
-    /**
-     * @param \Spiral\Monolog\Bootloader\MonologBootloader $monolog
-     */
     private function configureDebugHandlers(MonologBootloader $monolog): void
     {
         // debug and info messages via global LoggerInterface
-        $monolog->addHandler(self::DEFAULT_CHANNEL, $monolog->logRotate(
-            directory('runtime') . 'logs/debug.log'
-        ));
+        $monolog->addHandler(
+            channel: self::DEFAULT_CHANNEL,
+            handler: $monolog->logRotate(
+                filename: directory('runtime') . 'logs/debug.log'
+            )
+        );
 
         // debug database queries
-        $monolog->addHandler(MySQLDriver::class, $monolog->logRotate(
-            directory('runtime') . 'logs/db.log'
-        ));
+        $monolog->addHandler(
+            channel: MySQLDriver::class,
+            handler: $monolog->logRotate(
+                filename: directory('runtime') . 'logs/db.log'
+            )
+        );
     }
 }

@@ -15,6 +15,8 @@ use Spiral\Auth\Middleware\AuthMiddleware as Framework;
 
 class AuthMiddleware implements MiddlewareInterface
 {
+    const HEADER_USER_ID = 'X-Internal-UserId';
+
     /**
      * {@inheritdoc}
      */
@@ -26,11 +28,13 @@ class AuthMiddleware implements MiddlewareInterface
             return $this->unauthenticated();
         }
 
-        if (! $authContext->getActor() instanceof User) {
+        $actor = $authContext->getActor();
+
+        if (! $actor instanceof User) {
             return $this->unauthenticated();
         }
 
-        return $handler->handle($request);
+        return $handler->handle($request->withAddedHeader(self::HEADER_USER_ID, (string) $actor->id));
     }
 
     /**

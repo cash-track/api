@@ -4,15 +4,16 @@ declare(strict_types=1);
 
 namespace Tests;
 
+use Aws\S3\S3ClientInterface;
 use Cycle\Database\DatabaseInterface;
-use Cycle\Database\DatabaseManager;
+use Spiral\Boot\FinalizerInterface;
 use Spiral\Config\ConfiguratorInterface;
 use Spiral\Config\Patch\Set;
 use Spiral\Core\Container;
 use Spiral\Testing\TestableKernelInterface;
 use Spiral\Testing\TestCase as BaseTestCase;
 use Spiral\Translator\TranslatorInterface;
-use Tests\App\TestApp;
+use Tests\App\TestKernel;
 use Tests\Traits\AssertHelpers;
 use Tests\Traits\InteractsWithDatabase;
 use Tests\Traits\InteractsWithHttp;
@@ -29,7 +30,7 @@ abstract class TestCase extends BaseTestCase
 
     protected function setUp(): void
     {
-        $this->beforeStarting(static function (ConfiguratorInterface $config): void {
+        $this->beforeBooting(static function (ConfiguratorInterface $config): void {
             if (! $config->exists('session')) {
                 return;
             }
@@ -41,23 +42,42 @@ abstract class TestCase extends BaseTestCase
 
         $this->getContainer()->get(TranslatorInterface::class)->setLocale('en');
 
-        if ($this instanceof DatabaseTransaction) {
-            $this->getContainer()->get(DatabaseInterface::class)->begin();
+        $this->scopedDatabase();
+    }
+
+    /**
+     * @return void
+     * @throws \Throwable
+     */
+    protected function scopedDatabase(): void
+    {
+        if (! $this instanceof DatabaseTransaction) {
+            return;
         }
+
+        /** @var \Cycle\Database\DatabaseInterface $db */
+        $db = $this->getContainer()->get(DatabaseInterface::class);
+
+        $this->getContainer()->get(FinalizerInterface::class)->addFinalizer(static function () use ($db) {
+            $db->rollback();
+        });
     }
 
     protected function tearDown(): void
     {
-        if ($this instanceof DatabaseTransaction) {
-            $this->getContainer()->get(DatabaseInterface::class)->rollback();
+        parent::tearDown();
+
+        $container = $this->getContainer();
+        unset($this->app);
+
+        if ($container instanceof Container) {
+            $container->destruct();
         }
+
+        unset($container);
 
         // Uncomment this line if you want to clean up runtime directory.
         // $this->cleanUpRuntimeDirectory();
-
-        foreach ($this->getContainer()->get(DatabaseManager::class)->getDrivers() as $driver) {
-            $driver->disconnect();
-        }
     }
 
     public function rootDirectory(): string
@@ -72,11 +92,14 @@ abstract class TestCase extends BaseTestCase
         ];
     }
 
-    public function createAppInstance(): TestableKernelInterface
+    public function createAppInstance(Container $container = new Container()): TestableKernelInterface
     {
-        return new TestApp(new Container(), $this->defineDirectories(
-            $this->rootDirectory()
-        ));
+        return TestKernel::create(
+            directories: $this->defineDirectories(
+                $this->rootDirectory(),
+            ),
+            handleErrors: false,
+            container: $container,
+        );
     }
-
 }

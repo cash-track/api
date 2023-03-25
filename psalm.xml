@@ -9,6 +9,7 @@
     <projectFiles>
         <directory name="app/src" />
         <ignoreFiles>
+            <directory name="tests" />
             <directory name="vendor" />
         </ignoreFiles>
     </projectFiles>

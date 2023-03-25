@@ -13,7 +13,7 @@ class CdnConfig extends InjectableConfig
     /**
      * @internal For internal usage. Will be hydrated in the constructor.
      */
-    protected $config = [
+    protected array $config = [
         'host'   => null,
         'bucket' => null
     ];

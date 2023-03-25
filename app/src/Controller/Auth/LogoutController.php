@@ -14,11 +14,6 @@ use Spiral\Router\Annotation\Route;
 
 final class LogoutController
 {
-    /**
-     * @param \Spiral\Auth\AuthScope $auth
-     * @param \Spiral\Http\ResponseWrapper $response
-     * @param \App\Service\Auth\RefreshTokenService $refreshTokenService
-     */
     public function __construct(
         protected AuthScope $auth,
         protected ResponseWrapper $response,
@@ -26,16 +21,12 @@ final class LogoutController
     ) {
     }
 
-    /**
-     * @Route(route="/auth/logout", name="auth.logout", methods="POST", group="auth")
-     *
-     * @return \Psr\Http\Message\ResponseInterface
-     */
+    #[Route(route: '/auth/logout', name: 'auth.logout', methods: 'POST', group: 'auth')]
     public function logout(LogoutRequest $request): ResponseInterface
     {
         $this->auth->close();
 
-        $refreshToken = $this->refreshTokenService->getContextByToken($request->getRefreshToken())->getToken();
+        $refreshToken = $this->refreshTokenService->getContextByToken($request->refreshToken)->getToken();
 
         if ($refreshToken instanceof TokenInterface) {
             $this->refreshTokenService->close($refreshToken);

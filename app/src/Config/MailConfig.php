@@ -14,7 +14,7 @@ class MailConfig extends InjectableConfig
     /**
      * @internal For internal usage. Will be hydrated in the constructor.
      */
-    protected $config = [
+    protected array $config = [
         'sender' => [
             'name'    => null,
             'address' => null,
@@ -85,13 +85,5 @@ class MailConfig extends InjectableConfig
     public function getSmtpPassword(): string
     {
         return (string) $this->config['drivers'][self::DRIVER_SMTP]['password'];
-    }
-
-    /**
-     * @return string
-     */
-    public function getSmtpEncryption(): string
-    {
-        return (string) $this->config['drivers'][self::DRIVER_SMTP]['encryption'];
     }
 }

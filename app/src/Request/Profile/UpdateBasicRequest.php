@@ -4,58 +4,55 @@ declare(strict_types=1);
 
 namespace App\Request\Profile;
 
+use App\Auth\AuthMiddleware;
 use App\Database\Currency;
 use App\Database\User;
-use Spiral\Filters\Filter;
+use Spiral\Filters\Attribute\Input\Data;
+use Spiral\Filters\Attribute\Input\Header;
+use Spiral\Filters\Model\Filter;
+use Spiral\Filters\Model\FilterDefinitionInterface;
+use Spiral\Filters\Model\HasFilterDefinition;
+use Spiral\Validator\FilterDefinition;
 
-class UpdateBasicRequest extends Filter
+class UpdateBasicRequest extends Filter implements HasFilterDefinition
 {
-    protected const SCHEMA = [
-        'name' => 'data:name',
-        'lastName' => 'data:lastName',
-        'nickName' => 'data:nickName',
-        'defaultCurrencyCode' => 'data:defaultCurrencyCode'
-    ];
+    #[Header(key: AuthMiddleware::HEADER_USER_ID)]
+    public int $id = 0;
 
-    protected const VALIDATES = [
-        'name' => [
-            'is_string',
-            'type::notEmpty',
-        ],
-        'lastName' => [
-            'is_string',
-        ],
-        'nickName' => [
-            'is_string',
-            'type::notEmpty',
-            ['string::longer', 3],
-            ['string::regexp', '/^[a-zA-Z0-9_]*$/'],
-            ['entity::unique', User::class, 'nickName'],
-        ],
-        'defaultCurrencyCode' => [
-            'is_string',
-            'type::notEmpty',
-            ['entity::exists', Currency::class, 'code'],
-        ],
-    ];
+    #[Data]
+    public string $name = '';
 
-    public function getName(): string
+    #[Data]
+    public string $lastName = '';
+
+    #[Data]
+    public string $nickName = '';
+
+    #[Data]
+    public string $defaultCurrencyCode = '';
+
+    public function filterDefinition(): FilterDefinitionInterface
     {
-        return $this->getField('name');
-    }
-
-    public function getLastName(): string
-    {
-        return $this->getField('lastName');
-    }
-
-    public function getNickName(): string
-    {
-        return $this->getField('nickName');
-    }
-
-    public function getDefaultCurrencyCode(): string
-    {
-        return $this->getField('defaultCurrencyCode');
+        return new FilterDefinition(validationRules: [
+            'name' => [
+                'is_string',
+                'type::notEmpty',
+            ],
+            'lastName' => [
+                'is_string',
+            ],
+            'nickName' => [
+                'is_string',
+                'type::notEmpty',
+                ['string::longer', 3],
+                ['string::regexp', '/^[a-zA-Z0-9_]*$/'],
+                ['unique::verify', User::class, 'nickName', [], ['id']],
+            ],
+            'defaultCurrencyCode' => [
+                'is_string',
+                'type::notEmpty',
+                ['entity::exists', Currency::class, 'code'],
+            ],
+        ]);
     }
 }

@@ -4,19 +4,11 @@ declare(strict_types=1);
 
 namespace App\Request;
 
-use Spiral\Filters\Filter;
+use Spiral\Filters\Attribute\Input\Data;
+use Spiral\Filters\Model\Filter;
 
 class LogoutRequest extends Filter
 {
-    protected const SCHEMA = [
-        'refreshToken' => 'data:refreshToken',
-    ];
-
-    /**
-     * @return string
-     */
-    public function getRefreshToken(): string
-    {
-        return (string) $this->getField('refreshToken');
-    }
+    #[Data]
+    public string $refreshToken = '';
 }

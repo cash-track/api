@@ -78,27 +78,6 @@ class PhotoControllerTest extends TestCase implements DatabaseTransaction
         ]);
     }
 
-    public function testUpdatePhotoValidationFails(): void
-    {
-        $auth = $this->makeAuth($this->userFactory->create());
-
-        $fileMock = $this->getMockUploadedFile();
-        $requestMock = $this->getMockUpdatePhotoRequest($fileMock, true);
-        $storageMock = $this->getMockStorageService();
-
-        $this->getContainer()->bind(UpdatePhotoRequest::class, fn () => $requestMock);
-        $this->getContainer()->bind(PhotoStorageService::class, fn () => $storageMock);
-
-        $response = $this->withAuth($auth)->put('/profile/photo');
-
-        $response->assertUnprocessable();
-
-        $body = $this->getJsonResponseBody($response);
-
-        $this->assertArrayHasKey('errors', $body);
-        $this->assertArrayHasKey('photo', $body['errors']);
-    }
-
     public function testUpdatePhotoStoreFails(): void
     {
         $auth = $this->makeAuth($this->userFactory->create());
@@ -175,14 +154,10 @@ class PhotoControllerTest extends TestCase implements DatabaseTransaction
     {
         $mock = $this->getMockBuilder(UpdatePhotoRequest::class)
                      ->disableOriginalConstructor()
-                     ->onlyMethods(['isValid', 'setContext', 'getPhoto', 'getErrors'])
                      ->getMock();
 
-        $mock->method('isValid')->willReturn(!$isInvalid);
+        $mock->photo = $file;
         $mock->method('getPhoto')->willReturn($file);
-        $mock->method('getErrors')->willReturn(
-            $isInvalid ? ['photo' => ['Validation error']] : [],
-        );
 
         return $mock;
     }

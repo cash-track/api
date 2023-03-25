@@ -4,52 +4,51 @@ declare(strict_types=1);
 
 namespace App\Request\Tag;
 
+use App\Auth\AuthMiddleware;
 use App\Database\Tag;
-use Spiral\Filters\Filter;
+use Spiral\Filters\Attribute\Input\Data;
+use Spiral\Filters\Attribute\Input\Header;
+use Spiral\Filters\Attribute\Input\Route;
+use Spiral\Filters\Model\Filter;
+use Spiral\Filters\Model\FilterDefinitionInterface;
+use Spiral\Filters\Model\HasFilterDefinition;
+use Spiral\Validator\FilterDefinition;
 
-class UpdateRequest extends Filter
+class UpdateRequest extends Filter implements HasFilterDefinition
 {
-    protected const SCHEMA = [
-        'name'    => 'data:name',
-        'icon'    => 'data:icon',
-        'color'   => 'data:color',
-        'user_id' => 'data:user_id',
-    ];
+    #[Header(key: AuthMiddleware::HEADER_USER_ID)]
+    public int $user_id = 0;
 
-    protected const VALIDATES = [
-        'name' => [
-            ['is_string'],
-            ['string::range', 3, 255],
-            ['type::notEmpty'],
-            ['string::regexp', '/^[^\s]*$/'],
-            ['unique::verify', Tag::class, 'name', ['user_id'], ['id']],
-        ],
-        'icon' => [
-            ['is_string'],
-            ['string::range', 1, 7]
-        ],
-        'color' => [
-            ['is_string'],
-            ['string::regexp', '/^\#[0-9a-fA-F]{6}$/'],
-        ],
-    ];
+    #[Route]
+    public int $id = 0;
 
-    public function getName(): string
+    #[Data]
+    public string $name = '';
+
+    #[Data]
+    public ?string $icon = '';
+
+    #[Data]
+    public ?string $color = '';
+
+    public function filterDefinition(): FilterDefinitionInterface
     {
-        return (string) $this->getField('name');
-    }
-
-    public function getIcon(): ?string
-    {
-        $value = $this->getField('icon');
-
-        return is_string($value) ? $value : null;
-    }
-
-    public function getColor(): ?string
-    {
-        $value = $this->getField('color');
-
-        return is_string($value) ? $value : null;
+        return new FilterDefinition(validationRules: [
+            'name' => [
+                ['is_string'],
+                ['string::range', 3, 255],
+                ['type::notEmpty'],
+                ['string::regexp', '/^[^\s]*$/'],
+                ['unique::verify', Tag::class, 'name', ['user_id'], ['id']],
+            ],
+            'icon' => [
+                ['is_string'],
+                ['string::range', 1, 7]
+            ],
+            'color' => [
+                ['is_string'],
+                ['string::regexp', '/^\#[0-9a-fA-F]{6}$/'],
+            ],
+        ]);
     }
 }

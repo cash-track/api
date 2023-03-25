@@ -6,35 +6,34 @@ namespace App\Request\Profile;
 
 use Laminas\Diactoros\Exception\UploadedFileErrorException;
 use Psr\Http\Message\UploadedFileInterface;
-use Spiral\Filters\Filter;
+use Spiral\Filters\Attribute\Input\File;
+use Spiral\Filters\Model\Filter;
+use Spiral\Filters\Model\FilterDefinitionInterface;
+use Spiral\Filters\Model\HasFilterDefinition;
+use Spiral\Validator\FilterDefinition;
 
-class UpdatePhotoRequest extends Filter
+class UpdatePhotoRequest extends Filter implements HasFilterDefinition
 {
-    protected const SCHEMA = [
-        'photo'      => 'file:photo',
-    ];
+    #[File]
+    public ?UploadedFileInterface $photo = null;
 
-    protected const VALIDATES = [
-        'photo' => [
-            'file::uploaded',
-            'image::valid',
-            ['file::size', 5120],
-            ['image::smaller', 5000, 5000],
-            ['image::bigger', 50, 50],
-        ],
-    ];
+    public function filterDefinition(): FilterDefinitionInterface
+    {
+        return new FilterDefinition(validationRules: [
+            'photo' => [
+                'file::uploaded',
+                'image::valid',
+                ['file::size', 5120],
+                ['image::smaller', 5000, 5000],
+                ['image::bigger', 50, 50],
+            ],
+        ]);
+    }
 
-    /**
-     * @return \Psr\Http\Message\UploadedFileInterface
-     * @throws \Laminas\Diactoros\Exception\UploadedFileErrorException
-     * @throws \Spiral\Models\Exception\EntityExceptionInterface
-     */
     public function getPhoto(): UploadedFileInterface
     {
-        $file = $this->getField('photo');
-
-        if ($file instanceof UploadedFileInterface) {
-            return $file;
+        if ($this->photo instanceof UploadedFileInterface) {
+            return $this->photo;
         }
 
         throw new UploadedFileErrorException('Empty uploaded file');

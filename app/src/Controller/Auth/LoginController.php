@@ -14,10 +14,8 @@ use Psr\Http\Message\ResponseInterface;
 use Spiral\Http\ResponseWrapper;
 use Spiral\Router\Annotation\Route;
 
-final class LoginController
+final class LoginController extends Controller
 {
-    use AuthResponses;
-
     /**
      * @param \App\View\UserView $userView
      * @param \App\Service\Auth\AuthService $authService
@@ -32,24 +30,14 @@ final class LoginController
         protected UserRepository $userRepository,
         protected RefreshTokenService $refreshTokenService,
     ) {
+        parent::__construct($userView, $response);
     }
 
-    /**
-     * @Route(route="/auth/login", name="auth.login", methods="POST")
-     *
-     * @param \App\Request\LoginRequest $request
-     * @return \Psr\Http\Message\ResponseInterface
-     */
+    #[Route(route: '/auth/login', name: 'auth.login', methods: 'POST')]
     public function login(LoginRequest $request): ResponseInterface
     {
-        if (! $request->isValid()) {
-            return $this->response->json([
-                'errors' => $request->getErrors(),
-            ], 422);
-        }
-
         try {
-            $user = $this->userRepository->findByEmail($request->getField('email'));
+            $user = $this->userRepository->findByEmail($request->email);
         } catch (\Throwable $exception) {
             return $this->response->json([
                 'error' => $exception->getMessage(),
@@ -61,7 +49,7 @@ final class LoginController
             return $this->responseAuthenticationFailure();
         }
 
-        if (! $this->authService->verifyPassword($user, $request->getField('password'))) {
+        if (! $this->authService->verifyPassword($user, $request->password)) {
             return $this->responseAuthenticationFailure();
         }
 

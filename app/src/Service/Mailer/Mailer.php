@@ -5,11 +5,14 @@ declare(strict_types=1);
 namespace App\Service\Mailer;
 
 use Spiral\Views\ViewsInterface;
+use Symfony\Component\Mailer\MailerInterface as SymfonyMailerInterface;
+use Symfony\Component\Mime\Address;
+use Symfony\Component\Mime\Email;
 
 class Mailer implements MailerInterface
 {
     /**
-     * @var \Swift_Mailer
+     * @var \Symfony\Component\Mailer\MailerInterface
      */
     private $mailer;
 
@@ -31,10 +34,10 @@ class Mailer implements MailerInterface
     /**
      * Mailer constructor.
      *
-     * @param \Swift_Mailer $mailer
+     * @param \Symfony\Component\Mailer\MailerInterface $mailer
      * @param \Spiral\Views\ViewsInterface $views
      */
-    public function __construct(\Swift_Mailer $mailer, ViewsInterface $views)
+    public function __construct(SymfonyMailerInterface $mailer, ViewsInterface $views)
     {
         $this->mailer = $mailer;
         $this->views = $views;
@@ -81,21 +84,21 @@ class Mailer implements MailerInterface
      */
     public function render(Mail $mail): string
     {
-        return $this->build($mail)->getBody();
+        return (string) $this->build($mail)->getHtmlBody();
     }
 
     /**
      * Convert Mail instance to Swift_Message instance
      *
      * @param \App\Service\Mailer\Mail $mail
-     * @return \Swift_Message
+     * @return \Symfony\Component\Mime\Email
      */
-    private function build(Mail $mail): \Swift_Message
+    private function build(Mail $mail): Email
     {
-        $message = $mail->build()->render($this->views)->getSwiftMessage();
+        $message = $mail->build()->render($this->views)->getEmailMessage();
 
-        if (!is_array($message->getFrom()) || count($message->getFrom()) == 0) {
-            $message = $message->addFrom($this->defaultFromAddress, $this->defaultFromName);
+        if (count($message->getFrom()) === 0) {
+            $message = $message->from(new Address($this->defaultFromAddress, $this->defaultFromName));
         }
 
         return $message;

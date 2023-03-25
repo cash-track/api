@@ -5,7 +5,8 @@ declare(strict_types=1);
 namespace App\Security;
 
 use App\Service\Auth\AuthService;
-use Spiral\Validation\AbstractChecker;
+use Cycle\ORM\ORMInterface;
+use Spiral\Validator\AbstractChecker;
 
 class PasswordChecker extends AbstractChecker
 {
@@ -13,30 +14,25 @@ class PasswordChecker extends AbstractChecker
         'verify' => 'Wrong password.'
     ];
 
-    /**
-     * @var \App\Service\Auth\AuthService
-     */
-    private $auth;
-
-    /**
-     * PasswordChecker constructor.
-     *
-     * @param \App\Service\Auth\AuthService $auth
-     */
-    public function __construct(AuthService $auth)
-    {
-        $this->auth = $auth;
+    public function __construct(
+        private AuthService $auth,
+        private ORMInterface $orm
+    ) {
     }
 
-    /**
-     * Expect an instance of PasswordContainerInterface in request context.
-     *
-     * @param mixed $value
-     * @return bool
-     */
-    public function verify($value): bool
+    public function verify(mixed $value, string $role, string $field = 'id'): bool
     {
-        $entity = $this->getValidator()->getContext();
+        if (!$this->getValidator()->hasValue($field) || !class_exists($role)) {
+            return false;
+        }
+
+        /** @var \Cycle\ORM\Select\Repository $repository */
+        $repository = $this->orm->getRepository($role);
+
+        $select = $repository->select();
+        $select->where($field, $this->getValidator()->getValue($field));
+        $entity = $select->fetchOne();
+
         if (! $entity instanceof PasswordContainerInterface) {
             return false;
         }

@@ -29,10 +29,10 @@ final class IndexController extends Controller
         parent::__construct($auth);
     }
 
-    #[Route(route: '/wallets/<id:\d+>', name: 'wallet.index', methods: 'GET', group: 'auth')]
-    public function index(int $id): ResponseInterface
+    #[Route(route: '/wallets/<id>', name: 'wallet.index', methods: 'GET', group: 'auth')]
+    public function index(string $id): ResponseInterface
     {
-        $wallet = $this->walletRepository->findByPKByUserPK($id, (int) $this->user->id);
+        $wallet = $this->walletRepository->findByPKByUserPK((int) $id, (int) $this->user->id);
 
         if (! $wallet instanceof Wallet) {
             return $this->response->create(404);
@@ -42,9 +42,9 @@ final class IndexController extends Controller
     }
 
     #[Route(route: '/wallets/<id>/total', name: 'wallet.index.total', methods: 'GET', group: 'auth')]
-    public function indexTotal(int $id, InputManager $input): ResponseInterface
+    public function indexTotal(string $id, InputManager $input): ResponseInterface
     {
-        $wallet = $this->walletRepository->findByPKByUserPK($id, (int) $this->user->id);
+        $wallet = $this->walletRepository->findByPKByUserPK((int) $id, (int) $this->user->id);
 
         if (! $wallet instanceof Wallet) {
             return $this->response->create(404);
@@ -52,14 +52,14 @@ final class IndexController extends Controller
 
         $this->chargeRepository->filter($input->query->fetch(['date-from', 'date-to']));
 
-        $income = $this->chargeRepository->totalByWalletPK($id, Charge::TYPE_INCOME);
-        $expense = $this->chargeRepository->totalByWalletPK($id, Charge::TYPE_EXPENSE);
+        $income = $this->chargeRepository->totalByWalletPK((int) $wallet->id, Charge::TYPE_INCOME);
+        $expense = $this->chargeRepository->totalByWalletPK((int) $wallet->id, Charge::TYPE_EXPENSE);
 
         return $this->response->json([
             'data' => [
                 'totalAmount' => $this->chargeWalletService->totalByIncomeAndExpense($income, $expense),
-                'totalIncomeAmount' => $this->chargeRepository->totalByWalletPK($id, Charge::TYPE_INCOME),
-                'totalExpenseAmount' => $this->chargeRepository->totalByWalletPK($id, Charge::TYPE_EXPENSE),
+                'totalIncomeAmount' => $income,
+                'totalExpenseAmount' => $expense,
             ],
         ]);
     }

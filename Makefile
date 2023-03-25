@@ -56,7 +56,7 @@ phpcs:
 	./vendor/bin/phpcs -p -n --standard=PSR12 --colors --report=code ./app/src
 
 psalm:
-	./vendor/bin/psalm --php-version=8.0 --show-info=true
+	./vendor/bin/psalm --php-version=8.2 --show-info=true --no-cache
 
 test-env-start:
 	cd ./tests && docker-compose up -d

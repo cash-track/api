@@ -1,19 +1,10 @@
-FROM php:8.1.9-cli
+FROM php:8.2.4-alpine3.17 as backend
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
-  build-essential \
-  nano \
-  libzip-dev \
-  libonig-dev \
-  unzip
+RUN  --mount=type=bind,from=mlocati/php-extension-installer:1.5,source=/usr/bin/install-php-extensions,target=/usr/local/bin/install-php-extensions \
+      install-php-extensions opcache zip xsl dom exif intl pcntl bcmath sockets mbstring pdo_mysql mysqli && \
+     apk del --no-cache  ${PHPIZE_DEPS} ${BUILD_DEPENDS}
 
-# Install PHP Extensions
-RUN docker-php-ext-install zip mbstring pdo_mysql mysqli
-
-# Clear cache
-RUN apt-get clean && rm -rf /var/lib/apt/lists/*
-
-COPY --from=ghcr.io/roadrunner-server/roadrunner:2.11.1 /usr/bin/rr /usr/bin/rr
+COPY --from=ghcr.io/roadrunner-server/roadrunner:2.12.3 /usr/bin/rr /usr/bin/rr
 
 COPY --from=composer /usr/bin/composer /usr/bin/composer
 
@@ -22,10 +13,11 @@ WORKDIR /app
 COPY composer.json /app
 COPY composer.lock /app
 
-RUN composer install --ignore-platform-reqs --no-scripts
+ENV COMPOSER_ALLOW_SUPERUSER=1
+RUN composer install --ignore-platform-reqs --optimize-autoloader --no-dev --no-scripts
 
 COPY . /app
 
-EXPOSE 8080
+EXPOSE 8080/tcp
 
 ENTRYPOINT [ "rr", "serve", "-c", "/app/.rr.yaml" ]

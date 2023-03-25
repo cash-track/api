@@ -7,6 +7,8 @@ namespace Tests\Feature\Service\Mailer;
 use App\Service\Mailer\Mail;
 use App\Service\Mailer\Mailer;
 use Spiral\Views\ViewsInterface;
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mime\Email;
 use Tests\Fixtures;
 use Tests\TestCase;
 
@@ -14,29 +16,28 @@ class MailerTest extends TestCase
 {
     public function testSend(): void
     {
-        $swiftMessage = new \Swift_Message();
+        $message = new Email();
 
-        $swift = $this->getMockBuilder(\Swift_Mailer::class)
+        $symfonyMailer = $this->getMockBuilder(MailerInterface::class)
                       ->onlyMethods(['send'])
-                      ->disableOriginalConstructor()
                       ->getMock();
 
-        $swift->expects($this->once())->method('send')->with($swiftMessage);
+        $symfonyMailer->expects($this->once())->method('send')->with($message);
 
         $views = $this->getMockBuilder(ViewsInterface::class)->getMock();
 
 
-        $mailer = new Mailer($swift, $views);
+        $mailer = new Mailer($symfonyMailer, $views);
         $mailer->setDefaultFromAddress(Fixtures::email());
         $mailer->setDefaultFromName(Fixtures::string());
 
         $mail = $this->getMockBuilder(Mail::class)
-                     ->onlyMethods(['build', 'render', 'getSwiftMessage'])
+                     ->onlyMethods(['build', 'render', 'getEmailMessage'])
                      ->getMockForAbstractClass();
 
         $mail->method('build')->willReturnSelf();
         $mail->method('render')->with($views)->willReturnSelf();
-        $mail->method('getSwiftMessage')->willReturn($swiftMessage);
+        $mail->method('getEmailMessage')->willReturn($message);
 
         $mailer->send($mail);
     }
@@ -45,26 +46,25 @@ class MailerTest extends TestCase
     {
         $content = Fixtures::string(128);
 
-        $swiftMessage = new \Swift_Message();
-        $swiftMessage->setBody($content, 'text/html', 'utf-8');
+        $message = new Email();
+        $message->html($content);
 
-        $swift = $this->getMockBuilder(\Swift_Mailer::class)
-                      ->disableOriginalConstructor()
+        $symfonyMailer = $this->getMockBuilder(MailerInterface::class)
                       ->getMock();
 
         $views = $this->getMockBuilder(ViewsInterface::class)->getMock();
 
-        $mailer = new Mailer($swift, $views);
+        $mailer = new Mailer($symfonyMailer, $views);
         $mailer->setDefaultFromAddress(Fixtures::email());
         $mailer->setDefaultFromName(Fixtures::string());
 
         $mail = $this->getMockBuilder(Mail::class)
-                     ->onlyMethods(['build', 'render', 'getSwiftMessage'])
+                     ->onlyMethods(['build', 'render', 'getEmailMessage'])
                      ->getMockForAbstractClass();
 
         $mail->method('build')->willReturnSelf();
         $mail->method('render')->with($views)->willReturnSelf();
-        $mail->method('getSwiftMessage')->willReturn($swiftMessage);
+        $mail->method('getEmailMessage')->willReturn($message);
 
         $this->assertEquals($content, $mailer->render($mail));
     }

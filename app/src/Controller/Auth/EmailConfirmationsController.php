@@ -16,13 +16,6 @@ use Spiral\Router\Annotation\Route;
 
 final class EmailConfirmationsController extends AuthAwareController
 {
-    /**
-     * @param \Spiral\Auth\AuthScope $auth
-     * @param \Spiral\Http\ResponseWrapper $response
-     * @param \App\View\EmailConfirmationView $emailConfirmationView
-     * @param \App\Service\Auth\EmailConfirmationService $emailConfirmationService
-     * @param \App\Repository\EmailConfirmationRepository $emailConfirmationRepository
-     */
     public function __construct(
         protected AuthScope $auth,
         protected ResponseWrapper $response,
@@ -33,11 +26,7 @@ final class EmailConfirmationsController extends AuthAwareController
         parent::__construct($auth);
     }
 
-    /**
-     * @Route(route="/auth/email/confirmation", name="auth.email.confirmation", methods="GET", group="auth")
-     *
-     * @return \Psr\Http\Message\ResponseInterface
-     */
+    #[Route(route: '/auth/email/confirmation', name: 'auth.email.confirmation', methods: 'GET', group: 'auth')]
     public function index(): ResponseInterface
     {
         /** @var \App\Database\EmailConfirmation|null $confirmation */
@@ -52,12 +41,7 @@ final class EmailConfirmationsController extends AuthAwareController
         return $this->emailConfirmationView->json($confirmation);
     }
 
-    /**
-     * @Route(route="/auth/email/confirmation/confirm/<token>", name="auth.email.confirm")
-     *
-     * @param string $token
-     * @return \Psr\Http\Message\ResponseInterface
-     */
+    #[Route(route: '/auth/email/confirmation/confirm/<token>', name: 'auth.email.confirm')]
     public function confirm(string $token): ResponseInterface
     {
         try {
@@ -74,11 +58,7 @@ final class EmailConfirmationsController extends AuthAwareController
         ]);
     }
 
-    /**
-     * @Route(route="/auth/email/confirmation/resend", name="auth.email.resend", methods="POST", group="auth")
-     *
-     * @return \Psr\Http\Message\ResponseInterface
-     */
+    #[Route(route: '/auth/email/confirmation/resend', name: 'auth.email.resend', methods: 'POST', group: 'auth')]
     public function reSend(): ResponseInterface
     {
         try {

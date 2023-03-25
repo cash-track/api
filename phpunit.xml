@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.3/phpunit.xsd"
+         xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
          bootstrap="vendor/autoload.php"
          backupGlobals="false"
          backupStaticAttributes="false"
@@ -13,20 +13,28 @@
          stopOnFailure="false"
          stopOnError="false"
          stderr="true">
-  <coverage processUncoveredFiles="true">
-    <include>
-      <directory suffix=".php">app/src</directory>
-    </include>
-  </coverage>
-  <testsuites>
-    <testsuite name="Unit">
-      <directory suffix="Test.php">tests/Unit</directory>
-    </testsuite>
-    <testsuite name="Feature">
-      <directory suffix="Test.php">tests/Feature</directory>
-    </testsuite>
-  </testsuites>
-  <php>
-    <ini name="memory_limit" value="-1"/>
-  </php>
+    <coverage processUncoveredFiles="true">
+        <include>
+            <directory suffix=".php">app/src</directory>
+        </include>
+    </coverage>
+    <testsuites>
+        <testsuite name="Unit">
+            <directory suffix="Test.php">tests/Unit</directory>
+        </testsuite>
+        <testsuite name="Feature">
+            <directory suffix="Test.php">tests/Feature</directory>
+        </testsuite>
+    </testsuites>
+    <php>
+        <ini name="memory_limit" value="-1"/>
+        <env name="APP_ENV" value="testing"/>
+        <env name="DEBUG" value="false"/>
+        <env name="CYCLE_SCHEMA_CACHE" value="true"/>
+        <env name="CYCLE_SCHEMA_WARMUP" value="false"/>
+        <env name="QUEUE_CONNECTION" value="sync"/>
+        <env name="MONOLOG_DEFAULT_CHANNEL" value="default"/>
+        <env name="CACHE_STORAGE" value="file"/>
+        <env name="SCHEDULER_MUTEX_CACHE_STORAGE" value="file"/>
+    </php>
 </phpunit>

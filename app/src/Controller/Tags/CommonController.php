@@ -37,9 +37,9 @@ final class CommonController extends AuthAwareController
     }
 
     #[Route(route: '/tags/common/<id>', name: 'tag.common.index', methods: 'GET', group: 'auth')]
-    public function index(int $id): ResponseInterface
+    public function index(string $id): ResponseInterface
     {
-        $tag = $this->tagRepository->findByPKByUsersPK($id, $this->userRepository->getCommonUserIDs($this->user));
+        $tag = $this->tagRepository->findByPKByUsersPK((int) $id, $this->userRepository->getCommonUserIDs($this->user));
 
         if (! $tag instanceof Tag) {
             return $this->response->create(404);

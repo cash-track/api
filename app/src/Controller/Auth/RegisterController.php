@@ -17,18 +17,8 @@ use Psr\Http\Message\ResponseInterface;
 use Spiral\Http\ResponseWrapper;
 use Spiral\Router\Annotation\Route;
 
-final class RegisterController
+final class RegisterController extends Controller
 {
-    use AuthResponses;
-
-    /**
-     * @param \App\View\UserView $userView
-     * @param \App\Service\Auth\AuthService $authService
-     * @param \App\Service\UserService $userService
-     * @param \Spiral\Http\ResponseWrapper $response
-     * @param \App\Service\Auth\EmailConfirmationService $emailConfirmationService
-     * @param \App\Service\Auth\RefreshTokenService $refreshTokenService
-     */
     public function __construct(
         protected UserView $userView,
         protected AuthService $authService,
@@ -38,22 +28,12 @@ final class RegisterController
         protected RefreshTokenService $refreshTokenService,
         private CurrencyRepository $currencyRepository,
     ) {
+        parent::__construct($userView, $response);
     }
 
-    /**
-     * @Route(route="/auth/register", name="auth.register", methods="POST")
-     *
-     * @param \App\Request\RegisterRequest $request
-     * @return \Psr\Http\Message\ResponseInterface
-     */
+    #[Route(route: '/auth/register', name: 'auth.register', methods: 'POST')]
     public function register(RegisterRequest $request): ResponseInterface
     {
-        if (! $request->isValid()) {
-            return $this->response->json([
-                'errors' => $request->getErrors(),
-            ], 422);
-        }
-
         $user = $request->createUser();
 
         $currency = $this->currencyRepository->getDefault();
@@ -62,7 +42,7 @@ final class RegisterController
             $user->setDefaultCurrency($currency);
         }
 
-        $this->authService->hashPassword($user, $request->getField('password'));
+        $this->authService->hashPassword($user, $request->password);
 
         try {
             $user = $this->userService->store($user);
@@ -85,20 +65,9 @@ final class RegisterController
         return $this->responseTokensWithUser($accessToken, $refreshToken, $user);
     }
 
-    /**
-     * @Route(route="/auth/register/check/nick-name", name="auth.register.check.nickname", methods="POST")
-     *
-     * @param \App\Request\CheckNickNameRequest $request
-     * @return \Psr\Http\Message\ResponseInterface
-     */
-    public function checkNickName(CheckNickNameRequest $request): ResponseInterface
+    #[Route(route: '/auth/register/check/nick-name', name: 'auth.register.check.nickname', methods: 'POST')]
+    public function checkNickName(CheckNickNameRequest $_): ResponseInterface
     {
-        if (! $request->isValid()) {
-            return $this->response->json([
-                'errors' => $request->getErrors(),
-            ], 422);
-        }
-
         return $this->response->json([
             'message' => 'Nick name are free to register'
         ]);

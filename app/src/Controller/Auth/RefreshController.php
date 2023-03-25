@@ -8,35 +8,25 @@ use App\Database\User;
 use App\Request\RefreshTokenRequest;
 use App\Service\Auth\AuthService;
 use App\Service\Auth\RefreshTokenService;
+use App\View\UserView;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Spiral\Auth\TokenInterface;
 use Spiral\Http\ResponseWrapper;
 use Spiral\Router\Annotation\Route;
 
-final class RefreshController
+final class RefreshController extends Controller
 {
-    use AuthResponses;
-
-    /**
-     * @param \App\Service\Auth\AuthService $authService
-     * @param \Spiral\Http\ResponseWrapper $response
-     * @param \App\Service\Auth\RefreshTokenService $refreshTokenService
-     */
     public function __construct(
+        protected UserView $userView,
         protected AuthService $authService,
         protected ResponseWrapper $response,
         protected RefreshTokenService $refreshTokenService,
     ) {
+        parent::__construct($userView, $response);
     }
 
-    /**
-     * @Route(route="/auth/refresh", name="auth.refresh", methods="POST")
-     *
-     * @param \Psr\Http\Message\ServerRequestInterface $request
-     * @param \App\Request\RefreshTokenRequest $refreshTokenRequest
-     * @return \Psr\Http\Message\ResponseInterface
-     */
+    #[Route(route: '/auth/refresh', name: 'auth.refresh', methods: 'POST')]
     public function refresh(ServerRequestInterface $request, RefreshTokenRequest $refreshTokenRequest): ResponseInterface
     {
         $authContext = $this->refreshTokenService->getContextByRequest($request);

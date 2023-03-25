@@ -294,14 +294,12 @@ class ProfileControllerTest extends TestCase implements DatabaseTransaction
 
         $requestMock = $this->getMockBuilder(UpdateBasicRequest::class)
                             ->disableOriginalConstructor()
-                            ->onlyMethods(['setContext', 'isValid', 'getName', 'getLastName', 'getNickName', 'getDefaultCurrencyCode'])
                             ->getMock();
 
-        $requestMock->method('isValid')->willReturn(true);
-        $requestMock->method('getName')->willReturn($newProfile->name);
-        $requestMock->method('getLastName')->willReturn($newProfile->lastName);
-        $requestMock->method('getNickName')->willReturn($newProfile->nickName);
-        $requestMock->method('getDefaultCurrencyCode')->willReturn($missingCurrencyCode);
+        $requestMock->name = $newProfile->name;
+        $requestMock->lastName = $newProfile->lastName;
+        $requestMock->nickName = $newProfile->nickName;
+        $requestMock->defaultCurrencyCode = $missingCurrencyCode;
 
         $repositoryMock = $this->getMockBuilder(CurrencyRepository::class)
                                ->disableOriginalConstructor()

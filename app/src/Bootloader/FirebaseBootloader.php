@@ -6,7 +6,7 @@ namespace App\Bootloader;
 
 use App\Config\FirebaseConfig;
 use Kreait\Firebase\Factory;
-use Kreait\Firebase\Storage;
+use Nyholm\Psr7\Uri;
 use Spiral\Boot\Bootloader\Bootloader;
 use Spiral\Core\Container;
 
@@ -35,10 +35,14 @@ class FirebaseBootloader extends Bootloader
     {
         $container->bind(Factory::class, function (): Factory {
             $factory = (new Factory())
-                ->withDatabaseUri($this->config->getDatabaseUri())
-                ->withDefaultStorageBucket($this->config->getStorageBucket())
-                ->withDefaultStorageBucket($this->config->getStorageBucket())
+                ->withDatabaseUri(new Uri($this->config->getDatabaseUri()))
                 ->withServiceAccount($this->getServiceAccount());
+
+            if (($storageBucket = $this->config->getStorageBucket()) !== '') {
+                $factory = $factory
+                    ->withDefaultStorageBucket($storageBucket)
+                    ->withDefaultStorageBucket($storageBucket);
+            }
 
             return $factory;
         });

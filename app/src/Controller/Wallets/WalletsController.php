@@ -35,12 +35,6 @@ final class WalletsController extends Controller
     #[Route(route: '/wallets', name: 'wallet.create', methods: 'POST', group: 'auth')]
     public function create(CreateRequest $request): ResponseInterface
     {
-        if (! $request->isValid()) {
-            return $this->response->json([
-                'errors' => $request->getErrors(),
-            ], 422);
-        }
-
         try {
             $wallet = $this->walletService->create($request->createWallet(), $this->user);
         } catch (\Throwable $exception) {
@@ -54,27 +48,21 @@ final class WalletsController extends Controller
     }
 
     #[Route(route: '/wallets/<id>', name: 'wallet.update', methods: 'PUT', group: 'auth')]
-    public function update(int $id, UpdateRequest $request): ResponseInterface
+    public function update(string $id, UpdateRequest $request): ResponseInterface
     {
-        $wallet = $this->walletRepository->findByPKByUserPK($id, (int) $this->user->id);
+        $wallet = $this->walletRepository->findByPKByUserPK((int) $id, (int) $this->user->id);
 
         if (! $wallet instanceof Wallet) {
             return $this->response->create(404);
         }
 
-        if (! $request->isValid()) {
-            return $this->response->json([
-                'errors' => $request->getErrors(),
-            ], 422);
-        }
-
-        $wallet->name = $request->getName();
-        $wallet->isPublic = $request->getIsPublic();
-        $wallet->defaultCurrencyCode = $request->getDefaultCurrencyCode();
+        $wallet->name = $request->name;
+        $wallet->isPublic = $request->isPublic;
+        $wallet->defaultCurrencyCode = $request->defaultCurrencyCode;
 
         try {
             /** @var \App\Database\Currency|null $defaultCurrency */
-            $defaultCurrency = $this->currencyRepository->findByPK($request->getDefaultCurrencyCode());
+            $defaultCurrency = $this->currencyRepository->findByPK($request->defaultCurrencyCode);
 
             if (! $defaultCurrency instanceof Currency) {
                 throw new \RuntimeException('Unable to load default currency');
@@ -113,9 +101,9 @@ final class WalletsController extends Controller
     }
 
     #[Route(route: '/wallets/<id>', name: 'wallet.delete', methods: 'DELETE', group: 'auth')]
-    public function delete(int $id): ResponseInterface
+    public function delete(string $id): ResponseInterface
     {
-        $wallet = $this->walletRepository->findByPKByUserPK($id, (int) $this->user->id);
+        $wallet = $this->walletRepository->findByPKByUserPK((int) $id, (int) $this->user->id);
 
         if (! $wallet instanceof Wallet) {
             return $this->response->create(404);

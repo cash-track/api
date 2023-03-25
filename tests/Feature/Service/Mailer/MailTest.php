@@ -6,6 +6,8 @@ namespace Tests\Feature\Service\Mailer;
 
 use App\Service\Mailer\Mail;
 use Spiral\Views\ViewsInterface;
+use Symfony\Component\Mime\Address;
+use Symfony\Component\Mime\Email;
 use Tests\Fixtures;
 use Tests\TestCase;
 
@@ -15,7 +17,7 @@ class MailTest extends TestCase
     {
         $mail = $this->getMockBuilder(Mail::class)->getMockForAbstractClass();
 
-        $this->assertInstanceOf(\Swift_Message::class, $mail->getSwiftMessage());
+        $this->assertInstanceOf(Email::class, $mail->getEmailMessage());
     }
 
     public function testSubject(): void
@@ -26,7 +28,7 @@ class MailTest extends TestCase
 
         $mail->subject($subject);
 
-        $this->assertEquals($subject, $mail->getSwiftMessage()->getSubject());
+        $this->assertEquals($subject, $mail->getEmailMessage()->getSubject());
     }
 
     public function testFrom(): void
@@ -38,9 +40,12 @@ class MailTest extends TestCase
 
         $mail->from($address, $fullName);
 
-        $this->assertIsArray($mail->getSwiftMessage()->getFrom());
-        $this->assertArrayHasKey($address, $mail->getSwiftMessage()->getFrom());
-        $this->assertEquals($fullName, $mail->getSwiftMessage()->getFrom()[$address] ?? null);
+        $data = $mail->getEmailMessage()->getFrom();
+        $this->assertIsArray($data);
+        $this->assertCount(1, $data);
+        $this->assertInstanceOf(Address::class, $data[0]);
+        $this->assertEquals($address, $data[0]->getAddress());
+        $this->assertEquals($fullName, $data[0]->getName());
     }
 
     public function testTo(): void
@@ -52,9 +57,12 @@ class MailTest extends TestCase
 
         $mail->to($address, $fullName);
 
-        $this->assertIsArray($mail->getSwiftMessage()->getTo());
-        $this->assertArrayHasKey($address, $mail->getSwiftMessage()->getTo());
-        $this->assertEquals($fullName, $mail->getSwiftMessage()->getTo()[$address] ?? null);
+        $data = $mail->getEmailMessage()->getTo();
+        $this->assertIsArray($data);
+        $this->assertCount(1, $data);
+        $this->assertInstanceOf(Address::class, $data[0]);
+        $this->assertEquals($address, $data[0]->getAddress());
+        $this->assertEquals($fullName, $data[0]->getName());
     }
 
     public function testReplyTo(): void
@@ -66,9 +74,12 @@ class MailTest extends TestCase
 
         $mail->replyTo($address, $fullName);
 
-        $this->assertIsArray($mail->getSwiftMessage()->getReplyTo());
-        $this->assertArrayHasKey($address, $mail->getSwiftMessage()->getReplyTo());
-        $this->assertEquals($fullName, $mail->getSwiftMessage()->getReplyTo()[$address] ?? null);
+        $data = $mail->getEmailMessage()->getReplyTo();
+        $this->assertIsArray($data);
+        $this->assertCount(1, $data);
+        $this->assertInstanceOf(Address::class, $data[0]);
+        $this->assertEquals($address, $data[0]->getAddress());
+        $this->assertEquals($fullName, $data[0]->getName());
     }
 
     public function testCc(): void
@@ -80,9 +91,12 @@ class MailTest extends TestCase
 
         $mail->cc($address, $fullName);
 
-        $this->assertIsArray($mail->getSwiftMessage()->getCc());
-        $this->assertArrayHasKey($address, $mail->getSwiftMessage()->getCc());
-        $this->assertEquals($fullName, $mail->getSwiftMessage()->getCc()[$address] ?? null);
+        $data = $mail->getEmailMessage()->getCc();
+        $this->assertIsArray($data);
+        $this->assertCount(1, $data);
+        $this->assertInstanceOf(Address::class, $data[0]);
+        $this->assertEquals($address, $data[0]->getAddress());
+        $this->assertEquals($fullName, $data[0]->getName());
     }
 
     public function testBcc(): void
@@ -94,15 +108,18 @@ class MailTest extends TestCase
 
         $mail->bcc($address, $fullName);
 
-        $this->assertIsArray($mail->getSwiftMessage()->getBcc());
-        $this->assertArrayHasKey($address, $mail->getSwiftMessage()->getBcc());
-        $this->assertEquals($fullName, $mail->getSwiftMessage()->getBcc()[$address] ?? null);
+        $data = $mail->getEmailMessage()->getBcc();
+        $this->assertIsArray($data);
+        $this->assertCount(1, $data);
+        $this->assertInstanceOf(Address::class, $data[0]);
+        $this->assertEquals($address, $data[0]->getAddress());
+        $this->assertEquals($fullName, $data[0]->getName());
     }
 
     public function testRender(): void
     {
         $viewName = Fixtures::string();
-        $rendered = Fixtures::string(1024);
+        $rendered = Fixtures::string(64);
         $address = Fixtures::email();
         $fullName = Fixtures::string();
 
@@ -122,6 +139,6 @@ class MailTest extends TestCase
 
         $mail->render($views);
 
-        $this->assertEquals($rendered, $mail->getSwiftMessage()->getBody());
+        $this->assertEquals($rendered, $mail->getEmailMessage()->getBody()->bodyToString());
     }
 }

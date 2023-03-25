@@ -36,14 +36,14 @@ class TagsController extends Controller
     }
 
     #[Route(route: '/wallets/<walletId>/tags/<tagId>/charges', name: 'wallet.tag.charge.list', methods: 'GET', group: 'auth')]
-    public function list(int $walletId, int $tagId, InputManager $input): ResponseInterface
+    public function list(string $walletId, string $tagId, InputManager $input): ResponseInterface
     {
-        $wallet = $this->walletRepository->findByPKByUserPK($walletId, (int) $this->user->id);
+        $wallet = $this->walletRepository->findByPKByUserPK((int) $walletId, (int) $this->user->id);
         if (! $wallet instanceof Wallet) {
             return $this->response->create(404);
         }
 
-        $tag = $this->tagRepository->findByPKByUsersPK($tagId, $wallet->getUserIDs());
+        $tag = $this->tagRepository->findByPKByUsersPK((int) $tagId, $wallet->getUserIDs());
         if (! $tag instanceof Tag) {
             return $this->response->create(404);
         }
@@ -57,14 +57,14 @@ class TagsController extends Controller
     }
 
     #[Route(route: '/wallets/<walletId>/tags/<tagId>/charges/graph', name: 'wallet.tag.charge.graph', methods: 'GET', group: 'auth')]
-    public function graph(int $walletId, int $tagId, InputManager $input, ChargeAmountGraph $graph): ResponseInterface
+    public function graph(string $walletId, string $tagId, InputManager $input, ChargeAmountGraph $graph): ResponseInterface
     {
-        $wallet = $this->walletRepository->findByPKByUserPK($walletId, (int) $this->user->id);
+        $wallet = $this->walletRepository->findByPKByUserPK((int) $walletId, (int) $this->user->id);
         if (! $wallet instanceof Wallet) {
             return $this->response->create(404);
         }
 
-        $tag = $this->tagRepository->findByPKByUsersPK($tagId, $this->userRepository->getCommonUserIDs($this->user));
+        $tag = $this->tagRepository->findByPKByUsersPK((int) $tagId, $this->userRepository->getCommonUserIDs($this->user));
         if (! $tag instanceof Tag) {
             return $this->response->create(404);
         }

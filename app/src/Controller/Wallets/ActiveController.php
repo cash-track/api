@@ -25,15 +25,10 @@ final class ActiveController extends Controller
         parent::__construct($auth);
     }
 
-    /**
-     * @Route(route="/wallets/<id>/activate", name="wallet.activate", methods="POST", group="auth")
-     *
-     * @param int $id
-     * @return \Psr\Http\Message\ResponseInterface
-     */
-    public function activate(int $id): ResponseInterface
+    #[Route(route: '/wallets/<id>/activate', name: 'wallet.activate', methods: 'POST', group: 'auth')]
+    public function activate(string $id): ResponseInterface
     {
-        $wallet = $this->walletRepository->findByPKByUserPK($id, (int) $this->user->id);
+        $wallet = $this->walletRepository->findByPKByUserPK((int) $id, (int) $this->user->id);
 
         if (! $wallet instanceof Wallet) {
             return $this->response->create(404);
@@ -57,15 +52,10 @@ final class ActiveController extends Controller
         return $this->response->create(200);
     }
 
-    /**
-     * @Route(route="/wallets/<id>/disable", name="wallet.disable", methods="POST", group="auth")
-     *
-     * @param int $id
-     * @return \Psr\Http\Message\ResponseInterface
-     */
-    public function disable(int $id): ResponseInterface
+    #[Route(route: '/wallets/<id>/disable', name: 'wallet.disable', methods: 'POST', group: 'auth')]
+    public function disable(string $id): ResponseInterface
     {
-        $wallet = $this->walletRepository->findByPKByUserPK($id, (int) $this->user->id);
+        $wallet = $this->walletRepository->findByPKByUserPK((int) $id, (int) $this->user->id);
 
         if (! $wallet instanceof Wallet) {
             return $this->response->create(404);

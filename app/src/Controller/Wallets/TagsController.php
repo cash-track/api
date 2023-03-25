@@ -32,10 +32,10 @@ final class TagsController extends Controller
         parent::__construct($auth);
     }
 
-    #[Route(route: '/wallets/<id:\d+>/tags', name: 'wallet.tags.list', methods: 'GET', group: 'auth')]
-    public function list(int $id): ResponseInterface
+    #[Route(route: '/wallets/<id>/tags', name: 'wallet.tags.list', methods: 'GET', group: 'auth')]
+    public function list(string $id): ResponseInterface
     {
-        $wallet = $this->walletRepository->findByPKByUserPK($id, (int) $this->user->id);
+        $wallet = $this->walletRepository->findByPKByUserPK((int) $id, (int) $this->user->id);
 
         if (! $wallet instanceof Wallet) {
             return $this->response->create(404);
@@ -46,16 +46,16 @@ final class TagsController extends Controller
         return $this->tagsView->json($tags);
     }
 
-    #[Route(route: '/wallets/<walletId:\d+>/tags/<tagId:\d+>/total', name: 'wallet.tags.total', methods: 'GET', group: 'auth')]
-    public function total(int $walletId, int $tagId, InputManager $input): ResponseInterface
+    #[Route(route: '/wallets/<walletId>/tags/<tagId>/total', name: 'wallet.tags.total', methods: 'GET', group: 'auth')]
+    public function total(string $walletId, string $tagId, InputManager $input): ResponseInterface
     {
-        $wallet = $this->walletRepository->findByPKByUserPK($walletId, (int) $this->user->id);
+        $wallet = $this->walletRepository->findByPKByUserPK((int) $walletId, (int) $this->user->id);
 
         if (! $wallet instanceof Wallet) {
             return $this->response->create(404);
         }
 
-        $tag = $this->tagRepository->findByPKByUsersPK($tagId, $wallet->getUserIDs());
+        $tag = $this->tagRepository->findByPKByUsersPK((int) $tagId, $wallet->getUserIDs());
 
         if (! $tag instanceof Tag) {
             return $this->response->create(404);
@@ -63,8 +63,8 @@ final class TagsController extends Controller
 
         $this->chargeRepository->filter($input->query->fetch(['date-from', 'date-to']));
 
-        $income = $this->chargeRepository->totalByWalletPKAndTagId($walletId, $tagId, Charge::TYPE_INCOME);
-        $expense = $this->chargeRepository->totalByWalletPKAndTagId($walletId, $tagId, Charge::TYPE_EXPENSE);
+        $income = $this->chargeRepository->totalByWalletPKAndTagId((int) $wallet->id, (int) $tag->id, Charge::TYPE_INCOME);
+        $expense = $this->chargeRepository->totalByWalletPKAndTagId((int) $wallet->id, (int) $tag->id, Charge::TYPE_EXPENSE);
 
         return $this->response->json([
             'data' => [
@@ -75,10 +75,10 @@ final class TagsController extends Controller
         ]);
     }
 
-    #[Route(route: '/wallets/<walletId:\d+>/tags/find/<query>', name: 'wallet.tags.find', methods: 'GET', group: 'auth')]
-    public function find(int $walletId, string $query = ''): ResponseInterface
+    #[Route(route: '/wallets/<walletId>/tags/find/<query>', name: 'wallet.tags.find', methods: 'GET', group: 'auth')]
+    public function find(string $walletId, string $query = ''): ResponseInterface
     {
-        $wallet = $this->walletRepository->findByPKByUserPK($walletId, (int) $this->user->id);
+        $wallet = $this->walletRepository->findByPKByUserPK((int) $walletId, (int) $this->user->id);
 
         if (! $wallet instanceof Wallet) {
             return $this->response->create(404);

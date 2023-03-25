@@ -28,12 +28,12 @@ final class ArchiveController extends Controller
     /**
      * @Route(route="/wallets/<id>/archive", name="wallet.archive", methods="POST", group="auth")
      *
-     * @param int $id
+     * @param string $id
      * @return \Psr\Http\Message\ResponseInterface
      */
-    public function archive(int $id): ResponseInterface
+    public function archive(string $id): ResponseInterface
     {
-        $wallet = $this->walletRepository->findByPKByUserPK($id, (int) $this->user->id);
+        $wallet = $this->walletRepository->findByPKByUserPK((int) $id, (int) $this->user->id);
 
         if (! $wallet instanceof Wallet) {
             return $this->response->create(404);
@@ -60,12 +60,12 @@ final class ArchiveController extends Controller
     /**
      * @Route(route="/wallets/<id>/un-archive", name="wallet.unarchive", methods="POST", group="auth")
      *
-     * @param int $id
+     * @param string $id
      * @return \Psr\Http\Message\ResponseInterface
      */
-    public function unArchive(int $id): ResponseInterface
+    public function unArchive(string $id): ResponseInterface
     {
-        $wallet = $this->walletRepository->findByPKByUserPK($id, (int) $this->user->id);
+        $wallet = $this->walletRepository->findByPKByUserPK((int) $id, (int) $this->user->id);
 
         if (! $wallet instanceof Wallet) {
             return $this->response->create(404);

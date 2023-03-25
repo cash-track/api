@@ -16,7 +16,11 @@ return [
      * Aliases, if you want to use domain specific storages.
      */
     'aliases' => [
-        'user-data' => 'localMemory',
+        // 'user-data' => [
+        //     'storage' => 'rr-local',
+        //     'prefix' => 'user_'
+        // ],
+        // 'blog-data' => 'rr-local',
     ],
 
     /**
