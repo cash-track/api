@@ -10,7 +10,7 @@ use Spiral\Validator\AbstractChecker;
 class UniqueChecker extends AbstractChecker
 {
     public const MESSAGES = [
-        'verify' => 'Value should be unique.'
+        'verify' => 'error_value_is_not_unique'
     ];
 
     public function __construct(private ORMInterface $orm)

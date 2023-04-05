@@ -33,6 +33,7 @@
         "spiral/roadrunner-bridge": "^2.1",
         "spiral/roadrunner-cli": "^2.4",
         "spiral/stempler-bridge": "^3.2",
+        "spiral/translator": "^3.6",
         "spiral/validator": "^1.1",
         "symfony/mailer": "^6.2",
         "voku/portable-utf8": "^6.0"

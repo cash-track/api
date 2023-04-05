@@ -12,9 +12,12 @@ use App\Repository\UserRepository;
 use App\Service\Mailer\MailerInterface;
 use App\Service\UriService;
 use Cycle\ORM\EntityManagerInterface;
+use Spiral\Translator\Traits\TranslatorTrait;
 
 class ForgotPasswordService extends HelperService
 {
+    use TranslatorTrait;
+
     public function __construct(
         EntityManagerInterface $tr,
         UserRepository $userRepository,
@@ -26,23 +29,20 @@ class ForgotPasswordService extends HelperService
         parent::__construct($tr, $userRepository, $mailer, $uri);
     }
 
-    /**
-     * @param string $email
-     * @return void
-     * @throws \Throwable
-     */
     public function create(string $email): void
     {
         $user = $this->userRepository->findByEmail($email);
         if (! $user instanceof User) {
-            throw new \RuntimeException('Unable to find user by email');
+            throw new \RuntimeException($this->say('forgot_password_invalid_user'));
         }
 
         /** @var \App\Database\ForgotPasswordRequest|null $request */
         $request = $this->repository->findByPK($email);
 
         if ($request instanceof ForgotPasswordRequest && $this->isThrottled($request->createdAt)) {
-            throw new ForgotPasswordThrottledException('Previous request was created in less than ' . self::RESEND_TIME_LIMIT . ' seconds');
+            throw new ForgotPasswordThrottledException(
+                sprintf($this->say('forgot_password_throttled'), self::RESEND_TIME_LIMIT)
+            );
         }
 
         if ($request instanceof ForgotPasswordRequest) {
@@ -84,17 +84,17 @@ class ForgotPasswordService extends HelperService
         $request = $this->repository->findByCode($code);
 
         if (! $request instanceof ForgotPasswordRequest) {
-            throw new \RuntimeException('Wrong password reset code');
+            throw new \RuntimeException($this->say('forgot_password_invalid_code'));
         }
 
         if ($this->isExpired($request->createdAt)) {
-            throw new \RuntimeException('Password reset link are expired');
+            throw new \RuntimeException($this->say('forgot_password_expired'));
         }
 
         $user = $this->userRepository->findByEmail((string) $request->email);
 
         if (! $user instanceof User) {
-            throw new \RuntimeException('Unable to find user linked to password reset link');
+            throw new \RuntimeException($this->say('forgot_password_missing_user'));
         }
 
         $this->authService->hashPassword($user, $password);

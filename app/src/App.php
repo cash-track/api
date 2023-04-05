@@ -98,6 +98,7 @@ class App extends Kernel
         ViewsBootloader::class,
         TranslatedCacheBootloader::class,
         StemplerBootloader::class,
+        Framework\I18nBootloader::class,
 
         // Queue
         QueueBootloader::class,
@@ -146,7 +147,6 @@ class App extends Kernel
         Auth\AuthBootloader::class,
         Bootloader\RoutesBootloader::class,
         Bootloader\UserBootloader::class,
-        Bootloader\LocaleSelectorBootloader::class,
         Bootloader\CheckerBootloader::class,
 
         Bootloader\FirebaseBootloader::class,

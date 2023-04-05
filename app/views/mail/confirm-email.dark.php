@@ -4,12 +4,12 @@
     <title></title>
 </head>
 <body>
-    <h1>Hey, {{ $user->name }} {{ $user->lastName }}</h1>
-    <p>Your email was used to register at <a href="https://cash-track.ml" target="_blank">Cash Track</a>.</p>
-    <p>Click to the link bellow to confirm your account email:</p>
+    <h1>[[email_confirmation_mail_hello]], {{ $user->name }} {{ $user->lastName }}</h1>
+    <p>[[email_confirmation_mail_line_1]] <a href="https://cash-track.app" target="_blank">Cash Track</a>.</p>
+    <p>[[email_confirmation_mail_line_2]]</p>
     <p></p>
     <p><b><a href="{{ $link }}" target="_blank">{{ $link }}</a></b></p>
     <p></p>
-    <p>If it's not you just ignore this.</p>
+    <p>[[email_confirmation_mail_footer]]</p>
 </body>
 </html>

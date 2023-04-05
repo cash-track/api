@@ -181,6 +181,7 @@ class ProfileControllerTest extends TestCase implements DatabaseTransaction
             'lastName' => $newProfile->lastName,
             'nickName' => $newProfile->nickName,
             'defaultCurrencyCode' => $newProfile->defaultCurrencyCode,
+            'locale' => UserFactory::locale(),
         ]);
 
         $response->assertOk();
@@ -226,6 +227,7 @@ class ProfileControllerTest extends TestCase implements DatabaseTransaction
             'lastName' => 123,
             'nickName' => 123,
             'defaultCurrencyCode' => 123,
+            'locale' => 123,
         ]);
 
         $response->assertUnprocessable();
@@ -238,6 +240,7 @@ class ProfileControllerTest extends TestCase implements DatabaseTransaction
         $this->assertArrayHasKey('lastName', $body['errors']);
         $this->assertArrayHasKey('nickName', $body['errors']);
         $this->assertArrayHasKey('defaultCurrencyCode', $body['errors']);
+        $this->assertArrayHasKey('locale', $body['errors']);
     }
 
     /**
@@ -355,6 +358,7 @@ class ProfileControllerTest extends TestCase implements DatabaseTransaction
             'lastName' => $newProfile->lastName,
             'nickName' => $newProfile->nickName,
             'defaultCurrencyCode' => $newProfile->defaultCurrencyCode,
+            'locale' => UserFactory::locale(),
         ]);
 
         $response->assertStatus(500);
@@ -371,5 +375,78 @@ class ProfileControllerTest extends TestCase implements DatabaseTransaction
             'nick_name' => $newProfile->nickName,
             'default_currency_code' => $newProfile->defaultCurrencyCode,
         ]);
+    }
+
+    public function testUpdateLocaleRequireAuth(): void
+    {
+        $response = $this->put('/profile/locale');
+
+        $response->assertUnauthorized();
+    }
+
+    public function testUpdateLocale(): void
+    {
+        $auth = $this->makeAuth($user = $this->userFactory->create());
+
+        $newLocale = UserFactory::locale();
+
+        $response = $this->withAuth($auth)->put('/profile/locale', [
+            'locale' => $newLocale,
+        ]);
+
+        $response->assertOk();
+
+        $body = $this->getJsonResponseBody($response);
+
+        $this->assertArrayHasKey('data', $body);
+        $this->assertArrayHasKey('type', $body['data']);
+        $this->assertArrayHasKey('id', $body['data']);
+        $this->assertEquals($body['data']['type'], 'user');
+        $this->assertEquals($body['data']['id'], $user->id);
+        $this->assertArrayHasKey('locale', $body['data']);
+        $this->assertEquals($body['data']['locale'], $newLocale);
+    }
+
+    public function testUpdateLocaleFailsDueInvalidForm(): void
+    {
+        $auth = $this->makeAuth($this->userFactory->create());
+
+        $response = $this->withAuth($auth)->put('/profile/locale', [
+            'locale' => 123,
+        ]);
+
+        $response->assertUnprocessable();
+
+        $body = $this->getJsonResponseBody($response);
+
+        $this->assertArrayHasKey('errors', $body);
+        $this->assertArrayHasKey('locale', $body['errors']);
+    }
+
+    public function testUpdateLocaleFailsWithStorageException(): void
+    {
+        $auth = $this->makeAuth($this->userFactory->create());
+
+        $mock = $this->getMockBuilder(UserService::class)
+                     ->disableOriginalConstructor()
+                     ->onlyMethods(['store'])
+                     ->getMock();
+
+        $mock->expects($this->once())
+             ->method('store')
+             ->willThrowException(new \RuntimeException('Storage exception.'));
+
+        $this->getContainer()->bind(UserService::class, $mock);
+
+        $response = $this->withAuth($auth)->put('/profile/locale', [
+            'locale' => UserFactory::locale(),
+        ]);
+
+        $response->assertStatus(500);
+
+        $body = $this->getJsonResponseBody($response);
+
+        $this->assertArrayHasKey('message', $body);
+        $this->assertArrayHasKey('error', $body);
     }
 }

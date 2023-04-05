@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Auth;
 
 use App\Database\User;
+use App\Service\UserOptionsService;
 use Laminas\Diactoros\Response\JsonResponse;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
@@ -12,10 +13,19 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Spiral\Auth\AuthContextInterface;
 use Spiral\Auth\Middleware\AuthMiddleware as Framework;
+use Spiral\Translator\Traits\TranslatorTrait;
 
 class AuthMiddleware implements MiddlewareInterface
 {
+    use TranslatorTrait;
+
     const HEADER_USER_ID = 'X-Internal-UserId';
+    const USER_LOCALE = 'X-Internal-UserLocale';
+
+    public function __construct(
+        private readonly UserOptionsService $userOptionsService,
+    ) {
+    }
 
     /**
      * {@inheritdoc}
@@ -34,7 +44,10 @@ class AuthMiddleware implements MiddlewareInterface
             return $this->unauthenticated();
         }
 
-        return $handler->handle($request->withAddedHeader(self::HEADER_USER_ID, (string) $actor->id));
+        return $handler->handle(
+            $request->withAddedHeader(self::HEADER_USER_ID, (string) $actor->id)
+                    ->withAttribute(self::USER_LOCALE, $this->userOptionsService->getLocale($actor))
+        );
     }
 
     /**
@@ -43,7 +56,7 @@ class AuthMiddleware implements MiddlewareInterface
     private function unauthenticated(): Response
     {
         return new JsonResponse([
-            'message' => 'Authentication required',
+            'message' => $this->say('error_authentication_required'),
         ], 401);
     }
 }

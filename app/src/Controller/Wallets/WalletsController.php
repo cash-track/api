@@ -17,9 +17,12 @@ use Psr\Log\LoggerInterface;
 use Spiral\Auth\AuthScope;
 use Spiral\Http\ResponseWrapper;
 use Spiral\Router\Annotation\Route;
+use Spiral\Translator\Traits\TranslatorTrait;
 
 final class WalletsController extends Controller
 {
+    use TranslatorTrait;
+
     public function __construct(
         AuthScope $auth,
         private ResponseWrapper $response,
@@ -39,7 +42,7 @@ final class WalletsController extends Controller
             $wallet = $this->walletService->create($request->createWallet(), $this->user);
         } catch (\Throwable $exception) {
             return $this->response->json([
-                'message' => 'Unable to create new wallet. Please try again later.',
+                'message' => $this->say('wallet_create_exception'),
                 'error' => $exception->getMessage(),
             ], 500);
         }
@@ -65,7 +68,7 @@ final class WalletsController extends Controller
             $defaultCurrency = $this->currencyRepository->findByPK($request->defaultCurrencyCode);
 
             if (! $defaultCurrency instanceof Currency) {
-                throw new \RuntimeException('Unable to load default currency');
+                throw new \RuntimeException($this->say('error_loading_default_currency'));
             }
 
             $wallet->setDefaultCurrency($defaultCurrency);
@@ -77,7 +80,7 @@ final class WalletsController extends Controller
             ]);
 
             return $this->response->json([
-                'message' => 'Unable to update wallet. Please try again later.',
+                'message' => $this->say('wallet_update_exception'),
                 'error'   => $exception->getMessage(),
             ], 500);
         }
@@ -92,7 +95,7 @@ final class WalletsController extends Controller
             ]);
 
             return $this->response->json([
-                'message' => 'Unable to update wallet. Please try again later.',
+                'message' => $this->say('wallet_update_exception'),
                 'error'   => $exception->getMessage(),
             ], 500);
         }
@@ -119,7 +122,7 @@ final class WalletsController extends Controller
             ]);
 
             return $this->response->json([
-                'message' => 'Unable to delete wallet. Please try again later.',
+                'message' => $this->say('wallet_delete_exception'),
                 'error'   => $exception->getMessage(),
             ], 500);
         }

@@ -12,6 +12,7 @@ use Spiral\Filters\Attribute\Input\Header;
 use Spiral\Filters\Model\Filter;
 use Spiral\Filters\Model\FilterDefinitionInterface;
 use Spiral\Filters\Model\HasFilterDefinition;
+use Spiral\Translator\Translator;
 use Spiral\Validator\FilterDefinition;
 
 class UpdateBasicRequest extends Filter implements HasFilterDefinition
@@ -30,6 +31,14 @@ class UpdateBasicRequest extends Filter implements HasFilterDefinition
 
     #[Data]
     public string $defaultCurrencyCode = '';
+
+    #[Data]
+    public string $locale = '';
+
+    public function __construct(
+        private readonly Translator $translator,
+    ) {
+    }
 
     public function filterDefinition(): FilterDefinitionInterface
     {
@@ -53,6 +62,11 @@ class UpdateBasicRequest extends Filter implements HasFilterDefinition
                 'type::notEmpty',
                 ['entity::exists', Currency::class, 'code'],
             ],
+            'locale' => [
+                'is_string',
+                'type::notEmpty',
+                ['in_array', $this->translator->getCatalogueManager()->getLocales(), true],
+            ]
         ]);
     }
 }

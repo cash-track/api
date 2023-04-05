@@ -6,9 +6,12 @@ namespace App\Mail;
 
 use App\Database\User;
 use App\Service\Mailer\Mail;
+use Spiral\Translator\Traits\TranslatorTrait;
 
 class EmailConfirmationMail extends UserMail
 {
+    use TranslatorTrait;
+
     /**
      * @var string
      */
@@ -32,7 +35,7 @@ class EmailConfirmationMail extends UserMail
      */
     public function build(): Mail
     {
-        return parent::build()->subject('Confirm Your Account Email')
+        return parent::build()->subject($this->say('email_confirmation_mail_subject'))
                               ->view('mail/confirm-email');
     }
 }

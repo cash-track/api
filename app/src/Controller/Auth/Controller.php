@@ -9,9 +9,12 @@ use App\View\UserView;
 use Psr\Http\Message\ResponseInterface;
 use Spiral\Auth\TokenInterface;
 use Spiral\Http\ResponseWrapper;
+use Spiral\Translator\Traits\TranslatorTrait;
 
 abstract class Controller
 {
+    use TranslatorTrait;
+
     public function __construct(
         protected UserView $userView,
         protected ResponseWrapper $response,
@@ -42,14 +45,14 @@ abstract class Controller
     protected function responseAuthenticationFailure(): ResponseInterface
     {
         return $this->response->json([
-            'message' => 'Wrong email or password.',
+            'message' => $this->say('error_authentication_failure'),
         ], 400);
     }
 
     protected function responseUnauthenticated(): ResponseInterface
     {
         return $this->response->json([
-            'message' => 'Authentication required.',
+            'message' => $this->say('error_authentication_required'),
         ], 401);
     }
 }

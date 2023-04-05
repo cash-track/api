@@ -12,9 +12,12 @@ use Psr\Log\LoggerInterface;
 use Spiral\Auth\AuthScope;
 use Spiral\Http\ResponseWrapper;
 use Spiral\Router\Annotation\Route;
+use Spiral\Translator\Traits\TranslatorTrait;
 
 final class ActiveController extends Controller
 {
+    use TranslatorTrait;
+
     public function __construct(
         AuthScope $auth,
         private ResponseWrapper $response,
@@ -44,7 +47,7 @@ final class ActiveController extends Controller
             ]);
 
             return $this->response->json([
-                'message' => 'Unable to activate wallet. Please try again later.',
+                'message' => $this->say('wallet_activate_exception'),
                 'error'   => $exception->getMessage(),
             ], 500);
         }
@@ -71,7 +74,7 @@ final class ActiveController extends Controller
             ]);
 
             return $this->response->json([
-                'message' => 'Unable to disable wallet. Please try again later.',
+                'message' => $this->say('wallet_disable_exception'),
                 'error'   => $exception->getMessage(),
             ], 500);
         }

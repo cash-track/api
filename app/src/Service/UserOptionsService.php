@@ -10,6 +10,7 @@ use App\Service\Sort\SortType;
 class UserOptionsService
 {
     protected const SORT_ROOT = 'sort';
+    protected const LOCALE_ROOT = 'locale';
 
     /**
      * Fetch the order from the user's options and specific order type
@@ -42,5 +43,19 @@ class UserOptionsService
         }
 
         $user->options[self::SORT_ROOT][$type->value] = $order;
+    }
+
+    public function getLocale(User $user): ?string
+    {
+        if (! array_key_exists(self::LOCALE_ROOT, $user->options)) {
+            return null;
+        }
+
+        return (string) $user->options[self::LOCALE_ROOT];
+    }
+
+    public function setLocale(User $user, string $locale): void
+    {
+        $user->options[self::LOCALE_ROOT] = trim(strtolower($locale));
     }
 }

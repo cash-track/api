@@ -10,28 +10,19 @@ use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Spiral\Translator\Translator;
 
-class LocaleSelector implements MiddlewareInterface
+class LocaleSelectorMiddleware implements MiddlewareInterface
 {
-    /** @var Translator */
-    private $translator;
-
-    /** @var array */
-    private $availableLocales;
-
     /**
-     * @param Translator $translator
+     * @var string[]
      */
-    public function __construct(Translator $translator)
-    {
-        $this->translator = $translator;
+    private array $availableLocales;
+
+    public function __construct(
+        private readonly Translator $translator
+    ) {
         $this->availableLocales = $this->translator->getCatalogueManager()->getLocales();
     }
 
-    /**
-     * @param ServerRequestInterface  $request
-     * @param RequestHandlerInterface $handler
-     * @return ResponseInterface
-     */
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
         $defaultLocale = $this->translator->getLocale();
@@ -51,18 +42,14 @@ class LocaleSelector implements MiddlewareInterface
         }
     }
 
-    /**
-     * @param ServerRequestInterface $request
-     * @return \Generator
-     */
     public function fetchLocales(ServerRequestInterface $request): \Generator
     {
         $header = $request->getHeaderLine('accept-language');
-        foreach (explode(',', $header) as $value) {
-            $value = trim($value);
+        foreach (\explode(',', $header) as $value) {
+            $value = \trim($value);
 
-            if (($colon = strpos($value, ';')) !== false) {
-                yield substr($value, 0, $colon);
+            if (($colon = \strpos($value, ';')) !== false) {
+                yield \substr($value, 0, $colon);
                 continue;
             }
 

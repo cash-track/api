@@ -35,7 +35,7 @@ class ForgotPasswordResetRequest extends Filter implements HasFilterDefinition
             ],
             'passwordConfirmation' => [
                 ['notEmpty', 'if' => ['withAll' => ['password']]],
-                ['match', 'password', 'error' => 'Password confirmation does not match']
+                ['match', 'password', 'error' => 'error_password_confirmation_not_match']
             ],
         ]);
     }

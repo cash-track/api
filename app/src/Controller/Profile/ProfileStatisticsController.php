@@ -15,18 +15,13 @@ use App\View\WalletsView;
 use Psr\Http\Message\ResponseInterface;
 use Spiral\Http\ResponseWrapper;
 use Spiral\Router\Annotation\Route;
+use Spiral\Translator\Traits\TranslatorTrait;
 
 class ProfileStatisticsController extends AuthAwareController
 {
-    /**
-     * @Route(route="/profile/statistics/charges-flow", name="profile.statistics.charges-flow", methods="GET", group="auth")
-     *
-     * @param \Spiral\Http\ResponseWrapper $response
-     * @param \App\Repository\CurrencyRepository $currencyRepository
-     * @param \App\View\CurrencyView $currencyView
-     * @param \App\Service\Statistics\ProfileStatistics $statistics
-     * @return \Psr\Http\Message\ResponseInterface
-     */
+    use TranslatorTrait;
+
+    #[Route(route: '/profile/statistics/charges-flow', name: 'profile.statistics.charges-flow', methods: 'GET', group: 'auth')]
     public function chargesFlow(
         ResponseWrapper $response,
         CurrencyRepository $currencyRepository,
@@ -38,7 +33,7 @@ class ProfileStatisticsController extends AuthAwareController
 
         if (! $currency instanceof Currency) {
             return $response->json([
-                'message' => 'Unable to find currency.',
+                'message' => $this->say('error_unknown_currency'),
             ], 400);
         }
 
@@ -50,13 +45,7 @@ class ProfileStatisticsController extends AuthAwareController
         ]);
     }
 
-    /**
-     * @Route(route="/profile/statistics/counters", name="profile.statistics.counters", methods="GET", group="auth")
-     *
-     * @param \Spiral\Http\ResponseWrapper $response
-     * @param \App\Service\Statistics\ProfileStatistics $statistics
-     * @return \Psr\Http\Message\ResponseInterface
-     */
+    #[Route(route: '/profile/statistics/counters', name: 'profile.statistics.counters', methods: 'GET', group: 'auth')]
     public function counters(ResponseWrapper $response, ProfileStatistics $statistics): ResponseInterface
     {
         return $response->json([
@@ -64,14 +53,7 @@ class ProfileStatisticsController extends AuthAwareController
         ]);
     }
 
-    /**
-     * @Route(route="/profile/wallets/latest", name="profile.wallets.latest", methods="GET", group="auth")
-     *
-     * @param \App\Repository\WalletRepository $walletRepository
-     * @param \App\Repository\ChargeRepository $chargeRepository
-     * @param \App\View\WalletsView $view
-     * @return \Psr\Http\Message\ResponseInterface
-     */
+    #[Route(route: '/profile/wallets/latest', name: 'profile.wallets.latest', methods: 'GET', group: 'auth')]
     public function walletsLatest(
         WalletRepository $walletRepository,
         ChargeRepository $chargeRepository,
