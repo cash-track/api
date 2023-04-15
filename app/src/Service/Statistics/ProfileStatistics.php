@@ -70,10 +70,6 @@ class ProfileStatistics
 
         foreach ($metrics as $metricName => $dateFrom) {
             foreach ($data as $type => &$value) {
-                if ($dateFrom === null) {
-                    continue;
-                }
-
                 $value[$metricName] = $this->chargeRepository->sumTotalByTypeByCurrencyFromDate($type, $walletIDs, $dateFrom);
             }
         }
