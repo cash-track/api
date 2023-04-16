@@ -12,9 +12,12 @@ use Psr\Log\LoggerInterface;
 use Spiral\Auth\AuthScope;
 use Spiral\Http\ResponseWrapper;
 use Spiral\Router\Annotation\Route;
+use Spiral\Translator\Traits\TranslatorTrait;
 
 final class ArchiveController extends Controller
 {
+    use TranslatorTrait;
+
     public function __construct(
         AuthScope $auth,
         private ResponseWrapper $response,
@@ -25,12 +28,7 @@ final class ArchiveController extends Controller
         parent::__construct($auth);
     }
 
-    /**
-     * @Route(route="/wallets/<id>/archive", name="wallet.archive", methods="POST", group="auth")
-     *
-     * @param string $id
-     * @return \Psr\Http\Message\ResponseInterface
-     */
+    #[Route(route: '/wallets/<id>/archive', name: 'wallet.archive', methods: 'POST', group: 'auth')]
     public function archive(string $id): ResponseInterface
     {
         $wallet = $this->walletRepository->findByPKByUserPK((int) $id, (int) $this->user->id);
@@ -49,7 +47,7 @@ final class ArchiveController extends Controller
             ]);
 
             return $this->response->json([
-                'message' => 'Unable to archive wallet. Please try again later.',
+                'message' => $this->say('wallet_archive_exception'),
                 'error'   => $exception->getMessage(),
             ], 500);
         }
@@ -57,12 +55,7 @@ final class ArchiveController extends Controller
         return $this->response->create(200);
     }
 
-    /**
-     * @Route(route="/wallets/<id>/un-archive", name="wallet.unarchive", methods="POST", group="auth")
-     *
-     * @param string $id
-     * @return \Psr\Http\Message\ResponseInterface
-     */
+    #[Route(route: '/wallets/<id>/un-archive', name: 'wallet.unarchive', methods: 'POST', group: 'auth')]
     public function unArchive(string $id): ResponseInterface
     {
         $wallet = $this->walletRepository->findByPKByUserPK((int) $id, (int) $this->user->id);
@@ -81,7 +74,7 @@ final class ArchiveController extends Controller
             ]);
 
             return $this->response->json([
-                'message' => 'Unable to un-archive wallet. Please try again later.',
+                'message' => $this->say('wallet_un_archive_exception'),
                 'error'   => $exception->getMessage(),
             ], 500);
         }

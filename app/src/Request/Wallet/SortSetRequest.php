@@ -23,7 +23,7 @@ class SortSetRequest extends Filter implements HasFilterDefinition
                 'notEmpty',
                 [
                     'arrayOf', ['entity:exists', Wallet::class],
-                    'error' => 'One or more wallets does not exists',
+                    'error' => 'error_wallet_does_not_exists',
                 ],
             ],
         ]);

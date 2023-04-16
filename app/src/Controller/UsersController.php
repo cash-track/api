@@ -25,12 +25,7 @@ final class UsersController extends AuthAwareController
         parent::__construct($authScope);
     }
 
-    /**
-     * @Route(route="/users/find/by-email/<query>", name="users.find.by-email", methods="GET", group="auth")
-     *
-     * @param string $query
-     * @return \Psr\Http\Message\ResponseInterface
-     */
+    #[Route(route: '/users/find/by-email/<query>', name: 'users.find.by-email', methods: 'GET', group: 'auth')]
     public function findByEmail(string $query): ResponseInterface
     {
         if ($query === $this->user->email) {
@@ -46,11 +41,7 @@ final class UsersController extends AuthAwareController
         return $this->userView->json($user);
     }
 
-    /**
-     * @Route(route="/users/find/by-common-wallets", name="users.find.by-common-wallets", methods="GET", group="auth")
-     *
-     * @return \Psr\Http\Message\ResponseInterface
-     */
+    #[Route(route: '/users/find/by-common-wallets', name: 'users.find.by-common-wallets', methods: 'GET', group: 'auth')]
     public function findByCommonWallets(): ResponseInterface
     {
         /** @var \App\Database\User[] $users */

@@ -22,9 +22,12 @@ use Spiral\Auth\AuthScope;
 use Spiral\Http\Request\InputManager;
 use Spiral\Http\ResponseWrapper;
 use Spiral\Router\Annotation\Route;
+use Spiral\Translator\Traits\TranslatorTrait;
 
 class ChargesController extends Controller
 {
+    use TranslatorTrait;
+
     public function __construct(
         AuthScope $auth,
         private ResponseWrapper $response,
@@ -110,7 +113,7 @@ class ChargesController extends Controller
             ]);
 
             return $this->response->json([
-                'message' => 'Unable to create charge. Please try again later.',
+                'message' => $this->say('charge_create_exception'),
                 'error'   => $exception->getMessage(),
             ], 500);
         }
@@ -160,7 +163,7 @@ class ChargesController extends Controller
             ]);
 
             return $this->response->json([
-                'message' => 'Unable to update charge. Please try again later.',
+                'message' => $this->say('charge_update_exception'),
                 'error'   => $exception->getMessage(),
             ], 500);
         }
@@ -194,7 +197,7 @@ class ChargesController extends Controller
             ]);
 
             return $this->response->json([
-                'message' => 'Unable to delete charge. Please try again later.',
+                'message' => $this->say('charge_delete_exception'),
                 'error'   => $exception->getMessage(),
             ], 500);
         }

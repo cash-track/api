@@ -4,10 +4,10 @@
     <title></title>
 </head>
 <body>
-    <h1>Hey, {{ $user->name }} {{ $user->lastName }}</h1>
-    <p>{{ $sharer->name }} {{ $sharer->lastName }} invited you to wallet <a href="{{ $link }}" target="_blank">{{ $wallet->name }}</a> at <a href="https://cash-track.ml" target="_blank">Cash Track</a>.</p>
-    <p>Now you can use it together.</p>
+    <h1>[[wallet_share_mail_hello]], {{ $user->name }} {{ $user->lastName }}</h1>
+    <p>{{ $sharer->name }} {{ $sharer->lastName }} [[wallet_share_mail_line_invited]] <a href="{{ $link }}" target="_blank">{{ $wallet->name }}</a> [[wallet_share_mail_line_invited_to]] <a href="https://cash-track.app" target="_blank">Cash Track</a>.</p>
+    <p>[[wallet_share_mail_line_2]]</p>
     <p></p>
-    <p>If it's not you just ignore this.</p>
+    <p>[[wallet_share_mail_footer]]</p>
 </body>
 </html>

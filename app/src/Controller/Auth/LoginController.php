@@ -13,16 +13,12 @@ use App\View\UserView;
 use Psr\Http\Message\ResponseInterface;
 use Spiral\Http\ResponseWrapper;
 use Spiral\Router\Annotation\Route;
+use Spiral\Translator\Traits\TranslatorTrait;
 
 final class LoginController extends Controller
 {
-    /**
-     * @param \App\View\UserView $userView
-     * @param \App\Service\Auth\AuthService $authService
-     * @param \Spiral\Http\ResponseWrapper $response
-     * @param \App\Repository\UserRepository $userRepository
-     * @param \App\Service\Auth\RefreshTokenService $refreshTokenService
-     */
+    use TranslatorTrait;
+
     public function __construct(
         protected UserView $userView,
         protected AuthService $authService,
@@ -41,7 +37,7 @@ final class LoginController extends Controller
         } catch (\Throwable $exception) {
             return $this->response->json([
                 'error' => $exception->getMessage(),
-                'message' => 'Unable to authenticate. Please try again later',
+                'message' => $this->say('error_authentication_exception'),
             ], 500);
         }
 

@@ -6,6 +6,7 @@ namespace App\View;
 
 use App\Database\User;
 use App\Service\PhotoStorageService;
+use App\Service\UserOptionsService;
 use Psr\Http\Message\ResponseInterface;
 use Spiral\Core\Container\SingletonInterface;
 use Spiral\Http\ResponseWrapper;
@@ -16,6 +17,7 @@ class UserView implements SingletonInterface
         protected ResponseWrapper $response,
         protected CurrencyView $currencyView,
         protected PhotoStorageService $photoStorageService,
+        protected UserOptionsService $userOptionsService,
     ) {
     }
 
@@ -54,6 +56,8 @@ class UserView implements SingletonInterface
 
             'defaultCurrencyCode' => $user->defaultCurrencyCode,
             'defaultCurrency'     => $this->currencyView->map($user->getDefaultCurrency()),
+
+            'locale' => $this->userOptionsService->getLocale($user),
         ];
     }
 }

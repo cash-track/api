@@ -31,6 +31,11 @@ class UserFactory extends AbstractFactory
         return $user;
     }
 
+    public static function locale(): string
+    {
+        return Fixtures::arrayElement(['en', 'uk']);
+    }
+
     public static function passwordHash(string $password = self::DEFAULT_PASSWORD)
     {
         if (array_key_exists($password, self::$hashCache)) {

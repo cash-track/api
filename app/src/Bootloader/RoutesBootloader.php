@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Bootloader;
 
+use App\Middleware\LocaleSelectorMiddleware;
+use App\Middleware\UserLocaleSelectorMiddleware;
 use App\Request\JsonErrorsRenderer;
 use Spiral\Bootloader\Http\RoutesBootloader as BaseRoutesBootloader;
 use App\Auth\AuthMiddleware;
@@ -15,7 +17,6 @@ use Spiral\Http\Middleware\ErrorHandlerMiddleware;
 use Spiral\Http\Middleware\JsonPayloadMiddleware;
 use Spiral\Router\Bootloader\AnnotatedRoutesBootloader;
 use Spiral\Router\Loader\Configurator\RoutingConfigurator;
-use App\Endpoint\Web\Middleware\LocaleSelector;
 
 final class RoutesBootloader extends BaseRoutesBootloader
 {
@@ -30,11 +31,7 @@ final class RoutesBootloader extends BaseRoutesBootloader
     protected function globalMiddleware(): array
     {
         return [
-            // If you want to automatically detect the user's locale based on the
-            // "Accept-Language" header uncomment this middleware and add \Spiral\Bootloader\I18nBootloader
-            // to the Kernel
-            // LocaleSelector::class,
-
+            LocaleSelectorMiddleware::class,
             ErrorHandlerMiddleware::class,
             JsonPayloadMiddleware::class,
             HttpCollector::class,
@@ -48,6 +45,7 @@ final class RoutesBootloader extends BaseRoutesBootloader
         return [
             'auth' => [
                 AuthMiddleware::class,
+                UserLocaleSelectorMiddleware::class,
             ],
         ];
     }

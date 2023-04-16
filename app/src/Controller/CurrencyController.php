@@ -20,11 +20,7 @@ final class CurrencyController extends AuthAwareController
         parent::__construct($authScope);
     }
 
-    /**
-     * @Route(route="/currencies", name="currency.list", methods="GET", group="auth")
-     *
-     * @return \Psr\Http\Message\ResponseInterface
-     */
+    #[Route(route: '/currencies', name: 'currency.list', methods: 'GET', group: 'auth')]
     public function list(): ResponseInterface
     {
         /** @var \App\Database\Currency[] $currencies */
@@ -33,11 +29,7 @@ final class CurrencyController extends AuthAwareController
         return $this->currenciesView->json($currencies);
     }
 
-    /**
-     * @Route(route="/currencies/featured", name="currency.featured", methods="GET", group="auth")
-     *
-     * @return \Psr\Http\Message\ResponseInterface
-     */
+    #[Route(route: '/currencies/featured', name: 'currency.featured', methods: 'GET', group: 'auth')]
     public function featured(): ResponseInterface
     {
         /** @var \App\Database\Currency[] */

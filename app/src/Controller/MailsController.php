@@ -20,12 +20,8 @@ final class MailsController extends AuthAwareController
         parent::__construct($auth);
     }
 
-    /**
-     * @Route(route="/mails/test", name="mails.test", methods="GET", group="auth")
-     *
-     * @return void
-     */
-    public function test()
+    #[Route(route:'/mails/test', name: 'mails.test', methods: 'GET', group: 'auth')]
+    public function test(): void
     {
         if (! $this->isDebug()) {
             return;
@@ -34,11 +30,7 @@ final class MailsController extends AuthAwareController
         $this->mailer->send(new TestMail($this->user));
     }
 
-    /**
-     * @Route(route="/mails/preview", name="mails.preview", methods="GET", group="auth")
-     *
-     * @return string
-     */
+    #[Route(route:'/mails/preview', name: 'mails.preview', methods: 'GET', group: 'auth')]
     public function preview(): string
     {
         if (! $this->isDebug()) {

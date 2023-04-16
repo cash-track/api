@@ -15,12 +15,9 @@ use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Spiral\Core\Exception\ScopeException;
 use Spiral\Core\FactoryInterface;
-use Spiral\Prototype\Annotation\Prototyped;
 
 /**
- * Paginators factory binded to active request scope in order to select page number.
- *
- * @Prototyped(property="paginators")
+ * Pagination factory binded to active request scope in order to select page number.
  */
 final class PaginationFactory implements PaginationProviderInterface
 {

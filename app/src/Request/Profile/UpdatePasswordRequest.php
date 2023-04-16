@@ -40,7 +40,7 @@ class UpdatePasswordRequest extends Filter implements HasFilterDefinition
             ],
             'newPasswordConfirmation' => [
                 ['notEmpty', 'if' => ['withAll' => ['newPassword']]],
-                ['match', 'newPassword', 'error' => 'New password confirmation does not match'],
+                ['match', 'newPassword', 'error' => 'error_password_confirmation_not_match'],
             ],
         ]);
     }

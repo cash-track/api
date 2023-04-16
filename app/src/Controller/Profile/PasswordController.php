@@ -13,9 +13,12 @@ use Psr\Log\LoggerInterface;
 use Spiral\Auth\AuthScope;
 use Spiral\Http\ResponseWrapper;
 use Spiral\Router\Annotation\Route;
+use Spiral\Translator\Traits\TranslatorTrait;
 
 final class PasswordController extends AuthAwareController
 {
+    use TranslatorTrait;
+
     public function __construct(
         AuthScope $auth,
         protected ResponseWrapper $response,
@@ -41,7 +44,7 @@ final class PasswordController extends AuthAwareController
             ]);
 
             return $this->response->json([
-                'message' => 'Unable to update user password. Please try again later.',
+                'message' => $this->say('password_change_exception'),
                 'error'   => $exception->getMessage(),
             ], 500);
         }
@@ -51,7 +54,7 @@ final class PasswordController extends AuthAwareController
         // TODO. Add active token to blacklist, generate new and add to response.
 
         return $this->response->json([
-            'message' => 'Password has been changed.'
+            'message' => $this->say('password_change_ok'),
         ], 200);
     }
 }

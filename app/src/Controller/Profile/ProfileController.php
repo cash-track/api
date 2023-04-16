@@ -9,19 +9,21 @@ use App\Database\Currency;
 use App\Repository\CurrencyRepository;
 use App\Request\CheckNickNameRequest;
 use App\Request\Profile\UpdateBasicRequest;
+use App\Request\Profile\UpdateLocaleRequest;
+use App\Service\UserOptionsService;
 use App\Service\UserService;
 use App\View\UserView;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Log\LoggerInterface;
 use Spiral\Auth\AuthScope;
-use Spiral\Http\Request\InputManager;
 use Spiral\Http\ResponseWrapper;
 use Spiral\Router\Annotation\Route;
-use Spiral\Validation\ValidationProviderInterface;
-use Spiral\Validator\FilterDefinition;
+use Spiral\Translator\Traits\TranslatorTrait;
 
 class ProfileController extends AuthAwareController
 {
+    use TranslatorTrait;
+
     public function __construct(
         AuthScope $auth,
         protected UserView $userView,
@@ -29,6 +31,7 @@ class ProfileController extends AuthAwareController
         protected UserService $userService,
         protected ResponseWrapper $response,
         protected CurrencyRepository $currencyRepository,
+        protected UserOptionsService $userOptionsService,
     ) {
         parent::__construct($auth);
     }
@@ -43,7 +46,7 @@ class ProfileController extends AuthAwareController
     public function checkNickName(CheckNickNameRequest $_): ResponseInterface
     {
         return $this->response->json([
-            'message' => 'Nick name are free to use'
+            'message' => $this->say('profile_nick_name_free'),
         ]);
     }
 
@@ -54,6 +57,7 @@ class ProfileController extends AuthAwareController
         $this->user->lastName = $request->lastName;
         $this->user->nickName = $request->nickName;
         $this->user->defaultCurrencyCode = $request->defaultCurrencyCode;
+        $this->userOptionsService->setLocale($this->user, $request->locale);
 
         try {
             /** @var \App\Database\Currency|null $defaultCurrency */
@@ -82,7 +86,30 @@ class ProfileController extends AuthAwareController
             ]);
 
             return $this->response->json([
-                'message' => 'Unable to update basic user profile. Please try again later.',
+                'message' => $this->say('profile_update_basic_exception'),
+                'error'   => $exception->getMessage(),
+            ], 500);
+        }
+
+        return $this->userView->json($this->user);
+    }
+
+    #[Route(route: '/profile/locale', name: 'profile.update.locale', methods: 'PUT', group: 'auth')]
+    public function updateLocale(UpdateLocaleRequest $request): ResponseInterface
+    {
+        $this->userOptionsService->setLocale($this->user, $request->locale);
+
+        try {
+            $this->userService->store($this->user);
+        } catch (\Throwable $exception) {
+            $this->logger->error('Unable to store user', [
+                'action' => 'profile.update',
+                'id'     => $this->user->id,
+                'msg'    => $exception->getMessage(),
+            ]);
+
+            return $this->response->json([
+                'message' => $this->say('profile_update_locale_exception'),
                 'error'   => $exception->getMessage(),
             ], 500);
         }

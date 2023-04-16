@@ -16,9 +16,12 @@ use App\View\UserView;
 use Psr\Http\Message\ResponseInterface;
 use Spiral\Http\ResponseWrapper;
 use Spiral\Router\Annotation\Route;
+use Spiral\Translator\Traits\TranslatorTrait;
 
 final class RegisterController extends Controller
 {
+    use TranslatorTrait;
+
     public function __construct(
         protected UserView $userView,
         protected AuthService $authService,
@@ -48,7 +51,7 @@ final class RegisterController extends Controller
             $user = $this->userService->store($user);
         } catch (\Throwable $exception) {
             return $this->response->json([
-                'message' => 'Unable to register new user. Please try again later.',
+                'message' => $this->say('user_register_exception'),
                 'error' => $exception->getMessage(),
             ], 500);
         }
@@ -69,7 +72,7 @@ final class RegisterController extends Controller
     public function checkNickName(CheckNickNameRequest $_): ResponseInterface
     {
         return $this->response->json([
-            'message' => 'Nick name are free to register'
+            'message' => $this->say('nick_name_register_free'),
         ]);
     }
 }

@@ -15,9 +15,12 @@ use Psr\Log\LoggerInterface;
 use Spiral\Auth\AuthScope;
 use Spiral\Http\ResponseWrapper;
 use Spiral\Router\Annotation\Route;
+use Spiral\Translator\Traits\TranslatorTrait;
 
 final class UsersController extends Controller
 {
+    use TranslatorTrait;
+
     public function __construct(
         AuthScope $auth,
         private ResponseWrapper $response,
@@ -30,12 +33,7 @@ final class UsersController extends Controller
         parent::__construct($auth);
     }
 
-    /**
-     * @Route(route="/wallets/<id>/users", name="wallet.users.list", methods="GET", group="auth")
-     *
-     * @param string $id
-     * @return \Psr\Http\Message\ResponseInterface
-     */
+    #[Route(route: '/wallets/<id>/users', name: 'wallet.users.list', methods: 'GET', group: 'auth')]
     public function users(string $id): ResponseInterface
     {
         $wallet = $this->walletRepository->findByPKByUserPKWithUsers((int) $id, (int) $this->user->id);
@@ -47,13 +45,7 @@ final class UsersController extends Controller
         return $this->usersView->json($wallet->users->getValues());
     }
 
-    /**
-     * @Route(route="/wallets/<id>/users/<userId>", name="wallet.users.add", methods="PATCH", group="auth")
-     *
-     * @param string $id
-     * @param string $userId
-     * @return \Psr\Http\Message\ResponseInterface
-     */
+    #[Route(route: '/wallets/<id>/users/<userId>', name: 'wallet.users.add', methods: 'PATCH', group: 'auth')]
     public function patch(string $id, string $userId): ResponseInterface
     {
         $wallet = $this->walletRepository->findByPKByUserPKWithUsers((int) $id, (int) $this->user->id);
@@ -81,7 +73,7 @@ final class UsersController extends Controller
             ]);
 
             return $this->response->json([
-                'message' => 'Unable to share wallet with user. Please try again later.',
+                'message' => $this->say('wallet_share_exception'),
                 'error'   => $exception->getMessage(),
             ], 500);
         }
@@ -89,13 +81,7 @@ final class UsersController extends Controller
         return $this->response->create(200);
     }
 
-    /**
-     * @Route(route="/wallets/<id>/users/<userId>", name="wallet.users.delete", methods="DELETE", group="auth")
-     *
-     * @param string $id
-     * @param string $userId
-     * @return \Psr\Http\Message\ResponseInterface
-     */
+    #[Route(route: '/wallets/<id>/users/<userId>', name: 'wallet.users.delete', methods: 'DELETE', group: 'auth')]
     public function delete(string $id, string $userId): ResponseInterface
     {
         $wallet = $this->walletRepository->findByPKByUserPKWithUsers((int) $id, (int) $this->user->id);
@@ -114,8 +100,8 @@ final class UsersController extends Controller
         if ($wallet->users->count() === 1) {
             if ($this->user->id === (int) $userId) {
                 return $this->response->json([
-                    'message' => 'Unable to revoke user from wallet. You are only one member. Delete wallet if you do not need them anymore.',
-                    'error'   => 'Current user is the one wallet owner.',
+                    'message' => $this->say('wallet_revoke_owner'),
+                    'error'   => $this->say('wallet_revoke_owner_error'),
                 ], 403);
             }
 
@@ -134,7 +120,7 @@ final class UsersController extends Controller
             ]);
 
             return $this->response->json([
-                'message' => 'Unable to revoke user from wallet. Please try again later.',
+                'message' => $this->say('wallet_revoke_exception'),
                 'error'   => $exception->getMessage(),
             ], 500);
         }

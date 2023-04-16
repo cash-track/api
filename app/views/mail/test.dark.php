@@ -4,9 +4,9 @@
     <title></title>
 </head>
 <body>
-    <h1>Welcome, {{ $user->name }} {{ $user->lastName }}</h1>
-    <p>This is a test mail.</p>
-    <p>Sending mails are working well.</p>
-    <p>Have a nice day.</p>
+    <h1>[[test_mail_hello]], {{ $user->name }} {{ $user->lastName }}</h1>
+    <p>[[test_mail_line_1]]</p>
+    <p>[[test_mail_line_2]]</p>
+    <p>[[test_mail_footer]]</p>
 </body>
 </html>

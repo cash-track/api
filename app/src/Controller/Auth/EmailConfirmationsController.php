@@ -13,9 +13,12 @@ use Psr\Http\Message\ResponseInterface;
 use Spiral\Auth\AuthScope;
 use Spiral\Http\ResponseWrapper;
 use Spiral\Router\Annotation\Route;
+use Spiral\Translator\Traits\TranslatorTrait;
 
 final class EmailConfirmationsController extends AuthAwareController
 {
+    use TranslatorTrait;
+
     public function __construct(
         protected AuthScope $auth,
         protected ResponseWrapper $response,
@@ -48,13 +51,13 @@ final class EmailConfirmationsController extends AuthAwareController
             $this->emailConfirmationService->confirm($token);
         } catch (\Throwable $exception) {
             return $this->response->json([
-                'message' => 'Unable to confirm your email',
+                'message' => $this->say('email_confirmation_confirm_failure'),
                 'error' => $exception->getMessage(),
             ], 400);
         }
 
         return $this->response->json([
-            'message' => 'Your email has been confirmed',
+            'message' => $this->say('email_confirmation_ok'),
         ]);
     }
 
@@ -65,13 +68,13 @@ final class EmailConfirmationsController extends AuthAwareController
             $this->emailConfirmationService->reSend($this->user);
         } catch (\Throwable $exception) {
             return $this->response->json([
-                'message' => 'Error on trying to send new confirmation link.',
+                'message' => $this->say('email_confirmation_resend_failure'),
                 'error' => $exception->getMessage(),
             ], 400);
         }
 
         return $this->response->json([
-            'message' => 'Confirmation message has been sent.',
+            'message' => $this->say('email_confirmation_resend_ok'),
         ]);
     }
 }

@@ -6,9 +6,12 @@ namespace App\Mail;
 
 use App\Database\User;
 use App\Service\Mailer\Mail;
+use Spiral\Translator\Traits\TranslatorTrait;
 
 class ForgotPasswordMail extends UserMail
 {
+    use TranslatorTrait;
+
     /**
      * @var string
      */
@@ -32,7 +35,7 @@ class ForgotPasswordMail extends UserMail
      */
     public function build(): Mail
     {
-        return parent::build()->subject('Reset Your Password')
+        return parent::build()->subject($this->say('forgot_password_mail_subject'))
                               ->view('mail/forgot-password');
     }
 }

@@ -11,9 +11,12 @@ use App\Service\Auth\ForgotPasswordThrottledException;
 use Psr\Http\Message\ResponseInterface;
 use Spiral\Http\ResponseWrapper;
 use Spiral\Router\Annotation\Route;
+use Spiral\Translator\Traits\TranslatorTrait;
 
 final class ForgotPasswordController
 {
+    use TranslatorTrait;
+
     public function __construct(
         protected readonly ResponseWrapper $response,
         protected readonly ForgotPasswordService $forgotPasswordService,
@@ -31,13 +34,13 @@ final class ForgotPasswordController
             ], 400);
         } catch (\Throwable $exception) {
             return $this->response->json([
-                'message' => 'Unable to reset your password.',
+                'message' => $this->say('forgot_password_send_failure'),
                 'error' => $exception->getMessage(),
             ], 400);
         }
 
         return $this->response->json([
-            'message' => 'Email with reset password link has been sent.'
+            'message' => $this->say('forgot_password_sent'),
         ], 200);
     }
 
@@ -48,13 +51,13 @@ final class ForgotPasswordController
             $this->forgotPasswordService->reset($request->code, $request->password);
         } catch (\Throwable $exception) {
             return $this->response->json([
-                'message' => 'Unable to reset your password.',
+                'message' => $this->say('forgot_password_reset_failure'),
                 'error' => $exception->getMessage(),
             ], 400);
         }
 
         return $this->response->json([
-            'message' => 'Your password has been changed.'
+            'message' => $this->say('forgot_password_reset_ok'),
         ], 200);
     }
 }

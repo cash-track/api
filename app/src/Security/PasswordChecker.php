@@ -11,7 +11,7 @@ use Spiral\Validator\AbstractChecker;
 class PasswordChecker extends AbstractChecker
 {
     public const MESSAGES = [
-        'verify' => 'Wrong password.'
+        'verify' => 'password_verify_error',
     ];
 
     public function __construct(

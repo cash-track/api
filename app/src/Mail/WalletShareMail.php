@@ -7,9 +7,12 @@ namespace App\Mail;
 use App\Database\User;
 use App\Database\Wallet;
 use App\Service\Mailer\Mail;
+use Spiral\Translator\Traits\TranslatorTrait;
 
 class WalletShareMail extends UserMail
 {
+    use TranslatorTrait;
+
     /**
      * @var \App\Database\User
      */
@@ -46,7 +49,7 @@ class WalletShareMail extends UserMail
      */
     public function build(): Mail
     {
-        return parent::build()->subject('Invitation To Wallet')
+        return parent::build()->subject($this->say('wallet_share_mail_subject'))
                               ->view('mail/wallet-share');
     }
 }

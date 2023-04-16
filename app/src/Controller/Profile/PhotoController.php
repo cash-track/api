@@ -12,12 +12,12 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Log\LoggerInterface;
 use Spiral\Auth\AuthScope;
 use Spiral\Http\ResponseWrapper;
-use Spiral\Prototype\Traits\PrototypeTrait;
 use Spiral\Router\Annotation\Route;
+use Spiral\Translator\Traits\TranslatorTrait;
 
 final class PhotoController extends AuthAwareController
 {
-    use PrototypeTrait;
+    use TranslatorTrait;
 
     public function __construct(
         AuthScope $auth,
@@ -38,7 +38,7 @@ final class PhotoController extends AuthAwareController
 
         if ($fileName === null) {
             return $this->response->json([
-                'message' => 'Unable to store uploaded photo. Please try again later.'
+                'message' => $this->say('profile_photo_update_empty'),
             ], 500);
         }
 
@@ -58,13 +58,13 @@ final class PhotoController extends AuthAwareController
             ]);
 
             return $this->response->json([
-                'message' => 'Unable to update user photo. Please try again later.',
+                'message' => $this->say('profile_photo_update_exception'),
                 'error'   => $exception->getMessage(),
             ], 500);
         }
 
         return $this->response->json([
-            'message' => 'Photo has been updated.',
+            'message' => $this->say('profile_photo_update_ok'),
             'fileName' => $fileName,
             'url' => $this->photoStorageService->getProfilePhotoPublicUrl($fileName),
         ], 200);
