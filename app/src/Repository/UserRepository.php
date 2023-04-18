@@ -17,7 +17,7 @@ class UserRepository extends Repository implements ActorProviderInterface
     public function __construct(
         Select $select,
         private readonly EncrypterInterface $encrypter,
-        ) {
+    ) {
         parent::__construct($select);
     }
 

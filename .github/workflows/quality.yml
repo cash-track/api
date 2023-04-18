@@ -132,7 +132,7 @@ jobs:
           php app.php migrate
 
       - name: Run PHPUnit
-        run: ./vendor/bin/phpunit --coverage-clover=coverage.xml
+        run: ./vendor/bin/phpunit --coverage-clover=coverage.xml --stop-on-failure
 
       - name: Upload Coverage To Codecov
         continue-on-error: true

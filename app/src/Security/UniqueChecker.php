@@ -17,7 +17,8 @@ class UniqueChecker extends AbstractChecker
     public function __construct(
         private readonly ORMInterface $orm,
         private readonly EncrypterInterface $encrypter
-    ) {}
+    ) {
+    }
 
     public function verify(mixed $value, string $role, string $field, array $withFields = [], array $exceptFields = [], bool $encrypted = false): bool
     {

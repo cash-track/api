@@ -19,7 +19,8 @@ final class EncryptedTypecast implements CastableInterface, UncastableInterface
     public function __construct(
         private readonly LoggerInterface $logger,
         private readonly EncrypterInterface $encrypter,
-    ) {}
+    ) {
+    }
 
     /**
      * @param array<non-empty-string, mixed> $rules
