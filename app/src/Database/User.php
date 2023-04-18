@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Database;
 
+use App\Database\Typecast\EncryptedTypecast;
 use App\Database\Typecast\JsonTypecast;
 use App\Repository\UserRepository;
 use App\Security\PasswordContainerInterface;
@@ -14,6 +15,7 @@ use Cycle\ORM\Parser\Typecast;
 #[ORM\Entity(repository: UserRepository::class, typecast: [
     Typecast::class,
     JsonTypecast::class,
+    EncryptedTypecast::class,
 ])]
 #[ORM\Table(indexes: [
     new ORM\Table\Index(columns: ['nick_name'], unique: true),
@@ -26,16 +28,16 @@ class User implements PasswordContainerInterface
     #[ORM\Column('primary')]
     public int|null $id = null;
 
-    #[ORM\Column('string')]
+    #[ORM\Column(type: 'string', typecast: EncryptedTypecast::RULE)]
     public string $name = '';
 
-    #[ORM\Column(type: 'string', name: 'last_name', nullable: true)]
+    #[ORM\Column(type: 'string', name: 'last_name', nullable: true, typecast: EncryptedTypecast::RULE)]
     public string|null $lastName = null;
 
-    #[ORM\Column(type: 'string', name: 'nick_name')]
+    #[ORM\Column(type: 'string', name: 'nick_name', typecast: EncryptedTypecast::RULE)]
     public string $nickName = '';
 
-    #[ORM\Column('string')]
+    #[ORM\Column(type: 'string', typecast: EncryptedTypecast::RULE)]
     public string $email = '';
 
     #[ORM\Column(type: 'boolean', name: 'is_email_confirmed', default: false)]

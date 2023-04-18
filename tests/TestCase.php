@@ -57,6 +57,7 @@ abstract class TestCase extends BaseTestCase
 
         /** @var \Cycle\Database\DatabaseInterface $db */
         $db = $this->getContainer()->get(DatabaseInterface::class);
+        $db->begin();
 
         $this->getContainer()->get(FinalizerInterface::class)->addFinalizer(static function () use ($db) {
             $db->rollback();

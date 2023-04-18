@@ -56,12 +56,12 @@ class RegisterRequest extends Filter implements HasFilterDefinition
                 'type::notEmpty',
                 ['string::longer', 3],
                 ['string::regexp', '/^[a-zA-Z0-9_]*$/'],
-                ['entity::unique', User::class, 'nickName'],
+                ['encrypted-entity::unique', User::class, 'nickName'],
             ],
             'email' => [
                 'address::email',
                 'type::notEmpty',
-                ['entity::unique', User::class, 'email'],
+                ['encrypted-entity::unique', User::class, 'email'],
             ],
             'password' => [
                 'type::notEmpty',

@@ -16,11 +16,11 @@ trait Filter
 
     public function filter(array $query): static
     {
+        $this->filter = [];
+
         if (count($query) === 0) {
             return $this;
         }
-
-        $this->filter = [];
 
         foreach (FilterType::cases() as $type) {
             if (! array_key_exists($type->value, $query)) {

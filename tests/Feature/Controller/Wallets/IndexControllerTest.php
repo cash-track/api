@@ -275,4 +275,49 @@ class IndexControllerTest extends TestCase implements DatabaseTransaction
         $this->assertArrayContains($total['income'], $body, 'data.totalIncomeAmount');
         $this->assertArrayContains($total['expense'], $body, 'data.totalExpenseAmount');
     }
+
+    public function testTotalWithDateFiltersDoesNotOverlapsBetweenRequests()
+    {
+        $auth = $this->makeAuth($user = $this->userFactory->create());
+        $wallet = $this->walletFactory->forUser($user)->create();
+
+        for ($i = 1; $i <= 4; $i++) {
+            $charge = ChargeFactory::make();
+            $charge->type = Charge::TYPE_INCOME;
+            $charge->amount = 100 + $i;
+            $charge->createdAt = new \DateTimeImmutable("0{$i}-06-2022");
+            $this->chargeFactory->forUser($user)->forWallet($wallet)->create($charge);
+        }
+
+        for ($i = 1; $i <= 4; $i++) {
+            $charge = ChargeFactory::make();
+            $charge->type = Charge::TYPE_EXPENSE;
+            $charge->amount = 50 + $i;
+            $charge->createdAt = new \DateTimeImmutable("0{$i}-06-2022");
+            $this->chargeFactory->forUser($user)->forWallet($wallet)->create($charge);
+        }
+
+        $response = $this->withAuth($auth)->get("/wallets/{$wallet->id}/total", [
+            'date-from' => '02-06-2022',
+            'date-to' => '03-06-2022',
+        ]);
+
+        $response->assertOk();
+
+        $body = $this->getJsonResponseBody($response);
+
+        $this->assertArrayContains(100, $body, 'data.totalAmount');
+        $this->assertArrayContains(205, $body, 'data.totalIncomeAmount');
+        $this->assertArrayContains(105, $body, 'data.totalExpenseAmount');
+
+        $response = $this->withAuth($auth)->get("/wallets/{$wallet->id}/total");
+
+        $response->assertOk();
+
+        $body = $this->getJsonResponseBody($response);
+
+        $this->assertArrayContains(200, $body, 'data.totalAmount');
+        $this->assertArrayContains(410, $body, 'data.totalIncomeAmount');
+        $this->assertArrayContains(210, $body, 'data.totalExpenseAmount');
+    }
 }

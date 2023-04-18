@@ -119,9 +119,10 @@ class WalletsControllerTest extends TestCase implements DatabaseTransaction
         $this->assertArrayHasKey('id', $body['data']);
 
         $this->assertDatabaseHas('wallets', [
+            'default_currency_code' => $wallet->defaultCurrencyCode,
+        ], [
             'name' => $wallet->name,
             'slug' => $wallet->slug,
-            'default_currency_code' => $wallet->defaultCurrencyCode,
         ]);
 
         $this->assertDatabaseHas('user_wallets', [
@@ -271,10 +272,11 @@ class WalletsControllerTest extends TestCase implements DatabaseTransaction
         $this->assertArrayContains($otherWallet->defaultCurrencyCode, $body, 'data.defaultCurrencyCode');
 
         $this->assertDatabaseHas('wallets', [
-            'name' => $otherWallet->name,
-            'slug' => $wallet->slug,
             'is_public' => $otherWallet->isPublic,
             'default_currency_code' => $otherWallet->defaultCurrencyCode,
+        ], [
+            'name' => $otherWallet->name,
+            'slug' => $wallet->slug,
         ]);
     }
 
@@ -452,6 +454,7 @@ class WalletsControllerTest extends TestCase implements DatabaseTransaction
 
         $this->assertDatabaseHas('wallets', [
             'id' => $wallet->id,
+        ], [
             'name' => $wallet->name,
             'slug' => $wallet->slug,
         ]);

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Repository;
 
+use App\Database\Encrypter\EncrypterInterface;
 use App\Database\User;
 use Cycle\ORM\Select;
 use Cycle\ORM\Select\Repository;
@@ -13,6 +14,13 @@ use Cycle\Database\Query\SelectQuery;
 
 class UserRepository extends Repository implements ActorProviderInterface
 {
+    public function __construct(
+        Select $select,
+        private readonly EncrypterInterface $encrypter,
+        ) {
+        parent::__construct($select);
+    }
+
     /**
      * @param \Spiral\Auth\TokenInterface $token
      * @return object|null
@@ -32,7 +40,9 @@ class UserRepository extends Repository implements ActorProviderInterface
      */
     public function findByEmail(string $email): object|null
     {
-        return $this->findOne(['email' => $email]);
+        return $this->findOne([
+            'email' => $this->encrypter->encrypt($email),
+        ]);
     }
 
     /**

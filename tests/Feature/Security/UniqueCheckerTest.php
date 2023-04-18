@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Security;
 
+use App\Database\Encrypter\EncrypterInterface;
 use App\Security\UniqueChecker;
 use Cycle\ORM\ORMInterface;
 use Tests\Fixtures;
@@ -13,7 +14,10 @@ class UniqueCheckerTest extends TestCase
 {
     public function testVerifyEmptyRole(): void
     {
-        $checker = new UniqueChecker($this->getContainer()->get(ORMInterface::class));
+        $checker = new UniqueChecker(
+            $this->getContainer()->get(ORMInterface::class),
+            $this->getContainer()->get(EncrypterInterface::class)
+        );
 
         $this->assertFalse($checker->verify(Fixtures::string(), '', Fixtures::string()));
     }

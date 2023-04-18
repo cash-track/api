@@ -63,7 +63,7 @@ class RegisterTest extends TestCase implements DatabaseTransaction
         $this->assertArrayHasKey('accessToken', $body);
         $this->assertArrayHasKey('refreshToken', $body);
 
-        $this->assertDatabaseHas('users', ['email' => $user->email]);
+        $this->assertDatabaseHas('users', [], ['email' => $user->email]);
     }
 
     public function testUserStoreFailed(): void
@@ -134,7 +134,7 @@ class RegisterTest extends TestCase implements DatabaseTransaction
         $this->assertArrayHasKey('accessToken', $body);
         $this->assertArrayHasKey('refreshToken', $body);
 
-        $this->assertDatabaseHas('users', ['email' => $user->email]);
+        $this->assertDatabaseHas('users', [], ['email' => $user->email]);
     }
 
     public function testValidationFailsByEmptyForm(): void
