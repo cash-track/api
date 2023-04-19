@@ -36,5 +36,6 @@
         <env name="MONOLOG_DEFAULT_CHANNEL" value="default"/>
         <env name="CACHE_STORAGE" value="file"/>
         <env name="SCHEDULER_MUTEX_CACHE_STORAGE" value="file"/>
+        <env name="DB_ENCRYPTER_KEY" value=""/>
     </php>
 </phpunit>
