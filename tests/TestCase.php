@@ -57,14 +57,29 @@ abstract class TestCase extends BaseTestCase
 
         /** @var \Cycle\Database\DatabaseInterface $db */
         $db = $this->getContainer()->get(DatabaseInterface::class);
+        $db->begin();
+    }
 
-        $this->getContainer()->get(FinalizerInterface::class)->addFinalizer(static function () use ($db) {
-            $db->rollback();
-        });
+    protected function scopedDatabaseFinalise(): void
+    {
+        if (! $this instanceof DatabaseTransaction) {
+            return;
+        }
+
+        /** @var \Cycle\Database\DatabaseInterface $db */
+        $db = $this->getContainer()->get(DatabaseInterface::class);
+
+        while ($db->getDriver()->getTransactionLevel() !== 0) {
+            if (! $db->rollback()) {
+                return;
+            }
+        }
     }
 
     protected function tearDown(): void
     {
+        $this->scopedDatabaseFinalise();
+
         parent::tearDown();
 
         $container = $this->getContainer();

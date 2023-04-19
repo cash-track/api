@@ -4,14 +4,19 @@ declare(strict_types=1);
 
 namespace App\Database;
 
+use App\Database\Typecast\EncryptedTypecast;
 use App\Repository\WalletRepository;
 use App\Service\Sort\Sortable;
 use Cycle\Annotated\Annotation as ORM;
 use Cycle\ORM\Collection\Pivoted\PivotedCollection;
+use Cycle\ORM\Parser\Typecast;
 use Doctrine\Common\Collections\ArrayCollection;
 use Cycle\ORM\Entity\Behavior;
 
-#[ORM\Entity(repository: WalletRepository::class)]
+#[ORM\Entity(repository: WalletRepository::class, typecast: [
+    Typecast::class,
+    EncryptedTypecast::class,
+])]
 #[Behavior\CreatedAt(field: 'createdAt', column: 'created_at')]
 #[Behavior\UpdatedAt(field: 'updatedAt', column: 'updated_at')]
 class Wallet implements Sortable
@@ -19,10 +24,10 @@ class Wallet implements Sortable
     #[ORM\Column('primary')]
     public int|null $id = null;
 
-    #[ORM\Column('string')]
+    #[ORM\Column(type: 'string', typecast: EncryptedTypecast::RULE)]
     public string $name = '';
 
-    #[ORM\Column('string')]
+    #[ORM\Column(type: 'string', typecast: EncryptedTypecast::RULE)]
     public string $slug = '';
 
     #[ORM\Column(type: 'decimal(13,2)', name: 'total_amount', default: 0.0)]

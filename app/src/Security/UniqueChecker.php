@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Security;
 
+use App\Database\Encrypter\EncrypterInterface;
 use Cycle\ORM\ORMInterface;
 use Spiral\Validator\AbstractChecker;
 
@@ -13,14 +14,16 @@ class UniqueChecker extends AbstractChecker
         'verify' => 'error_value_is_not_unique'
     ];
 
-    public function __construct(private ORMInterface $orm)
-    {
+    public function __construct(
+        private readonly ORMInterface $orm,
+        private readonly EncrypterInterface $encrypter
+    ) {
     }
 
-    public function verify(mixed $value, string $role, string $field, array $withFields = [], array $exceptFields = []): bool
+    public function verify(mixed $value, string $role, string $field, array $withFields = [], array $exceptFields = [], bool $encrypted = false): bool
     {
         $values = $this->withValues($withFields);
-        $values[$field] = $value;
+        $values[$field] = $encrypted ? $this->encrypter->encrypt($value) : $value;
 
         $exceptValues = $this->withValues($exceptFields);
 

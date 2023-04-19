@@ -8,9 +8,12 @@ use App\Repository\ChargeRepository;
 use Cycle\Annotated\Annotation as ORM;
 use Cycle\ORM\Collection\Pivoted\PivotedCollection;
 use Cycle\ORM\Entity\Behavior;
+use Cycle\ORM\Parser\Typecast;
 use Ramsey\Uuid\UuidInterface;
 
-#[ORM\Entity(repository: ChargeRepository::class)]
+#[ORM\Entity(repository: ChargeRepository::class, typecast: [
+    Typecast::class,
+])]
 #[Behavior\Uuid\Uuid4(field: 'id', column: 'id')]
 #[Behavior\UpdatedAt(field: 'updatedAt', column: 'updated_at')]
 class Charge
@@ -33,13 +36,13 @@ class Charge
     #[ORM\Column('decimal(13,2)')]
     public float $amount = 0.0;
 
-    #[ORM\Column('string')]
+    #[ORM\Column(type: 'string')]
     public string $title = '';
 
     #[ORM\Column(type: 'integer', name: 'currency_exchange_id', nullable: true)]
     public int|null $currencyExchangeId = null;
 
-    #[ORM\Column('text')]
+    #[ORM\Column(type: 'text')]
     public string $description = '';
 
     #[ORM\Column(type: 'datetime', name: 'created_at')]

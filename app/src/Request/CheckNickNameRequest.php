@@ -34,7 +34,7 @@ class CheckNickNameRequest extends Filter implements HasFilterDefinition
                 'type::notEmpty',
                 ['string::longer', 3],
                 ['string::regexp', '/^[a-zA-Z0-9_]*$/'],
-                ['unique::verify', User::class, 'nickName', [], ['id'], 'error' => 'error_nick_name_claimed'],
+                ['unique::verify', User::class, 'nickName', [], ['id'], true, 'error' => 'error_nick_name_claimed'],
             ],
         ];
     }

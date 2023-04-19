@@ -94,8 +94,9 @@ class EmailConfirmationControllerTest extends TestCase implements DatabaseTransa
         ]);
 
         $this->assertDatabaseHas('users', [
-            'email' => $user->email,
             'is_email_confirmed' => true,
+        ], [
+            'email' => $user->email,
         ]);
     }
 
@@ -117,8 +118,9 @@ class EmailConfirmationControllerTest extends TestCase implements DatabaseTransa
         $this->assertArrayHasKey('error', $body);
 
         $this->assertDatabaseHas('users', [
-            'email' => $user->email,
             'is_email_confirmed' => false,
+        ], [
+            'email' => $user->email,
         ]);
     }
 
@@ -138,8 +140,9 @@ class EmailConfirmationControllerTest extends TestCase implements DatabaseTransa
         $this->assertArrayHasKey('error', $body);
 
         $this->assertDatabaseHas('users', [
-            'email' => $user->email,
             'is_email_confirmed' => false,
+        ], [
+            'email' => $user->email,
         ]);
     }
 

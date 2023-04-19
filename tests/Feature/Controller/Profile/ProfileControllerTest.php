@@ -190,9 +190,10 @@ class ProfileControllerTest extends TestCase implements DatabaseTransaction
 
         $this->assertDatabaseHas('users', [
             'id' => $user->id,
+            'default_currency_code' => $user->defaultCurrencyCode,
+        ], [
             'name' => $user->name,
             'last_name' => $user->lastName,
-            'default_currency_code' => $user->defaultCurrencyCode,
         ]);
     }
 

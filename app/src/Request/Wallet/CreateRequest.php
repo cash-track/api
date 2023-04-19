@@ -36,7 +36,7 @@ class CreateRequest extends Filter implements HasFilterDefinition
             'slug' => [
                 'is_string',
                 ['string::regexp', '/^[a-zA-Z0-9\-_]*$/'],
-                ['entity::unique', Wallet::class, 'slug'],
+                ['encrypted-entity::unique', Wallet::class, 'slug'],
             ],
             'isPublic' => [
                 'type::boolean',

@@ -11,6 +11,7 @@ use App\Request\RegisterRequest;
 use App\Service\Auth\AuthService;
 use App\Service\Auth\EmailConfirmationService;
 use App\Service\Auth\RefreshTokenService;
+use App\Service\UserOptionsService;
 use App\Service\UserService;
 use App\View\UserView;
 use Psr\Http\Message\ResponseInterface;
@@ -30,6 +31,7 @@ final class RegisterController extends Controller
         protected EmailConfirmationService $emailConfirmationService,
         protected RefreshTokenService $refreshTokenService,
         private CurrencyRepository $currencyRepository,
+        protected UserOptionsService $userOptionsService,
     ) {
         parent::__construct($userView, $response);
     }
@@ -46,6 +48,7 @@ final class RegisterController extends Controller
         }
 
         $this->authService->hashPassword($user, $request->password);
+        $this->userOptionsService->setLocale($user, $request->locale);
 
         try {
             $user = $this->userService->store($user);

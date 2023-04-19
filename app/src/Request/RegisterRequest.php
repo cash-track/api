@@ -10,6 +10,7 @@ use Spiral\Filters\Attribute\Input\Data;
 use Spiral\Filters\Model\Filter;
 use Spiral\Filters\Model\FilterDefinitionInterface;
 use Spiral\Filters\Model\HasFilterDefinition;
+use Spiral\Translator\Translator;
 use Spiral\Validator\FilterDefinition;
 
 class RegisterRequest extends Filter implements HasFilterDefinition
@@ -32,6 +33,14 @@ class RegisterRequest extends Filter implements HasFilterDefinition
     #[Data]
     public string $passwordConfirmation = '';
 
+    #[Data]
+    public string $locale = '';
+
+    public function __construct(
+        private readonly Translator $translator,
+    ) {
+    }
+
     public function filterDefinition(): FilterDefinitionInterface
     {
         return new FilterDefinition(validationRules: [
@@ -47,12 +56,12 @@ class RegisterRequest extends Filter implements HasFilterDefinition
                 'type::notEmpty',
                 ['string::longer', 3],
                 ['string::regexp', '/^[a-zA-Z0-9_]*$/'],
-                ['entity::unique', User::class, 'nickName'],
+                ['encrypted-entity::unique', User::class, 'nickName'],
             ],
             'email' => [
                 'address::email',
                 'type::notEmpty',
-                ['entity::unique', User::class, 'email'],
+                ['encrypted-entity::unique', User::class, 'email'],
             ],
             'password' => [
                 'type::notEmpty',
@@ -62,6 +71,10 @@ class RegisterRequest extends Filter implements HasFilterDefinition
                 ['notEmpty', 'if' => ['withAll' => ['password']]],
                 ['match', 'password', 'error' => 'error_password_confirmation_not_match']
             ],
+            'locale' => [
+                'is_string',
+                ['in_array', $this->translator->getCatalogueManager()->getLocales(), true],
+            ]
         ]);
     }
 

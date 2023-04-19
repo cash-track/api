@@ -51,6 +51,7 @@ class RegisterTest extends TestCase implements DatabaseTransaction
             'email' => $user->email,
             'password' => UserFactory::DEFAULT_PASSWORD,
             'passwordConfirmation' => UserFactory::DEFAULT_PASSWORD,
+            'locale' => UserFactory::locale(),
         ]);
 
         $response->assertOk();
@@ -62,7 +63,7 @@ class RegisterTest extends TestCase implements DatabaseTransaction
         $this->assertArrayHasKey('accessToken', $body);
         $this->assertArrayHasKey('refreshToken', $body);
 
-        $this->assertDatabaseHas('users', ['email' => $user->email]);
+        $this->assertDatabaseHas('users', [], ['email' => $user->email]);
     }
 
     public function testUserStoreFailed(): void
@@ -86,6 +87,7 @@ class RegisterTest extends TestCase implements DatabaseTransaction
             'email' => $user->email,
             'password' => UserFactory::DEFAULT_PASSWORD,
             'passwordConfirmation' => UserFactory::DEFAULT_PASSWORD,
+            'locale' => UserFactory::locale(),
         ]);
 
         $response->assertStatus(500);
@@ -120,6 +122,7 @@ class RegisterTest extends TestCase implements DatabaseTransaction
             'email' => $user->email,
             'password' => UserFactory::DEFAULT_PASSWORD,
             'passwordConfirmation' => UserFactory::DEFAULT_PASSWORD,
+            'locale' => UserFactory::locale(),
         ]);
 
         $response->assertOk();
@@ -131,7 +134,7 @@ class RegisterTest extends TestCase implements DatabaseTransaction
         $this->assertArrayHasKey('accessToken', $body);
         $this->assertArrayHasKey('refreshToken', $body);
 
-        $this->assertDatabaseHas('users', ['email' => $user->email]);
+        $this->assertDatabaseHas('users', [], ['email' => $user->email]);
     }
 
     public function testValidationFailsByEmptyForm(): void
@@ -141,7 +144,8 @@ class RegisterTest extends TestCase implements DatabaseTransaction
             'nickName' => '',
             'email' => '',
             'password' => '',
-            'passwordConfirmation' => ''
+            'passwordConfirmation' => '',
+            'locale' => '',
         ]);
 
         $response->assertUnprocessable();
@@ -153,6 +157,7 @@ class RegisterTest extends TestCase implements DatabaseTransaction
         $this->assertArrayHasKey('nickName', $body['errors']);
         $this->assertArrayHasKey('email', $body['errors']);
         $this->assertArrayHasKey('password', $body['errors']);
+        $this->assertArrayHasKey('locale', $body['errors']);
     }
 
     public function testValidationFailsByShortPassword(): void
@@ -165,6 +170,7 @@ class RegisterTest extends TestCase implements DatabaseTransaction
             'email' => $user->email,
             'password' => Fixtures::string(5),
             'passwordConfirmation' => Fixtures::string(5),
+            'locale' => UserFactory::locale(),
         ]);
 
         $response->assertUnprocessable();
@@ -188,6 +194,7 @@ class RegisterTest extends TestCase implements DatabaseTransaction
             'email' => $newUser->email,
             'password' => Fixtures::string(),
             'passwordConfirmation' => Fixtures::string(),
+            'locale' => UserFactory::locale(),
         ]);
 
         $response->assertUnprocessable();
@@ -210,6 +217,7 @@ class RegisterTest extends TestCase implements DatabaseTransaction
             'email' => Fixtures::email(),
             'password' => Fixtures::string(),
             'passwordConfirmation' => Fixtures::string(),
+            'locale' => UserFactory::locale(),
         ]);
 
         $response->assertUnprocessable();
@@ -243,6 +251,7 @@ class RegisterTest extends TestCase implements DatabaseTransaction
             'email' => $existingUser->email,
             'password' => Fixtures::string(),
             'passwordConfirmation' => Fixtures::string(),
+            'locale' => UserFactory::locale(),
         ]);
 
         $response->assertUnprocessable();
@@ -267,6 +276,7 @@ class RegisterTest extends TestCase implements DatabaseTransaction
             'email' => $email,
             'password' => Fixtures::string(),
             'passwordConfirmation' => Fixtures::string(),
+            'locale' => UserFactory::locale(),
         ]);
 
         $response->assertUnprocessable();

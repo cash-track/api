@@ -22,7 +22,7 @@ class ForgotPasswordCreateRequest extends Filter implements HasFilterDefinition
             'email' => [
                 'address::email',
                 'type::notEmpty',
-                ['entity::exists', User::class, 'email'],
+                ['encrypted-entity::exists', User::class, 'email'],
             ],
         ]);
     }
