@@ -10,6 +10,7 @@ return [
     'error_wallet_does_not_exists'          => 'One or more wallets does not exists.',
     'error_nick_name_claimed'               => 'Nick name already claimed.',
     'error_value_is_not_unique'             => 'Value should be unique.',
+    'error_profile_not_confirmed'           => 'You are not allowed to perform this action as your profile is not confirmed.',
 
     'email_confirmation_confirm_failure' => 'Unable to confirm your email.',
     'email_confirmation_ok'              => 'Your email has been confirmed.',

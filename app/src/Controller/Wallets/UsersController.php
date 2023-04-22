@@ -48,6 +48,8 @@ final class UsersController extends Controller
     #[Route(route: '/wallets/<id>/users/<userId>', name: 'wallet.users.add', methods: 'PATCH', group: 'auth')]
     public function patch(string $id, string $userId): ResponseInterface
     {
+        $this->verifyIsProfileConfirmed();
+
         $wallet = $this->walletRepository->findByPKByUserPKWithUsers((int) $id, (int) $this->user->id);
 
         if (! $wallet instanceof Wallet) {
@@ -84,6 +86,8 @@ final class UsersController extends Controller
     #[Route(route: '/wallets/<id>/users/<userId>', name: 'wallet.users.delete', methods: 'DELETE', group: 'auth')]
     public function delete(string $id, string $userId): ResponseInterface
     {
+        $this->verifyIsProfileConfirmed();
+
         $wallet = $this->walletRepository->findByPKByUserPKWithUsers((int) $id, (int) $this->user->id);
 
         if (! $wallet instanceof Wallet) {

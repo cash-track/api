@@ -35,6 +35,29 @@ class WalletsControllerTest extends TestCase implements DatabaseTransaction
         $response->assertUnauthorized();
     }
 
+    public function testCreateRequireProfileConfirmation(): void
+    {
+        $auth = $this->makeAuth($this->userFactory->create(UserFactory::emailNotConfirmed()));
+
+        $wallet = WalletFactory::make();
+
+        $response = $this->withAuth($auth)->post('/wallets', [
+            'name' => $wallet->name,
+            'slug' => $wallet->slug,
+            'isPublic' => $wallet->isPublic,
+            'defaultCurrencyCode' => $wallet->defaultCurrencyCode,
+        ]);
+
+        $response->assertForbidden();
+
+        $this->assertDatabaseMissing('wallets', [
+            'default_currency_code' => $wallet->defaultCurrencyCode,
+        ], [
+            'name' => $wallet->name,
+            'slug' => $wallet->slug,
+        ]);
+    }
+
     public function createValidationFailsDataProvider(): array
     {
         return [
@@ -169,6 +192,30 @@ class WalletsControllerTest extends TestCase implements DatabaseTransaction
         $response = $this->put("/wallets/{$wallet->id}");
 
         $response->assertUnauthorized();
+    }
+
+    public function testUpdateRequireProfileConfirmation(): void
+    {
+        $auth = $this->makeAuth($user = $this->userFactory->create(UserFactory::emailNotConfirmed()));
+
+        $wallet = $this->walletFactory->forUser($user)->create();
+        $otherWallet = WalletFactory::make();
+
+        $response = $this->withAuth($auth)->put("/wallets/{$wallet->id}", [
+            'name' => $otherWallet->name,
+            'isPublic' => $otherWallet->isPublic,
+            'defaultCurrencyCode' => $otherWallet->defaultCurrencyCode,
+        ]);
+
+        $response->assertForbidden();
+
+        $this->assertDatabaseMissing('wallets', [
+            'is_public' => $otherWallet->isPublic,
+            'default_currency_code' => $otherWallet->defaultCurrencyCode,
+        ], [
+            'name' => $otherWallet->name,
+            'slug' => $wallet->slug,
+        ]);
     }
 
     public function testUpdateMissingWalletStillRequireAuth(): void

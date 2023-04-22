@@ -80,6 +80,8 @@ class ChargesController extends Controller
     #[Route(route: '/wallets/<walletId:\d+>/charges', name: 'wallet.charge.create', methods: 'POST', group: 'auth')]
     public function create(string $walletId, CreateRequest $request): ResponseInterface
     {
+        $this->verifyIsProfileConfirmed();
+
         $wallet = $this->walletRepository->findByPKByUserPK((int) $walletId, (int) $this->user->id);
 
         if (! $wallet instanceof Wallet) {
@@ -124,6 +126,8 @@ class ChargesController extends Controller
     #[Route(route: '/wallets/<walletId>/charges/<chargeId>', name: 'wallet.charge.update', methods: 'PUT', group: 'auth')]
     public function update(string $walletId, string $chargeId, CreateRequest $request): ResponseInterface
     {
+        $this->verifyIsProfileConfirmed();
+
         $wallet = $this->walletRepository->findByPKByUserPK((int) $walletId, (int) $this->user->id);
 
         if (! $wallet instanceof Wallet) {
@@ -174,6 +178,8 @@ class ChargesController extends Controller
     #[Route(route: '/wallets/<walletId>/charges/<chargeId>', name: 'wallet.charge.delete', methods: 'DELETE', group: 'auth')]
     public function delete(string $walletId, string $chargeId): ResponseInterface
     {
+        $this->verifyIsProfileConfirmed();
+
         $wallet = $this->walletRepository->findByPKByUserPK((int) $walletId, (int) $this->user->id);
 
         if (! $wallet instanceof Wallet) {

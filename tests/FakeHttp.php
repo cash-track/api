@@ -40,7 +40,7 @@ class FakeHttp extends BaseFakeHttp
         );
     }
 
-    public function patchJson(string $uri, array $data = [], array $headers = [], array $cookies = []): TestResponse
+    public function patchJson(string $uri, $data = [], array $headers = [], array $cookies = [], array $files = []): TestResponse
     {
         return $this->handleRequest(
             $this->createJsonRequest($uri, 'PATCH', $data, $headers, $cookies)

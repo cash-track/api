@@ -81,6 +81,21 @@ class TagsControllerTest extends TestCase implements DatabaseTransaction
         $response->assertUnauthorized();
     }
 
+    public function testCreateRequireProfileConfirmation(): void
+    {
+        $tag = TagFactory::make();
+
+        $auth = $this->makeAuth($this->userFactory->create(UserFactory::emailNotConfirmed()));
+
+        $response = $this->withAuth($auth)->post('/tags', [
+            'name' => $tag->name,
+            'icon' => $tag->icon,
+            'color' => $tag->color,
+        ]);
+
+        $response->assertForbidden();
+    }
+
     public function createValidationFailsDataProvider(): array
     {
         return [
@@ -210,6 +225,21 @@ class TagsControllerTest extends TestCase implements DatabaseTransaction
         $response = $this->put("/tags/{$tag->id}");
 
         $response->assertUnauthorized();
+    }
+
+    public function testUpdateRequireProfileConfirmation(): void
+    {
+        $tag = $this->tagFactory->forUser($user = $this->userFactory->create(UserFactory::emailNotConfirmed()))->create();
+
+        $auth = $this->makeAuth($user);
+
+        $response = $this->withAuth($auth)->put("/tags/{$tag->id}", [
+            'name' => $tag->name,
+            'icon' => $tag->icon,
+            'color' => $tag->color,
+        ]);
+
+        $response->assertForbidden();
     }
 
     public function testUpdateMissingTagStillRequireAuth(): void
@@ -426,6 +456,17 @@ class TagsControllerTest extends TestCase implements DatabaseTransaction
         $response = $this->delete("/tags/{$tag->id}");
 
         $response->assertUnauthorized();
+    }
+
+    public function testDeleteRequireProfileConfirmation(): void
+    {
+        $auth = $this->makeAuth($user = $this->userFactory->create(UserFactory::emailNotConfirmed()));
+
+        $tag = $this->tagFactory->forUser($user)->create();
+
+        $response = $this->withAuth($auth)->delete("/tags/{$tag->id}");
+
+        $response->assertForbidden();
     }
 
     public function testDeleteMissingTagStillRequireAuth(): void
