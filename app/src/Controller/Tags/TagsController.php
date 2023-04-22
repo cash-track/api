@@ -44,6 +44,8 @@ final class TagsController extends AuthAwareController
     #[Route(route: '/tags', name: 'tag.create', methods: 'POST', group: 'auth')]
     public function create(CreateRequest $request): ResponseInterface
     {
+        $this->verifyIsProfileConfirmed();
+
         try {
             $tag = $this->tagService->create($request->createTag(), $this->user);
         } catch (\Throwable $exception) {
@@ -59,6 +61,8 @@ final class TagsController extends AuthAwareController
     #[Route(route: '/tags/<id>', name: 'tag.update', methods: 'PUT', group: 'auth')]
     public function update(string $id, UpdateRequest $request): ResponseInterface
     {
+        $this->verifyIsProfileConfirmed();
+
         $tag = $this->tagRepository->findByPKByUserPK((int) $id, (int) $this->user->id);
 
         if (! $tag instanceof Tag) {
@@ -90,6 +94,8 @@ final class TagsController extends AuthAwareController
     #[Route(route: '/tags/<id>', name: 'tag.delete', methods: 'DELETE', group: 'auth')]
     public function delete(string $id): ResponseInterface
     {
+        $this->verifyIsProfileConfirmed();
+
         $tag = $this->tagRepository->findByPKByUserPK((int) $id, (int) $this->user->id);
 
         if (! $tag instanceof Tag) {

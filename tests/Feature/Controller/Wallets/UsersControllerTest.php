@@ -102,6 +102,23 @@ class UsersControllerTest extends TestCase implements DatabaseTransaction
         $response->assertUnauthorized();
     }
 
+    public function testPathRequireProfileConfirmation(): void
+    {
+        $auth = $this->makeAuth($user = $this->userFactory->create(UserFactory::emailNotConfirmed()));
+        $wallet = $this->walletFactory->forUser($user)->create();
+
+        $otherUser = $this->userFactory->create();
+
+        $response = $this->withAuth($auth)->patch("/wallets/{$wallet->id}/users/{$otherUser->id}");
+
+        $response->assertForbidden();
+
+        $this->assertDatabaseMissing('user_wallets', [
+            'wallet_id' => $wallet->id,
+            'user_id' => $otherUser->id,
+        ]);
+    }
+
     public function testPatchNotExistingWalletAndUserStillRequireAuth(): void
     {
         $walletId = Fixtures::integer();
@@ -206,6 +223,27 @@ class UsersControllerTest extends TestCase implements DatabaseTransaction
         $response = $this->delete("/wallets/{$wallet->id}/users/{$otherUser->id}");
 
         $response->assertUnauthorized();
+    }
+
+    public function testDeleteRequireProfileConfirmation(): void
+    {
+        $auth = $this->makeAuth($user = $this->userFactory->create(UserFactory::emailNotConfirmed()));
+
+        $otherUser = $this->userFactory->create();
+
+        $wallet = WalletFactory::make();
+        $wallet->users->add($user);
+        $wallet->users->add($otherUser);
+        $wallet = $this->walletFactory->create($wallet);
+
+        $response = $this->withAuth($auth)->delete("/wallets/{$wallet->id}/users/{$otherUser->id}");
+
+        $response->assertForbidden();
+
+        $this->assertDatabaseHas('user_wallets', [
+            'wallet_id' => $wallet->id,
+            'user_id' => $otherUser->id,
+        ]);
     }
 
     public function testDeleteNotExistingWalletAndUserStillRequireAuth(): void

@@ -38,6 +38,8 @@ final class WalletsController extends Controller
     #[Route(route: '/wallets', name: 'wallet.create', methods: 'POST', group: 'auth')]
     public function create(CreateRequest $request): ResponseInterface
     {
+        $this->verifyIsProfileConfirmed();
+
         try {
             $wallet = $this->walletService->create($request->createWallet(), $this->user);
         } catch (\Throwable $exception) {
@@ -53,6 +55,8 @@ final class WalletsController extends Controller
     #[Route(route: '/wallets/<id>', name: 'wallet.update', methods: 'PUT', group: 'auth')]
     public function update(string $id, UpdateRequest $request): ResponseInterface
     {
+        $this->verifyIsProfileConfirmed();
+
         $wallet = $this->walletRepository->findByPKByUserPK((int) $id, (int) $this->user->id);
 
         if (! $wallet instanceof Wallet) {
@@ -106,6 +110,8 @@ final class WalletsController extends Controller
     #[Route(route: '/wallets/<id>', name: 'wallet.delete', methods: 'DELETE', group: 'auth')]
     public function delete(string $id): ResponseInterface
     {
+        $this->verifyIsProfileConfirmed();
+
         $wallet = $this->walletRepository->findByPKByUserPK((int) $id, (int) $this->user->id);
 
         if (! $wallet instanceof Wallet) {

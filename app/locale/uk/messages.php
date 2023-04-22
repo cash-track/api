@@ -10,6 +10,7 @@ return [
     'error_wallet_does_not_exists'          => 'Один чи більше гаманець більше не існує.',
     'error_nick_name_claimed'               => 'Нікнейм вже зайнято.',
     'error_value_is_not_unique'             => 'Значення має бути унікальним.',
+    'error_profile_not_confirmed'           => 'Вам не дозволено здійснити бажану операцію, так як Ваш профіль не підтверджено.',
 
     'email_confirmation_confirm_failure' => 'Неможливо підтвердити ваш email.',
     'email_confirmation_ok'              => 'Ваш email було підтверджено.',

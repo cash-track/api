@@ -11,6 +11,10 @@ use Spiral\Http\ErrorHandler\RendererInterface;
 
 final class ViewRenderer implements RendererInterface
 {
+    const MAP = [
+        UnconfirmedProfileException::class => 403
+    ];
+
     public function __construct(
         private readonly ResponseFactoryInterface $responseFactory,
     ) {
@@ -18,6 +22,12 @@ final class ViewRenderer implements RendererInterface
 
     public function renderException(Request $request, int $code, \Throwable $exception): ResponseInterface
     {
+        foreach (static::MAP as $className => $responseCode) {
+            if ($exception instanceof $className) {
+                return $this->renderJson($responseCode, $exception);
+            }
+        }
+
         return $this->renderJson($code, $exception);
     }
 

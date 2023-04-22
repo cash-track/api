@@ -58,7 +58,7 @@ class UserFactory extends AbstractFactory
         $user->createdAt = Fixtures::dateTime();
         $user->updatedAt = Fixtures::dateTimeAfter($user->createdAt);
         $user->photo = Fixtures::fileName();
-        $user->isEmailConfirmed = Fixtures::boolean();
+        $user->isEmailConfirmed = true;
 
         return self::withPassword(self::DEFAULT_PASSWORD, $user);
     }
