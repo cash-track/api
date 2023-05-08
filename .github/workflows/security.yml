@@ -11,10 +11,10 @@ jobs:
     runs-on: [self-hosted, Linux, x64]
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Prepare Cache For Vulnerability Database
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         id: vulnerability-db-cache
         with:
           path: ~/.vulnerability-db/cache
