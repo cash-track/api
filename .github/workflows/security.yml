@@ -21,4 +21,4 @@ jobs:
           key: vulnerability-db
 
       - name: Scan Packages For Vulnerability
-        uses: symfonycorp/security-checker-action@v3
+        uses: symfonycorp/security-checker-action@v4
