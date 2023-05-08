@@ -12,9 +12,6 @@ use Tests\TestCase;
 
 class LoginControllerTest extends TestCase implements DatabaseTransaction
 {
-    /**
-     * @var \Tests\Factories\UserFactory
-     */
     protected UserFactory $userFactory;
 
     protected function setUp(): void

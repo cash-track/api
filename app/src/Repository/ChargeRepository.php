@@ -9,9 +9,19 @@ use Cycle\ORM\Select\AbstractLoader;
 use Cycle\ORM\Select\Repository;
 use Cycle\Database\Injection\Parameter;
 
+/**
+ * @extends Repository<\App\Database\Charge>
+ */
 class ChargeRepository extends Repository
 {
+    /**
+     * @use Paginator<\App\Database\Charge>
+     */
     use Paginator;
+
+    /**
+     * @use Filter<\App\Database\Charge>
+     */
     use Filter;
 
     /**
@@ -61,7 +71,7 @@ class ChargeRepository extends Repository
                       ->orderBy('created_at', 'DESC');
 
         $this->injectFilter($query);
-        $query = $this->injectPaginator($query);
+        $this->injectPaginator($query);
 
         return $query->fetchAll();
     }
@@ -80,7 +90,7 @@ class ChargeRepository extends Repository
                       ->orderBy('created_at', 'DESC');
 
         $this->injectFilter($query);
-        $query = $this->injectPaginator($query);
+        $this->injectPaginator($query);
 
         /** @var \App\Database\Charge[] $charges */
         $charges = $query->fetchAll();
@@ -103,7 +113,7 @@ class ChargeRepository extends Repository
                       ->orderBy('created_at', 'DESC');
 
         $this->injectFilter($query);
-        $query = $this->injectPaginator($query);
+        $this->injectPaginator($query);
 
         return $query->fetchAll();
     }

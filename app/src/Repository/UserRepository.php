@@ -12,8 +12,15 @@ use Spiral\Auth\ActorProviderInterface;
 use Spiral\Auth\TokenInterface;
 use Cycle\Database\Query\SelectQuery;
 
+/**
+ * @extends Repository<\App\Database\User>
+ */
 class UserRepository extends Repository implements ActorProviderInterface
 {
+    /**
+     * @param \Cycle\ORM\Select<User> $select
+     * @param \App\Database\Encrypter\EncrypterInterface $encrypter
+     */
     public function __construct(
         Select $select,
         private readonly EncrypterInterface $encrypter,

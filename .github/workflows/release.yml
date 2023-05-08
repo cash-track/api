@@ -22,7 +22,7 @@ jobs:
     steps:
       - name: Checkout repository
         if: github.event_name != 'pull_request'
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       # Login against a Docker registry except on PR
       # https://github.com/docker/login-action
@@ -71,7 +71,7 @@ jobs:
 
     steps:
       - name: Checkout infra repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           repository: ${{ env.INFRA_REPO }}
           ref: ${{ env.INFRA_REPO_REF }}

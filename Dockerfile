@@ -1,7 +1,7 @@
 FROM php:8.2.4-alpine3.17 as backend
 
 RUN  --mount=type=bind,from=mlocati/php-extension-installer:1.5,source=/usr/bin/install-php-extensions,target=/usr/local/bin/install-php-extensions \
-      install-php-extensions opcache zip xsl dom exif intl pcntl bcmath sockets mbstring pdo_mysql mysqli && \
+      install-php-extensions opcache zip xsl dom exif intl pcntl bcmath sockets mbstring pdo_mysql mysqli redis && \
      apk del --no-cache  ${PHPIZE_DEPS} ${BUILD_DEPENDS}
 
 COPY --from=ghcr.io/roadrunner-server/roadrunner:2.12.3 /usr/bin/rr /usr/bin/rr

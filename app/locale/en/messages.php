@@ -11,6 +11,7 @@ return [
     'error_nick_name_claimed'               => 'Nick name already claimed.',
     'error_value_is_not_unique'             => 'Value should be unique.',
     'error_profile_not_confirmed'           => 'You are not allowed to perform this action as your profile is not confirmed.',
+    'error_rate_limit_reached'              => 'Too many requests. Please try again later.',
 
     'email_confirmation_confirm_failure' => 'Unable to confirm your email.',
     'email_confirmation_ok'              => 'Your email has been confirmed.',

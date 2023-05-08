@@ -10,18 +10,19 @@ server:
 http:
   address: 0.0.0.0:8080
   middleware:
-    - gzip
     - http_metrics
+    - gzip
   pool:
     num_workers: 1
     supervisor:
       max_worker_memory: 100
 
 kv:
-  local:
-    driver: memory
+  redis:
+    driver: redis
     config:
-      interval: 60
+      addrs:
+        - ${REDIS_CONNECTION}
 
 logs:
   mode: production

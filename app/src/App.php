@@ -46,12 +46,12 @@ class App extends Kernel
      */
     protected const LOAD = [
         // Logging and exceptions handling
+        RoadRunnerBridge\LoggerBootloader::class,
         Bootloader\LoggingBootloader::class,
         Monolog\MonologBootloader::class,
         Bootloader\ExceptionHandlerBootloader::class,
 
         // RoadRunner
-        RoadRunnerBridge\LoggerBootloader::class,
         RoadRunnerBridge\QueueBootloader::class,
         RoadRunnerBridge\HttpBootloader::class,
         RoadRunnerBridge\CacheBootloader::class,
@@ -144,6 +144,7 @@ class App extends Kernel
      * Application specific services and extensions.
      */
     protected const APP = [
+        Bootloader\RedisBootloader::class,
         Auth\AuthBootloader::class,
         Bootloader\RoutesBootloader::class,
         Bootloader\UserBootloader::class,

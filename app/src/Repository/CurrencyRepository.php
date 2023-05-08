@@ -8,6 +8,9 @@ use App\Database\Currency;
 use Cycle\ORM\Select\Repository;
 use Cycle\Database\Injection\Parameter;
 
+/**
+ * @extends Repository<\App\Database\Currency>
+ */
 class CurrencyRepository extends Repository
 {
     const FEATURED_USD = 'USD';
