@@ -139,7 +139,7 @@ class WalletService
      */
     public function share(Wallet $wallet, User $user, User $sharer): Wallet
     {
-        /** @psalm-suppress DocblockTypeContradiction */
+        /** @psalm-suppress InvalidArgument */
         if ($wallet->users->contains($user) === true) {
             return $wallet;
         }
@@ -160,6 +160,7 @@ class WalletService
      */
     public function revoke(Wallet $wallet, User $user): Wallet
     {
+        /** @psalm-suppress InvalidArgument */
         if ($wallet->users->contains($user) === false) {
             return $wallet;
         }
