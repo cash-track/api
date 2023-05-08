@@ -21,7 +21,7 @@ jobs:
           runner: self-hosted
         with:
           php-version: '8.2'
-          extensions: zip xsl dom exif intl pcntl bcmath sockets mbstring pdo_mysql mysqli redis
+          extensions: zip, xsl, dom, exif, intl, pcntl, bcmath, sockets, mbstring, pdo_mysql, mysqli, redis
           tools: composer
 
       - name: Get Composer Cache Directory
@@ -55,7 +55,7 @@ jobs:
           runner: self-hosted
         with:
           php-version: '8.2'
-          extensions: zip xsl dom exif intl pcntl bcmath sockets mbstring pdo_mysql mysqli redis
+          extensions: zip, xsl, dom, exif, intl, pcntl, bcmath, sockets, mbstring, pdo_mysql, mysqli, redis
           tools: composer
 
       - name: Get Composer Cache Directory
@@ -110,7 +110,7 @@ jobs:
         with:
           php-version: '8.2'
           coverage: pcov
-          extensions: zip xsl dom exif intl pcntl bcmath sockets mbstring pdo_mysql mysqli redis
+          extensions: zip, xsl, dom, exif, intl, pcntl, bcmath, sockets, mbstring, pdo_mysql, mysqli, redis
           tools: composer, phpunit
 
       - name: Get Composer Cache Directory
