@@ -6,6 +6,9 @@ namespace App\Repository;
 
 use Cycle\ORM\Select\Repository;
 
+/**
+ * @extends Repository<\App\Database\ForgotPasswordRequest>
+ */
 class ForgotPasswordRequestRepository extends Repository
 {
     /**

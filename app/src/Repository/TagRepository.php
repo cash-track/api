@@ -10,6 +10,9 @@ use Cycle\ORM\Select;
 use Cycle\ORM\Select\Repository;
 use Cycle\Database\Injection\Parameter;
 
+/**
+ * @extends Repository<\App\Database\Tag>
+ */
 class TagRepository extends Repository
 {
     /**

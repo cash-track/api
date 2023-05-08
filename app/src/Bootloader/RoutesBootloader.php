@@ -4,12 +4,15 @@ declare(strict_types=1);
 
 namespace App\Bootloader;
 
+use App\Auth\AuthMiddleware;
 use App\Middleware\LocaleSelectorMiddleware;
+use App\Middleware\RateLimitMiddleware;
 use App\Middleware\UserLocaleSelectorMiddleware;
 use App\Request\JsonErrorsRenderer;
-use Spiral\Bootloader\Http\RoutesBootloader as BaseRoutesBootloader;
-use App\Auth\AuthMiddleware;
+use App\Service\RateLimit\RateLimitInterface;
+use App\Service\RateLimit\RedisRateLimit;
 use Spiral\Auth\Middleware\AuthMiddleware as InitAuthMiddleware;
+use Spiral\Bootloader\Http\RoutesBootloader as BaseRoutesBootloader;
 use Spiral\Debug\StateCollector\HttpCollector;
 use Spiral\Filter\ValidationHandlerMiddleware;
 use Spiral\Filters\ErrorsRendererInterface;
@@ -22,6 +25,10 @@ final class RoutesBootloader extends BaseRoutesBootloader
 {
     protected const SINGLETONS = [
         ErrorsRendererInterface::class => JsonErrorsRenderer::class,
+    ];
+
+    protected const BINDINGS = [
+        RateLimitInterface::class => RedisRateLimit::class,
     ];
 
     protected const DEPENDENCIES = [
@@ -45,7 +52,11 @@ final class RoutesBootloader extends BaseRoutesBootloader
         return [
             'auth' => [
                 AuthMiddleware::class,
+                RateLimitMiddleware::class,
                 UserLocaleSelectorMiddleware::class,
+            ],
+            'web' => [
+                RateLimitMiddleware::class,
             ],
         ];
     }

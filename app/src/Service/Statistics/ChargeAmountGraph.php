@@ -15,6 +15,9 @@ use Cycle\Database\Query\SelectQuery;
 
 class ChargeAmountGraph
 {
+    /**
+     * @use Filter<\App\Database\Charge>
+     */
     use Filter;
 
     protected Group $grouping = Group::ByMonth;

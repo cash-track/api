@@ -7,6 +7,9 @@ use App\Service\Filter\FilterType;
 
 class ChargeAmountData
 {
+    /**
+     * @use Filter<\App\Database\Charge>
+     */
     use Filter;
 
     protected array $income = [];

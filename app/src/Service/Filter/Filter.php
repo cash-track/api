@@ -7,6 +7,9 @@ namespace App\Service\Filter;
 use Cycle\Database\Query\SelectQuery;
 use Cycle\ORM\Select;
 
+/**
+ * @template T of object
+ */
 trait Filter
 {
     /**
@@ -55,6 +58,10 @@ trait Filter
         ];
     }
 
+    /**
+     * @param \Cycle\ORM\Select<T>|\Cycle\Database\Query\SelectQuery $query
+     * @return void
+     */
     protected function injectFilter(Select|SelectQuery $query): void
     {
         if (! count($this->filter)) {

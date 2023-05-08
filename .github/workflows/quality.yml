@@ -84,6 +84,10 @@ jobs:
       packages: write
 
     services:
+      cache:
+        image: cashtrack/redis:latest
+        ports:
+          - 6379
       database:
         image: cashtrack/mysql:latest
         env:

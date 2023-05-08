@@ -7,6 +7,9 @@ namespace App\Repository;
 use App\Service\Pagination\PaginatorInterface;
 use Cycle\ORM\Select;
 
+/**
+ * @template T of object
+ */
 trait Paginator
 {
     /**
@@ -38,15 +41,13 @@ trait Paginator
     }
 
     /**
-     * @param \Cycle\ORM\Select $query
-     * @return \Cycle\ORM\Select
+     * @param \Cycle\ORM\Select<T> $query
+     * @return void
      */
-    private function injectPaginator(Select $query): Select
+    private function injectPaginator(Select $query): void
     {
         if ($this->paginator instanceof PaginatorInterface) {
             $this->paginator = $this->paginator->paginate($query);
         }
-
-        return $query;
     }
 }

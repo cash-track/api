@@ -4,9 +4,7 @@ declare(strict_types=1);
 
 namespace Tests;
 
-use Aws\S3\S3ClientInterface;
 use Cycle\Database\DatabaseInterface;
-use Spiral\Boot\FinalizerInterface;
 use Spiral\Config\ConfiguratorInterface;
 use Spiral\Config\Patch\Set;
 use Spiral\Core\Container;
@@ -27,6 +25,10 @@ abstract class TestCase extends BaseTestCase
     use ProvideAuth;
     use InteractsWithMock;
     use AssertHelpers;
+
+    public const ENV = [
+        'REDIS_HOST' => '',
+    ];
 
     protected function setUp(): void
     {
@@ -83,7 +85,6 @@ abstract class TestCase extends BaseTestCase
         parent::tearDown();
 
         $container = $this->getContainer();
-        unset($this->app);
 
         if ($container instanceof Container) {
             $container->destruct();

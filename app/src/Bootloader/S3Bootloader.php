@@ -15,25 +15,11 @@ use Spiral\Core\Container;
  */
 class S3Bootloader extends Bootloader
 {
-    /**
-     * @var \App\Config\S3Config
-     */
-    private $config;
-
-    /**
-     * FirebaseBootloader constructor.
-     *
-     * @param \App\Config\S3Config $config
-     */
-    public function __construct(S3Config $config)
-    {
-        $this->config = $config;
+    public function __construct(
+        private S3Config $config,
+    ) {
     }
 
-    /**
-     * @param \Spiral\Core\Container $container
-     * @return void
-     */
     public function boot(Container $container): void
     {
         $container->bind(S3ClientInterface::class, function (): S3ClientInterface {

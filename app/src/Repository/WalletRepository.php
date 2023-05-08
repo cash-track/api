@@ -5,10 +5,12 @@ declare(strict_types=1);
 namespace App\Repository;
 
 use App\Database\Currency;
-use Cycle\Database\Injection\Parameter;
 use Cycle\ORM\Select;
 use Cycle\ORM\Select\Repository;
 
+/**
+ * @extends Repository<\App\Database\Wallet>
+ */
 class WalletRepository extends Repository
 {
     /**
