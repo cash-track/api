@@ -11,8 +11,7 @@ class RedisConfig extends InjectableConfig
     public const CONFIG = 'redis';
 
     protected array $config = [
-        'host' => '',
-        'port' => '',
+        'connection' => '',
         'timeout' => '',
         'retry_interval' => '',
         'retry_timeout' => '',
@@ -22,12 +21,12 @@ class RedisConfig extends InjectableConfig
 
     public function getHost(): string
     {
-        return $this->config['host'];
+        return (string) parse_url($this->config['connection'], PHP_URL_HOST);
     }
 
     public function getPort(): int
     {
-        return (int) $this->config['port'];
+        return (int) parse_url($this->config['connection'], PHP_URL_PORT);
     }
 
     public function getTimeout(): float

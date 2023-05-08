@@ -7,8 +7,7 @@ return [
      * Can be a host, or the path to a unix domain socket.
      * Starting from version 5.0.0 it is possible to specify schema.
      */
-    'host' => env('REDIS_HOST', 'localhost'),
-    'port' => env('REDIS_PORT', 6379),
+    'connection' => env('REDIS_CONNECTION', 'localhost:6379'),
 
     /**
      * Value in seconds (default is 0 meaning it will use default_socket_timeout)

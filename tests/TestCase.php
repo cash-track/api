@@ -27,7 +27,7 @@ abstract class TestCase extends BaseTestCase
     use AssertHelpers;
 
     public const ENV = [
-        'REDIS_HOST' => '',
+        'REDIS_CONNECTION' => '',
     ];
 
     protected function setUp(): void
