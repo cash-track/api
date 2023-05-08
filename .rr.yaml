@@ -22,7 +22,7 @@ kv:
     driver: redis
     config:
       addrs:
-        - ${REDIS_CONNECTION_STRING}
+        - ${REDIS_CONNECTION}
 
 logs:
   mode: production
