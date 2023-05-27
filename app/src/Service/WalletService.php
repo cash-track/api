@@ -147,7 +147,12 @@ class WalletService
         $wallet->users->add($user);
         $wallet = $this->store($wallet);
 
-        $this->mailer->send(new WalletShareMail($user, $sharer, $wallet, $this->uri->wallet($wallet)));
+        $this->mailer->send(new WalletShareMail(
+            $user->getEntityHeader(),
+            $sharer->getEntityHeader(),
+            $wallet->getEntityHeader(),
+            $this->uri->wallet($wallet),
+        ));
 
         return $wallet;
     }

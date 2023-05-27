@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Mail;
 
-use App\Database\User;
+use App\Database\EntityHeader;
 use App\Service\Mailer\Mail;
 use Spiral\Translator\Traits\TranslatorTrait;
 
@@ -13,21 +13,12 @@ class ForgotPasswordMail extends UserMail
     use TranslatorTrait;
 
     /**
-     * @var string
-     */
-    public $link;
-
-    /**
-     * ForgotPasswordMail constructor.
-     *
-     * @param \App\Database\User $user
+     * @param \App\Database\EntityHeader<\App\Database\User> $userHeader
      * @param string $link
      */
-    public function __construct(User $user, string $link)
+    public function __construct(public EntityHeader $userHeader, public string $link)
     {
-        parent::__construct($user);
-
-        $this->link = $link;
+        parent::__construct($userHeader);
     }
 
     /**

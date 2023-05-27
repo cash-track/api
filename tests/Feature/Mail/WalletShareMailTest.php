@@ -20,7 +20,8 @@ class WalletShareMailTest extends TestCase
         $wallet = WalletFactory::make();
         $link = Fixtures::url();
 
-        $mail = new WalletShareMail($user, $sharer, $wallet, $link);
+        $mail = new WalletShareMail($user->getEntityHeader(), $sharer->getEntityHeader(), $wallet->getEntityHeader(), $link);
+        $mail->user = $user;
 
         $mail = $mail->build();
 

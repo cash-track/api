@@ -27,7 +27,7 @@ final class MailsController extends AuthAwareController
             return;
         }
 
-        $this->mailer->send(new TestMail($this->user));
+        $this->mailer->send(new TestMail($this->user->getEntityHeader()));
     }
 
     #[Route(route:'/mails/preview', name: 'mails.preview', methods: 'GET', group: 'auth')]
@@ -37,7 +37,7 @@ final class MailsController extends AuthAwareController
             return 'ok';
         }
 
-        return $this->mailer->render(new TestMail($this->user));
+        return $this->mailer->render(new TestMail($this->user->getEntityHeader()));
     }
 
     private function isDebug(): bool

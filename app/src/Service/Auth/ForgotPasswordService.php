@@ -57,7 +57,7 @@ class ForgotPasswordService extends HelperService
 
         $this->store($request);
 
-        $this->mailer->send(new ForgotPasswordMail($user, $this->uri->passwordReset($request->code)));
+        $this->mailer->send(new ForgotPasswordMail($user->getEntityHeader(), $this->uri->passwordReset($request->code)));
     }
 
     /**

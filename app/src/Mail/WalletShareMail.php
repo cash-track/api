@@ -4,8 +4,7 @@ declare(strict_types=1);
 
 namespace App\Mail;
 
-use App\Database\User;
-use App\Database\Wallet;
+use App\Database\EntityHeader;
 use App\Service\Mailer\Mail;
 use Spiral\Translator\Traits\TranslatorTrait;
 
@@ -14,34 +13,18 @@ class WalletShareMail extends UserMail
     use TranslatorTrait;
 
     /**
-     * @var \App\Database\User
+     * @param \App\Database\EntityHeader<\App\Database\User> $userHeader
+     * @param \App\Database\EntityHeader<\App\Database\User> $sharerHeader
+     * @param \App\Database\EntityHeader<\App\Database\Wallet> $walletHeader
+     * @param string $link
      */
-    public $sharer;
-
-    /**
-     * @var \App\Database\Wallet
-     */
-    public $wallet;
-
-    /**
-     * @var string
-     */
-    public $link;
-
-    /**
-     * WalletShareMail constructor.
-     *
-     * @param \App\Database\User $user
-     * @param \App\Database\User $sharer
-     * @param \App\Database\Wallet $wallet
-     */
-    public function __construct(User $user, User $sharer, Wallet $wallet, string $link)
-    {
-        parent::__construct($user);
-
-        $this->sharer = $sharer;
-        $this->wallet = $wallet;
-        $this->link = $link;
+    public function __construct(
+        public EntityHeader $userHeader,
+        public EntityHeader $sharerHeader,
+        public EntityHeader $walletHeader,
+        public string $link
+    ) {
+        parent::__construct($userHeader);
     }
 
     /**

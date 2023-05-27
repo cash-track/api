@@ -17,7 +17,8 @@ class ForgotPasswordMailTest extends TestCase
         $user = UserFactory::make();
         $link = Fixtures::url();
 
-        $mail = new ForgotPasswordMail($user, $link);
+        $mail = new ForgotPasswordMail($user->getEntityHeader(), $link);
+        $mail->user = $user;
 
         $mail = $mail->build();
 

@@ -142,4 +142,16 @@ class Wallet implements Sortable
     {
         return $this->id ?? 0;
     }
+
+    /**
+     * @psalm-return \App\Database\EntityHeader<\App\Database\Wallet>
+     * @return \App\Database\EntityHeader<\App\Database\Wallet>
+     */
+    public function getEntityHeader(): EntityHeader
+    {
+        /** @var \App\Database\EntityHeader<\App\Database\Wallet> $header */
+        $header = new EntityHeader(self::class, ['id' => $this->id]);
+
+        return $header;
+    }
 }

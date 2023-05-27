@@ -41,7 +41,7 @@ class EmailConfirmationService extends HelperService
 
         $this->store($confirmation);
 
-        $this->mailer->send(new EmailConfirmationMail($user, $this->uri->emailConfirmation($confirmation->token)));
+        $this->mailer->send(new EmailConfirmationMail($user->getEntityHeader(), $this->uri->emailConfirmation($confirmation->token)));
     }
 
     public function store(EmailConfirmation $confirmation): EmailConfirmation

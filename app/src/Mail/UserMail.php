@@ -4,26 +4,26 @@ declare(strict_types=1);
 
 namespace App\Mail;
 
+use App\Database\EntityHeader;
 use App\Database\User;
 use App\Service\Mailer\Mail;
+use Cycle\ORM\ORMInterface;
 
 abstract class UserMail extends Mail
 {
-    /**
-     * @var \App\Database\User
-     */
-    public $user;
+    public ?User $user = null;
 
     /**
-     * UserMail constructor.
-     *
-     * @param \App\Database\User $user
+     * @param \App\Database\EntityHeader<\App\Database\User> $userHeader
      */
-    public function __construct(User $user)
+    public function __construct(public EntityHeader $userHeader)
     {
         parent::__construct();
+    }
 
-        $this->user = $user;
+    public function hydrate(ORMInterface $orm)
+    {
+        $this->user = $this->userHeader->hydrate($orm);
     }
 
     /**
@@ -31,6 +31,10 @@ abstract class UserMail extends Mail
      */
     public function build(): Mail
     {
+        if ($this->user === null) {
+            throw new \RuntimeException('Empty user for user-required mail');
+        }
+
         return $this->to($this->user->email, $this->user->fullName());
     }
 }

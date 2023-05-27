@@ -4,12 +4,15 @@ declare(strict_types=1);
 
 namespace App\Service\Mailer;
 
+use Cycle\ORM\ORMInterface;
 use Spiral\Views\ViewsInterface;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\Mime\Email;
 
 abstract class Mail
 {
+    use PayloadSerializer;
+
     /**
      * @var \Symfony\Component\Mime\Email
      */
@@ -26,6 +29,14 @@ abstract class Mail
     public function __construct()
     {
         $this->message = new Email();
+    }
+
+    /**
+     * @param \Cycle\ORM\ORMInterface $orm
+     * @return void
+     */
+    public function hydrate(ORMInterface $orm)
+    {
     }
 
     /**
