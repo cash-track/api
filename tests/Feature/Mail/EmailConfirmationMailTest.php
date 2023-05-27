@@ -17,7 +17,8 @@ class EmailConfirmationMailTest extends TestCase
         $user = UserFactory::make();
         $link = Fixtures::url();
 
-        $mail = new EmailConfirmationMail($user, $link);
+        $mail = new EmailConfirmationMail($user->getEntityHeader(), $link);
+        $mail->user = $user;
 
         $mail = $mail->build();
 

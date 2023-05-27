@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Controller\Auth;
 
+use App\Database\EntityHeader;
 use App\Database\User;
 use App\Mail\ForgotPasswordMail;
 use App\Repository\ForgotPasswordRequestRepository;
@@ -44,15 +45,16 @@ class ForgotPasswordControllerTest extends TestCase implements DatabaseTransacti
 
         $mock = $this->getMockBuilder(MailerInterface::class)
                      ->disableOriginalConstructor()
-                     ->onlyMethods(['send', 'render'])
                      ->getMock();
 
         $mock->expects($this->once())
              ->method('send')
              ->with($this->callback(function ($mail) use ($user) {
                 $this->assertInstanceOf(ForgotPasswordMail::class, $mail);
-                $this->assertInstanceOf(User::class, $mail->user);
-                $this->assertEquals($user->id, $mail->user->id);
+                $this->assertInstanceOf(EntityHeader::class, $mail->userHeader);
+                $this->assertEquals(User::class, $mail->userHeader->role);
+                $this->assertEquals(['id' => $user->id], $mail->userHeader->params);
+
                 return true;
              }));
 
@@ -93,7 +95,6 @@ class ForgotPasswordControllerTest extends TestCase implements DatabaseTransacti
 
         $mock = $this->getMockBuilder(MailerInterface::class)
                      ->disableOriginalConstructor()
-                     ->onlyMethods(['send', 'render'])
                      ->getMock();
 
         $this->getContainer()->bind(MailerInterface::class, fn () => $mock);
@@ -124,7 +125,6 @@ class ForgotPasswordControllerTest extends TestCase implements DatabaseTransacti
 
         $mock = $this->getMockBuilder(MailerInterface::class)
                      ->disableOriginalConstructor()
-                     ->onlyMethods(['send', 'render'])
                      ->getMock();
 
         $mock->expects($this->once())
@@ -162,7 +162,6 @@ class ForgotPasswordControllerTest extends TestCase implements DatabaseTransacti
 
         $mock = $this->getMockBuilder(MailerInterface::class)
                      ->disableOriginalConstructor()
-                     ->onlyMethods(['send', 'render'])
                      ->getMock();
 
         $mock->expects($this->once())
@@ -189,7 +188,6 @@ class ForgotPasswordControllerTest extends TestCase implements DatabaseTransacti
 
         $mock = $this->getMockBuilder(MailerInterface::class)
                      ->disableOriginalConstructor()
-                     ->onlyMethods(['send', 'render'])
                      ->getMock();
 
         $mock->expects($this->never())

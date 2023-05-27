@@ -148,7 +148,7 @@ class UsersControllerTest extends TestCase implements DatabaseTransaction
         $wallet = $this->walletFactory->forUser($user)->create();
         $otherUserId = Fixtures::integer() * -1;
 
-        $this->mock(MailerInterface::class, ['send', 'render'], function (MockObject $mock) {
+        $this->mock(MailerInterface::class, [], function (MockObject $mock) {
             $mock->expects($this->never())->method('send');
         });
 
@@ -178,7 +178,7 @@ class UsersControllerTest extends TestCase implements DatabaseTransaction
 
         $otherUser = $this->userFactory->create();
 
-        $this->mock(MailerInterface::class, ['send', 'render'], function (MockObject $mock) {
+        $this->mock(MailerInterface::class, [], function (MockObject $mock) {
             $mock->expects($this->once())->method('send');
         });
 

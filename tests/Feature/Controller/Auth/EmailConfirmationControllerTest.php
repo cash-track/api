@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Controller\Auth;
 
+use App\Database\EntityHeader;
 use App\Database\User;
 use App\Mail\EmailConfirmationMail;
 use App\Service\Mailer\MailerInterface;
@@ -187,15 +188,15 @@ class EmailConfirmationControllerTest extends TestCase implements DatabaseTransa
 
         $mock = $this->getMockBuilder(MailerInterface::class)
                      ->disableOriginalConstructor()
-                     ->onlyMethods(['send', 'render'])
                      ->getMock();
 
         $mock->expects($this->once())
              ->method('send')
              ->with($this->callback(function ($mail) use ($user) {
                  $this->assertInstanceOf(EmailConfirmationMail::class, $mail);
-                 $this->assertInstanceOf(User::class, $mail->user);
-                 $this->assertEquals($user->id, $mail->user->id);
+                 $this->assertInstanceOf(EntityHeader::class, $mail->userHeader);
+                 $this->assertEquals(User::class, $mail->userHeader->role);
+                 $this->assertEquals(['id' => $user->id], $mail->userHeader->params);
 
                  return true;
              }));
@@ -269,7 +270,6 @@ class EmailConfirmationControllerTest extends TestCase implements DatabaseTransa
     {
         $mock = $this->getMockBuilder(MailerInterface::class)
                      ->disableOriginalConstructor()
-                     ->onlyMethods(['send', 'render'])
                      ->getMock();
 
         $mock->expects($this->never())->method('send');

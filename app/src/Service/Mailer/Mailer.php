@@ -4,6 +4,14 @@ declare(strict_types=1);
 
 namespace App\Service\Mailer;
 
+use App\Jobs\SendMailJob;
+use App\Mail\UserMail;
+use App\Service\UserOptionsService;
+use Cycle\ORM\ORMInterface;
+use Spiral\Queue\Options;
+use Spiral\Queue\QueueInterface;
+use Spiral\Translator\Config\TranslatorConfig;
+use Spiral\Translator\Translator;
 use Spiral\Views\ViewsInterface;
 use Symfony\Component\Mailer\MailerInterface as SymfonyMailerInterface;
 use Symfony\Component\Mime\Address;
@@ -11,15 +19,7 @@ use Symfony\Component\Mime\Email;
 
 class Mailer implements MailerInterface
 {
-    /**
-     * @var \Symfony\Component\Mailer\MailerInterface
-     */
-    private $mailer;
-
-    /**
-     * @var \Spiral\Views\ViewsInterface
-     */
-    private $views;
+    const QUEUE_NAME = 'mail';
 
     /**
      * @var string
@@ -31,16 +31,15 @@ class Mailer implements MailerInterface
      */
     private $defaultFromAddress = '';
 
-    /**
-     * Mailer constructor.
-     *
-     * @param \Symfony\Component\Mailer\MailerInterface $mailer
-     * @param \Spiral\Views\ViewsInterface $views
-     */
-    public function __construct(SymfonyMailerInterface $mailer, ViewsInterface $views)
-    {
-        $this->mailer = $mailer;
-        $this->views = $views;
+    public function __construct(
+        private readonly SymfonyMailerInterface $mailer,
+        private readonly ViewsInterface $views,
+        private readonly QueueInterface $queue,
+        private readonly ORMInterface $orm,
+        private readonly Translator $translator,
+        private readonly TranslatorConfig $translatorConfig,
+        private readonly UserOptionsService $userOptionsService,
+    ) {
     }
 
     /**
@@ -66,12 +65,23 @@ class Mailer implements MailerInterface
     }
 
     /**
-     * Compile, render and send given mail using previously configured transport.
+     * Push a queue job to compile, render and send given mail in queue
      *
      * @param \App\Service\Mailer\Mail $mail
      * @return void
      */
     public function send(Mail $mail): void
+    {
+        $this->queue->push(SendMailJob::class, $mail->toPayload(), Options::onQueue(self::QUEUE_NAME));
+    }
+
+    /**
+     * Compile, render and send given mail using previously configured transport.
+     *
+     * @param \App\Service\Mailer\Mail $mail
+     * @return void
+     */
+    public function sendNow(Mail $mail): void
     {
         $this->mailer->send($this->build($mail));
     }
@@ -95,6 +105,10 @@ class Mailer implements MailerInterface
      */
     private function build(Mail $mail): Email
     {
+        $mail->hydrate($this->orm);
+
+        $this->setLocale($mail);
+
         $message = $mail->build()->render($this->views)->getEmailMessage();
 
         if (count($message->getFrom()) === 0) {
@@ -102,5 +116,16 @@ class Mailer implements MailerInterface
         }
 
         return $message;
+    }
+
+    private function setLocale(Mail $mail): void
+    {
+        $this->translator->setLocale($this->translatorConfig->getDefaultLocale());
+
+        if (! $mail instanceof UserMail || $mail->user === null) {
+            return;
+        }
+
+        $this->translator->setLocale($this->userOptionsService->getLocale($mail->user) ?? $this->translatorConfig->getDefaultLocale());
     }
 }

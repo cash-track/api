@@ -35,4 +35,11 @@ jobs:
   pool:
     num_workers: 2
     max_worker_memory: 100
-  consume: {  }
+  consume:
+    - mail
+  pipelines:
+    mail:
+      driver: memory
+      config:
+        priority: 10
+        prefetch: 10
