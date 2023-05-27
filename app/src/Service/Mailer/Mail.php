@@ -11,9 +11,6 @@ use Symfony\Component\Mime\Email;
 
 abstract class Mail
 {
-    /**
-     * @use \App\Service\Mailer\PayloadSerializer<\App\Service\Mailer\Mail>
-     */
     use PayloadSerializer;
 
     /**

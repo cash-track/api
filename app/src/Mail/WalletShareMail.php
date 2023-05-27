@@ -12,6 +12,12 @@ class WalletShareMail extends UserMail
 {
     use TranslatorTrait;
 
+    /**
+     * @param \App\Database\EntityHeader<\App\Database\User> $userHeader
+     * @param \App\Database\EntityHeader<\App\Database\User> $sharerHeader
+     * @param \App\Database\EntityHeader<\App\Database\Wallet> $walletHeader
+     * @param string $link
+     */
     public function __construct(
         public EntityHeader $userHeader,
         public EntityHeader $sharerHeader,

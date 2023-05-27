@@ -6,18 +6,15 @@ namespace App\Service\Mailer;
 
 use ReflectionClass;
 
-/**
- * @template TEntity as object
- */
 trait PayloadSerializer
 {
     /**
      * @param array $payload
-     * @return TEntity
+     * @return object
      */
     public static function fromPayload(array $payload): object
     {
-        $class = $payload['class'] ?? null;
+        $class = $payload['class'] ?? self::class;
 
         if (empty($payload['attrs'])) {
             return new $class();
@@ -41,7 +38,7 @@ trait PayloadSerializer
 
         $rf = new ReflectionClass($this);
 
-        foreach ($rf->getConstructor()->getParameters() as $parameter) {
+        foreach ($rf->getConstructor()?->getParameters() ?? [] as $parameter) {
             if (is_object($this->{$parameter->name}) && method_exists($this->{$parameter->name}, 'toPayload')) {
                 $payload['attrs'][] = $this->{$parameter->name}->toPayload();
                 continue;

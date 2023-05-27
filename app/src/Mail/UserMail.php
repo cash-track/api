@@ -13,6 +13,9 @@ abstract class UserMail extends Mail
 {
     public ?User $user = null;
 
+    /**
+     * @param \App\Database\EntityHeader<\App\Database\User> $userHeader
+     */
     public function __construct(public EntityHeader $userHeader)
     {
         parent::__construct();

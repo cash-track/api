@@ -12,6 +12,10 @@ class ForgotPasswordMail extends UserMail
 {
     use TranslatorTrait;
 
+    /**
+     * @param \App\Database\EntityHeader<\App\Database\User> $userHeader
+     * @param string $link
+     */
     public function __construct(public EntityHeader $userHeader, public string $link)
     {
         parent::__construct($userHeader);

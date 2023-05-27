@@ -111,6 +111,9 @@ class User implements PasswordContainerInterface
      */
     public function getEntityHeader(): EntityHeader
     {
-        return new EntityHeader(self::class, ['id' => $this->id]);
+        /** @var \App\Database\EntityHeader<\App\Database\User> $header */
+        $header = new EntityHeader(self::class, ['id' => $this->id]);
+
+        return $header;
     }
 }

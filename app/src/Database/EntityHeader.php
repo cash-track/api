@@ -12,11 +12,12 @@ use Cycle\ORM\ORMInterface;
  */
 class EntityHeader
 {
-    /**
-     * @use \App\Service\Mailer\PayloadSerializer<\App\Database\EntityHeader>
-     */
     use PayloadSerializer;
 
+    /**
+     * @param class-string $role
+     * @param array $params
+     */
     public function __construct(
         public string $role,
         public array $params
@@ -27,7 +28,7 @@ class EntityHeader
      * @param \Cycle\ORM\ORMInterface $orm
      * @return TEntity|null
      */
-    public function hydrate(ORMInterface $orm):? object
+    public function hydrate(ORMInterface $orm): ?object
     {
         /** @var \Cycle\ORM\Select\Repository<TEntity> $repository */
         $repository = $orm->getRepository($this->role);
