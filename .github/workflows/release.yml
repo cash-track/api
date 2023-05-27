@@ -5,6 +5,10 @@ on:
   release:
     types: [ published ]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 env:
   REPO: cashtrack/api
   INFRA_REPO: cash-track/infra
