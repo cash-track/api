@@ -5,12 +5,19 @@ declare(strict_types=1);
 namespace App\Mail;
 
 use App\Database\EntityHeader;
+use App\Database\User;
+use App\Database\Wallet;
 use App\Service\Mailer\Mail;
+use Cycle\ORM\ORMInterface;
 use Spiral\Translator\Traits\TranslatorTrait;
 
 class WalletShareMail extends UserMail
 {
     use TranslatorTrait;
+
+    public ?User $sharer = null;
+
+    public ?Wallet $wallet = null;
 
     /**
      * @param \App\Database\EntityHeader<\App\Database\User> $userHeader
@@ -25,6 +32,14 @@ class WalletShareMail extends UserMail
         public string $link
     ) {
         parent::__construct($userHeader);
+    }
+
+    public function hydrate(ORMInterface $orm)
+    {
+        parent::hydrate($orm);
+
+        $this->sharer = $this->sharerHeader->hydrate($orm);
+        $this->wallet = $this->walletHeader->hydrate($orm);
     }
 
     /**
