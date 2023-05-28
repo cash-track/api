@@ -8,6 +8,7 @@ return [
     'fallbackLocale' => env('LOCALE', 'en'),
     'directory'      => directory('locale'),
     'autoRegister'   => env('DEBUG', true),
+    'cacheLocales'   => false,
 
     // available locale loaders (the key is extension)
     'loaders'        => [
