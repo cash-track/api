@@ -53,6 +53,17 @@ class UserRepository extends Repository implements ActorProviderInterface
     }
 
     /**
+     * @param string $nickName
+     * @return object|null
+     */
+    public function findByNickName(string $nickName): object|null
+    {
+        return $this->findOne([
+            'nick_name' => $this->encrypter->encrypt($nickName),
+        ]);
+    }
+
+    /**
      * @param \App\Database\User $user
      * @return object[]
      */

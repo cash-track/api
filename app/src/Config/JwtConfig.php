@@ -21,43 +21,28 @@ class JwtConfig extends InjectableConfig
         'privateKey' => null,
     ];
 
-    /**
-     * @return string
-     */
     public function getSecret(): string
     {
         return (string) $this->config['secret'];
     }
 
-    /**
-     * @return int
-     */
     public function getTtl(): int
     {
         return (int) $this->config['ttl'];
     }
 
-    /**
-     * @return int
-     */
     public function getRefreshTtl(): int
     {
         return (int) $this->config['refreshTtl'];
     }
 
-    /**
-     * @return string
-     */
     public function getPublicKey(): string
     {
-        return (string) base64_decode((string) $this->config['publicKey']);
+        return base64_decode((string) $this->config['publicKey']);
     }
 
-    /**
-     * @return string
-     */
     public function getPrivateKey(): string
     {
-        return (string) base64_decode((string) $this->config['privateKey']);
+        return base64_decode((string) $this->config['privateKey']);
     }
 }

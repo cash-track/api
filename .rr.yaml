@@ -36,10 +36,14 @@ jobs:
     num_workers: 2
     max_worker_memory: 100
   consume:
-    - mail
+    - high-priority
+    - low-priority
   pipelines:
-    mail:
+    high-priority:
+      driver: memory
+      config:
+        priority: 1
+    low-priority:
       driver: memory
       config:
         priority: 10
-        prefetch: 10

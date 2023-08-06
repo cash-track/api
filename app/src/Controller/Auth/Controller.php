@@ -4,10 +4,9 @@ declare(strict_types=1);
 
 namespace App\Controller\Auth;
 
-use App\Database\User;
+use App\Service\Auth\Authentication;
 use App\View\UserView;
 use Psr\Http\Message\ResponseInterface;
-use Spiral\Auth\TokenInterface;
 use Spiral\Http\ResponseWrapper;
 use Spiral\Translator\Traits\TranslatorTrait;
 
@@ -21,31 +20,22 @@ abstract class Controller
     ) {
     }
 
-    protected function responseTokens(TokenInterface $accessToken, TokenInterface $refreshToken): ResponseInterface
+    protected function responseTokensWithUser(Authentication $authentication): ResponseInterface
     {
         return $this->response->json([
-            'accessToken' => $accessToken->getID(),
-            'accessTokenExpiredAt' => $accessToken->getExpiresAt()?->format(DATE_RFC3339),
-            'refreshToken' => $refreshToken->getID(),
-            'refreshTokenExpiredAt' => $refreshToken->getExpiresAt()?->format(DATE_RFC3339),
+            'data' => $this->userView->head($authentication->user),
+            'accessToken' => $authentication->accessToken->getID(),
+            'accessTokenExpiredAt' => $authentication->accessToken->getExpiresAt()?->format(DATE_RFC3339),
+            'refreshToken' => $authentication->refreshToken->getID(),
+            'refreshTokenExpiredAt' => $authentication->refreshToken->getExpiresAt()?->format(DATE_RFC3339),
         ], 200);
     }
 
-    protected function responseTokensWithUser(TokenInterface $accessToken, TokenInterface $refreshToken, User $user): ResponseInterface
+    protected function responseAuthenticationFailure(string $error = '', ?string $message = null): ResponseInterface
     {
         return $this->response->json([
-            'data' => $this->userView->head($user),
-            'accessToken' => $accessToken->getID(),
-            'accessTokenExpiredAt' => $accessToken->getExpiresAt()?->format(DATE_RFC3339),
-            'refreshToken' => $refreshToken->getID(),
-            'refreshTokenExpiredAt' => $refreshToken->getExpiresAt()?->format(DATE_RFC3339),
-        ], 200);
-    }
-
-    protected function responseAuthenticationFailure(): ResponseInterface
-    {
-        return $this->response->json([
-            'message' => $this->say('error_authentication_failure'),
+            'error' => $error,
+            'message' => $message ?? $this->say('error_authentication_failure'),
         ], 400);
     }
 

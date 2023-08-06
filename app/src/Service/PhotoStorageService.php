@@ -5,43 +5,28 @@ declare(strict_types=1);
 namespace App\Service;
 
 use App\Config\CdnConfig;
+use App\Jobs\DownloadProfilePictureJob;
 use Aws\S3\S3ClientInterface;
+use Nyholm\Psr7\UploadedFile;
 use Psr\Http\Message\UploadedFileInterface;
-use Spiral\Prototype\Annotation\Prototyped;
+use Psr\Log\LoggerInterface;
+use Spiral\Queue\QueueInterface;
 
-/**
- * @Prototyped(property="photoStorageService")
- */
 class PhotoStorageService
 {
+    const DEFAULT_EXT = 'jpg';
+    const DEFAULT_MIME = 'image/jpeg';
     const PHOTO_PATH = 'photos/';
+    const TMP_PATH = '/tmp/';
 
-    /**
-     * @var \Aws\S3\S3ClientInterface
-     */
-    private $storage;
-
-    /**
-     * @var \App\Config\CdnConfig
-     */
-    private $config;
-
-    /**
-     * PhotoStorageService constructor.
-     *
-     * @param \Aws\S3\S3ClientInterface $storage
-     * @param \App\Config\CdnConfig $config
-     */
-    public function __construct(S3ClientInterface $storage, CdnConfig $config)
-    {
-        $this->storage = $storage;
-        $this->config = $config;
+    public function __construct(
+        private readonly LoggerInterface $logger,
+        private readonly S3ClientInterface $storage,
+        private readonly CdnConfig $config,
+        private readonly QueueInterface $queue,
+    ) {
     }
 
-    /**
-     * @param string $fileName
-     * @return string
-     */
     public function getProfilePhotoPublicUrl(?string $fileName): ?string
     {
         if ($fileName === null) {
@@ -51,10 +36,6 @@ class PhotoStorageService
         return $this->config->getHost() . '/' . self::PHOTO_PATH . $fileName;
     }
 
-    /**
-     * @param \Psr\Http\Message\UploadedFileInterface $uploadedFile
-     * @return string|null
-     */
     public function storeUploadedProfilePhoto(UploadedFileInterface $uploadedFile): ?string
     {
         $fileName = $this->generateFileName($uploadedFile->getClientFilename()) . '.' . $this->getFileExtension($uploadedFile->getClientFilename());
@@ -71,17 +52,21 @@ class PhotoStorageService
         $url = $result->get('ObjectURL');
 
         if ($url === null || $url === '') {
+            $this->logger->warning('Unable to upload profile photo => ' . print_r($result, true));
+
             return null;
         }
+
+        $this->logger->info('Uploaded profile photo', [
+            'filename' => $fileName,
+            'type' => $uploadedFile->getClientMediaType(),
+            'size' => $uploadedFile->getSize(),
+        ]);
 
         return $fileName;
     }
 
-    /**
-     * @param string $fileName
-     * @return void
-     */
-    public function removeProfilePhoto(string $fileName)
+    public function removeProfilePhoto(string $fileName): void
     {
         if ($fileName === '') {
             return;
@@ -91,6 +76,67 @@ class PhotoStorageService
             'Bucket' => $this->config->getBucket(),
             'Key' => self::PHOTO_PATH . $fileName
         ]);
+    }
+
+    public function queueDownloadProfilePhoto(int $userId, string $url, ?string $ext = null, ?string $mime = null): void
+    {
+        $this->logger->info('Queuing download profile photo', [
+            'userId' => $userId,
+            'url' => $url,
+            'ext' => $ext,
+            'mime' => $mime,
+        ]);
+
+        $this->queue->push(DownloadProfilePictureJob::class, [
+            'userId' => $userId,
+            'url' => $url,
+            'ext' => $ext,
+            'mime' => $mime,
+        ]);
+    }
+
+    public function storeRemoteProfilePhoto(string $url, ?string $ext = null, ?string $mime = null): ?string
+    {
+        $fileName = $this->generateFileName($url) . '.' . ($ext ?? $this->getFileExtension($url));
+
+        $tmpPath = self::TMP_PATH . $fileName;
+
+        $size = $this->downloadFile($url, $tmpPath);
+
+        if ($size === null) {
+            $this->logger->warning('Unable to download remote profile photo', [
+                'path' => $tmpPath,
+                'url' => $url,
+                'ext' => $ext,
+                'mime' => $mime,
+            ]);
+
+            return null;
+        }
+
+        $this->logger->info('Downloaded remote profile photo before uploading on storage', [
+            'path' => $tmpPath,
+            'url' => $url,
+            'size' => $size,
+        ]);
+
+        $uploadedFileName = $this->storeUploadedProfilePhoto(
+            new UploadedFile($tmpPath, $size, UPLOAD_ERR_OK, $fileName, $mime ?? self::DEFAULT_MIME)
+        );
+
+        try {
+            unlink($tmpPath);
+        } catch (\Throwable) {
+        }
+
+        return $uploadedFileName;
+    }
+
+    protected function downloadFile(string $url, string $downloadPath): ?int
+    {
+        $result = file_put_contents($downloadPath, file_get_contents($url));
+
+        return is_int($result) ? $result : null;
     }
 
     /**
@@ -107,7 +153,7 @@ class PhotoStorageService
      * @param string $default
      * @return string
      */
-    private function getFileExtension(?string $fileName, string $default = 'jpg'): string
+    private function getFileExtension(?string $fileName, string $default = self::DEFAULT_EXT): string
     {
         if ($fileName === null) {
             return $default;
@@ -115,10 +161,10 @@ class PhotoStorageService
 
         $parts = explode('.', $fileName);
 
-        if (($count = count($parts)) <= 1) {
+        if (($count = count($parts)) <= 1 || empty($parts[$count - 1]) || strlen($parts[$count - 1]) > 4) {
             return $default;
         }
 
-        return $parts[$count - 1] ?? $default;
+        return $parts[$count - 1];
     }
 }

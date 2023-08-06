@@ -62,3 +62,17 @@ if (! function_exists('str_slug')) {
         return trim($title, $separator);
     }
 }
+
+if (! function_exists('str_rand')) {
+
+    /**
+     * Generate random string of given $length characters
+     *
+     * @param int $length
+     * @return string
+     * @throws \Exception
+     */
+    function str_rand(int $length = 16): string {
+        return bin2hex(random_bytes($length));
+    }
+}

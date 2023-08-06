@@ -5,12 +5,17 @@ declare(strict_types=1);
 namespace Tests\Feature\Service;
 
 use App\Config\CdnConfig;
+use App\Jobs\DownloadProfilePictureJob;
 use App\Service\PhotoStorageService;
 use Aws\Result;
 use Aws\S3\S3Client;
 use Laminas\Diactoros\UploadedFile;
 use Nyholm\Psr7\Stream;
+use Psr\Http\Message\UploadedFileInterface;
+use Psr\Log\LoggerInterface;
 use Spiral\Boot\EnvironmentInterface;
+use Spiral\Queue\QueueInterface;
+use Tests\Fixtures;
 use Tests\TestCase;
 
 class PhotoStorageServiceTest extends TestCase
@@ -54,15 +59,20 @@ class PhotoStorageServiceTest extends TestCase
 
         $uploadedFileMock = $this->getMockBuilder(UploadedFile::class)
                                  ->disableOriginalConstructor()
-                                 ->onlyMethods(['getClientFilename', 'getStream', 'getClientMediaType'])
+                                 ->onlyMethods(['getClientFilename', 'getStream', 'getClientMediaType', 'getSize'])
                                  ->getMock();
 
         $uploadedFileMock->method('getClientFilename')->willReturn($uploadedFileName);
         $uploadedFileMock->method('getStream')->willReturn($stream);
         $uploadedFileMock->method('getClientMediaType')->willReturn($uploadedMime);
+        $uploadedFileMock->method('getSize')->willReturn(Fixtures::integer());
+
+        $queueMock = $this->getMockBuilder(QueueInterface::class)->getMock();
+
+        $loggerMock = $this->getMockBuilder(LoggerInterface::class)->getMock();
 
         $service = $this->getMockBuilder(PhotoStorageService::class)
-                        ->setConstructorArgs([$s3Client, $this->getContainer()->get(CdnConfig::class)])
+                        ->setConstructorArgs([$loggerMock, $s3Client, $this->getContainer()->get(CdnConfig::class), $queueMock])
                         ->onlyMethods(['generateFileName'])
                         ->getMock();
 
@@ -81,12 +91,13 @@ class PhotoStorageServiceTest extends TestCase
     {
         $uploadedFileMock = $this->getMockBuilder(UploadedFile::class)
                                  ->disableOriginalConstructor()
-                                 ->onlyMethods(['getClientFilename', 'getStream', 'getClientMediaType'])
+                                 ->onlyMethods(['getClientFilename', 'getStream', 'getClientMediaType', 'getSize'])
                                  ->getMock();
 
         $uploadedFileMock->method('getClientFilename')->willReturn('uploaded-file-name.jpg');
         $uploadedFileMock->method('getStream')->willReturn(Stream::create('test'));
         $uploadedFileMock->method('getClientMediaType')->willReturn('image/jpg');
+        $uploadedFileMock->method('getSize')->willReturn(Fixtures::integer());
 
         $s3ClientResult = $this->getMockBuilder(Result::class)
                                ->disableOriginalConstructor()
@@ -107,7 +118,11 @@ class PhotoStorageServiceTest extends TestCase
                  ->method('putObject')
                  ->willReturn($s3ClientResult);
 
-        $service = new PhotoStorageService($s3Client, $this->getContainer()->get(CdnConfig::class));
+        $queueMock = $this->getMockBuilder(QueueInterface::class)->getMock();
+
+        $loggerMock = $this->getMockBuilder(LoggerInterface::class)->getMock();
+
+        $service = new PhotoStorageService($loggerMock, $s3Client, $this->getContainer()->get(CdnConfig::class), $queueMock);
 
         $this->assertNull($service->storeUploadedProfilePhoto($uploadedFileMock));
     }
@@ -156,7 +171,11 @@ class PhotoStorageServiceTest extends TestCase
                      'Key' => PhotoStorageService::PHOTO_PATH . $fileName
                  ]);
 
-        $service = new PhotoStorageService($s3Client, $this->getContainer()->get(CdnConfig::class));
+        $queueMock = $this->getMockBuilder(QueueInterface::class)->getMock();
+
+        $loggerMock = $this->getMockBuilder(LoggerInterface::class)->getMock();
+
+        $service = new PhotoStorageService($loggerMock, $s3Client, $this->getContainer()->get(CdnConfig::class), $queueMock);
 
         $service->removeProfilePhoto($fileName);
         $service->removeProfilePhoto('');
@@ -170,9 +189,101 @@ class PhotoStorageServiceTest extends TestCase
 
         $s3Client = $this->getMockBuilder(S3Client::class)->disableOriginalConstructor()->getMock();
 
-        $service = new PhotoStorageService($s3Client, $this->getContainer()->get(CdnConfig::class));
+        $queueMock = $this->getMockBuilder(QueueInterface::class)->getMock();
+
+        $loggerMock = $this->getMockBuilder(LoggerInterface::class)->getMock();
+
+        $service = new PhotoStorageService($loggerMock, $s3Client, $this->getContainer()->get(CdnConfig::class), $queueMock);
 
         $this->assertNull($service->getProfilePhotoPublicUrl(null));
         $this->assertEquals($expectedUrl, $service->getProfilePhotoPublicUrl($fileName));
+    }
+
+    public function testQueueDownloadProfilePhoto(): void
+    {
+        $userId = Fixtures::integer();
+        $url = Fixtures::url();
+        $ext = Fixtures::string(3);
+
+        $s3Client = $this->getMockBuilder(S3Client::class)->disableOriginalConstructor()->getMock();
+
+        $queueMock = $this->getMockBuilder(QueueInterface::class)->getMock();
+        $queueMock->expects($this->once())->method('push')->with(DownloadProfilePictureJob::class, [
+            'userId' => $userId,
+            'url' => $url,
+            'ext' => $ext,
+            'mime' => null,
+        ]);
+
+        $loggerMock = $this->getMockBuilder(LoggerInterface::class)->getMock();
+
+        $service = new PhotoStorageService($loggerMock, $s3Client, $this->getContainer()->get(CdnConfig::class), $queueMock);
+
+        $service->queueDownloadProfilePhoto($userId, $url, $ext);
+    }
+
+    public function testStoreRemoteProfilePhoto(): void
+    {
+        $url = 'https://dummyimage.com/30x10/000/fff.png';
+        $ext = '.png';
+        $generatedFileName = Fixtures::string();
+        $name = Fixtures::string() . $ext;
+        $tmpPath = '/tmp/' . $generatedFileName;
+
+        $cdnConfig = $this->getContainer()->get(CdnConfig::class);
+        $s3Client = $this->getMockBuilder(S3Client::class)->disableOriginalConstructor()->getMock();
+        $queueMock = $this->getMockBuilder(QueueInterface::class)->getMock();
+        $loggerMock = $this->getMockBuilder(LoggerInterface::class)->getMock();
+
+        $service = $this->getMockBuilder(PhotoStorageService::class)
+                        ->setConstructorArgs([$loggerMock, $s3Client, $cdnConfig, $queueMock])
+                        ->onlyMethods(['generateFileName', 'storeUploadedProfilePhoto'])
+                        ->getMock();
+
+        $service->expects($this->once())
+                ->method('generateFileName')
+                ->with($url)
+                ->willReturn($generatedFileName);
+
+        $service->expects($this->once())
+                ->method('storeUploadedProfilePhoto')
+                ->with($this->isInstanceOf(UploadedFileInterface::class))
+                ->willReturn($name);
+
+        $fileName = $service->storeRemoteProfilePhoto($url);
+
+        if (file_exists($tmpPath)) {
+            unlink($tmpPath);
+        }
+
+        $this->assertEquals($name, $fileName);
+    }
+
+    public function testStoreRemoteProfilePhotoError(): void
+    {
+        $url = Fixtures::url('picture.png');
+        $generatedFileName = Fixtures::string();
+        $tmpPath = '/tmp/' . $generatedFileName . '.png';
+
+        $cdnConfig = $this->getContainer()->get(CdnConfig::class);
+        $s3Client = $this->getMockBuilder(S3Client::class)->disableOriginalConstructor()->getMock();
+        $queueMock = $this->getMockBuilder(QueueInterface::class)->getMock();
+        $loggerMock = $this->getMockBuilder(LoggerInterface::class)->getMock();
+
+        $service = $this->getMockBuilder(PhotoStorageService::class)
+                        ->setConstructorArgs([$loggerMock, $s3Client, $cdnConfig, $queueMock])
+                        ->onlyMethods(['generateFileName', 'downloadFile', 'storeUploadedProfilePhoto'])
+                        ->getMock();
+
+        $service->expects($this->once())
+                ->method('generateFileName')
+                ->with($url)
+                ->willReturn($generatedFileName);
+        $service->expects($this->once())->method('downloadFile')->with($url, $tmpPath)->willReturn(null);
+        $service->expects($this->never())->method('storeUploadedProfilePhoto');
+
+        $fileName = $service->storeRemoteProfilePhoto($url);
+
+        $this->assertNull($fileName);
     }
 }

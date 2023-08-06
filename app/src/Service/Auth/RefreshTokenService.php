@@ -100,7 +100,7 @@ class RefreshTokenService
      * @param \App\Database\User $user
      * @return \Spiral\Auth\TokenInterface
      */
-    public function authenticate(User $user): TokenInterface
+    public function createToken(User $user): TokenInterface
     {
         return $this->tokenStorage->create([
             'sub' => $user->id,

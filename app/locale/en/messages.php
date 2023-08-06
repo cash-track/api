@@ -3,6 +3,7 @@
 return [
     'error_authentication_required'         => 'Authentication required.',
     'error_authentication_failure'          => 'Wrong email or password.',
+    'error_token_authentication_failure'    => 'Invalid access token.',
     'error_authentication_exception'        => 'Unable to authenticate. Please try again later.',
     'error_unknown_currency'                => 'Unable to find currency.',
     'error_loading_default_currency'        => 'Unable to load default currency.',
@@ -96,5 +97,11 @@ return [
     'wallet_share_mail_line_invited_to' => 'at',
     'wallet_share_mail_line_2'          => 'Now you can use it together.',
     'wallet_share_mail_footer'          => 'If it\'s not you just ignore this.',
+
+    'auth_no_free_nickname'             => 'Unable to allocate free nickname.',
+    'google_auth_invalid_id_token'      => 'Token validation failed. Please try again.',
+    'google_auth_id_token_not_verified' => 'Unexpected token verification response.',
+    'google_auth_account_not_verified'  => 'Your Google account email is not verified. Please verify your Google account email first.',
+    'google_auth_email_already_claimed' => 'Your email has been associated with other Google account. Please try different Google account.',
 
 ];

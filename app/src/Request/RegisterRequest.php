@@ -87,6 +87,7 @@ class RegisterRequest extends Filter implements HasFilterDefinition
         $user->nickName = $this->nickName;
         $user->email = $this->email;
         $user->defaultCurrencyCode = Currency::DEFAULT_CURRENCY_CODE;
+        $user->password = $this->password;
 
         return $user;
     }
