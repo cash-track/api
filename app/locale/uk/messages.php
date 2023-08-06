@@ -3,6 +3,7 @@
 return [
     'error_authentication_required'         => 'Автентифікація обов\'язкова.',
     'error_authentication_failure'          => 'Невірний email або пароль.',
+    'error_token_authentication_failure'    => 'Хибний токен доступу.',
     'error_authentication_exception'        => 'Неможливо автентифікувати. Будь ласка, спробуйте ще раз пізніше.',
     'error_unknown_currency'                => 'Неможливо знайти валюту.',
     'error_loading_default_currency'        => 'Неможливо завантажити валюту за замовчуванням.',
@@ -96,6 +97,12 @@ return [
     'wallet_share_mail_line_invited_to'                        => 'на',
     'wallet_share_mail_line_2'                                 => 'Тепер ви можете користуватись ним разом.',
     'wallet_share_mail_footer'                                 => 'Якщо це призначалось не вам, можете проігнорувати дане повідомлення.',
+
+    'auth_no_free_nickname'             => 'Помилка під час виділення вільного нікнейму.',
+    'google_auth_invalid_id_token'      => 'Помилка перевірки токену. Будь ласка, спробуйте ще раз пізніше.',
+    'google_auth_id_token_not_verified' => 'Неочікувана відповідь під час перевірки токену.',
+    'google_auth_account_not_verified'  => 'Email Вашого Google аккаунту не підтверджено. Будь ласка, спершу підтвердіть Email вашого Google аккаунту.',
+    'google_auth_email_already_claimed' => 'Ваш Email вже використовується іншим користувачем Google. Будь ласка, спробуйте інший Google аккаунт.',
 
     // validations
     'The condition `{method}` was not met.'                    => 'Умова `{method}` не виконалась.',

@@ -19,7 +19,7 @@ use Symfony\Component\Mime\Email;
 
 class Mailer implements MailerInterface
 {
-    const QUEUE_NAME = 'mail';
+    const QUEUE_NAME = 'high-priority';
 
     /**
      * @var string

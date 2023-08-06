@@ -6,6 +6,7 @@ namespace App\Controller\Profile;
 
 use App\Controller\AuthAwareController;
 use App\Database\Currency;
+use App\Database\GoogleAccount;
 use App\Repository\CurrencyRepository;
 use App\Request\CheckNickNameRequest;
 use App\Request\Profile\UpdateBasicRequest;
@@ -115,5 +116,15 @@ class ProfileController extends AuthAwareController
         }
 
         return $this->userView->json($this->user);
+    }
+
+    #[Route(route: '/profile/social', name: 'profile.social', methods: 'GET', group: 'auth')]
+    public function socialAccounts(): ResponseInterface
+    {
+        return $this->response->json([
+            'data' => [
+                'google' => $this->user->googleAccount instanceof GoogleAccount
+            ],
+        ]);
     }
 }

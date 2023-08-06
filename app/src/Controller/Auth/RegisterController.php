@@ -4,15 +4,9 @@ declare(strict_types=1);
 
 namespace App\Controller\Auth;
 
-use App\Database\Currency;
-use App\Repository\CurrencyRepository;
 use App\Request\CheckNickNameRequest;
 use App\Request\RegisterRequest;
 use App\Service\Auth\AuthService;
-use App\Service\Auth\EmailConfirmationService;
-use App\Service\Auth\RefreshTokenService;
-use App\Service\UserOptionsService;
-use App\Service\UserService;
 use App\View\UserView;
 use Psr\Http\Message\ResponseInterface;
 use Spiral\Http\ResponseWrapper;
@@ -26,12 +20,7 @@ final class RegisterController extends Controller
     public function __construct(
         protected UserView $userView,
         protected AuthService $authService,
-        protected UserService $userService,
         protected ResponseWrapper $response,
-        protected EmailConfirmationService $emailConfirmationService,
-        protected RefreshTokenService $refreshTokenService,
-        private CurrencyRepository $currencyRepository,
-        protected UserOptionsService $userOptionsService,
     ) {
         parent::__construct($userView, $response);
     }
@@ -41,17 +30,8 @@ final class RegisterController extends Controller
     {
         $user = $request->createUser();
 
-        $currency = $this->currencyRepository->getDefault();
-
-        if ($currency instanceof Currency) {
-            $user->setDefaultCurrency($currency);
-        }
-
-        $this->authService->hashPassword($user, $request->password);
-        $this->userOptionsService->setLocale($user, $request->locale);
-
         try {
-            $user = $this->userService->store($user);
+            $auth = $this->authService->register($user, $request->locale);
         } catch (\Throwable $exception) {
             return $this->response->json([
                 'message' => $this->say('user_register_exception'),
@@ -59,16 +39,7 @@ final class RegisterController extends Controller
             ], 500);
         }
 
-        try {
-            $this->emailConfirmationService->create($user);
-        } catch (\Throwable $exception) {
-            // TODO. Handle error
-        }
-
-        $accessToken = $this->authService->authenticate($user);
-        $refreshToken = $this->refreshTokenService->authenticate($user);
-
-        return $this->responseTokensWithUser($accessToken, $refreshToken, $user);
+        return $this->responseTokensWithUser($auth);
     }
 
     #[Route(route: '/auth/register/check/nick-name', name: 'auth.register.check.nickname', methods: 'POST')]

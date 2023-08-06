@@ -450,4 +450,54 @@ class ProfileControllerTest extends TestCase implements DatabaseTransaction
         $this->assertArrayHasKey('message', $body);
         $this->assertArrayHasKey('error', $body);
     }
+
+    public function testSocialAccountsRequireAuth(): void
+    {
+        $response = $this->get('/profile/social');
+
+        $response->assertUnauthorized();
+    }
+
+    public function testSocialAccountsNone(): void
+    {
+        $auth = $this->makeAuth($this->userFactory->create());
+
+        $response = $this->withAuth($auth)->get('/profile/social');
+
+        $response->assertOk();
+
+        $body = $this->getJsonResponseBody($response);
+
+        $this->assertArrayHasKey('data', $body);
+        $this->assertArrayHasKey('google', $body['data']);
+        $this->assertFalse($body['data']['google']);
+    }
+
+    public function testSocialAccountsGoogle(): void
+    {
+        $user = UserFactory::make();
+
+        $existingData = [
+            'sub' => (string) Fixtures::integer(),
+            'email' => $user->email,
+            'email_verified' => true,
+            'picture' => Fixtures::url(),
+            'given_name' => Fixtures::string(),
+            'family_name' => Fixtures::string(),
+        ];
+
+        $user = $this->userFactory->create(UserFactory::withGoogleAccount($existingData, $user));
+
+        $auth = $this->makeAuth($user);
+
+        $response = $this->withAuth($auth)->get('/profile/social');
+
+        $response->assertOk();
+
+        $body = $this->getJsonResponseBody($response);
+
+        $this->assertArrayHasKey('data', $body);
+        $this->assertArrayHasKey('google', $body['data']);
+        $this->assertTrue($body['data']['google']);
+    }
 }

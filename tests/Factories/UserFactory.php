@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Factories;
 
 use App\Database\Currency;
+use App\Database\GoogleAccount;
 use App\Database\User;
 use Tests\Fixtures;
 
@@ -88,6 +89,20 @@ class UserFactory extends AbstractFactory
     public static function emailNotConfirmed(User $user = null): User
     {
         return self::emailConfirmed($user, false);
+    }
+
+    public static function withGoogleAccount(array $data = [], User $user = null): User
+    {
+        if ($user === null) {
+            $user = self::make();
+        }
+
+        $user->googleAccount = new GoogleAccount();
+        $user->googleAccount->accountId = $data['sub'] ?? null;
+        $user->googleAccount->pictureUrl = $data['picture'] ?? null;
+        $user->googleAccount->setData($data);
+
+        return $user;
     }
 
     public static function invalidNickNames(): array

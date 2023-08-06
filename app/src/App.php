@@ -151,6 +151,7 @@ class App extends Kernel
         Bootloader\CheckerBootloader::class,
 
         Bootloader\FirebaseBootloader::class,
+        Bootloader\GoogleApiBootloader::class,
         Bootloader\S3Bootloader::class,
         Bootloader\MailerBootloader::class,
 
