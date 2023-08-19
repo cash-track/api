@@ -147,6 +147,10 @@ class ChargesController extends Controller
         $charge->title = $request->title;
         $charge->description = $request->description;
 
+        if (($dateTime = $request->getDateTime()) !== null) {
+            $charge->createdAt = $dateTime;
+        }
+
         $charge->tags->clear();
         $tags = $this->tagRepository->findAllByPKsAndUserPKs($request->tags, $wallet->getUserIDs());
 

@@ -6,6 +6,7 @@ namespace Tests\Feature\Controller\Wallets\Charges;
 
 use App\Database\Charge;
 use App\Database\Tag;
+use App\Request\Charge\CreateRequest;
 use App\Service\ChargeWalletService;
 use Doctrine\Common\Collections\ArrayCollection;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -765,16 +766,19 @@ class ChargesControllerTest extends TestCase implements DatabaseTransaction
                 'amount' => 'false',
                 'title' => false,
                 'description' => false,
-            ], ['type', 'amount', 'title', 'description']],
+                'dateTime' => 123,
+            ], ['type', 'amount', 'title', 'description', 'dateTime']],
             [[
                 'type' => '+',
                 'amount' => 0,
                 'title' => 'Title',
-            ], ['amount']],
+                'dateTime' => '123'
+            ], ['amount', 'dateTime']],
             [[
                 'type' => '+',
                 'amount' => -1,
                 'title' => 'Title',
+                'dateTime' => (new \DateTimeImmutable())->add(\DateInterval::createFromDateString('1 minute'))->format(CreateRequest::DATE_FORMAT),
             ], ['amount']],
         ];
     }
@@ -828,6 +832,7 @@ class ChargesControllerTest extends TestCase implements DatabaseTransaction
             'amount' => $updatedCharge->amount,
             'title' => $updatedCharge->title,
             'description' => $updatedCharge->description,
+            'dateTime' => $updatedCharge->createdAt->format(CreateRequest::DATE_FORMAT),
         ]);
 
         $response->assertOk();
@@ -884,6 +889,7 @@ class ChargesControllerTest extends TestCase implements DatabaseTransaction
             'title' => $updatedCharge->title,
             'description' => $updatedCharge->description,
             'tags' => $newTags->map(fn(Tag $tag) => $tag->id)->getValues(),
+            'dateTime' => $updatedCharge->createdAt->format(CreateRequest::DATE_FORMAT),
         ]);
 
         $response->assertOk();
@@ -929,6 +935,7 @@ class ChargesControllerTest extends TestCase implements DatabaseTransaction
             'amount' => $updatedCharge->amount,
             'title' => $updatedCharge->title,
             'description' => $updatedCharge->description,
+            'dateTime' => $updatedCharge->createdAt->format(CreateRequest::DATE_FORMAT),
         ]);
 
         $response->assertStatus(500);
