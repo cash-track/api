@@ -15,6 +15,8 @@ use Spiral\Validator\FilterDefinition;
 
 class CreateRequest extends Filter implements HasFilterDefinition
 {
+    const DATE_FORMAT = 'Y-m-d H:i:s';
+
     // TODO. Support custom currency with custom rate
 
     #[Data]
@@ -35,6 +37,9 @@ class CreateRequest extends Filter implements HasFilterDefinition
      */
     #[Data]
     public array $tags = [];
+
+    #[Data]
+    public string $dateTime = '';
 
     public function filterDefinition(): FilterDefinitionInterface
     {
@@ -58,6 +63,16 @@ class CreateRequest extends Filter implements HasFilterDefinition
             'tags' => [
                 ['array::of', ['entity:exists', Tag::class, 'id']],
             ],
+            'dateTime' => [
+                'is_string',
+                ['datetime:format', self::DATE_FORMAT],
+                ['datetime:past', true],
+            ],
         ]);
+    }
+
+    public function getDateTime(): ?\DateTimeImmutable
+    {
+        return \DateTimeImmutable::createFromFormat(self::DATE_FORMAT, $this->dateTime) ?: null;
     }
 }

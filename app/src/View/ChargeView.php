@@ -47,6 +47,7 @@ class ChargeView implements SingletonInterface
             'description' => $charge->description,
             'userId'      => $charge->userId,
             'walletId'    => $charge->walletId,
+            'dateTime'    => $charge->createdAt->format(DATE_W3C),
             'createdAt'   => $charge->createdAt->format(DATE_W3C),
             'updatedAt'   => $charge->updatedAt->format(DATE_W3C),
 
