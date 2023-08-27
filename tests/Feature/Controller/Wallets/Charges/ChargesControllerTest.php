@@ -1064,4 +1064,134 @@ class ChargesControllerTest extends TestCase implements DatabaseTransaction
         $this->assertArrayHasKey('error', $body);
         $this->assertArrayHasKey('message', $body);
     }
+
+    public function testMoveRequireAuth(): void
+    {
+        $user = $this->userFactory->create();
+        $wallet = $this->walletFactory->forUser($user)->create();
+        $charges = $this->chargeFactory->forUser($user)->forWallet($wallet)->createMany(10);
+        $targetWallet = $this->walletFactory->forUser($user)->create();
+
+        $response = $this->post("/wallets/{$wallet->id}/charges/move/{$targetWallet->id}", [
+            'chargeIds' => $charges->map(fn (Charge $charge) => $charge->id)->toArray(),
+        ]);
+
+        $response->assertUnauthorized();
+    }
+
+    public function testMoveMissingWalletsRequireAuth(): void
+    {
+        $walletId = Fixtures::integer();
+        $targetWalletId = Fixtures::integer();
+        $chargeId = Fixtures::string();
+
+        $response = $this->post("/wallets/{$walletId}/charges/move/{$targetWalletId}", [
+            'chargeIds' => [$chargeId],
+        ]);
+
+        $response->assertUnauthorized();
+    }
+
+    public function testMoveValidationFails(): void
+    {
+        $auth = $this->makeAuth($user = $this->userFactory->create());
+        $wallet = $this->walletFactory->forUser($user)->create();
+        $targetWallet = $this->walletFactory->forUser($user)->create();
+        $chargeId = Fixtures::string();
+
+        $response = $this->withAuth($auth)->post("/wallets/{$wallet->id}/charges/move/{$targetWallet->id}", [
+            'chargeIds' => [$chargeId],
+        ]);
+
+        $response->assertUnprocessable();
+    }
+
+    public function testMoveMissingWalletsReturnNotFound(): void
+    {
+        $auth = $this->makeAuth($user = $this->userFactory->create());
+        $wallet = $this->walletFactory->forUser($user)->create();
+        $charges = $this->chargeFactory->forUser($user)->forWallet($wallet)->createMany(10);
+        $walletId = Fixtures::integer();
+        $targetWalletId = Fixtures::integer();
+
+        $response = $this->withAuth($auth)->post("/wallets/{$walletId}/charges/move/{$targetWalletId}", [
+            'chargeIds' => $charges->map(fn (Charge $charge) => $charge->id)->toArray(),
+        ]);
+
+        $response->assertNotFound();
+    }
+
+    public function testMoveNonMemberReturnNotFound(): void
+    {
+        $auth = $this->makeAuth($user = $this->userFactory->create());
+
+        $foreignWallet = $this->walletFactory->create();
+        $foreignTargetWallet = $this->walletFactory->create();
+
+        $wallet = $this->walletFactory->forUser($user)->create();
+        $charges = $this->chargeFactory->forUser($user)->forWallet($wallet)->createMany(10);
+
+        $response = $this->withAuth($auth)->post("/wallets/{$foreignWallet->id}/charges/move/{$foreignTargetWallet->id}", [
+            'chargeIds' => $charges->map(fn (Charge $charge) => $charge->id)->toArray(),
+        ]);
+
+        $response->assertNotFound();
+
+        $response = $this->withAuth($auth)->post("/wallets/{$wallet->id}/charges/move/{$foreignTargetWallet->id}", [
+            'chargeIds' => $charges->map(fn (Charge $charge) => $charge->id)->toArray(),
+        ]);
+
+        $response->assertNotFound();
+    }
+
+    public function testMoveChangeChargesWallet(): void
+    {
+        $auth = $this->makeAuth($user = $this->userFactory->create());
+        $wallet = $this->walletFactory->forUser($user)->create();
+        $targetWallet = $this->walletFactory->forUser($user)->create();
+        $charges = $this->chargeFactory->forUser($user)->forWallet($wallet)->createMany(10);
+
+        $response = $this->withAuth($auth)->post("/wallets/{$wallet->id}/charges/move/{$targetWallet->id}", [
+            'chargeIds' => $charges->map(fn (Charge $charge) => $charge->id)->toArray(),
+        ]);
+
+        $response->assertOk();
+
+        foreach ($charges as $charge) {
+            /** @var \App\Database\Charge $charge */
+            $this->assertDatabaseMissing('charges', [
+                'id' => $charge->id,
+                'wallet_id' => $wallet->id,
+            ]);
+
+            $this->assertDatabaseHas('charges', [
+                'id' => $charge->id,
+                'wallet_id' => $targetWallet->id,
+            ]);
+        }
+    }
+
+    public function testMoveThrownException(): void
+    {
+        $auth = $this->makeAuth($user = $this->userFactory->create());
+
+        $wallet = $this->walletFactory->forUser($user)->create();
+        $charges = $this->chargeFactory->forUser($user)->forWallet($wallet)->createMany(10);
+        $targetWallet = $this->walletFactory->forUser($user)->create();
+
+        $this->mock(ChargeWalletService::class, ['move'], function (MockObject $mock) {
+            $mock->expects($this->once())->method('move')->willThrowException(new \RuntimeException());
+        });
+
+        $response = $this->withAuth($auth)->post("/wallets/{$wallet->id}/charges/move/{$targetWallet->id}", [
+            'chargeIds' => $charges->map(fn (Charge $charge) => $charge->id)->toArray(),
+        ]);
+
+        $response->assertStatus(500);
+
+        $body = $this->getJsonResponseBody($response);
+
+        $this->assertArrayHasKey('error', $body);
+        $this->assertArrayHasKey('message', $body);
+    }
 }

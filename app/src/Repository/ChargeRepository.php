@@ -40,6 +40,19 @@ class ChargeRepository extends Repository
     }
 
     /**
+     * @param array $chargeIds
+     * @param int $walletId
+     * @return array<array-key, \App\Database\Charge>
+     */
+    public function findByPKsByWalletPK(array $chargeIds, int $walletId)
+    {
+        return $this->select()
+                    ->wherePK(...$chargeIds)
+                    ->where('wallet_id', $walletId)
+                    ->fetchAll();
+    }
+
+    /**
      * @param int $walletId
      * @param int $limit
      * @return \App\Database\Charge[]

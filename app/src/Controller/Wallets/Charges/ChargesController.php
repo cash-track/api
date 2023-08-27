@@ -11,6 +11,7 @@ use App\Repository\ChargeRepository;
 use App\Repository\TagRepository;
 use App\Repository\WalletRepository;
 use App\Request\Charge\CreateRequest;
+use App\Request\Charge\MoveRequest;
 use App\Service\ChargeWalletService;
 use App\Service\Pagination\PaginationFactory;
 use App\Service\Statistics\ChargeAmountGraph;
@@ -208,6 +209,46 @@ class ChargesController extends Controller
 
             return $this->response->json([
                 'message' => $this->say('charge_delete_exception'),
+                'error'   => $exception->getMessage(),
+            ], 500);
+        }
+
+        return $this->response->create(200);
+    }
+
+    #[Route(route: '/wallets/<walletId>/charges/move/<targetWalletId>', name: 'wallet.charges.move', methods: 'POST', group: 'auth')]
+    public function move(string $walletId, string $targetWalletId, MoveRequest $request): ResponseInterface
+    {
+        $this->verifyIsProfileConfirmed();
+
+        $wallet = $this->walletRepository->findByPKByUserPK((int) $walletId, (int) $this->user->id);
+
+        if (! $wallet instanceof Wallet) {
+            return $this->response->create(404);
+        }
+
+        $targetWallet = $this->walletRepository->findByPKByUserPK((int) $targetWalletId, (int) $this->user->id);
+
+        if (! $targetWallet instanceof Wallet) {
+            return $this->response->create(404);
+        }
+
+        $charges = $this->chargeRepository->findByPKsByWalletPK($request->chargeIds, (int) $wallet->id);
+
+        try {
+            $this->chargeWalletService->move($wallet, $targetWallet, $charges);
+        } catch (\Throwable $exception) {
+            $this->logger->error('Unable to move charges', [
+                'action'    => 'wallet.charges.move',
+                'id'        => $wallet->id,
+                'targetId'  => $targetWallet->id,
+                'chargeIds' => $request->chargeIds,
+                'userId'    => $this->user->id,
+                'msg'       => $exception->getMessage(),
+            ]);
+
+            return $this->response->json([
+                'message' => $this->say('charge_update_exception'),
                 'error'   => $exception->getMessage(),
             ], 500);
         }
