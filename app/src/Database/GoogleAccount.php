@@ -48,7 +48,7 @@ class GoogleAccount
         }
 
         try {
-            return (array) json_decode($this->data, true, JSON_THROW_ON_ERROR);
+            return (array) json_decode($this->data, true, 512, JSON_THROW_ON_ERROR);
         } catch (\JsonException $_) {
             return [];
         }
@@ -58,7 +58,7 @@ class GoogleAccount
     {
         try {
             $this->data = json_encode($data, JSON_THROW_ON_ERROR);
-        } catch (\JsonException $exception) {
+        } catch (\JsonException $_) {
             $this->data = '';
         }
     }

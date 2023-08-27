@@ -13,7 +13,7 @@ http:
     - http_metrics
     - gzip
   pool:
-    num_workers: 1
+    num_workers: 10
     supervisor:
       max_worker_memory: 100
 
