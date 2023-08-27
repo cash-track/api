@@ -92,4 +92,57 @@ class ChargeWalletServiceTest extends TestCase
 
         $this->assertEquals($expectedTotal, $wallet->totalAmount);
     }
+
+    public function moveDataProvider(): array
+    {
+        $charge1 = ChargeFactory::income();
+        $charge1->amount = 1.99;
+
+        $charge2 = ChargeFactory::expense();
+        $charge2->amount = 1.99;
+
+        $charge3 = ChargeFactory::expense();
+        $charge3->amount = 1.01;
+
+        return [
+            [[3.00, 1.01], [1.01, 3.00], [$charge1, null]],
+            [[3.00, 4.99], [2.01, 0.02], [$charge2, 1]],
+            [[3.01, 2.03], [2.02, 3.00], [$charge1, $charge3]],
+        ];
+    }
+
+    /**
+     * @dataProvider moveDataProvider
+     * @param array $walletAmounts
+     * @param array $targetWalletAmounts
+     * @param array $charges
+     * @return void
+     */
+    public function testMove(array $walletAmounts, array $targetWalletAmounts, array $charges)
+    {
+        $service = new ChargeWalletService(
+            $this->getMockBuilder(EntityManagerInterface::class)->getMock()
+        );
+
+        $wallet = WalletFactory::make();
+        $wallet->totalAmount = $walletAmounts[0];
+
+        $targetWallet = WalletFactory::make();
+        $targetWallet->totalAmount = $targetWalletAmounts[0];
+
+        $charge = ChargeFactory::income();
+        $charge->type = Charge::TYPE_INCOME;
+        $charge->amount = 1.99;
+
+        $service->move($wallet, $targetWallet, $charges);
+
+        $this->assertEquals($walletAmounts[1], $wallet->totalAmount);
+        $this->assertEquals($targetWalletAmounts[1], $targetWallet->totalAmount);
+
+        foreach ($charges as $charge) {
+            if ($charge instanceof Charge) {
+                $this->assertEquals($charge->walletId, $targetWallet->id);
+            }
+        }
+    }
 }

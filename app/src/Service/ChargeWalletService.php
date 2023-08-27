@@ -10,27 +10,12 @@ use Cycle\ORM\EntityManagerInterface;
 
 class ChargeWalletService
 {
-    /**
-     * @var \Cycle\ORM\EntityManagerInterface
-     */
-    private $tr;
+    const PRECISION = 2;
 
-    /**
-     * ChargeWalletService constructor.
-     *
-     * @param \Cycle\ORM\EntityManagerInterface $tr
-     */
-    public function __construct(EntityManagerInterface $tr)
+    public function __construct(private readonly EntityManagerInterface $tr)
     {
-        $this->tr = $tr;
     }
 
-    /**
-     * @param \App\Database\Wallet $wallet
-     * @param \App\Database\Charge $charge
-     * @return \App\Database\Charge
-     * @throws \Throwable
-     */
     public function create(Wallet $wallet, Charge $charge): Charge
     {
         $wallet = $this->apply($wallet, $charge);
@@ -42,13 +27,6 @@ class ChargeWalletService
         return $charge;
     }
 
-    /**
-     * @param \App\Database\Wallet $wallet
-     * @param \App\Database\Charge $oldCharge
-     * @param \App\Database\Charge $newCharge
-     * @return \App\Database\Charge
-     * @throws \Throwable
-     */
     public function update(Wallet $wallet, Charge $oldCharge, Charge $newCharge): Charge
     {
         $wallet = $this->rollback($wallet, $oldCharge);
@@ -61,11 +39,6 @@ class ChargeWalletService
         return $newCharge;
     }
 
-    /**
-     * @param \App\Database\Wallet $wallet
-     * @param \App\Database\Charge $charge
-     * @throws \Throwable
-     */
     public function delete(Wallet $wallet, Charge $charge): void
     {
         $wallet = $this->rollback($wallet, $charge);
@@ -75,21 +48,29 @@ class ChargeWalletService
         $this->tr->run();
     }
 
-    /**
-     * @param float $income
-     * @param float $expense
-     * @return float
-     */
-    public function totalByIncomeAndExpense(float $income, float $expense): float
+    public function move(Wallet $wallet, Wallet $targetWallet, array $charges): void
     {
-        return $income - $expense;
+        foreach ($charges as $charge) {
+            if (! $charge instanceof Charge) {
+                continue;
+            }
+
+            $this->rollback($wallet, $charge);
+            $this->apply($targetWallet, $charge);
+            $charge->setWallet($targetWallet);
+            $this->tr->persist($charge);
+        }
+
+        $this->tr->persist($wallet);
+        $this->tr->persist($targetWallet);
+        $this->tr->run();
     }
 
-    /**
-     * @param \App\Database\Wallet $wallet
-     * @param \App\Database\Charge $charge
-     * @return \App\Database\Wallet
-     */
+    public function totalByIncomeAndExpense(float $income, float $expense): float
+    {
+        return $this->safeFloatNumber($income - $expense);
+    }
+
     protected function apply(Wallet $wallet, Charge $charge): Wallet
     {
         switch ($charge->type) {
@@ -101,14 +82,11 @@ class ChargeWalletService
                 break;
         }
 
+        $wallet->totalAmount = $this->safeFloatNumber($wallet->totalAmount);
+
         return $wallet;
     }
 
-    /**
-     * @param \App\Database\Wallet $wallet
-     * @param \App\Database\Charge $charge
-     * @return \App\Database\Wallet
-     */
     protected function rollback(Wallet $wallet, Charge $charge): Wallet
     {
         switch ($charge->type) {
@@ -120,6 +98,13 @@ class ChargeWalletService
                 break;
         }
 
+        $wallet->totalAmount = $this->safeFloatNumber($wallet->totalAmount);
+
         return $wallet;
+    }
+
+    protected function safeFloatNumber(float $number): float
+    {
+        return round($number, self::PRECISION);
     }
 }
