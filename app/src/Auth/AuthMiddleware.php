@@ -6,6 +6,7 @@ namespace App\Auth;
 
 use App\Database\User;
 use App\Service\UserOptionsService;
+use App\Service\UserService;
 use Laminas\Diactoros\Response\JsonResponse;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
@@ -23,6 +24,7 @@ class AuthMiddleware implements MiddlewareInterface
     const USER_LOCALE = 'X-Internal-UserLocale';
 
     public function __construct(
+        private readonly UserService $userService,
         private readonly UserOptionsService $userOptionsService,
     ) {
     }
@@ -44,19 +46,28 @@ class AuthMiddleware implements MiddlewareInterface
             return $this->unauthenticated();
         }
 
+        $this->trackActiveAt($actor);
+
         return $handler->handle(
             $request->withAddedHeader(self::HEADER_USER_ID, (string) $actor->id)
                     ->withAttribute(self::USER_LOCALE, $this->userOptionsService->getLocale($actor))
         );
     }
 
-    /**
-     * @return \Psr\Http\Message\ResponseInterface
-     */
     private function unauthenticated(): Response
     {
         return new JsonResponse([
             'message' => $this->say('error_authentication_required'),
         ], 401);
+    }
+
+    private function trackActiveAt(User $user): void
+    {
+        $user->activeAt = new \DateTimeImmutable();
+
+        try {
+            $this->userService->store($user);
+        } catch (\Throwable) {
+        }
     }
 }
