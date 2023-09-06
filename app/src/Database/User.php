@@ -58,6 +58,9 @@ class User implements PasswordContainerInterface
     #[ORM\Column(type: 'datetime', name: 'updated_at')]
     public \DateTimeImmutable $updatedAt;
 
+    #[ORM\Column(type: 'datetime', name: 'active_at', nullable: true, default: null)]
+    public ?\DateTimeImmutable $activeAt = null;
+
     #[ORM\Relation\BelongsTo(target: Currency::class, innerKey: 'default_currency_code', cascade: true, load: 'eager')]
     private Currency $defaultCurrency;
 
