@@ -13,7 +13,7 @@ env:
   INFRA_REPO_REF: main
   CLUSTER: k8s-cash-track
   NAMESPACE: cash-track
-  KUBECTL_BIN: https://storage.googleapis.com/kubernetes-release/release/v1.24.4/bin/linux/amd64/kubectl
+  KUBECTL_BIN: https://storage.googleapis.com/kubernetes-release/release/v1.27.4/bin/linux/amd64/kubectl
 
 jobs:
   deploy:
