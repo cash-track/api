@@ -29,8 +29,8 @@ class RedisRateLimitTest extends TestCase
         $redis = $this->getMockBuilder(\Redis::class)->onlyMethods(['isConnected', 'incr', 'getLastError', 'ttl'])->getMock();
         $redis->method('isConnected')->willReturn(true);
         $redis->method('incr')->willReturn(1);
-        $redis->method('getLastError')->willReturn(-1);
-        $redis->method('ttl')->willReturn('unknown error');
+        $redis->method('getLastError')->willReturn('unknown error');
+        $redis->method('ttl')->willReturn(-1);
 
         $rateLimit = new RedisRateLimit($redis);
 
