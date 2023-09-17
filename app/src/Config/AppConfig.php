@@ -42,17 +42,20 @@ class AppConfig extends InjectableConfig
 
     public function getEmailConfirmationLink(string $token): string
     {
-        return str_replace('{token}', $token, $this->config['email_confirmation_link']);
+        /** @psalm-suppress PossiblyInvalidCast */
+        return (string) str_replace('{token}', $token, $this->config['email_confirmation_link']);
     }
 
     public function getPasswordResetLink(string $code): string
     {
-        return str_replace('{code}', $code, $this->config['password_reset_link']);
+        /** @psalm-suppress PossiblyInvalidCast */
+        return (string) str_replace('{code}', $code, $this->config['password_reset_link']);
     }
 
     public function getWalletLink(int $walletId): string
     {
-        return str_replace('{wallet}', (string) $walletId, $this->config['wallet_link']);
+        /** @psalm-suppress PossiblyInvalidCast */
+        return (string) str_replace('{wallet}', (string) $walletId, $this->config['wallet_link']);
     }
 
     public function getDbEncrypterKey(): string
