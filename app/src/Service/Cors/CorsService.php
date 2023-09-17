@@ -246,6 +246,10 @@ class CorsService implements CorsInterface
         return false;
     }
 
+    /**
+     * @param string $pattern
+     * @return non-empty-string
+     */
     protected function convertPatternToRegex(string $pattern): string
     {
         $pattern = str_replace(['/', '.', '*'], ['\/', '\.', '.*'], $pattern);

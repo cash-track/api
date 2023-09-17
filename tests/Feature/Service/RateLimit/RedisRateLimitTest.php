@@ -30,7 +30,7 @@ class RedisRateLimitTest extends TestCase
         $redis->method('isConnected')->willReturn(true);
         $redis->method('incr')->willReturn(1);
         $redis->method('getLastError')->willReturn('unknown error');
-        $redis->method('ttl')->willReturn('unknown error');
+        $redis->method('ttl')->willReturn(-1);
 
         $rateLimit = new RedisRateLimit($redis);
 

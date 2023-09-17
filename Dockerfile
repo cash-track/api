@@ -4,7 +4,7 @@ RUN  --mount=type=bind,from=mlocati/php-extension-installer:1.5,source=/usr/bin/
       install-php-extensions opcache zip xsl dom exif intl pcntl bcmath sockets mbstring pdo_mysql mysqli redis && \
      apk del --no-cache  ${PHPIZE_DEPS} ${BUILD_DEPENDS}
 
-COPY --from=ghcr.io/roadrunner-server/roadrunner:2.12.3 /usr/bin/rr /usr/bin/rr
+COPY --from=ghcr.io/roadrunner-server/roadrunner:2023.2.2 /usr/bin/rr /usr/bin/rr
 
 COPY --from=composer /usr/bin/composer /usr/bin/composer
 
