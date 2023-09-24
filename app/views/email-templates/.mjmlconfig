@@ -1,0 +1,12 @@
+{
+    "packages": [],
+    "options": {
+        "minifyOptions": {
+            "minifyCSS": true
+        },
+        "keepComments": false,
+        "juicePreserveTags": {
+            "php": {"start": "<?php", "end": "?>"}
+        }
+    }
+}

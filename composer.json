@@ -68,6 +68,9 @@
         ],
         "psalm": [
             "./vendor/bin/psalm --php-version=8.2 --show-info=true --no-cache"
+        ],
+        "mjml": [
+            "./app/views/email-templates/build.sh ../email"
         ]
     },
     "autoload": {

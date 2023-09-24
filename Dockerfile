@@ -1,3 +1,14 @@
+FROM node:20-alpine3.18 as mjml
+
+WORKDIR /templates
+
+COPY ./app/views/email-templates .
+
+RUN npm install -g mjml &&  \
+    mkdir out &&  \
+    ./build.sh ./out
+
+
 FROM php:8.2.4-alpine3.17 as backend
 
 RUN  --mount=type=bind,from=mlocati/php-extension-installer:1.5,source=/usr/bin/install-php-extensions,target=/usr/local/bin/install-php-extensions \
@@ -7,6 +18,8 @@ RUN  --mount=type=bind,from=mlocati/php-extension-installer:1.5,source=/usr/bin/
 COPY --from=ghcr.io/roadrunner-server/roadrunner:2023.2.2 /usr/bin/rr /usr/bin/rr
 
 COPY --from=composer /usr/bin/composer /usr/bin/composer
+
+COPY --from=mjml /templates/out /app/app/views/email
 
 WORKDIR /app
 

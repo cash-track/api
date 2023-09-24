@@ -1,0 +1,35 @@
+<mjml>
+    <mj-body background-color="#fff">
+        <mj-include path="header.mjml"></mj-include>
+
+        <mj-section padding-top="0" padding-bottom="0">
+            <mj-column>
+                <mj-text font-size="16px" font-family="helvetica">
+                    [[email_confirmation_mail_hello]], {{ $user->name }} {{ $user->lastName }}
+                </mj-text>
+
+                <mj-text font-size="16px" font-family="helvetica">
+                    [[email_confirmation_mail_line_1]] <a href="https://cash-track.app" target="_blank">Cash Track</a>.
+                </mj-text>
+
+                <mj-text font-size="16px" font-family="helvetica">
+                    [[email_confirmation_mail_line_2]]
+                </mj-text>
+
+                <mj-button font-size="16px" font-family="Helvetica" background-color="#5ccb80" color="white" href="{{ $link }}">
+                    [[email_confirmation_mail_confirm]]
+                </mj-button>
+
+                <mj-text font-size="16px" font-family="helvetica">
+                    <a href="{{ $link }}">{{ $link }}</a>
+                </mj-text>
+
+                <mj-text font-size="16px" font-family="helvetica">
+                    [[email_confirmation_mail_footer]]
+                </mj-text>
+            </mj-column>
+        </mj-section>
+
+        <mj-include path="footer.mjml"></mj-include>
+    </mj-body>
+</mjml>

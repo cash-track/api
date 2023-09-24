@@ -1,0 +1,27 @@
+<mjml>
+    <mj-body background-color="#fff">
+        <mj-include path="header.mjml"></mj-include>
+
+        <mj-section padding-top="0" padding-bottom="0">
+            <mj-column>
+                <mj-text font-size="16px" font-family="helvetica">
+                    [[test_mail_hello]] {{ $user->name }} {{ $user->lastName }}
+                </mj-text>
+
+                <mj-text font-size="16px" font-family="helvetica">
+                    [[test_mail_line_1]]
+                </mj-text>
+
+                <mj-text font-size="16px" font-family="helvetica">
+                    [[test_mail_line_2]]
+                </mj-text>
+
+                <mj-text font-size="16px" font-family="helvetica">
+                    [[test_mail_footer]]
+                </mj-text>
+            </mj-column>
+        </mj-section>
+
+        <mj-include path="footer.mjml"></mj-include>
+    </mj-body>
+</mjml>

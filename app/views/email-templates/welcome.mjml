@@ -1,0 +1,39 @@
+<mjml>
+    <mj-body background-color="#fff">
+        <mj-include path="header.mjml"></mj-include>
+
+        <mj-section padding-top="0" padding-bottom="0">
+            <mj-column>
+                <mj-text font-size="16px" font-family="helvetica">
+                    [[welcome_mail_subject]]
+                </mj-text>
+
+                <mj-text font-size="16px" font-family="helvetica">
+                    [[welcome_mail_line_2]]
+                </mj-text>
+
+                <mj-text font-size="16px" font-family="helvetica">
+                    [[welcome_mail_line_3]]
+                </mj-text>
+
+                <mj-button font-size="16px" font-family="Helvetica" background-color="#5ccb80" color="white" href="https://my.cash-track.app/wallets/create">
+                    [[welcome_mail_create_wallet]]
+                </mj-button>
+
+                <mj-text font-size="16px" font-family="helvetica">
+                    [[welcome_mail_line_4_1]] <a href="https://t.me/cash_track">[[welcome_mail_line_4_telegram_link]]</a> [[welcome_mail_line_4_2]]
+                </mj-text>
+
+                <mj-button font-size="16px" font-family="Helvetica" background-color="#5C99CB" color="white" href="https://t.me/cash_track">
+                    [[welcome_mail_telegram_channel]]
+                </mj-button>
+
+                <mj-text font-size="16px" font-family="helvetica">
+                    [[welcome_mail_line_5_1]] <a href="https://cash-track.app/about">[[welcome_mail_line_5_about_link]]</a> [[welcome_mail_line_5_2]]
+                </mj-text>
+            </mj-column>
+        </mj-section>
+
+        <mj-include path="footer.mjml"></mj-include>
+    </mj-body>
+</mjml>
