@@ -6,4 +6,4 @@ spiral*
 .env
 .phpunit.result.cache
 .bin
-
+app/views/email/*.php

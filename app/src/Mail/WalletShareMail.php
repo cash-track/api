@@ -48,6 +48,6 @@ class WalletShareMail extends UserMail
     public function build(): Mail
     {
         return parent::build()->subject($this->say('wallet_share_mail_subject'))
-                              ->view('mail/wallet-share');
+                              ->view('email/wallet-share');
     }
 }

@@ -7,6 +7,7 @@ namespace Tests\Feature\Controller\Auth;
 use App\Database\EntityHeader;
 use App\Database\User;
 use App\Mail\EmailConfirmationMail;
+use App\Mail\WelcomeMail;
 use App\Service\Mailer\MailerInterface;
 use Tests\DatabaseTransaction;
 use Tests\Factories\EmailConfirmationFactory;
@@ -77,6 +78,24 @@ class EmailConfirmationControllerTest extends TestCase implements DatabaseTransa
     public function testConfirm(): void
     {
         $user = $this->userFactory->create(UserFactory::emailNotConfirmed());
+
+        $mock = $this->getMockBuilder(MailerInterface::class)
+                     ->disableOriginalConstructor()
+                     ->getMock();
+
+        $mock->expects($this->once())
+             ->method('send')
+             ->with($this->callback(function ($mail) use ($user) {
+                 $this->assertInstanceOf(WelcomeMail::class, $mail);
+                 $this->assertInstanceOf(EntityHeader::class, $mail->userHeader);
+                 $this->assertEquals(User::class, $mail->userHeader->role);
+                 $this->assertEquals(['id' => $user->id], $mail->userHeader->params);
+
+                 return true;
+             }));
+
+        $this->getContainer()->bind(MailerInterface::class, fn () => $mock);
+
 
         $confirmation = EmailConfirmationFactory::notExpired();
         $confirmation->email = $user->email;

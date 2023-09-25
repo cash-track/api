@@ -7,6 +7,7 @@ namespace App\Service\Auth;
 use App\Database\EmailConfirmation;
 use App\Database\User;
 use App\Mail\EmailConfirmationMail;
+use App\Mail\WelcomeMail;
 use App\Repository\EmailConfirmationRepository;
 use App\Repository\UserRepository;
 use App\Service\Mailer\MailerInterface;
@@ -93,5 +94,7 @@ class EmailConfirmationService extends HelperService
         $this->tr->persist($user);
         $this->tr->delete($confirmation);
         $this->tr->run();
+
+        $this->mailer->send(new WelcomeMail($user->getEntityHeader()));
     }
 }

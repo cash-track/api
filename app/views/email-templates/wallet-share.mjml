@@ -1,0 +1,31 @@
+<mjml>
+    <mj-body background-color="#fff">
+        <mj-include path="header.mjml"></mj-include>
+
+        <mj-section padding-top="0" padding-bottom="0">
+            <mj-column>
+                <mj-text font-size="16px" font-family="helvetica">
+                    [[wallet_share_mail_hello]], {{ $user->name }} {{ $user->lastName }}
+                </mj-text>
+
+                <mj-text font-size="16px" font-family="helvetica">
+                    {{ $sharer->name }} {{ $sharer->lastName }} [[wallet_share_mail_line_invited]] <a href="{{ $link }}" target="_blank">{{ $wallet->name }}</a>.
+                </mj-text>
+
+                <mj-text font-size="16px" font-family="helvetica">
+                    [[wallet_share_mail_line_2]]
+                </mj-text>
+
+                <mj-button font-size="16px" font-family="Helvetica" background-color="#5ccb80" color="white" href="{{ $link }}">
+                    [[wallet_share_mail_check_wallet]]
+                </mj-button>
+
+                <mj-text font-size="16px" font-family="helvetica">
+                    [[wallet_share_mail_footer]]
+                </mj-text>
+            </mj-column>
+        </mj-section>
+
+        <mj-include path="footer.mjml"></mj-include>
+    </mj-body>
+</mjml>

@@ -27,6 +27,6 @@ class EmailConfirmationMail extends UserMail
     public function build(): Mail
     {
         return parent::build()->subject($this->say('email_confirmation_mail_subject'))
-                              ->view('mail/confirm-email');
+                              ->view('email/confirm-email');
     }
 }
