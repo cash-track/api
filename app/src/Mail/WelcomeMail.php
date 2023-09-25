@@ -12,6 +12,9 @@ class WelcomeMail extends UserMail
 {
     use TranslatorTrait;
 
+    /**
+     * @param \App\Database\EntityHeader<\App\Database\User> $userHeader
+     */
     public function __construct(public EntityHeader $userHeader)
     {
         parent::__construct($userHeader);
