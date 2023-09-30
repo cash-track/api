@@ -2,7 +2,7 @@
     <mj-body background-color="#fff">
         <mj-section padding-top="0" padding-bottom="0" text-align="center">
             <mj-column>
-                <mj-image href="https://cash-track.app" height="50px" padding-top="20px" padding-bottom="10px" src="https://cash-track.app/img/logo-full.svg" />
+                <mj-image href="https://cash-track.app" height="50px" width="225px" padding-top="20px" padding-bottom="10px" src="https://cash-track.app/img/logo-full.png" />
                 <mj-divider border-width="2px" border-color="#5ccb80"></mj-divider>
             </mj-column>
         </mj-section>
