@@ -9,12 +9,9 @@ use App\Database\User;
 use App\Database\Wallet;
 use App\Service\Mailer\Mail;
 use Cycle\ORM\ORMInterface;
-use Spiral\Translator\Traits\TranslatorTrait;
 
 class WalletShareMail extends BaseMail
 {
-    use TranslatorTrait;
-
     public ?User $sharer = null;
 
     public ?Wallet $wallet = null;

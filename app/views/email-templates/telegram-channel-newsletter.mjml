@@ -1,0 +1,42 @@
+<mjml>
+    <mj-body background-color="#fff">
+        <mj-include path="header.mjml"></mj-include>
+
+        <mj-section padding-top="0" padding-bottom="0">
+            <mj-column>
+                <mj-text font-size="16px" font-family="helvetica">
+                    [[telegram_channel_nl_mail_hello]] 👋
+                </mj-text>
+
+                <mj-text font-size="16px" font-family="helvetica">
+                    [[telegram_channel_nl_mail_line_1]]
+                </mj-text>
+
+                <mj-text font-size="16px" font-family="helvetica">
+                    [[telegram_channel_nl_mail_line_2]] <a href="https://t.me/cash_track">[[telegram_channel_nl_mail_line_2_link]]</a>.
+                </mj-text>
+
+                <mj-button font-size="16px" font-family="Helvetica" background-color="#5C99CB" color="white" href="https://t.me/cash_track">
+                    [[telegram_channel_nl_mail_join]]
+                </mj-button>
+
+                <mj-text font-size="16px" font-family="helvetica">
+                    [[telegram_channel_nl_mail_line_3]]
+                    <ul>
+                        <li>🚀 [[telegram_channel_nl_mail_line_3_1]]</li>
+                        <li>👀 [[telegram_channel_nl_mail_line_3_2]]</li>
+                        <li>🤙 [[telegram_channel_nl_mail_line_3_3]]</li>
+                        <li>💸 [[telegram_channel_nl_mail_line_3_4]]</li>
+                    </ul>
+                </mj-text>
+
+                <mj-text font-size="16px" font-family="helvetica">
+                    [[telegram_channel_nl_mail_line_4]]<br>
+                    [[telegram_channel_nl_mail_line_5]] 🙌
+                </mj-text>
+            </mj-column>
+        </mj-section>
+
+        <mj-include path="footer.mjml"></mj-include>
+    </mj-body>
+</mjml>
