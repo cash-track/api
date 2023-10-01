@@ -32,6 +32,9 @@ class NewsletterSendCommand extends Command
     #[Option(name: 'now', description: 'Send messages now bypassing queue [sending in queue by default]')]
     public bool $now = false;
 
+    #[Option(name: 'test', description: 'User ID to send test mail')]
+    public int $test = 0;
+
     private int $total = 0;
 
     private int $counter = 0;
@@ -55,7 +58,7 @@ class NewsletterSendCommand extends Command
             throw new \RuntimeException('Mail class name is required to be a correct class name in \App\Mail');
         }
 
-        $query = $this->repository->allForNewsletter($this->getEmailConfirmedParam());
+        $query = $this->repository->allForNewsletter($this->getEmailConfirmedParam(), $this->test);
 
         if ($query === null) {
             throw new \RuntimeException('Unable to resolve query instance');
@@ -63,7 +66,8 @@ class NewsletterSendCommand extends Command
 
         $this->total = $query->count();
 
-        $this->info("Sending {$this->mail} to {$this->total} users [all={$this->forAll}, unconfirmed={$this->onlyUnconfirmed}]");
+        $params = "[all={$this->forAll}, unconfirmed={$this->onlyUnconfirmed}, now={$this->now}, test={$this->test}]";
+        $this->info("Sending {$this->mail} to {$this->total} users {$params}");
 
         $query->limit($this->batch);
 

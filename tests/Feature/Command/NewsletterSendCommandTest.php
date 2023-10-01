@@ -33,6 +33,24 @@ class NewsletterSendCommandTest extends TestCase
         $this->assertEquals(0, $command->run($input, $output));
     }
 
+    public function testRunTest(): void
+    {
+        $logger = $this->getMockBuilder(LoggerInterface::class)->getMock();
+        $mailer = $this->getMockBuilder(MailerInterface::class)->getMock();
+        $repository = $this->getContainer()->get(UserRepository::class);
+
+        $command = new NewsletterSendCommand($repository, $mailer, $logger, 'rsa:gen');
+        $command->setContainer($this->getContainer());
+
+        $input = $this->getMockBuilder(InputInterface::class)->getMock();
+        $output = $this->getMockBuilder(OutputInterface::class)->getMock();
+
+        $command->mail = 'TestMail';
+        $command->test = 1;
+
+        $this->assertEquals(0, $command->run($input, $output));
+    }
+
     public function testRunDefault(): void
     {
         $logger = $this->getMockBuilder(LoggerInterface::class)->getMock();
