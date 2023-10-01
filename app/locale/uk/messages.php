@@ -121,6 +121,20 @@ return [
     'google_auth_account_not_verified'  => 'Email Вашого Google аккаунту не підтверджено. Будь ласка, спершу підтвердіть Email вашого Google аккаунту.',
     'google_auth_email_already_claimed' => 'Ваш Email вже використовується іншим користувачем Google. Будь ласка, спробуйте інший Google аккаунт.',
 
+    'telegram_channel_nl_mail_subject'     => 'Телеграм Канал',
+    'telegram_channel_nl_mail_hello'       => 'Вітання',
+    'telegram_channel_nl_mail_line_1'      => 'Хочемо повідомити про останні оновлення. Нещодавно ми створили новий канал в Телеграм.',
+    'telegram_channel_nl_mail_line_2'      => 'Якщо Ви активний користувач Телеграм - приєднуйтесь до нашого нового ',
+    'telegram_channel_nl_mail_line_2_link' => 'каналу',
+    'telegram_channel_nl_mail_join'        => 'Приєднатись',
+    'telegram_channel_nl_mail_line_3'      => 'Там ми будемо публікувати:',
+    'telegram_channel_nl_mail_line_3_1'    => 'важливі оновлення порталу',
+    'telegram_channel_nl_mail_line_3_2'    => 'огляд існуючих функцій',
+    'telegram_channel_nl_mail_line_3_3'    => 'плани на майбутнє',
+    'telegram_channel_nl_mail_line_3_4'    => 'поради з обліку фінансів',
+    'telegram_channel_nl_mail_line_4'      => 'Дякуємо, що залишаєтесь з нами.',
+    'telegram_channel_nl_mail_line_5'      => 'На все добре',
+
     // validations
     'The condition `{method}` was not met.'                    => 'Умова `{method}` не виконалась.',
     'Should be true.'                                          => 'Має бути увімкнутим.',

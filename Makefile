@@ -12,7 +12,7 @@ IMAGE_DEV=$(REPO):dev
 IMAGE_LATEST=$(REPO):latest
 WORKDIR=$(shell pwd)
 
-.PHONY: build tag push start stop network phpcs psalm test-env-start test-env-stop
+.PHONY: build tag push start stop network phpcs psalm test-env-start test-env-stop email-build
 
 build:
 	docker build . -t $(IMAGE_DEV)
@@ -63,3 +63,6 @@ test-env-start:
 
 test-env-stop:
 	cd ./tests && docker-compose down
+
+email-build:
+	cd ./app/views/email-templates && ./build.sh ../email

@@ -121,4 +121,20 @@ return [
     'google_auth_account_not_verified'  => 'Your Google account email is not verified. Please verify your Google account email first.',
     'google_auth_email_already_claimed' => 'Your email has been associated with other Google account. Please try different Google account.',
 
+    'telegram_channel_nl_mail_subject'     => 'Telegram Channel',
+    'telegram_channel_nl_mail_hello'       => 'Greetings',
+    'telegram_channel_nl_mail_line_1'      => 'We\'d like to inform you about latest updates. Recently we\'ve started a new communication channel on Telegram.',
+    'telegram_channel_nl_mail_line_2'      => 'If you are an active user - feel free to join our new',
+    'telegram_channel_nl_mail_line_2_link' => 'channel',
+    'telegram_channel_nl_mail_join'        => 'Join',
+    'telegram_channel_nl_mail_line_3'      => 'There we\'re going to publish:',
+    'telegram_channel_nl_mail_line_3_1'    => 'important platform updates',
+    'telegram_channel_nl_mail_line_3_2'    => 'existing features overview',
+    'telegram_channel_nl_mail_line_3_3'    => 'future plans / roadmap',
+    'telegram_channel_nl_mail_line_3_4'    => 'financial tips and advices',
+    'telegram_channel_nl_mail_line_4'      => 'Thank you for staying with us.',
+    'telegram_channel_nl_mail_line_5'      => 'Cheers',
+
+
+
 ];

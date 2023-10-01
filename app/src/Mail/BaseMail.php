@@ -8,9 +8,12 @@ use App\Database\EntityHeader;
 use App\Database\User;
 use App\Service\Mailer\Mail;
 use Cycle\ORM\ORMInterface;
+use Spiral\Translator\Traits\TranslatorTrait;
 
 abstract class BaseMail extends Mail
 {
+    use TranslatorTrait;
+
     public ?User $user = null;
 
     /**

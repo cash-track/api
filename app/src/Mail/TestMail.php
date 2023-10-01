@@ -5,12 +5,9 @@ declare(strict_types=1);
 namespace App\Mail;
 
 use App\Service\Mailer\Mail;
-use Spiral\Translator\Traits\TranslatorTrait;
 
 class TestMail extends BaseMail
 {
-    use TranslatorTrait;
-
     /**
      * {@inheritDoc}
      */

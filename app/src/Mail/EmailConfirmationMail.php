@@ -6,12 +6,9 @@ namespace App\Mail;
 
 use App\Database\EntityHeader;
 use App\Service\Mailer\Mail;
-use Spiral\Translator\Traits\TranslatorTrait;
 
 class EmailConfirmationMail extends BaseMail
 {
-    use TranslatorTrait;
-
     /**
      * @param \App\Database\EntityHeader<\App\Database\User> $userHeader
      * @param string $link
