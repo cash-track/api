@@ -39,6 +39,21 @@ class RedisRateLimitTest extends TestCase
         $rateLimit->hit(new GuestRule());
     }
 
+    public function testTtlMissing()
+    {
+        $redis = $this->getMockBuilder(\Redis::class)->onlyMethods(['isConnected', 'incr', 'getLastError', 'ttl'])->getMock();
+        $redis->method('isConnected')->willReturn(true);
+        $redis->method('incr')->willReturn(1);
+        $redis->method('getLastError')->willReturn('unknown error');
+        $redis->method('ttl')->willReturn(false);
+
+        $rateLimit = new RedisRateLimit($redis);
+
+        $this->expectException(\RuntimeException::class);
+
+        $rateLimit->hit(new GuestRule());
+    }
+
     public function testExpireException()
     {
         $redis = $this->getMockBuilder(\Redis::class)->onlyMethods(['isConnected', 'incr', 'getLastError', 'ttl', 'expire'])->getMock();

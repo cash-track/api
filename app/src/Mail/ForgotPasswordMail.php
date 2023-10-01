@@ -8,7 +8,7 @@ use App\Database\EntityHeader;
 use App\Service\Mailer\Mail;
 use Spiral\Translator\Traits\TranslatorTrait;
 
-class ForgotPasswordMail extends UserMail
+class ForgotPasswordMail extends BaseMail
 {
     use TranslatorTrait;
 

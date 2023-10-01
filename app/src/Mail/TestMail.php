@@ -7,7 +7,7 @@ namespace App\Mail;
 use App\Service\Mailer\Mail;
 use Spiral\Translator\Traits\TranslatorTrait;
 
-class TestMail extends UserMail
+class TestMail extends BaseMail
 {
     use TranslatorTrait;
 

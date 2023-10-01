@@ -11,7 +11,7 @@ use App\Service\Mailer\Mail;
 use Cycle\ORM\ORMInterface;
 use Spiral\Translator\Traits\TranslatorTrait;
 
-class WalletShareMail extends UserMail
+class WalletShareMail extends BaseMail
 {
     use TranslatorTrait;
 
