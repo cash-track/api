@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Feature\Mail;
 
+use App\Mail\Newsletter\DeletionNoticeMail;
 use App\Mail\Newsletter\TelegramChannelMail;
 use Symfony\Component\Mime\Address;
 use Tests\Factories\UserFactory;
@@ -15,6 +16,7 @@ class NewsletterMailsTest extends TestCase
     {
         return [
             [TelegramChannelMail::class],
+            [DeletionNoticeMail::class],
         ];
     }
 
