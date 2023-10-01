@@ -6,12 +6,9 @@ namespace App\Mail\Newsletter;
 
 use App\Mail\BaseMail;
 use App\Service\Mailer\Mail;
-use Spiral\Translator\Traits\TranslatorTrait;
 
 class TelegramChannelMail extends BaseMail
 {
-    use TranslatorTrait;
-
     /**
      * {@inheritDoc}
      */

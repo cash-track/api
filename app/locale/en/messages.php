@@ -135,6 +135,23 @@ return [
     'telegram_channel_nl_mail_line_4'      => 'Thank you for staying with us.',
     'telegram_channel_nl_mail_line_5'      => 'Cheers',
 
-
+    'deletion_notice_nl_mail_subject'       => 'Deletion Notice',
+    'deletion_notice_nl_mail_hello'         => 'Greetings',
+    'deletion_notice_nl_mail_line_1'        => 'Your email have been used to create an account at Cash Track some time ago. We\'ve found that the email address is not confirmed yet.',
+    'deletion_notice_nl_mail_line_2'        => 'As a part of our retention policy, we\'re checking old unused accounts to inform possible owners about upcoming deletion activity.',
+    'deletion_notice_nl_mail_line_3_1'      => 'You account will be automatically deleted within 3 months since today.',
+    'deletion_notice_nl_mail_line_3_2'      => 'By term "Account" means your user profile and all related data including your personal details, wallets, charges.',
+    'deletion_notice_nl_mail_line_4'        => 'In case this is a mistake, you are an active Cash Track user, but for some reasons still didn\'t confirm your email address - do the next:',
+    'deletion_notice_nl_mail_line_4_1_link' => 'Login',
+    'deletion_notice_nl_mail_line_4_1'      => 'to your account',
+    'deletion_notice_nl_mail_line_4_2'      => 'Go to your',
+    'deletion_notice_nl_mail_line_4_2_link' => 'Profile Settings',
+    'deletion_notice_nl_mail_line_4_3'      => 'Near email address click "Resend"',
+    'deletion_notice_nl_mail_line_4_4'      => 'Check your mailbox for a Confirmation Mail',
+    'deletion_notice_nl_mail_line_4_5'      => 'Follow instructions',
+    'deletion_notice_nl_mail_line_5'        => 'If you have any issues on confirming your account, please respond to this message with the details. We will try to help you.',
+    'deletion_notice_nl_mail_line_6'        => 'If you didn\'t register at Cash Track or don\'t want to use the service anymore - feel free to ignore this message. Your data will be wiped soon.',
+    'deletion_notice_nl_mail_line_7'        => 'Sincerely,',
+    'deletion_notice_nl_mail_line_8'        => 'Cash Track Support',
 
 ];

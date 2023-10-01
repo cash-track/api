@@ -1,0 +1,51 @@
+<mjml>
+    <mj-body background-color="#fff">
+        <mj-include path="header.mjml"></mj-include>
+
+        <mj-section padding-top="0" padding-bottom="0">
+            <mj-column>
+                <mj-text font-size="16px" font-family="helvetica">
+                    [[deletion_notice_nl_mail_hello]] 👋
+                </mj-text>
+
+                <mj-text font-size="16px" font-family="helvetica">
+                    [[deletion_notice_nl_mail_line_1]]
+                </mj-text>
+
+                <mj-text font-size="16px" font-family="helvetica">
+                    [[deletion_notice_nl_mail_line_2]]
+                </mj-text>
+
+                <mj-text font-size="16px" font-family="helvetica">
+                    <b>[[deletion_notice_nl_mail_line_3_1]]</b> [[deletion_notice_nl_mail_line_3_2]]
+                </mj-text>
+
+                <mj-text font-size="16px" font-family="helvetica">
+                    [[deletion_notice_nl_mail_line_4]]<br>
+                    <ul>
+                        <li><a href="https://cash-track.app/login" target="_blank">[[deletion_notice_nl_mail_line_4_1_link]]</a> [[deletion_notice_nl_mail_line_4_1]]</li>
+                        <li>[[deletion_notice_nl_mail_line_4_2]] <a href="https://cash-track.app/login" target="_blank">[[deletion_notice_nl_mail_line_4_2_link]]</a></li>
+                        <li>[[deletion_notice_nl_mail_line_4_3]]</li>
+                        <li>[[deletion_notice_nl_mail_line_4_4]]</li>
+                        <li>[[deletion_notice_nl_mail_line_4_5]]</li>
+                    </ul>
+                </mj-text>
+
+                <mj-text font-size="16px" font-family="helvetica">
+                    [[deletion_notice_nl_mail_line_5]]
+                </mj-text>
+
+                <mj-text font-size="16px" font-family="helvetica">
+                    [[deletion_notice_nl_mail_line_6]]
+                </mj-text>
+
+                <mj-text font-size="16px" font-family="helvetica">
+                    [[deletion_notice_nl_mail_line_7]]<br>
+                    [[deletion_notice_nl_mail_line_8]] 🙌
+                </mj-text>
+            </mj-column>
+        </mj-section>
+
+        <mj-include path="footer.mjml"></mj-include>
+    </mj-body>
+</mjml>
