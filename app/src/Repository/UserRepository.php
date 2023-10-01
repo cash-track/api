@@ -107,7 +107,7 @@ class UserRepository extends Repository implements ActorProviderInterface
         $query = $this->select()->getBuilder()->getQuery();
 
         if ($testId > 0) {
-            $query->where('id', $testId);
+            $query?->where('id', $testId);
             return $query;
         }
 
