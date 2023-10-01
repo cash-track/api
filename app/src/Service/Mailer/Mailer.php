@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Service\Mailer;
 
 use App\Jobs\SendMailJob;
-use App\Mail\UserMail;
+use App\Mail\BaseMail;
 use App\Service\UserOptionsService;
 use Cycle\ORM\ORMInterface;
 use Spiral\Queue\Options;
@@ -122,7 +122,7 @@ class Mailer implements MailerInterface
     {
         $this->translator->setLocale($this->translatorConfig->getDefaultLocale());
 
-        if (! $mail instanceof UserMail || $mail->user === null) {
+        if (! $mail instanceof BaseMail || $mail->user === null) {
             return;
         }
 

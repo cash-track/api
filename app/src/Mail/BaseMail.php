@@ -9,7 +9,7 @@ use App\Database\User;
 use App\Service\Mailer\Mail;
 use Cycle\ORM\ORMInterface;
 
-abstract class UserMail extends Mail
+abstract class BaseMail extends Mail
 {
     public ?User $user = null;
 

@@ -102,6 +102,17 @@ class UserRepository extends Repository implements ActorProviderInterface
         return $users;
     }
 
+    public function allForNewsletter(?bool $emailConfirmed = null): ?SelectQuery
+    {
+        $query = $this->select()->getBuilder()->getQuery();
+
+        if ($emailConfirmed !== null) {
+            $query?->where('is_email_confirmed', $emailConfirmed);
+        }
+
+        return $query;
+    }
+
     /**
      * @psalm-suppress UndefinedMagicMethod
      * @param \App\Database\User $user

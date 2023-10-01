@@ -8,7 +8,7 @@ use App\Database\EntityHeader;
 use App\Service\Mailer\Mail;
 use Spiral\Translator\Traits\TranslatorTrait;
 
-class WelcomeMail extends UserMail
+class WelcomeMail extends BaseMail
 {
     use TranslatorTrait;
 
