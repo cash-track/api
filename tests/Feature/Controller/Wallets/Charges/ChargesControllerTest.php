@@ -479,16 +479,19 @@ class ChargesControllerTest extends TestCase implements DatabaseTransaction
                 'amount' => 'false',
                 'title' => false,
                 'description' => false,
-            ], ['type', 'amount', 'title', 'description']],
+                'dateTime' => 123,
+            ], ['type', 'amount', 'title', 'description', 'dateTime']],
             [[
                 'type' => '+',
                 'amount' => 0,
                 'title' => 'Title',
-            ], ['amount']],
+                'dateTime' => '123'
+            ], ['amount', 'dateTime']],
             [[
                 'type' => '+',
                 'amount' => -1,
                 'title' => 'Title',
+                'dateTime' => (new \DateTimeImmutable())->add(\DateInterval::createFromDateString('1 minute'))->format(CreateRequest::DATE_FORMAT),
             ], ['amount']],
         ];
     }
@@ -531,6 +534,7 @@ class ChargesControllerTest extends TestCase implements DatabaseTransaction
             'amount' => $charge->amount,
             'title' => $charge->title,
             'description' => $charge->description,
+            'dateTime' => $charge->createdAt->format(CreateRequest::DATE_FORMAT),
         ]);
 
         $response->assertOk();
@@ -541,6 +545,7 @@ class ChargesControllerTest extends TestCase implements DatabaseTransaction
         $this->assertArrayContains($charge->type, $body, 'data.operation');
         $this->assertArrayContains($charge->amount, $body, 'data.amount');
         $this->assertArrayContains($charge->description, $body, 'data.description');
+        $this->assertArrayContains($charge->createdAt->format(DATE_W3C), $body, 'data.dateTime');
 
         $this->assertDatabaseHas('charges', [
             'title' => $charge->title,

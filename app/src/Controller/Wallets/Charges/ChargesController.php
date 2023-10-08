@@ -97,6 +97,10 @@ class ChargesController extends Controller
         $charge->setWallet($wallet);
         $charge->setUser($this->user);
 
+        if (($dateTime = $request->getDateTime()) !== null) {
+            $charge->createdAt = $dateTime;
+        }
+
         $tags = $this->tagRepository->findAllByPKsAndUserPKs($request->tags, $wallet->getUserIDs());
 
         foreach ($tags as $tag) {
