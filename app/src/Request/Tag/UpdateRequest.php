@@ -43,7 +43,7 @@ class UpdateRequest extends Filter implements HasFilterDefinition
             ],
             'icon' => [
                 ['is_string'],
-                ['string::range', 1, 7]
+                ['string::range', 1, 10]
             ],
             'color' => [
                 ['is_string'],

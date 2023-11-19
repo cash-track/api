@@ -22,7 +22,7 @@ class Tag
     #[ORM\Column(type: 'integer', name: 'user_id')]
     public int $userId = 0;
 
-    #[ORM\Column(type: 'string(4)', nullable: true)]
+    #[ORM\Column(type: 'string(10)', nullable: true)]
     public string|null $icon = null;
 
     #[ORM\Column(type: 'string', nullable: true)]
