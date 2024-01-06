@@ -64,7 +64,7 @@ class User implements PasswordContainerInterface
     #[ORM\Relation\BelongsTo(target: Currency::class, innerKey: 'default_currency_code', cascade: true, load: 'eager')]
     private Currency $defaultCurrency;
 
-    #[ORM\Relation\HasOne(target: GoogleAccount::class, outerKey: 'user_id')]
+    #[ORM\Relation\HasOne(target: GoogleAccount::class, outerKey: 'user_id', nullable: true)]
     public GoogleAccount|null $googleAccount = null;
 
     #[ORM\Column(type: 'json', name: 'options', typecast: JsonTypecast::RULE)]
