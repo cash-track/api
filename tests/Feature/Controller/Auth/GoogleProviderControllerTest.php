@@ -166,6 +166,7 @@ class GoogleProviderControllerTest extends TestCase implements DatabaseTransacti
             'family_name' => Fixtures::string(),
         ];
 
+        $user = $this->userFactory->create($user);
         $user = $this->userFactory->create(UserFactory::withGoogleAccount($existingData, $user));
 
         $googleClient = $this->getMockBuilder(\Google\Client::class)->onlyMethods(['verifyIdToken'])->disableOriginalConstructor()->getMock();
@@ -230,6 +231,7 @@ class GoogleProviderControllerTest extends TestCase implements DatabaseTransacti
             'family_name' => Fixtures::string(),
         ];
 
+        $user = $this->userFactory->create($user);
         $user = $this->userFactory->create(UserFactory::withGoogleAccount($existingData, $user));
 
         [

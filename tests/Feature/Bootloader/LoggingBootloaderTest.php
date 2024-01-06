@@ -16,11 +16,14 @@ class LoggingBootloaderTest extends TestCase
     public function testDebugConfig(): void
     {
         $env = $this->getMockBuilder(EnvironmentInterface::class)->getMock();
-        $env->expects($this->once())->method('get')->with('DEBUG')->willReturn(true);
+        $env->expects($this->exactly(3))->method('get')->willReturnMap([
+            ['MONOLOG_FORMAT', $this->anything(), $this->returnArgument(2)],
+            ['DEBUG', $this->anything(), true],
+        ]);
 
         $config = $this->getMockBuilder(ConfiguratorInterface::class)->getMock();
 
-        $monolog = new MonologBootloader($config);
+        $monolog = new MonologBootloader($config, $env);
 
         $this->getContainer()->runScope([
             EnvironmentInterface::class => fn () => $env,

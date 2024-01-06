@@ -486,6 +486,7 @@ class ProfileControllerTest extends TestCase implements DatabaseTransaction
             'family_name' => Fixtures::string(),
         ];
 
+        $user = $this->userFactory->create($user);
         $user = $this->userFactory->create(UserFactory::withGoogleAccount($existingData, $user));
 
         $auth = $this->makeAuth($user);
