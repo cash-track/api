@@ -137,7 +137,7 @@ jobs:
           php app.php configure -vv
           vendor/bin/rr get --quiet
           php app.php migrate:init
-          php app.php migrate -n
+          php app.php migrate -s -n
 
       - name: Run PHPUnit
         run: ./vendor/bin/phpunit --coverage-clover=coverage.xml
