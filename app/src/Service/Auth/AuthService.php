@@ -135,6 +135,13 @@ class AuthService
 
         $this->userOptionsService->setLocale($user, $locale ?? $this->translator->getLocale());
 
+        if (($googleAccount = $user->googleAccount) !== null) {
+            // insert user first
+            $user->googleAccount = null;
+            $this->storeUser($user);
+            $user->googleAccount = $googleAccount;
+        }
+
         $this->storeUser($user);
 
         if (! $user->isEmailConfirmed) {
