@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace App\Repository;
 
 use App\Service\Filter\Filter;
+use Cycle\Database\Injection\Expression;
+use Cycle\Database\Injection\Fragment;
+use Cycle\Database\Query\SelectQuery;
 use Cycle\ORM\Select\AbstractLoader;
 use Cycle\ORM\Select\Repository;
 use Cycle\Database\Injection\Parameter;
@@ -229,5 +232,26 @@ class ChargeRepository extends Repository
         }
 
         return $query->count();
+    }
+
+    public function searchTitle(int $userID, string $query = '', int $limit = 10): array
+    {
+        $builder  = $this->select()->getBuilder();
+        $titleCol = $builder->resolve('title');
+        $q        = $builder->getQuery();
+
+        return $q?->columns([$titleCol, new Expression("count({$titleCol}) as count")])
+                 ->from('charges charge')
+                 ->rightJoin('user_wallets')
+                 ->on($builder->resolve('wallet_id'), '=', 'user_wallets.wallet_id')
+                 ->on('user_wallets.user_id', '=', new Parameter($userID))
+                 ->where($titleCol, 'like', new Fragment("concat('%', ?, '%')", $query, $query, $query, $query))
+                 ->groupBy($titleCol)
+                 ->orderBy(new Fragment("{$titleCol} like concat(?, '%')"), SelectQuery::SORT_DESC)
+                 ->orderBy(new Fragment("ifnull(nullif(instr({$titleCol}, concat(' ', ?)), 0), 99999)"))
+                 ->orderBy(new Expression("count({$titleCol})"), SelectQuery::SORT_DESC)
+                 ->orderBy(new Fragment("ifnull(nullif(instr({$titleCol}, ?), 0), 99999)"))
+                 ->limit($limit)
+                 ->fetchAll();
     }
 }

@@ -20,7 +20,7 @@ use Spiral\Http\Request\InputManager;
 use Spiral\Http\ResponseWrapper;
 use Spiral\Router\Annotation\Route;
 
-class TagsController extends Controller
+final class TagsController extends Controller
 {
     public function __construct(
         AuthScope $auth,
