@@ -25,7 +25,7 @@ use Spiral\Http\ResponseWrapper;
 use Spiral\Router\Annotation\Route;
 use Spiral\Translator\Traits\TranslatorTrait;
 
-class ChargesController extends Controller
+final class ChargesController extends Controller
 {
     use TranslatorTrait;
 
