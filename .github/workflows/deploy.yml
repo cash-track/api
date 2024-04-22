@@ -24,7 +24,7 @@ jobs:
 
     steps:
       - name: Checkout infra repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: ${{ env.INFRA_REPO }}
           ref: ${{ env.INFRA_REPO_REF }}
@@ -49,7 +49,7 @@ jobs:
       - name: Extract Docker metadata
         if: github.event_name != 'pull_request'
         id: meta
-        uses: docker/metadata-action@v4
+        uses: docker/metadata-action@v5
         with:
           images: ${{ env.REPO }}
           tags: |

@@ -15,14 +15,14 @@ jobs:
     runs-on: [self-hosted, Linux, x64]
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Prepare Cache For Vulnerability Database
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         id: vulnerability-db-cache
         with:
           path: ~/.vulnerability-db/cache
           key: vulnerability-db
 
       - name: Scan Packages For Vulnerability
-        uses: symfonycorp/security-checker-action@v4
+        uses: symfonycorp/security-checker-action@v5
