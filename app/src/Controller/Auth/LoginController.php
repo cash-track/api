@@ -30,10 +30,7 @@ final class LoginController extends Controller
         try {
             $auth = $this->authService->login($request->email, $request->password);
         } catch (\Throwable $exception) {
-            return $this->response->json([
-                'error' => $exception->getMessage(),
-                'message' => $this->say('error_authentication_exception'),
-            ], 500);
+            return $this->responseAuthenticationException($exception->getMessage());
         }
 
         if ($auth === null) {

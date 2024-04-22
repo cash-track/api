@@ -33,10 +33,10 @@ final class RegisterController extends Controller
         try {
             $auth = $this->authService->register($user, $request->locale);
         } catch (\Throwable $exception) {
-            return $this->response->json([
-                'message' => $this->say('user_register_exception'),
-                'error' => $exception->getMessage(),
-            ], 500);
+            return $this->responseAuthenticationException(
+                error: $exception->getMessage(),
+                message: $this->say('user_register_exception'),
+            );
         }
 
         return $this->responseTokensWithUser($auth);

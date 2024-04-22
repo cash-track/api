@@ -24,10 +24,10 @@ class Wallet implements Sortable
     #[ORM\Column('primary')]
     public int|null $id = null;
 
-    #[ORM\Column(type: 'string', typecast: EncryptedTypecast::RULE)]
+    #[ORM\Column(type: 'string(1536)', typecast: EncryptedTypecast::RULE)]
     public string $name = '';
 
-    #[ORM\Column(type: 'string', typecast: EncryptedTypecast::RULE)]
+    #[ORM\Column(type: 'string(1536)', typecast: EncryptedTypecast::RULE)]
     public string $slug = '';
 
     #[ORM\Column(type: 'decimal(13,2)', name: 'total_amount', default: 0.0)]

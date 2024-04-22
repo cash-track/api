@@ -76,6 +76,8 @@ abstract class TestCase extends BaseTestCase
                 return;
             }
         }
+
+        $db->getDriver()->disconnect();
     }
 
     protected function tearDown(): void

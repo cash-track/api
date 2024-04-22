@@ -45,4 +45,12 @@ abstract class Controller
             'message' => $this->say('error_authentication_required'),
         ], 401);
     }
+
+    protected function responseAuthenticationException(string $error = '', ?string $message = null): ResponseInterface
+    {
+        return $this->response->json([
+            'error' => $error,
+            'message' => $message ?? $this->say('error_authentication_exception'),
+        ], 500);
+    }
 }

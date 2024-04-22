@@ -13,6 +13,10 @@ return [
     'error_value_is_not_unique'             => 'Value should be unique.',
     'error_profile_not_confirmed'           => 'You are not allowed to perform this action as your profile is not confirmed.',
     'error_rate_limit_reached'              => 'Too many requests. Please try again later.',
+    'error_authentication_passkey'          => 'Passkey validation failed. Please try again.',
+    'error_auth_passkey_invalid_challenge'  => 'Authentication attempt is not verified. Please try again.',
+    'error_auth_passkey_invalid_response'   => 'Authentication response is not valid. Please try again.',
+    'error_auth_passkey_unregistered'       => 'Provided passkey is not registered. Please use passkey added before.',
 
     'email_confirmation_confirm_failure' => 'Unable to confirm your email.',
     'email_confirmation_ok'              => 'Your email has been confirmed.',
@@ -154,4 +158,8 @@ return [
     'deletion_notice_nl_mail_line_7'        => 'Sincerely,',
     'deletion_notice_nl_mail_line_8'        => 'Cash Track Support',
 
+    'passkey_deleted' => 'Passkey has been deleted',
+    'passkey_init_exception' => 'Unable to initiate passkey creation. Please try again later.',
+    'passkey_store_exception' => 'Unable to store passkey. Please try again later.',
+    'passkey_delete_exception' => 'Unable to delete passkey. Please try again later.',
 ];

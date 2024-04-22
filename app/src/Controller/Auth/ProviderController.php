@@ -32,14 +32,11 @@ final class ProviderController extends Controller
             $auth = $this->googleAuthService->loginOrRegister($input->post('token', ''));
         } catch (InvalidTokenException $exception) {
             return $this->responseAuthenticationFailure(
-                $exception->getMessage(),
-                $this->say('error_token_authentication_failure'),
+                error: $exception->getMessage(),
+                message: $this->say('error_token_authentication_failure'),
             );
         } catch (\Throwable $exception) {
-            return $this->response->json([
-                'error' => $exception->getMessage(),
-                'message' => $this->say('error_authentication_exception'),
-            ], 500);
+            return $this->responseAuthenticationException($exception->getMessage());
         }
 
         return $this->responseTokensWithUser($auth);

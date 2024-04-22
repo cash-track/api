@@ -27,37 +27,26 @@ trait InteractsWithDatabase
 
     public function assertDatabaseHas(string $table, array $where, array $whereEncrypted = [])
     {
-        $data = $this->getDatabase()
-                     ->select()
-                     ->from($table)
-                     ->where($where)
-                     ->where($this->encryptWhere($whereEncrypted))
-                     ->fetchAll();
-
-        $this->assertNotEmpty($data);
+        $this->assertNotEmpty($this->queryDatabase($table, $where, $whereEncrypted));
     }
 
     public function assertDatabaseMissing(string $table, array $where, array $whereEncrypted = [])
     {
-        $data = $this->getDatabase()
-                     ->select()
-                     ->from($table)
-                     ->where($where)
-                     ->where($this->encryptWhere($whereEncrypted))
-                     ->fetchAll();
-
-        $this->assertEmpty($data);
+        $this->assertEmpty($this->queryDatabase($table, $where, $whereEncrypted));
     }
 
     public function assertDatabaseCount(int $expected, string $table, array $where, array $whereEncrypted = [])
     {
-        $data = $this->getDatabase()
+        $this->assertCount($expected, $this->queryDatabase($table, $where, $whereEncrypted));
+    }
+
+    public function queryDatabase(string $table, array $where = [], array $whereEncrypted = []): array
+    {
+        return $this->getDatabase()
                      ->select()
                      ->from($table)
                      ->where($where)
                      ->where($this->encryptWhere($whereEncrypted))
                      ->fetchAll();
-
-        $this->assertCount($expected, $data);
     }
 }
