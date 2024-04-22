@@ -51,7 +51,7 @@ class AuthService
             return null;
         }
 
-        return $this->makeAuthentication($user);
+        return $this->authenticate($user);
     }
 
     public function logout(string $refreshToken = ''): void
@@ -69,7 +69,7 @@ class AuthService
     {
         $user = $this->createUser($user, $locale);
 
-        return $this->makeAuthentication($user);
+        return $this->authenticate($user);
     }
 
     public function refresh(ServerRequestInterface $request): ?Authentication
@@ -86,7 +86,7 @@ class AuthService
         // TODO. Add to blacklist token $refreshToken->getID();
         // TODO. Add to blacklist token $refreshTokenRequest->getAccessToken();
 
-        return $this->makeAuthentication($user);
+        return $this->authenticate($user);
     }
 
     public function updatePassword(User $user, string $password): void
@@ -179,7 +179,7 @@ class AuthService
         }
     }
 
-    protected function makeAuthentication(User $user): Authentication
+    public function authenticate(User $user): Authentication
     {
         return new Authentication(
             $user,

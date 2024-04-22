@@ -25,10 +25,7 @@ class Encrypter implements EncrypterInterface
         }
 
         $payload = openssl_encrypt($value, static::CIPHER, $this->key);
-
-        if ($payload === false) {
-            throw new EncrypterException('Encryption unsuccessful: ' . openssl_error_string());
-        }
+        $payload !== false || throw new EncrypterException('Encryption unsuccessful: ' . openssl_error_string());
 
         return $payload;
     }

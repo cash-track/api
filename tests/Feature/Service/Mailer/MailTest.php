@@ -141,4 +141,12 @@ class MailTest extends TestCase
 
         $this->assertEquals($rendered, $mail->getEmailMessage()->getBody()->bodyToString());
     }
+
+    public function testEmptyDeserializerAttr()
+    {
+        $mail = TestMail::fromPayload([
+            'class' => TestMail::class,
+        ]);
+        $this->assertInstanceOf(TestMail::class, $mail);
+    }
 }

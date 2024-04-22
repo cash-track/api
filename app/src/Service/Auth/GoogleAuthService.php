@@ -159,7 +159,7 @@ class GoogleAuthService extends AuthService
             $this->photoStorageService->queueDownloadProfilePhoto((int) $user->id, $data['picture']);
         }
 
-        return $this->makeAuthentication($user);
+        return $this->authenticate($user);
     }
 
     protected function makeUser(array $data): User
