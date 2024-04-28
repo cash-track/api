@@ -16,6 +16,8 @@ class ChargeAmountData
 
     protected array $expense = [];
 
+    protected array $tagIds = [];
+
     public function __construct(
         protected Group $grouping = Group::ByMonth,
     ) {
@@ -31,6 +33,13 @@ class ChargeAmountData
     public function setExpense(array $data): static
     {
         $this->expense = $this->indexDataByKeys($data, $this->grouping);
+
+        return $this;
+    }
+
+    public function setTagIds(array $ids): static
+    {
+        $this->tagIds = $ids;
 
         return $this;
     }
@@ -57,9 +66,17 @@ class ChargeAmountData
             $result[$index] = [
                 'date' => $key,
                 'timestamp' => $index,
-                'income' => $this->income[$index] ?? 0.0,
-                'expense' => $this->expense[$index] ?? 0.0,
             ];
+
+            if (count($this->tagIds) > 0) {
+                foreach ($this->tagIds as $tagId) {
+                    $result[$index]['tags'][$tagId]['income'] = $this->income[$index][$tagId] ?? 0.0;
+                    $result[$index]['tags'][$tagId]['expense'] = $this->expense[$index][$tagId] ?? 0.0;
+                }
+            } else {
+                $result[$index]['income'] = $this->income[$index] ?? 0.0;
+                $result[$index]['expense'] = $this->expense[$index] ?? 0.0;
+            }
 
             $from = $from->add($interval);
         }
@@ -78,7 +95,20 @@ class ChargeAmountData
                 continue;
             }
 
-            $result[$date->getTimestamp()] = (float) ($item['total'] ?? 0);
+            $timestamp = $date->getTimestamp();
+
+            $tagId = (int) ($item['tag_id'] ?? null);
+
+            if ($tagId === 0) {
+                $result[$timestamp] = (float) ($item['total'] ?? 0);
+                continue;
+            }
+
+            if (!isset($result[$timestamp]) || !is_array($result[$timestamp])) {
+                $result[$timestamp] = [];
+            }
+
+            $result[$timestamp][$tagId] = (float) ($item['total'] ?? 0);
         }
 
         return $result;

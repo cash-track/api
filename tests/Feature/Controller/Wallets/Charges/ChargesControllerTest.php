@@ -217,6 +217,160 @@ class ChargesControllerTest extends TestCase implements DatabaseTransaction
         }
     }
 
+    public function testListWithTagsFilterNoCharges(): void
+    {
+        $auth = $this->makeAuth($user = $this->userFactory->create());
+        $wallet = $this->walletFactory->forUser($user)->create();
+        $tag = $this->tagFactory->forUser($user)->create();
+        $this->chargeFactory->forUser($user)->forWallet($wallet)->create();
+
+        $response = $this->withAuth($auth)->get("/wallets/{$wallet->id}/charges", [
+            'tags' => (string) $tag->id,
+        ]);
+
+        $response->assertOk();
+
+        $body = $this->getJsonResponseBody($response);
+
+        $this->assertArrayHasKey('data', $body);
+        $this->assertCount(0, $body['data']);
+        $this->assertArrayContains(0, $body, 'pagination.count');
+        $this->assertArrayContains(0, $body, 'pagination.countDisplayed');
+        $this->assertArrayContains(1, $body, 'pagination.page');
+        $this->assertArrayContains(1, $body, 'pagination.pages');
+        $this->assertArrayContains(self::LIST_PER_PAGE, $body, 'pagination.perPage');
+        $this->assertArrayContains(null, $body, 'pagination.nextPage');
+        $this->assertArrayContains(null, $body, 'pagination.previousPage');
+    }
+
+    public function testListWithTagsFilterReturnPaginatedCharges(): void
+    {
+        $auth = $this->makeAuth($user = $this->userFactory->create());
+        $wallet = $this->walletFactory->forUser($user)->create();
+        $clearCharges = $this->chargeFactory->forUser($user)->forWallet($wallet)->createMany(4)->toArray();
+
+        $tag = $this->tagFactory->forUser($user)->create();
+        $charges = $this->chargeFactory->forUser($user)->forWallet($wallet)->withTags([$tag])->createMany(self::LIST_PER_PAGE + 1)->toArray();
+
+        usort($charges, fn(Charge $a, Charge $b) => $b->createdAt->getTimestamp() <=> $a->createdAt->getTimestamp());
+
+        $charges = new ArrayCollection($charges);
+
+        $response = $this->withAuth($auth)->get("/wallets/{$wallet->id}/charges", [
+            'tags' => (string) $tag->id,
+        ]);
+
+        $response->assertOk();
+
+        $body = $this->getJsonResponseBody($response);
+
+        $this->assertArrayContains(self::LIST_PER_PAGE + 1, $body, 'pagination.count');
+        $this->assertArrayContains(self::LIST_PER_PAGE, $body, 'pagination.countDisplayed');
+        $this->assertArrayContains(1, $body, 'pagination.page');
+        $this->assertArrayContains(2, $body, 'pagination.pages');
+        $this->assertArrayContains(self::LIST_PER_PAGE, $body, 'pagination.perPage');
+        $this->assertArrayContains(2, $body, 'pagination.nextPage');
+        $this->assertArrayContains(null, $body, 'pagination.previousPage');
+
+        foreach ($charges->slice(0, self::LIST_PER_PAGE) as $charge) {
+            /** @var \App\Database\Charge $charge */
+            $this->assertArrayContains((string) $charge->id, $body, 'data.*.id');
+            $this->assertArrayContains($charge->title, $body, 'data.*.title');
+            $this->assertArrayContains($charge->type, $body, 'data.*.operation');
+        }
+
+        foreach ($charges->slice(self::LIST_PER_PAGE, 1) as $charge) {
+            /** @var \App\Database\Charge $charge */
+            $this->assertArrayNotContains((string) $charge->id, $body, 'data.*.id');
+            $this->assertArrayNotContains($charge->title, $body, 'data.*.title');
+            $this->assertArrayNotContains($charge->type, $body, 'data.*.type');
+        }
+
+        foreach ($clearCharges as $charge) {
+            /** @var \App\Database\Charge $charge */
+            $this->assertArrayNotContains((string) $charge->id, $body, 'data.*.id');
+            $this->assertArrayNotContains($charge->title, $body, 'data.*.title');
+            $this->assertArrayNotContains($charge->type, $body, 'data.*.type');
+        }
+    }
+
+    public function listWithTagsFilterWithDateFilterReturnFilteredChargesDataProvider(): array
+    {
+        return [
+            [
+                [1, 2, 3, 4],
+                [
+                    'date-from' => '00-13-2022',
+                    'date-to' => '40-00-2022',
+                ],
+            ],
+            [
+                [1, 2, 3, 4],
+                [
+                    'date-from' => '01-06-2022',
+                    'date-to' => '04-06-2022',
+                ],
+            ],
+            [
+                [2, 3],
+                [
+                    'date-from' => '02-06-2022',
+                    'date-to' => '03-06-2022',
+                ],
+            ],
+            [
+                [1, 2, 3],
+                ['date-to' => '03-06-2022'],
+            ],
+            [
+                [2, 3, 4],
+                ['date-from' => '02-06-2022'],
+            ],
+        ];
+    }
+
+    /**
+     * @dataProvider listWithTagsFilterWithDateFilterReturnFilteredChargesDataProvider
+     * @param array $expectedIndexes
+     * @param array $query
+     * @return void
+     */
+    public function testListWithTagsFilterWithDateFilterReturnFilteredCharges(array $expectedIndexes, array $query): void
+    {
+        $auth = $this->makeAuth($user = $this->userFactory->create());
+        $wallet = $this->walletFactory->forUser($user)->create();
+        $tag = $this->tagFactory->forUser($user)->create();
+
+        $charges = [];
+
+        for ($i = 1; $i <= 4; $i++) {
+            $charges[$i] = ChargeFactory::make();
+            $charges[$i]->createdAt = new \DateTimeImmutable("0{$i}-06-2022");
+            $charges[$i] = $this->chargeFactory->forUser($user)->forWallet($wallet)->withTags([$tag])->create($charges[$i]);
+        }
+
+        $query['tags'] = (string) $tag->id;
+
+        $response = $this->withAuth($auth)->get("/wallets/{$wallet->id}/charges", $query);
+
+        $response->assertOk();
+
+        $body = $this->getJsonResponseBody($response);
+
+        $this->assertArrayHasKey('data', $body);
+        $this->assertIsArray($body['data']);
+        $this->assertCount(count($expectedIndexes), $body['data']);
+
+        foreach ($expectedIndexes as $index) {
+            if (! array_key_exists($index, $charges)) {
+                continue;
+            }
+
+            $this->assertArrayContains((string) $charges[$index]->id, $body, 'data.*.id');
+            $this->assertArrayContains($charges[$index]->title, $body, 'data.*.title');
+        }
+    }
+
     public function testGraphRequireAuth(): void
     {
         $user = $this->userFactory->create();
@@ -399,6 +553,165 @@ class ChargesControllerTest extends TestCase implements DatabaseTransaction
             $this->assertArrayContains($expected[0], $body, 'data.*.date');
             $this->assertArrayContains($expected[1], $body, 'data.*.income');
             $this->assertArrayContains($expected[2], $body, 'data.*.expense');
+        }
+    }
+
+    public function testGraphOfNoChargesWithWalletWithTags(): void
+    {
+        $auth = $this->makeAuth($user = $this->userFactory->create());
+        $wallet = $this->walletFactory->forUser($user)->create();
+        $tag = $this->tagFactory->forUser($user)->create();
+        $this->chargeFactory->forUser($user)->forWallet($wallet)->createMany(3);
+
+        $response = $this->withAuth($auth)->get("/wallets/{$wallet->id}/charges/graph", [
+            'tags' => (string) $tag->id,
+        ]);
+
+        $response->assertOk();
+
+        $body = $this->getJsonResponseBody($response);
+
+        $this->assertArrayHasKey('data', $body);
+        $this->assertCount(0, $body['data']);
+    }
+
+    public function graphWithTagsReturnsGraphDataDataProvider(): array
+    {
+        $charges = [
+            [
+                'date' => '2022-05-31',
+                'type' => Charge::TYPE_INCOME,
+                'amount' => 2060,
+            ],
+            [
+                'date' => '2022-06-01',
+                'type' => Charge::TYPE_EXPENSE,
+                'amount' => 150.99,
+            ],
+            [
+                'date' => '2022-06-02',
+                'type' => Charge::TYPE_EXPENSE,
+                'amount' => 51.02,
+            ],
+            [
+                'date' => '2022-06-03',
+                'type' => Charge::TYPE_INCOME,
+                'amount' => 30.99,
+            ],
+        ];
+
+        return [
+            [
+                $charges,
+                [],
+                [
+                    // date, income, expense
+                    ['2022-05-01', 2060, 0],
+                    ['2022-06-01', 30.99, 202.01],
+                ]
+            ],
+            [
+                $charges,
+                [
+                    'group-by' => 'day'
+                ],
+                [
+                    ['2022-05-31', 2060, 0],
+                    ['2022-06-01', 0, 150.99],
+                    ['2022-06-02', 0, 51.02],
+                    ['2022-06-03', 30.99, 0],
+                ]
+            ],
+            [
+                $charges,
+                [
+                    'date-from' => '2022-06-01',
+                    'date-to' => '2022-06-04',
+                ],
+                [
+                    ['2022-06-01', 30.99, 202.01],
+                ]
+            ],
+            [
+                $charges,
+                [
+                    'date-from' => '2022-06-01',
+                    'date-to' => '2022-06-04',
+                    'group-by' => 'day'
+                ],
+                [
+                    ['2022-06-01', 0, 150.99],
+                    ['2022-06-02', 0, 51.02],
+                    ['2022-06-03', 30.99, 0],
+                    ['2022-06-04', 0, 0],
+                ]
+            ],
+            [
+                $charges,
+                [
+                    'group-by' => 'year'
+                ],
+                [
+                    ['2022-01-01', 2090.99, 202.01],
+                ]
+            ],
+            [
+                $charges,
+                [
+                    'date-from' => '2021-12-31',
+                    'date-to' => '2022-06-04',
+                    'group-by' => 'year'
+                ],
+                [
+                    ['2022-01-01', 2090.99, 202.01],
+                    ['2021-01-01', 0, 0],
+                ]
+            ],
+        ];
+    }
+
+    /**
+     * @dataProvider graphWithTagsReturnsGraphDataDataProvider
+     * @param array $setCharges
+     * @param array $query
+     * @param array $expectedData
+     * @return void
+     * @throws \Exception
+     */
+    public function testGraphWithTagsReturnsGraphData(array $setCharges, array $query, array $expectedData): void
+    {
+        $auth = $this->makeAuth($user = $this->userFactory->create());
+        $wallet = $this->walletFactory->forUser($user)->create();
+        $tag = $this->tagFactory->forUser($user)->create();
+        $this->chargeFactory->forUser($user)->forWallet($wallet);
+
+        foreach ($setCharges as $item) {
+            $charge = ChargeFactory::make();
+            $charge->createdAt = new \DateTimeImmutable($item['date']);
+            $this->chargeFactory->withTags([])->create($charge);
+
+            $charge = ChargeFactory::make();
+            $charge->createdAt = new \DateTimeImmutable($item['date']);
+            $charge->type = $item['type'];
+            $charge->amount = $item['amount'];
+            $this->chargeFactory->withTags([$tag])->create($charge);
+        }
+
+        $query['tags'] = (string) $tag->id;
+
+        $response = $this->withAuth($auth)->get("/wallets/{$wallet->id}/charges/graph", $query);
+
+        $response->assertOk();
+
+        $body = $this->getJsonResponseBody($response);
+
+        $this->assertArrayHasKey('data', $body);
+        $this->assertCount(count($expectedData), $body['data']);
+
+        foreach ($expectedData as $expected) {
+            $this->assertArrayContains($expected[0], $body, 'data.*.date');
+            $this->assertArrayContains($expected[1], $body, "data.*.tags.{$tag->id}.income");
+            $this->assertArrayContains($expected[2], $body, "data.*.tags.{$tag->id}.expense");
         }
     }
 

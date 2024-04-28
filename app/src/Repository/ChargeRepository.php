@@ -75,24 +75,6 @@ class ChargeRepository extends Repository
     }
 
     /**
-     * @param int $walletId
-     * @return array
-     */
-    public function findByWalletIdWithPagination(int $walletId)
-    {
-        $query = $this->select()
-                      ->load('user')
-                      ->load('tags')
-                      ->where('wallet_id', $walletId)
-                      ->orderBy('created_at', 'DESC');
-
-        $this->injectFilter($query);
-        $this->injectPaginator($query);
-
-        return $query->fetchAll();
-    }
-
-    /**
      * @param int $tagId
      * @return \App\Database\Charge[]
      */
@@ -116,17 +98,20 @@ class ChargeRepository extends Repository
 
     /**
      * @param int $walletId
-     * @param int $tagId
+     * @param array $tagIDs
      * @return array
      */
-    public function findByWalletIdAndTagIdWithPagination(int $walletId, int $tagId = null)
+    public function findByWalletIdAndTagIdsWithPagination(int $walletId, array $tagIDs = [])
     {
         $query = $this->select()
                       ->load('user')
                       ->load('tags')
                       ->where('wallet_id', $walletId)
-                      ->where('tags.id', $tagId)
                       ->orderBy('created_at', 'DESC');
+
+        if (count($tagIDs) > 0) {
+            $query = $query->where('tags.id', 'in', new Parameter($tagIDs));
+        }
 
         $this->injectFilter($query);
         $this->injectPaginator($query);
@@ -174,17 +159,17 @@ class ChargeRepository extends Repository
     }
 
     /**
-     * @param int $walletId
-     * @param int $tagId
+     * @param int $walletID
+     * @param array $tagIDs
      * @param string|null $type
-     * @return float
+     * @return array<int, float>
      */
-    public function totalByWalletPKAndTagId(int $walletId, int $tagId, string $type = null): float
+    public function totalByWalletPKGroupByTagPKs(int $walletID, array $tagIDs, string $type = null): array
     {
         /** @psalm-suppress InternalClass */
-        $query = $this->select()->where('wallet_id', $walletId)->with('tags', [
+        $query = $this->select()->where('wallet_id', $walletID)->with('tags', [
             'method' => AbstractLoader::LEFT_JOIN,
-        ])->where('tags.id', $tagId);
+        ])->where('tags.id', 'in', new Parameter($tagIDs));
 
         if (! empty($type)) {
             $query = $query->where('type', $type);
@@ -192,7 +177,26 @@ class ChargeRepository extends Repository
 
         $this->injectFilter($query);
 
-        return (float) $query->sum('amount');
+        $builder  = $this->select()->getBuilder();
+        $tagIDsCol = $builder->resolve('tags.id');
+        $amountCol = $builder->resolve('amount');
+
+        $result = $query->buildQuery()
+                        ->columns([$tagIDsCol, new Expression("SUM({$amountCol}) as total")])
+                        ->groupBy($tagIDsCol)
+                        ->fetchAll();
+
+        $data = [];
+
+        foreach ($result as $row) {
+            $id = (int) ($row['id'] ?? 0);
+
+            if ($id > 0) {
+                $data[$id] = (float) ($row['total'] ?? 0);
+            }
+        }
+
+        return $data;
     }
 
     /**
