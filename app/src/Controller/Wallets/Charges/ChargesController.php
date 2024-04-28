@@ -56,7 +56,7 @@ final class ChargesController extends Controller
         $charges = $this->chargeRepository
             ->filter($input->query->fetch(['date-from', 'date-to']))
             ->paginate($this->paginationFactory->createPaginator())
-            ->findByWalletIdWithPagination((int) $wallet->id);
+            ->findByWalletIdAndTagIdsWithPagination((int) $wallet->id, $this->fetchFilteredTagIDs($input));
 
         return $this->chargesView->jsonPaginated($charges, $this->chargeRepository->getPaginationState());
     }
@@ -72,6 +72,7 @@ final class ChargesController extends Controller
 
         $graph->filter($input->query->fetch(['date-from', 'date-to']));
         $graph->groupBy($input->query('group-by'));
+        $graph->groupByTags($this->fetchFilteredTagIDs($input));
 
         return $this->response->json([
             'data' => $graph->getGraph(wallet: $wallet),
