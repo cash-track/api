@@ -7,10 +7,11 @@ namespace App\View;
 use App\Database\Tag;
 use App\Database\User;
 use Psr\Http\Message\ResponseInterface;
-use Spiral\Core\Container\SingletonInterface;
+use Spiral\Core\Attribute\Singleton;
 use Spiral\Http\ResponseWrapper;
 
-class ChargesView implements SingletonInterface
+#[Singleton]
+class ChargesView
 {
     use Relations;
 

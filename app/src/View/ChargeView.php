@@ -9,10 +9,11 @@ use App\Database\Tag;
 use App\Database\User;
 use App\Database\Wallet;
 use Psr\Http\Message\ResponseInterface;
-use Spiral\Core\Container\SingletonInterface;
+use Spiral\Core\Attribute\Singleton;
 use Spiral\Http\ResponseWrapper;
 
-class ChargeView implements SingletonInterface
+#[Singleton]
+class ChargeView
 {
     use Relations;
 

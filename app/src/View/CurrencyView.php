@@ -5,10 +5,11 @@ declare(strict_types=1);
 namespace App\View;
 
 use App\Database\Currency;
-use Spiral\Core\Container\SingletonInterface;
+use Spiral\Core\Attribute\Singleton;
 use Spiral\Http\ResponseWrapper;
 
-class CurrencyView implements SingletonInterface
+#[Singleton]
+class CurrencyView
 {
     public function __construct(
         protected ResponseWrapper $response,

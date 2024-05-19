@@ -62,6 +62,10 @@ return [
     'wallet_update_exception'     => 'Unable to update wallet. Please try again later.',
     'wallet_delete_exception'     => 'Unable to delete wallet. Please try again later.',
 
+    'limit_create_exception' => 'Unable to create limit. Please try again later.',
+    'limit_update_exception' => 'Unable to update limit. Please try again later.',
+    'limit_delete_exception' => 'Unable to delete limit. Please try again later.',
+
     'password_verify_error' => 'Wrong password.',
     'unique_verify_error'   => 'Value should be unique.',
 

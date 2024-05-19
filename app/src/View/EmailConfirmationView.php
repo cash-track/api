@@ -6,10 +6,11 @@ namespace App\View;
 
 use App\Database\EmailConfirmation;
 use Psr\Http\Message\ResponseInterface;
-use Spiral\Core\Container\SingletonInterface;
+use Spiral\Core\Attribute\Singleton;
 use Spiral\Http\ResponseWrapper;
 
-class EmailConfirmationView implements SingletonInterface
+#[Singleton]
+class EmailConfirmationView
 {
     public function __construct(
         protected ResponseWrapper $response,

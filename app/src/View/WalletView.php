@@ -6,10 +6,11 @@ namespace App\View;
 
 use App\Database\Wallet;
 use Psr\Http\Message\ResponseInterface;
-use Spiral\Core\Container\SingletonInterface;
+use Spiral\Core\Attribute\Singleton;
 use Spiral\Http\ResponseWrapper;
 
-class WalletView implements SingletonInterface
+#[Singleton]
+class WalletView
 {
     public function __construct(
         protected ResponseWrapper $response,
