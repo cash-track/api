@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Controller\Wallets\Limits;
 
-use App\Service\LimitService;
+use App\Service\Limit\LimitService;
 use PHPUnit\Framework\MockObject\MockObject;
 use Tests\DatabaseTransaction;
+use Tests\Factories\ChargeFactory;
 use Tests\Factories\LimitFactory;
 use Tests\Factories\TagFactory;
 use Tests\Factories\UserFactory;
@@ -24,7 +25,7 @@ class LimitsControllerTest extends TestCase implements DatabaseTransaction
 
     protected TagFactory $tagFactory;
 
-    const LIST_PER_PAGE = 25;
+    protected ChargeFactory $chargeFactory;
 
     protected function setUp(): void
     {
@@ -34,6 +35,7 @@ class LimitsControllerTest extends TestCase implements DatabaseTransaction
         $this->walletFactory = $this->getContainer()->get(WalletFactory::class);
         $this->limitFactory = $this->getContainer()->get(LimitFactory::class);
         $this->tagFactory = $this->getContainer()->get(TagFactory::class);
+        $this->chargeFactory = $this->getContainer()->get(ChargeFactory::class);
     }
 
     public function testListRequireAuth(): void
@@ -97,8 +99,30 @@ class LimitsControllerTest extends TestCase implements DatabaseTransaction
     {
         $auth = $this->makeAuth($user = $this->userFactory->create());
         $wallet = $this->walletFactory->forUser($user)->create();
+        $this->chargeFactory->forUser($user)->forWallet($wallet)->createMany(4);
+
+        $tag = $this->tagFactory->forUser($user)->create();
+        $limit = $this->limitFactory->forWallet($wallet)->withTags([$tag])->create();
+        $charges = $this->chargeFactory->forUser($user)->forWallet($wallet)->withTags([$tag])->createMany(4);
+
         $tags = $this->tagFactory->forUser($user)->createMany(2);
-        $limits = $this->limitFactory->forWallet($wallet)->withTags($tags->toArray())->createMany(4)->toArray();
+        $limitWithTwoTags = $this->limitFactory->forWallet($wallet)->withTags($tags->toArray())->create();
+        $chargesWithTwoTags = $this->chargeFactory->forUser($user)->forWallet($wallet)->withTags($tags->toArray())->createMany(4);
+
+        $chargesTotal = 0;
+        foreach ($charges as $charge) {
+            /** @var \App\Database\Charge $charge */
+            if ($limit->type === $charge->type) {
+                $chargesTotal += $charge->amount;
+            }
+        }
+
+        $chargesWithTwoTagsTotal = 0;
+        foreach ($chargesWithTwoTags as $charge) {
+            if ($limitWithTwoTags->type === $charge->type) {
+                $chargesWithTwoTagsTotal += $charge->amount;
+            }
+        }
 
         $response = $this->withAuth($auth)->get("/wallets/{$wallet->id}/limits");
 
@@ -106,15 +130,21 @@ class LimitsControllerTest extends TestCase implements DatabaseTransaction
 
         $body = $this->getJsonResponseBody($response);
 
-        foreach ($limits as $limit) {
-            /** @var \App\Database\Limit $limit */
-            $this->assertArrayContains($limit->id, $body, 'data.*.id');
-            $this->assertArrayContains($limit->type, $body, 'data.*.operation');
+        $this->assertIsArray($body);
+        $this->assertArrayHasKey('data', $body);
+        $this->assertCount(2, $body['data']);
 
-            foreach ($tags as $tag) {
-                $this->assertArrayContains($tag->id, $body, 'data.*.tags.*.id');
-                $this->assertArrayContains($tag->id, $body, 'data.*.tags.*.id');
-            }
+        $this->assertEquals($chargesTotal, $body['data'][0]['amount'] ?? null);
+        $this->assertEquals($limit->type, $body['data'][0]['limit']['operation'] ?? null);
+        $this->assertEquals($limit->amount, $body['data'][0]['limit']['amount'] ?? null);
+        $this->assertArrayContains($tag->id, $body['data'][0]['limit']['tags'], '*.id');
+
+        $this->assertEquals($chargesWithTwoTagsTotal, $body['data'][1]['amount']);
+        $this->assertEquals($limitWithTwoTags->type, $body['data'][1]['limit']['operation'] ?? null);
+        $this->assertEquals($limitWithTwoTags->amount, $body['data'][1]['limit']['amount'] ?? null);
+
+        foreach ($tags as $tag) {
+            $this->assertArrayContains($tag->id, $body['data'][1]['limit']['tags'], '*.id');
         }
     }
 

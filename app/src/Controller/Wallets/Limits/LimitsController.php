@@ -11,9 +11,9 @@ use App\Repository\LimitRepository;
 use App\Repository\TagRepository;
 use App\Repository\WalletRepository;
 use App\Request\Limit\CreateRequest;
-use App\Service\LimitService;
-use App\View\LimitsView;
+use App\Service\Limit\LimitService;
 use App\View\LimitView;
+use App\View\WalletLimitsView;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Log\LoggerInterface;
 use Spiral\Auth\AuthScope;
@@ -31,7 +31,7 @@ final class LimitsController extends Controller
         private readonly LimitRepository $limitRepository,
         private readonly LimitService $limitService,
         private readonly LimitView $limitView,
-        private readonly LimitsView $limitsView,
+        private readonly WalletLimitsView $walletLimitsView,
         private readonly TagRepository $tagRepository,
     ) {
         parent::__construct($auth);
@@ -47,10 +47,9 @@ final class LimitsController extends Controller
         }
 
         $limits = $this->limitRepository->findAllByWalletPK((int) $wallet->id);
+        $limits = $this->limitService->calculate($limits);
 
-        // TODO. Calculate limits
-
-        return $this->limitsView->json($limits);
+        return $this->walletLimitsView->json($limits);
     }
 
     #[Route(route: '/wallets/<id>/limits', name: 'wallet.limit.create', methods: 'POST', group: 'auth')]

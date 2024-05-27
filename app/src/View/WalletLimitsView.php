@@ -4,21 +4,19 @@ declare(strict_types=1);
 
 namespace App\View;
 
-use App\Database\Tag;
 use Psr\Http\Message\ResponseInterface;
 use Spiral\Core\Attribute\Singleton;
 use Spiral\Http\ResponseWrapper;
 
 #[Singleton]
-class LimitsView
+class WalletLimitsView
 {
     use Relations;
 
     public function __construct(
         protected ResponseWrapper $response,
-        protected LimitView $limitView,
+        protected WalletLimitView $walletLimitView,
     ) {
-        $this->withRelations([Tag::class]);
     }
 
     public function json(array $limits): ResponseInterface
@@ -30,8 +28,8 @@ class LimitsView
 
     public function map(array $limits): array
     {
-        $this->limitView->withRelations($this->relations);
+        $this->walletLimitView->withRelations($this->relations);
 
-        return array_map([$this->limitView, 'map'], $limits);
+        return array_map([$this->walletLimitView, 'map'], $limits);
     }
 }
