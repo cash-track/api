@@ -7,9 +7,10 @@ namespace App\Auth\Jwt;
 use App\Auth\RefreshTokenStorageInterface;
 use App\Config\JwtConfig;
 use Spiral\Auth\Exception\TokenStorageException;
-use Spiral\Core\Container\SingletonInterface;
+use Spiral\Core\Attribute\Singleton;
 
-class RefreshTokenStorage extends TokenStorage implements RefreshTokenStorageInterface, SingletonInterface
+#[Singleton]
+class RefreshTokenStorage extends TokenStorage implements RefreshTokenStorageInterface
 {
     /**
      * @var string

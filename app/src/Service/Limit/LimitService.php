@@ -30,7 +30,7 @@ class LimitService
         foreach ($limits as $limit) {
             $amount = $this->chargeRepository->totalByWalletPKAndTagPKs(
                 $limit->walletId,
-                array_map(fn (Tag $tag) => $tag->id, $limit->getTags()),
+                array_map(fn (Tag $tag) => (int) $tag->id, $limit->getTags()),
                 $limit->type
             );
 

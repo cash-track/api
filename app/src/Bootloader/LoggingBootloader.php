@@ -4,11 +4,10 @@ declare(strict_types=1);
 
 namespace App\Bootloader;
 
-use Monolog\Logger;
+use Monolog\Level;
 use Spiral\Boot\Bootloader\Bootloader;
 use Spiral\Http\Middleware\ErrorHandlerMiddleware;
 use Spiral\Monolog\Bootloader\MonologBootloader;
-use Spiral\Monolog\Config\MonologConfig;
 use Spiral\Boot\EnvironmentInterface;
 use Cycle\Database\Driver\MySQL\MySQLDriver;
 
@@ -37,7 +36,7 @@ class LoggingBootloader extends Bootloader
             channel: self::DEFAULT_CHANNEL,
             handler: $monolog->logRotate(
                 filename: directory('runtime') . 'logs/error.log',
-                level: Logger::ERROR,
+                level: Level::Error,
                 maxFiles: 25,
                 bubble: false
             )

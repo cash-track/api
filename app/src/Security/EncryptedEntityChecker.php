@@ -6,8 +6,10 @@ namespace App\Security;
 
 use App\Database\Encrypter\EncrypterInterface;
 use Cycle\ORM\ORMInterface;
+use Spiral\Core\Attribute\Singleton;
 use Spiral\Cycle\Validation\EntityChecker;
 
+#[Singleton]
 class EncryptedEntityChecker extends EntityChecker
 {
     public function __construct(

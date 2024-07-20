@@ -157,6 +157,8 @@ class ChargeRepository extends Repository
         $builder = $this->select()->getBuilder();
         $tagsIdCol  = $builder->resolve('tags.id');
         $chargesIdCol  = $builder->resolve('id');
+
+        /** @var non-empty-string $chargesAmountCol */
         $chargesAmountCol  = $builder->resolve('amount');
 
         $query = $query->buildQuery()

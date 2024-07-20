@@ -10,9 +10,10 @@ use Firebase\JWT\Key;
 use Spiral\Auth\Exception\TokenStorageException;
 use Spiral\Auth\TokenInterface;
 use Spiral\Auth\TokenStorageInterface;
-use Spiral\Core\Container\SingletonInterface;
+use Spiral\Core\Attribute\Singleton;
 
-class TokenStorage implements TokenStorageInterface, SingletonInterface
+#[Singleton]
+class TokenStorage implements TokenStorageInterface
 {
     /**
      * @var string
