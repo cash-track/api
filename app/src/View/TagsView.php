@@ -5,10 +5,11 @@ declare(strict_types=1);
 namespace App\View;
 
 use Psr\Http\Message\ResponseInterface;
-use Spiral\Core\Container\SingletonInterface;
+use Spiral\Core\Attribute\Singleton;
 use Spiral\Http\ResponseWrapper;
 
-class TagsView implements SingletonInterface
+#[Singleton]
+class TagsView
 {
     public function __construct(
         protected ResponseWrapper $response,

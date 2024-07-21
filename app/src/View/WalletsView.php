@@ -6,10 +6,11 @@ namespace App\View;
 
 use App\Service\Sort\Sorter;
 use Psr\Http\Message\ResponseInterface;
-use Spiral\Core\Container\SingletonInterface;
+use Spiral\Core\Attribute\Singleton;
 use Spiral\Http\ResponseWrapper;
 
-class WalletsView implements SingletonInterface
+#[Singleton]
+class WalletsView
 {
     use Sorter;
 

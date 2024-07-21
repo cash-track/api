@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace App\View;
 
-use Spiral\Core\Container\SingletonInterface;
+use Spiral\Core\Attribute\Singleton;
 use Spiral\Http\ResponseWrapper;
 
-class ChargeTitleView implements SingletonInterface
+#[Singleton]
+class ChargeTitleView
 {
     public function __construct(
         protected ResponseWrapper $response,

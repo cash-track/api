@@ -8,10 +8,11 @@ use App\Database\User;
 use App\Service\PhotoStorageService;
 use App\Service\UserOptionsService;
 use Psr\Http\Message\ResponseInterface;
-use Spiral\Core\Container\SingletonInterface;
+use Spiral\Core\Attribute\Singleton;
 use Spiral\Http\ResponseWrapper;
 
-class UserView implements SingletonInterface
+#[Singleton]
+class UserView
 {
     public function __construct(
         protected ResponseWrapper $response,

@@ -98,10 +98,10 @@ class ChargeRepository extends Repository
 
     /**
      * @param int $walletId
-     * @param array $tagIDs
+     * @param array $tagIds
      * @return array
      */
-    public function findByWalletIdAndTagIdsWithPagination(int $walletId, array $tagIDs = [])
+    public function findByWalletIdAndTagIdsWithPagination(int $walletId, array $tagIds = [])
     {
         $query = $this->select()
                       ->load('user')
@@ -109,8 +109,8 @@ class ChargeRepository extends Repository
                       ->where('wallet_id', $walletId)
                       ->orderBy('created_at', 'DESC');
 
-        if (count($tagIDs) > 0) {
-            $query = $query->where('tags.id', 'in', new Parameter($tagIDs));
+        if (count($tagIds) > 0) {
+            $query = $query->where('tags.id', 'in', new Parameter($tagIds));
         }
 
         $this->injectFilter($query);
@@ -135,6 +135,42 @@ class ChargeRepository extends Repository
         $this->injectFilter($query);
 
         return (float) $query->sum('amount');
+    }
+
+    /**
+     * @param int $walletId
+     * @param array<int, int> $tagIds
+     * @param string|null $type
+     * @return float
+     */
+    public function totalByWalletPKAndTagPKs(int $walletId, array $tagIds, string $type = null): float
+    {
+        /** @psalm-suppress InternalClass */
+        $query = $this->select()->where('wallet_id', $walletId)->with('tags', [
+            'method' => AbstractLoader::LEFT_JOIN,
+        ])->where('tags.id', 'in', new Parameter($tagIds));
+
+        if (! empty($type)) {
+            $query = $query->where('type', $type);
+        }
+
+        $builder = $this->select()->getBuilder();
+        $tagsIdCol  = $builder->resolve('tags.id');
+        $chargesIdCol  = $builder->resolve('id');
+
+        /** @var non-empty-string $chargesAmountCol */
+        $chargesAmountCol  = $builder->resolve('amount');
+
+        $query = $query->buildQuery()
+                       ->columns([$chargesIdCol, $chargesAmountCol])
+                       ->groupBy($chargesIdCol)
+                       ->having(new Fragment("count(distinct {$tagsIdCol}) = ?", count($tagIds)));
+
+        return (float) $this->select()
+                            ->buildQuery()
+                            ->rightJoin($query, 'filtered')
+                            ->on($chargesIdCol, '=', 'filtered.id')
+                            ->sum($chargesAmountCol);
     }
 
     /**

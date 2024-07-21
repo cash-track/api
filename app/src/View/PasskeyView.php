@@ -6,10 +6,11 @@ namespace App\View;
 
 use App\Database\Passkey;
 use Psr\Http\Message\ResponseInterface;
-use Spiral\Core\Container\SingletonInterface;
+use Spiral\Core\Attribute\Singleton;
 use Spiral\Http\ResponseWrapper;
 
-class PasskeyView implements SingletonInterface
+#[Singleton]
+class PasskeyView
 {
     public function __construct(
         protected ResponseWrapper $response,
