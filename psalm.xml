@@ -14,24 +14,9 @@
                 <directory name="app/src"/>
             </errorLevel>
         </InvalidClassConstantType>
-        <RiskyTruthyFalsyComparison>
-            <errorLevel type="suppress">
-                <directory name="app/src"/>
-            </errorLevel>
-        </RiskyTruthyFalsyComparison>
-        <DeprecatedMethod>
-            <errorLevel type="suppress">
-                <directory name="app/src"/>
-            </errorLevel>
-        </DeprecatedMethod>
-        <DeprecatedClass>
-            <errorLevel type="suppress">
-                <directory name="app/src"/>
-            </errorLevel>
-        </DeprecatedClass>
         <DeprecatedInterface>
             <errorLevel type="suppress">
-                <directory name="app/src"/>
+                <file name="app/src/Security/EncryptedEntityChecker.php" />
             </errorLevel>
         </DeprecatedInterface>
     </issueHandlers>

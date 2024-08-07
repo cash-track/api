@@ -128,7 +128,7 @@ class ChargeRepository extends Repository
     {
         $query = $this->select()->where('wallet_id', $walletId);
 
-        if (! empty($type)) {
+        if ($type !== null && $type !== '') {
             $query = $query->where('type', $type);
         }
 
@@ -150,7 +150,7 @@ class ChargeRepository extends Repository
             'method' => AbstractLoader::LEFT_JOIN,
         ])->where('tags.id', 'in', new Parameter($tagIds));
 
-        if (! empty($type)) {
+        if ($type !== null && $type !== '') {
             $query = $query->where('type', $type);
         }
 
@@ -185,7 +185,7 @@ class ChargeRepository extends Repository
             'method' => AbstractLoader::LEFT_JOIN,
         ])->where('tags.id', $tagId);
 
-        if (! empty($type)) {
+        if ($type !== null && $type !== '') {
             $query = $query->where('type', $type);
         }
 
@@ -207,7 +207,7 @@ class ChargeRepository extends Repository
             'method' => AbstractLoader::LEFT_JOIN,
         ])->where('tags.id', 'in', new Parameter($tagIDs));
 
-        if (! empty($type)) {
+        if ($type !== null && $type !== '') {
             $query = $query->where('type', $type);
         }
 

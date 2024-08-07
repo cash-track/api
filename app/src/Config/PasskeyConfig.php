@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Config;
 
+use Cose\Algorithm\Algorithm;
 use Spiral\Core\InjectableConfig;
+use Webauthn\PublicKeyCredentialParameters;
 
 class PasskeyConfig extends InjectableConfig
 {
@@ -20,7 +22,7 @@ class PasskeyConfig extends InjectableConfig
             'name' => '',
         ],
         'timeout' => 0,
-        'supported' => [],
+        'algorithms' => [],
     ];
 
     public function getServiceId(): string
@@ -45,8 +47,19 @@ class PasskeyConfig extends InjectableConfig
     /**
      * @return \Webauthn\PublicKeyCredentialParameters[]
      */
-    public function getSupported(): array
+    public function getSupportedPublicKeyCredentials(): array
     {
-        return $this->config['supported'] ?? [];
+        return array_map(
+            fn(Algorithm $algorithm) => PublicKeyCredentialParameters::create('public-key', $algorithm::identifier()),
+            $this->config['algorithms'] ?? [],
+        );
+    }
+
+    /**
+     * @return \Cose\Algorithm\Algorithm[]
+     */
+    public function getSupportedAlgorithms(): array
+    {
+        return $this->config['algorithms'] ?? [];
     }
 }

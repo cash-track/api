@@ -161,7 +161,12 @@ class PhotoStorageService
 
         $parts = explode('.', $fileName);
 
-        if (($count = count($parts)) <= 1 || empty($parts[$count - 1]) || strlen($parts[$count - 1]) > 4) {
+        if (
+            ($count = count($parts)) <= 1 ||
+            !array_key_exists($count - 1, $parts) ||
+            $parts[$count - 1] === '' ||
+            strlen($parts[$count - 1]) > 4
+        ) {
             return $default;
         }
 

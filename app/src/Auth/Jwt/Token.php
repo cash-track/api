@@ -67,7 +67,7 @@ class Token implements TokenInterface
     public static function fromPayload(string $id, array $payload): Token
     {
         $expiresAt = null;
-        if ($payload['exp'] ?? null !== null) {
+        if (($payload['exp'] ?? null) !== null) {
             $expiresAt = (new \DateTimeImmutable())->setTimestamp($payload['exp']);
         }
 

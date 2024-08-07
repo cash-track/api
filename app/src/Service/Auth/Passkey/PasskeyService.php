@@ -16,25 +16,24 @@ use App\Service\Auth\Passkey\Exception\UserNotFoundException;
 use App\Service\Auth\Passkey\Response\DataEncoder;
 use App\Service\Auth\Passkey\Response\PasskeyInitResponse;
 use Cose\Algorithm\Manager;
-use Cose\Algorithm\Signature\ECDSA\ES256;
-use Cose\Algorithm\Signature\RSA\RS256;
 use Cycle\ORM\EntityManagerInterface;
 use ParagonIE\ConstantTime\Base64UrlSafe;
 use Redis;
-use Webauthn\AttestationStatement\AttestationObjectLoader;
+use Symfony\Component\Serializer\SerializerInterface;
 use Webauthn\AttestationStatement\AttestationStatementSupportManager;
 use Webauthn\AttestationStatement\NoneAttestationStatementSupport;
 use Webauthn\AuthenticationExtensions\AuthenticationExtension;
-use Webauthn\AuthenticationExtensions\AuthenticationExtensionsClientInputs;
+use Webauthn\AuthenticationExtensions\AuthenticationExtensions;
 use Webauthn\AuthenticationExtensions\ExtensionOutputCheckerHandler;
 use Webauthn\AuthenticatorAssertionResponse;
 use Webauthn\AuthenticatorAssertionResponseValidator;
 use Webauthn\AuthenticatorAttestationResponse;
 use Webauthn\AuthenticatorAttestationResponseValidator;
 use Webauthn\AuthenticatorSelectionCriteria;
+use Webauthn\Denormalizer\WebauthnSerializerFactory;
+use Webauthn\PublicKeyCredential;
 use Webauthn\PublicKeyCredentialCreationOptions;
 use Webauthn\PublicKeyCredentialDescriptor;
-use Webauthn\PublicKeyCredentialLoader;
 use Webauthn\PublicKeyCredentialRequestOptions;
 use Webauthn\PublicKeyCredentialRpEntity;
 use Webauthn\PublicKeyCredentialSource;
@@ -53,6 +52,33 @@ class PasskeyService
         private readonly PasskeyRepository $repository,
         private readonly UserRepository $userRepository,
     ) {
+    }
+
+    protected function getAlgorithmManager(): Manager
+    {
+        $manager = Manager::create();
+
+        foreach ($this->config->getSupportedAlgorithms() as $algorithm) {
+            $manager->add($algorithm);
+        }
+
+        return $manager;
+    }
+
+    protected function getAttestationStatementSupportManager(): AttestationStatementSupportManager
+    {
+        $manager = new AttestationStatementSupportManager();
+        $manager->add(NoneAttestationStatementSupport::create());
+
+        return $manager;
+    }
+
+    protected function getSerializer(): SerializerInterface
+    {
+        $manager = new AttestationStatementSupportManager();
+        $manager->add(NoneAttestationStatementSupport::create());
+
+        return (new WebauthnSerializerFactory($this->getAttestationStatementSupportManager()))->create();
     }
 
     public function initAuth(): \JsonSerializable
@@ -86,22 +112,13 @@ class PasskeyService
      */
     public function authenticate(string $challenge, string $data): User
     {
-        $attestationStatementSupportManager = AttestationStatementSupportManager::create();
-        $attestationStatementSupportManager->add(NoneAttestationStatementSupport::create());
-
-        $attestationObjectLoader = AttestationObjectLoader::create(
-            $attestationStatementSupportManager
-        );
-
         $options = $this->getRequestOptions($challenge);
         if (! ($options instanceof RequestChallenge) || ! ($options->options instanceof PublicKeyCredentialRequestOptions)) {
             throw new InvalidChallengeException('Invalid challenge');
         }
 
-        $publicKeyCredentialLoader = PublicKeyCredentialLoader::create($attestationObjectLoader);
-
         try {
-            $credential = $publicKeyCredentialLoader->loadArray(self::decode($data));
+            $credential = $this->getSerializer()->deserialize(self::decode($data), PublicKeyCredential::class, 'json');
             $credential->response instanceof AuthenticatorAssertionResponse || throw new \RuntimeException('Invalid client response');
         } catch (\Throwable $exception) {
             throw new InvalidClientResponseException(
@@ -111,23 +128,18 @@ class PasskeyService
             );
         }
 
-        $algorithmManager = Manager::create()->add(
-            ES256::create(),
-            RS256::create(),
-        );
-
         $passkey = $this->repository->findKeyByCredential($credential);
         if (!$passkey instanceof Passkey || $passkey->data === '') {
             throw new PasskeyNotFoundException('Unregistered passkey');
         }
 
-        $existingCredentialSource = PublicKeyCredentialSource::createFromArray($passkey->getData());
+        $existingCredentialSource = $this->getSerializer()->deserialize($passkey->data, PublicKeyCredentialSource::class, 'json');
 
         $authenticatorAssertionResponseValidator = AuthenticatorAssertionResponseValidator::create(
             null,
             null,
             ExtensionOutputCheckerHandler::create(),
-            $algorithmManager
+            $this->getAlgorithmManager()
         );
 
         $credentialSource = $authenticatorAssertionResponseValidator->check(
@@ -151,20 +163,14 @@ class PasskeyService
 
     public function store(User $user, string $challenge, string $data): Passkey
     {
-        $attestationStatementSupportManager = AttestationStatementSupportManager::create();
-        $attestationStatementSupportManager->add(NoneAttestationStatementSupport::create());
-
-        $attestationObjectLoader = AttestationObjectLoader::create($attestationStatementSupportManager);
-        $publicKeyCredentialLoader = PublicKeyCredentialLoader::create($attestationObjectLoader);
-
         $authenticatorAttestationResponseValidator = AuthenticatorAttestationResponseValidator::create(
-            $attestationStatementSupportManager,
+            $this->getAttestationStatementSupportManager(),
             null,
             null,
             ExtensionOutputCheckerHandler::create(),
         );
 
-        $credential = $publicKeyCredentialLoader->loadArray(self::decode($data));
+        $credential = $this->getSerializer()->deserialize(self::decode($data), PublicKeyCredential::class, 'json');
         $credential->response instanceof AuthenticatorAttestationResponse || throw new \RuntimeException('Invalid response data');
 
         $creationOptions = $this->getCreationOptions($challenge);
@@ -221,7 +227,7 @@ class PasskeyService
             rp: $this->getRelyingParty(),
             user: $this->getUserEntity($user),
             challenge: $challenge,
-            pubKeyCredParams: $this->config->getSupported(),
+            pubKeyCredParams: $this->config->getSupportedPublicKeyCredentials(),
             authenticatorSelection: $this->getAuthenticatorSelectionCriteria(),
             attestation: PublicKeyCredentialCreationOptions::ATTESTATION_CONVEYANCE_PREFERENCE_NONE,
             excludeCredentials: $this->getExistingCredentials($user),
@@ -247,7 +253,7 @@ class PasskeyService
 
     protected function storeCreationOptions(string $name, string $challenge, PublicKeyCredentialCreationOptions $options): void
     {
-        $creation = new CreationChallenge($name, $challenge, $options);
+        $creation = new CreationChallenge($this->getSerializer(), $name, $challenge, $options);
 
         $cacheKey = $this->challengeCacheKey($challenge);
 
@@ -257,7 +263,7 @@ class PasskeyService
 
     protected function storeRequestOptions(string $challenge, PublicKeyCredentialRequestOptions $options): void
     {
-        $request = new RequestChallenge($challenge, $options);
+        $request = new RequestChallenge($this->getSerializer(), $challenge, $options);
 
         $cacheKey = $this->challengeCacheKey($challenge);
 
@@ -278,7 +284,7 @@ class PasskeyService
             return null;
         }
 
-        return CreationChallenge::fromArray($data);
+        return CreationChallenge::fromArray($data, $this->getSerializer());
     }
 
     protected function getRequestOptions(string $challenge): ?RequestChallenge
@@ -288,7 +294,7 @@ class PasskeyService
             return null;
         }
 
-        return RequestChallenge::fromArray($data);
+        return RequestChallenge::fromArray($data, $this->getSerializer());
     }
 
     protected function challengeCacheKey(string $challenge): string
@@ -344,10 +350,10 @@ class PasskeyService
         );
     }
 
-    protected function getExtensions(): AuthenticationExtensionsClientInputs
+    protected function getExtensions(): AuthenticationExtensions
     {
-        return AuthenticationExtensionsClientInputs::create([
-            AuthenticationExtension::create('credProps', true),
+        return AuthenticationExtensions::create([
+            AuthenticationExtension::create('credProps', true)
         ]);
     }
 }

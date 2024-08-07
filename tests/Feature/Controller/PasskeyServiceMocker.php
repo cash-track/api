@@ -68,7 +68,7 @@ trait PasskeyServiceMocker
             'pubKeyCredParams' => array_map(fn (PublicKeyCredentialParameters $item) => [
                 'type' => $item->type,
                 'alg' => $item->alg,
-            ], $config->getSupported()),
+            ], $config->getSupportedPublicKeyCredentials()),
             'timeout' => $config->getTimeout(),
             'excludeCredentials' => array_map(fn (Passkey $key) => [
                 'type' => 'public-key',

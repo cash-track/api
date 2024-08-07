@@ -118,7 +118,7 @@ class GoogleAuthService extends AuthService
             throw new \RuntimeException($exception->getMessage(), (int) $exception->getCode(), $exception);
         }
 
-        if ($user instanceof User && !($data['email_verified'] ?? false)) {
+        if ($user instanceof User && ($data['email_verified'] ?? false) === false) {
             $this->logger->error('Unable to attach Google Account to existing user, Google email is not verified.', [
                 'data' => json_encode($data),
             ]);
