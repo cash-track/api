@@ -48,7 +48,7 @@ class RedisBootloader extends Bootloader
             throw new \RedisException("Unable to connect to Redis");
         }
 
-        if (! $redis->ping()) {
+        if ($redis->ping() === false) {
             $this->logger->emergency("PING to a Redis instance is not successful [{$uri}]: {$redis->getLastError()}");
 
             throw new \RedisException("Unable to connect to Redis");

@@ -196,7 +196,7 @@ class WalletService
     {
         $code = $defaultCurrencyCode ?? Currency::DEFAULT_CURRENCY_CODE;
 
-        if (!empty($wallet->defaultCurrencyCode)) {
+        if ($wallet->defaultCurrencyCode !== null && $wallet->defaultCurrencyCode !== '') {
             $code = $wallet->defaultCurrencyCode;
         }
 
