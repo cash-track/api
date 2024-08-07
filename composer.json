@@ -25,6 +25,7 @@
         "kreait/firebase-php": "^7.10",
         "laminas/laminas-diactoros": "^2.26",
         "lcobucci/jwt": "^4.3",
+        "phpdocumentor/reflection-docblock": "^5.4",
         "ramsey/uuid": "^4.7",
         "spiral-packages/league-event": "^1.0",
         "spiral-packages/scheduler": "^2.1",
