@@ -184,7 +184,7 @@ class GoogleAuthService extends AuthService
     protected function makeGoogleAccount(User $user, array $data): GoogleAccount
     {
         $account = new GoogleAccount();
-        $account->userId = $user->id;
+        $account->userId = (int) $user->id;
         $account->accountId = $data['sub'] ?? null;
         $account->pictureUrl = $data['picture'] ?? null;
         $account->setData($data);

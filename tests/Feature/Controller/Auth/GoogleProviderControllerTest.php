@@ -8,6 +8,7 @@ use App\Repository\UserRepository;
 use App\Service\PhotoStorageService;
 use PHPUnit\Framework\MockObject\MockObject;
 use Tests\DatabaseTransaction;
+use Tests\Factories\GoogleAccountFactory;
 use Tests\Factories\UserFactory;
 use Tests\Fixtures;
 use Tests\TestCase;
@@ -16,11 +17,14 @@ class GoogleProviderControllerTest extends TestCase implements DatabaseTransacti
 {
     protected UserFactory $userFactory;
 
+    protected GoogleAccountFactory $googleAccountFactory;
+
     protected function setUp(): void
     {
         parent::setUp();
 
         $this->userFactory = $this->getContainer()->get(UserFactory::class);
+        $this->googleAccountFactory = $this->getContainer()->get(GoogleAccountFactory::class);
     }
 
     protected function googleAccountInfo(): array
@@ -167,7 +171,7 @@ class GoogleProviderControllerTest extends TestCase implements DatabaseTransacti
         ];
 
         $user = $this->userFactory->create($user);
-        $user = $this->userFactory->create(UserFactory::withGoogleAccount($existingData, $user));
+        $this->googleAccountFactory->create(GoogleAccountFactory::withUser($user, $existingData));
 
         $googleClient = $this->getMockBuilder(\Google\Client::class)->onlyMethods(['verifyIdToken'])->disableOriginalConstructor()->getMock();
         $googleClient->expects($this->once())->method('verifyIdToken')->with($token)->willReturn([
@@ -232,7 +236,7 @@ class GoogleProviderControllerTest extends TestCase implements DatabaseTransacti
         ];
 
         $user = $this->userFactory->create($user);
-        $user = $this->userFactory->create(UserFactory::withGoogleAccount($existingData, $user));
+        $this->googleAccountFactory->create(GoogleAccountFactory::withUser($user, $existingData));
 
         [
             'token' => $token,

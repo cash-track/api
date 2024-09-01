@@ -10,22 +10,23 @@ use App\Request\Profile\UpdateBasicRequest;
 use App\Service\UserService;
 use Spiral\Testing\Http\TestResponse;
 use Tests\DatabaseTransaction;
+use Tests\Factories\GoogleAccountFactory;
 use Tests\Factories\UserFactory;
 use Tests\Fixtures;
 use Tests\TestCase;
 
 class ProfileControllerTest extends TestCase implements DatabaseTransaction
 {
-    /**
-     * @var \Tests\Factories\UserFactory
-     */
     protected UserFactory $userFactory;
+
+    protected GoogleAccountFactory $googleAccountFactory;
 
     protected function setUp(): void
     {
         parent::setUp();
 
         $this->userFactory = $this->getContainer()->get(UserFactory::class);
+        $this->googleAccountFactory = $this->getContainer()->get(GoogleAccountFactory::class);
     }
 
     private function userFields(): array
@@ -487,7 +488,7 @@ class ProfileControllerTest extends TestCase implements DatabaseTransaction
         ];
 
         $user = $this->userFactory->create($user);
-        $user = $this->userFactory->create(UserFactory::withGoogleAccount($existingData, $user));
+        $this->googleAccountFactory->create(GoogleAccountFactory::withUser($user, $existingData));
 
         $auth = $this->makeAuth($user);
 
