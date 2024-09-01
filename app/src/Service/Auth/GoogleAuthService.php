@@ -8,8 +8,10 @@ use App\Database\Currency;
 use App\Database\GoogleAccount;
 use App\Database\User;
 use App\Repository\CurrencyRepository;
+use App\Repository\GoogleAccountRepository;
 use App\Repository\UserRepository;
 use App\Service\Auth\Exception\InvalidTokenException;
+use App\Service\GoogleAccountService;
 use App\Service\PhotoStorageService;
 use App\Service\UserOptionsService;
 use App\Service\UserService;
@@ -36,7 +38,9 @@ class GoogleAuthService extends AuthService
         protected CurrencyRepository $currencyRepository,
         protected PhotoStorageService $photoStorageService,
         protected RefreshTokenService $refreshTokenService,
+        protected GoogleAccountService $googleAccountService,
         protected EmailConfirmationService $emailConfirmationService,
+        protected readonly GoogleAccountRepository $googleAccountRepository,
     ) {
         parent::__construct(
             $this->auth,
@@ -48,6 +52,7 @@ class GoogleAuthService extends AuthService
             $this->userOptionsService,
             $this->currencyRepository,
             $this->refreshTokenService,
+            $this->googleAccountService,
             $this->emailConfirmationService,
         );
     }
@@ -126,25 +131,23 @@ class GoogleAuthService extends AuthService
             throw new InvalidTokenException($this->say('google_auth_account_not_verified'));
         }
 
-        if (
-            $user instanceof User &&
-            $user->googleAccount !== null &&
-            $user->googleAccount->accountId !== (string) ($data['sub'] ?? '')
-        ) {
-            $this->logger->error('Unable to attach Google Account to existing user, Google account ID is already attached and different from actual.', [
-                'data' => json_encode($data),
-            ]);
-
-            throw new InvalidTokenException($this->say('google_auth_email_already_claimed'));
-        }
-
         if ($user instanceof User) {
-            if ($user->googleAccount instanceof GoogleAccount) {
+            $googleAccount = $this->googleAccountRepository->findByUser($user);
+
+            if ($googleAccount instanceof GoogleAccount && $googleAccount->accountId !== (string) ($data['sub'] ?? '')) {
+                $this->logger->error('Unable to attach Google Account to existing user, Google account ID is already attached and different from actual.', [
+                    'data' => json_encode($data),
+                ]);
+
+                throw new InvalidTokenException($this->say('google_auth_email_already_claimed'));
+            }
+
+            if ($googleAccount instanceof GoogleAccount) {
                 // Update existing Google Account data
-                $user->googleAccount->setData($data);
+                $googleAccount->setData($data);
             } else {
                 // attach existing user to the new Google Account
-                $user->googleAccount = $this->makeGoogleAccount($data);
+                $googleAccount = $this->makeGoogleAccount($user, $data);
 
                 if ($user->photo === null) {
                     $this->photoStorageService->queueDownloadProfilePhoto((int) $user->id, $data['picture']);
@@ -152,10 +155,13 @@ class GoogleAuthService extends AuthService
             }
 
             $this->storeUser($user);
+            $this->storeGoogleAccount($googleAccount);
         } else {
             // new user
             $user = $this->makeUser($data);
             $user = $this->createUser($user);
+            $googleAccount = $this->makeGoogleAccount($user, $data);
+            $this->storeGoogleAccount($googleAccount);
             $this->photoStorageService->queueDownloadProfilePhoto((int) $user->id, $data['picture']);
         }
 
@@ -171,14 +177,14 @@ class GoogleAuthService extends AuthService
         $user->email = $data['email'] ?? null;
         $user->defaultCurrencyCode = Currency::DEFAULT_CURRENCY_CODE;
         $user->isEmailConfirmed = (bool) ($data['email_verified'] ?? false);
-        $user->googleAccount = $this->makeGoogleAccount($data);
 
         return $user;
     }
 
-    protected function makeGoogleAccount(array $data): GoogleAccount
+    protected function makeGoogleAccount(User $user, array $data): GoogleAccount
     {
         $account = new GoogleAccount();
+        $account->userId = $user->id;
         $account->accountId = $data['sub'] ?? null;
         $account->pictureUrl = $data['picture'] ?? null;
         $account->setData($data);

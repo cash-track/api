@@ -8,6 +8,7 @@ use App\Controller\AuthAwareController;
 use App\Database\Currency;
 use App\Database\GoogleAccount;
 use App\Repository\CurrencyRepository;
+use App\Repository\GoogleAccountRepository;
 use App\Request\CheckNickNameRequest;
 use App\Request\Profile\UpdateBasicRequest;
 use App\Request\Profile\UpdateLocaleRequest;
@@ -33,6 +34,7 @@ class ProfileController extends AuthAwareController
         protected ResponseWrapper $response,
         protected CurrencyRepository $currencyRepository,
         protected UserOptionsService $userOptionsService,
+        protected GoogleAccountRepository $googleAccountRepository,
     ) {
         parent::__construct($auth);
     }
@@ -121,9 +123,11 @@ class ProfileController extends AuthAwareController
     #[Route(route: '/profile/social', name: 'profile.social', methods: 'GET', group: 'auth')]
     public function socialAccounts(): ResponseInterface
     {
+        $googleAccount = $this->googleAccountRepository->findByUser($this->user);
+
         return $this->response->json([
             'data' => [
-                'google' => $this->user->googleAccount instanceof GoogleAccount
+                'google' => $googleAccount instanceof GoogleAccount
             ],
         ]);
     }
