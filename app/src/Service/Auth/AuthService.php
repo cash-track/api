@@ -5,10 +5,12 @@ declare(strict_types=1);
 namespace App\Service\Auth;
 
 use App\Database\Currency;
+use App\Database\GoogleAccount;
 use App\Database\User;
 use App\Repository\CurrencyRepository;
 use App\Repository\UserRepository;
 use App\Security\PasswordContainerInterface;
+use App\Service\GoogleAccountService;
 use App\Service\UserOptionsService;
 use App\Service\UserService;
 use Psr\Http\Message\ServerRequestInterface;
@@ -35,6 +37,7 @@ class AuthService
         protected UserOptionsService $userOptionsService,
         protected CurrencyRepository $currencyRepository,
         protected RefreshTokenService $refreshTokenService,
+        protected GoogleAccountService $googleAccountService,
         protected EmailConfirmationService $emailConfirmationService,
     ) {
     }
@@ -135,13 +138,6 @@ class AuthService
 
         $this->userOptionsService->setLocale($user, $locale ?? $this->translator->getLocale());
 
-        if (($googleAccount = $user->googleAccount) !== null) {
-            // insert user first
-            $user->googleAccount = null;
-            $this->storeUser($user);
-            $user->googleAccount = $googleAccount;
-        }
-
         $this->storeUser($user);
 
         if (! $user->isEmailConfirmed) {
@@ -157,6 +153,21 @@ class AuthService
             return $this->userService->store($user);
         } catch (\Throwable $exception) {
             $this->logger->error('Error while storing user', [
+                'error' => get_class($exception),
+                'message' => $exception->getMessage(),
+                'code' => $exception->getCode(),
+            ]);
+
+            throw new \RuntimeException($exception->getMessage(), (int) $exception->getCode(), $exception);
+        }
+    }
+
+    protected function storeGoogleAccount(GoogleAccount $googleAccount): GoogleAccount
+    {
+        try {
+            return $this->googleAccountService->store($googleAccount);
+        } catch (\Throwable $exception) {
+            $this->logger->error('Error while storing googleAccount', [
                 'error' => get_class($exception),
                 'message' => $exception->getMessage(),
                 'code' => $exception->getCode(),

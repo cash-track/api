@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace Tests\Feature\Controller\Auth;
 
 use App\Repository\UserRepository;
+use App\Service\GoogleAccountService;
 use App\Service\PhotoStorageService;
 use PHPUnit\Framework\MockObject\MockObject;
 use Tests\DatabaseTransaction;
+use Tests\Factories\GoogleAccountFactory;
 use Tests\Factories\UserFactory;
 use Tests\Fixtures;
 use Tests\TestCase;
@@ -16,11 +18,14 @@ class GoogleProviderControllerTest extends TestCase implements DatabaseTransacti
 {
     protected UserFactory $userFactory;
 
+    protected GoogleAccountFactory $googleAccountFactory;
+
     protected function setUp(): void
     {
         parent::setUp();
 
         $this->userFactory = $this->getContainer()->get(UserFactory::class);
+        $this->googleAccountFactory = $this->getContainer()->get(GoogleAccountFactory::class);
     }
 
     protected function googleAccountInfo(): array
@@ -167,7 +172,7 @@ class GoogleProviderControllerTest extends TestCase implements DatabaseTransacti
         ];
 
         $user = $this->userFactory->create($user);
-        $user = $this->userFactory->create(UserFactory::withGoogleAccount($existingData, $user));
+        $this->googleAccountFactory->create(GoogleAccountFactory::withUser($user, $existingData));
 
         $googleClient = $this->getMockBuilder(\Google\Client::class)->onlyMethods(['verifyIdToken'])->disableOriginalConstructor()->getMock();
         $googleClient->expects($this->once())->method('verifyIdToken')->with($token)->willReturn([
@@ -232,7 +237,7 @@ class GoogleProviderControllerTest extends TestCase implements DatabaseTransacti
         ];
 
         $user = $this->userFactory->create($user);
-        $user = $this->userFactory->create(UserFactory::withGoogleAccount($existingData, $user));
+        $this->googleAccountFactory->create(GoogleAccountFactory::withUser($user, $existingData));
 
         [
             'token' => $token,
@@ -425,5 +430,57 @@ class GoogleProviderControllerTest extends TestCase implements DatabaseTransacti
         $this->assertArrayHasKey('error', $body);
         $this->assertArrayHasKey('message', $body);
         $this->assertEquals($message, $body['error']);
+    }
+
+    public function testGoogleAccountStoreError(): void
+    {
+        [
+            'token' => $token,
+            'googleId' => $googleId,
+            'email' => $email,
+            'photoUrl' => $photoUrl,
+        ] = $this->googleAccountInfo();
+
+        $googleClient = $this->getMockBuilder(\Google\Client::class)->onlyMethods(['verifyIdToken'])->disableOriginalConstructor()->getMock();
+        $googleClient->expects($this->once())->method('verifyIdToken')->with($token)->willReturn([
+            'sub' => $googleId,
+            'email' => $email,
+            'email_verified' => true,
+            'picture' => $photoUrl,
+            'given_name' => Fixtures::string(),
+            'family_name' => Fixtures::string(),
+        ]);
+        $this->getContainer()->bind(\Google\Client::class, fn() => $googleClient);
+
+        $this->mock(PhotoStorageService::class, ['queueDownloadProfilePhoto'], function (MockObject $mock) use ($photoUrl) {
+            $mock->expects($this->never())->method('queueDownloadProfilePhoto')->with($this->anything(), $photoUrl, null, null);
+        });
+
+        $mock = $this->getMockBuilder(GoogleAccountService::class)
+                     ->disableOriginalConstructor()
+                     ->onlyMethods(['store'])
+                     ->getMock();
+
+        $mock->expects($this->once())
+             ->method('store')
+             ->willThrowException(new \RuntimeException('Database exception'));
+
+        $this->getContainer()->bind(GoogleAccountService::class, fn () => $mock);
+
+        $response = $this->post('/auth/provider/google', [
+            'token' => $token,
+        ]);
+
+        $response->assertStatus(500);
+
+        $body = $this->getJsonResponseBody($response);
+
+        $this->assertArrayHasKey('message', $body);
+        $this->assertArrayHasKey('error', $body);
+
+        $this->assertDatabaseHas('users', ['email' => $email]);
+        $this->assertDatabaseMissing('google_accounts', [
+            'account_id' => $googleId,
+        ]);
     }
 }

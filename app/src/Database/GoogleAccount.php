@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace App\Database;
 
 use App\Database\Typecast\EncryptedTypecast;
-use App\Repository\ChargeRepository;
+use App\Repository\GoogleAccountRepository;
 use Cycle\Annotated\Annotation as ORM;
 use Cycle\ORM\Entity\Behavior;
 use Cycle\ORM\Parser\Typecast;
 
-#[ORM\Entity(repository: ChargeRepository::class, typecast: [
+#[ORM\Entity(repository: GoogleAccountRepository::class, typecast: [
     Typecast::class,
     EncryptedTypecast::class,
 ])]
