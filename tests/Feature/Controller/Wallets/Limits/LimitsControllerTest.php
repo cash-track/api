@@ -759,4 +759,28 @@ class LimitsControllerTest extends TestCase implements DatabaseTransaction
             }
         }
     }
+
+    public function testCopyThrownException(): void
+    {
+        $auth = $this->makeAuth($user = $this->userFactory->create());
+
+        $wallet = $this->walletFactory->forUser($user)->create();
+
+        $sourceWallet = $this->walletFactory->forUser($user)->create();
+        $tags = $this->tagFactory->forUser($user)->createMany(2);
+        $this->limitFactory->forWallet($sourceWallet)->withTags($tags->toArray())->createMany(2);
+
+        $this->mock(LimitService::class, ['copy'], function (MockObject $mock) {
+            $mock->expects($this->once())->method('copy')->willThrowException(new \RuntimeException());
+        });
+
+        $response = $this->withAuth($auth)->post("/wallets/{$wallet->id}/limits/copy/{$sourceWallet->id}");
+
+        $response->assertStatus(500);
+
+        $body = $this->getJsonResponseBody($response);
+
+        $this->assertArrayHasKey('error', $body);
+        $this->assertArrayHasKey('message', $body);
+    }
 }

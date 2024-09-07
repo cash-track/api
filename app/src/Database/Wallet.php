@@ -61,7 +61,7 @@ class Wallet implements Sortable
     public PivotedCollection $users;
 
     #[ORM\Relation\HasMany(target: Limit::class, outerKey: 'wallet_id', load: 'lazy')]
-    private PivotedCollection $limits;
+    public PivotedCollection $limits;
 
     /**
      * @var \Doctrine\Common\Collections\ArrayCollection<int, \App\Database\Charge>|null

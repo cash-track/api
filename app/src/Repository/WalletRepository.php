@@ -135,6 +135,7 @@ class WalletRepository extends Repository
                     ->with('limits', ['method' => Select\JoinableLoader::JOIN])
                     ->where('users.id', $userID)
                     ->where('is_archived', $isArchived)
+                    ->orderBy('created_at', 'DESC')
                     ->fetchAll();
 
         return $wallets;
