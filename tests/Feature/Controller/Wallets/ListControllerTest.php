@@ -9,6 +9,8 @@ use App\Repository\UserRepository;
 use App\Service\Sort\SortService;
 use PHPUnit\Framework\MockObject\MockObject;
 use Tests\DatabaseTransaction;
+use Tests\Factories\LimitFactory;
+use Tests\Factories\TagFactory;
 use Tests\Factories\UserFactory;
 use Tests\Factories\WalletFactory;
 use Tests\TestCase;
@@ -19,12 +21,18 @@ class ListControllerTest extends TestCase implements DatabaseTransaction
 
     protected WalletFactory $walletFactory;
 
+    protected LimitFactory $limitFactory;
+
+    protected TagFactory $tagFactory;
+
     protected function setUp(): void
     {
         parent::setUp();
 
         $this->userFactory = $this->getContainer()->get(UserFactory::class);
         $this->walletFactory = $this->getContainer()->get(WalletFactory::class);
+        $this->limitFactory = $this->getContainer()->get(LimitFactory::class);
+        $this->tagFactory = $this->getContainer()->get(TagFactory::class);
     }
 
     public function testListRequireAuth(): void
@@ -218,5 +226,41 @@ class ListControllerTest extends TestCase implements DatabaseTransaction
         ]);
 
         $response->assertOk();
+    }
+
+    public function testListHasLimitsRequireAuth(): void
+    {
+        $response = $this->get('/wallets/has-limits');
+
+        $response->assertUnauthorized();
+    }
+
+    public function testListHasLimitsReturnsWalletsWithLimits(): void
+    {
+        $auth = $this->makeAuth($user = $this->userFactory->create());
+
+        /** @var \Doctrine\Common\Collections\ArrayCollection<int, Wallet> $wallets */
+        $wallets = $this->walletFactory->forUser($user)->createMany(3);
+        foreach ($wallets as $wallet) {
+            $tag = $this->tagFactory->forUser($user)->create();
+            $this->limitFactory->forWallet($wallet)->withTags([$tag])->create();
+        }
+        $walletWithoutLimit = $this->walletFactory->forUser($user)->create();
+
+        $response = $this->withAuth($auth)->get('/wallets/has-limits');
+
+        $response->assertOk();
+
+        $body = $this->getJsonResponseBody($response);
+
+        foreach ($wallets as $wallet) {
+            $this->assertArrayContains($wallet->id, $body, 'data.*.id');
+            $this->assertArrayContains($wallet->name, $body, 'data.*.name');
+            $this->assertArrayContains($wallet->slug, $body, 'data.*.slug');
+        }
+
+        $this->assertArrayNotContains($walletWithoutLimit->id, $body, 'data.*.id');
+        $this->assertArrayNotContains($walletWithoutLimit->name, $body, 'data.*.name');
+        $this->assertArrayNotContains($walletWithoutLimit->slug, $body, 'data.*.slug');
     }
 }

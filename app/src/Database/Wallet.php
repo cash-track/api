@@ -60,6 +60,9 @@ class Wallet implements Sortable
     #[ORM\Relation\ManyToMany(target: User::class, through: UserWallet::class, collection: 'doctrine')]
     public PivotedCollection $users;
 
+    #[ORM\Relation\HasMany(target: Limit::class, outerKey: 'wallet_id', load: 'lazy')]
+    private PivotedCollection $limits;
+
     /**
      * @var \Doctrine\Common\Collections\ArrayCollection<int, \App\Database\Charge>|null
      */
@@ -69,6 +72,7 @@ class Wallet implements Sortable
     {
         $this->defaultCurrency = new Currency();
         $this->users = new PivotedCollection();
+        $this->limits = new PivotedCollection();
         $this->createdAt = new \DateTimeImmutable();
         $this->updatedAt = new \DateTimeImmutable();
     }
@@ -99,6 +103,24 @@ class Wallet implements Sortable
         }
 
         return $users;
+    }
+
+    /**
+     * @return array<int, \App\Database\Limit>
+     */
+    public function getLimits(): array
+    {
+        $limits = [];
+
+        foreach ($this->limits->getValues() as $limit) {
+            if (! $limit instanceof Limit) {
+                continue;
+            }
+
+            $limits[] = $limit;
+        }
+
+        return $limits;
     }
 
     /**

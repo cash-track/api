@@ -13,6 +13,7 @@ use App\Service\UserService;
 use App\View\WalletsView;
 use Psr\Http\Message\ResponseInterface;
 use Spiral\Auth\AuthScope;
+use Spiral\Http\Request\InputManager;
 use Spiral\Http\ResponseWrapper;
 use Spiral\Router\Annotation\Route;
 
@@ -62,6 +63,14 @@ final class ListController extends Controller
     {
         return $this->walletsView->json(
             $this->walletRepository->findAllByUserPKByArchived((int) $this->user->id, true)
+        );
+    }
+
+    #[Route(route: '/wallets/has-limits', name: 'wallet.list.has-limits', methods: 'GET', group: 'auth', priority: -1)]
+    public function listHasLimits(InputManager $input): ResponseInterface
+    {
+        return $this->walletsView->json(
+            $this->walletRepository->findAllHasLimitsByUserPK((int) $this->user->id, $input->query->has('archived'))
         );
     }
 }

@@ -168,4 +168,39 @@ final class LimitsController extends Controller
 
         return $this->response->create(200);
     }
+
+    #[Route(route: '/wallets/<walletId>/limits/copy/<sourceWalletId>', name: 'wallet.limit.copy', methods: 'POST', group: 'auth')]
+    public function copy(string $walletId, string $sourceWalletId): ResponseInterface
+    {
+        $wallet = $this->walletRepository->findByPKByUserPK((int) $walletId, (int) $this->user->id);
+
+        if (! $wallet instanceof Wallet) {
+            return $this->response->create(404);
+        }
+
+        $sourceWallet = $this->walletRepository->findByPKByUserPK((int) $sourceWalletId, (int) $this->user->id);
+
+        if (! $sourceWallet instanceof Wallet) {
+            return $this->response->create(404);
+        }
+
+        try {
+            $limits = $this->limitService->copy($wallet, $sourceWallet);
+        } catch (Throwable $exception) {
+            $this->logger->error('Unable to copy limits', [
+                'action'   => 'wallet.limit.copy',
+                'walletId' => $wallet->id,
+                'sourceWalletId' => $sourceWallet->id,
+                'userId'   => $this->user->id,
+                'msg'      => $exception->getMessage(),
+            ]);
+
+            return $this->response->json([
+                'message' => $this->say('limit_create_exception'),
+                'error'   => $exception->getMessage(),
+            ], 500);
+        }
+
+        return $this->walletLimitsView->json($limits);
+    }
 }

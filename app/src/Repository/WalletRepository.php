@@ -119,4 +119,24 @@ class WalletRepository extends Repository
     {
         return $this->select()->wherePK($id)->where('users.id', $userID)->with('users')->fetchOne();
     }
+
+    /**
+     * @param int $userID
+     * @param bool $isArchived
+     * @return \App\Database\Wallet[]
+     */
+    public function findAllHasLimitsByUserPK(int $userID, bool $isArchived = false): array
+    {
+        /**
+         * @var \App\Database\Wallet[] $wallets
+         * @psalm-suppress InternalClass
+         */
+        $wallets = $this->select()
+                    ->with('limits', ['method' => Select\JoinableLoader::JOIN])
+                    ->where('users.id', $userID)
+                    ->where('is_archived', $isArchived)
+                    ->fetchAll();
+
+        return $wallets;
+    }
 }
