@@ -116,6 +116,7 @@ class LimitsControllerTest extends TestCase implements DatabaseTransaction
                 $chargesTotal += $charge->amount;
             }
         }
+        $chargesTotal = round($chargesTotal, 2);
 
         $chargesWithTwoTagsTotal = 0;
         foreach ($chargesWithTwoTags as $charge) {
@@ -123,6 +124,7 @@ class LimitsControllerTest extends TestCase implements DatabaseTransaction
                 $chargesWithTwoTagsTotal += $charge->amount;
             }
         }
+        $chargesWithTwoTagsTotal = round($chargesWithTwoTagsTotal, 2);
 
         $response = $this->withAuth($auth)->get("/wallets/{$wallet->id}/limits");
 
@@ -134,12 +136,12 @@ class LimitsControllerTest extends TestCase implements DatabaseTransaction
         $this->assertArrayHasKey('data', $body);
         $this->assertCount(2, $body['data']);
 
-        $this->assertEquals($chargesTotal, $body['data'][0]['amount'] ?? null);
+        $this->assertEquals((string) $chargesTotal, (string) ($body['data'][0]['amount'] ?? null));
         $this->assertEquals($limit->type, $body['data'][0]['limit']['operation'] ?? null);
         $this->assertEquals($limit->amount, $body['data'][0]['limit']['amount'] ?? null);
         $this->assertArrayContains($tag->id, $body['data'][0]['limit']['tags'], '*.id');
 
-        $this->assertEquals($chargesWithTwoTagsTotal, $body['data'][1]['amount']);
+        $this->assertEquals((string) $chargesWithTwoTagsTotal, (string) $body['data'][1]['amount']);
         $this->assertEquals($limitWithTwoTags->type, $body['data'][1]['limit']['operation'] ?? null);
         $this->assertEquals($limitWithTwoTags->amount, $body['data'][1]['limit']['amount'] ?? null);
 
