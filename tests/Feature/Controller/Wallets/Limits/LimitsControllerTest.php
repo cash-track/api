@@ -116,6 +116,7 @@ class LimitsControllerTest extends TestCase implements DatabaseTransaction
                 $chargesTotal += $charge->amount;
             }
         }
+        $chargesTotal = round($chargesTotal, 2);
 
         $chargesWithTwoTagsTotal = 0;
         foreach ($chargesWithTwoTags as $charge) {
@@ -123,6 +124,7 @@ class LimitsControllerTest extends TestCase implements DatabaseTransaction
                 $chargesWithTwoTagsTotal += $charge->amount;
             }
         }
+        $chargesWithTwoTagsTotal = round($chargesWithTwoTagsTotal, 2);
 
         $response = $this->withAuth($auth)->get("/wallets/{$wallet->id}/limits");
 
@@ -134,12 +136,12 @@ class LimitsControllerTest extends TestCase implements DatabaseTransaction
         $this->assertArrayHasKey('data', $body);
         $this->assertCount(2, $body['data']);
 
-        $this->assertEquals($chargesTotal, $body['data'][0]['amount'] ?? null);
+        $this->assertEquals((string) $chargesTotal, (string) ($body['data'][0]['amount'] ?? null));
         $this->assertEquals($limit->type, $body['data'][0]['limit']['operation'] ?? null);
         $this->assertEquals($limit->amount, $body['data'][0]['limit']['amount'] ?? null);
         $this->assertArrayContains($tag->id, $body['data'][0]['limit']['tags'], '*.id');
 
-        $this->assertEquals($chargesWithTwoTagsTotal, $body['data'][1]['amount']);
+        $this->assertEquals((string) $chargesWithTwoTagsTotal, (string) $body['data'][1]['amount']);
         $this->assertEquals($limitWithTwoTags->type, $body['data'][1]['limit']['operation'] ?? null);
         $this->assertEquals($limitWithTwoTags->amount, $body['data'][1]['limit']['amount'] ?? null);
 
@@ -659,6 +661,120 @@ class LimitsControllerTest extends TestCase implements DatabaseTransaction
         });
 
         $response = $this->withAuth($auth)->delete("/wallets/{$wallet->id}/limits/{$limit->id}");
+
+        $response->assertStatus(500);
+
+        $body = $this->getJsonResponseBody($response);
+
+        $this->assertArrayHasKey('error', $body);
+        $this->assertArrayHasKey('message', $body);
+    }
+
+    public function testCopyRequireAuth(): void
+    {
+        $user = $this->userFactory->create();
+        $wallet = $this->walletFactory->forUser($user)->create();
+        $sourceWallet = $this->walletFactory->forUser($user)->create();
+        $this->limitFactory->forWallet($sourceWallet)->create();
+
+        $response = $this->post("/wallets/{$wallet->id}/limits/copy/{$sourceWallet->id}");
+
+        $response->assertUnauthorized();
+    }
+
+    public function testCopyMissingWalletsStillRequireAuth(): void
+    {
+        $user = $this->userFactory->create();
+        $wallet = $this->walletFactory->forUser($user)->create();
+        $sourceWallet = $this->walletFactory->forUser($user)->create();
+        $this->limitFactory->forWallet($sourceWallet)->create();
+
+        $walletId = Fixtures::integer();
+        $sourceWalletId = Fixtures::integer();
+
+        $response = $this->post("/wallets/{$walletId}/limits/copy/{$sourceWallet->id}");
+        $response->assertUnauthorized();
+
+        $response = $this->post("/wallets/{$wallet->id}/limits/copy/{$sourceWalletId}");
+        $response->assertUnauthorized();
+
+        $response = $this->post("/wallets/{$walletId}/limits/copy/{$sourceWalletId}");
+        $response->assertUnauthorized();
+    }
+
+    public function testCopyNonMemberWalletReturnNotFound(): void
+    {
+        $wallet = $this->walletFactory->forUser($this->userFactory->create())->create();
+
+        $auth = $this->makeAuth($user = $this->userFactory->create());
+        $sourceWallet = $this->walletFactory->forUser($user)->create();
+        $this->limitFactory->forWallet($sourceWallet)->create();
+
+        $response = $this->withAuth($auth)->post("/wallets/{$wallet->id}/limits/copy/{$sourceWallet->id}");
+        $response->assertNotFound();
+    }
+
+    public function testCopyNonMemberSourceWalletReturnNotFound(): void
+    {
+        $auth = $this->makeAuth($user = $this->userFactory->create());
+        $wallet = $this->walletFactory->forUser($user)->create();
+
+        $sourceWallet = $this->walletFactory->forUser($this->userFactory->create())->create();
+        $this->limitFactory->forWallet($sourceWallet)->create();
+
+        $response = $this->withAuth($auth)->post("/wallets/{$wallet->id}/limits/copy/{$sourceWallet->id}");
+        $response->assertNotFound();
+    }
+
+    public function testCopyCreatesLimitsFromSourceWallet(): void
+    {
+        $auth = $this->makeAuth($user = $this->userFactory->create());
+
+        $wallet = $this->walletFactory->forUser($user)->create();
+
+        $sourceWallet = $this->walletFactory->forUser($user)->create();
+        $tags = $this->tagFactory->forUser($user)->createMany(2);
+        $limits = $this->limitFactory->forWallet($sourceWallet)->withTags($tags->toArray())->createMany(2);
+
+        $response = $this->withAuth($auth)->post("/wallets/{$wallet->id}/limits/copy/{$sourceWallet->id}");
+
+        $response->assertOk();
+
+        $body = $this->getJsonResponseBody($response);
+
+        $this->assertIsArray($body);
+        $this->assertArrayHasKey('data', $body);
+        $this->assertCount(count($limits), $body['data']);
+
+        foreach ($limits as $i => $limit) {
+            /** @var \App\Database\Limit $limit */
+            $this->assertArrayContains($limit->type, $body, 'data.*.limit.operation');
+            $this->assertArrayContains($limit->amount, $body, 'data.*.limit.amount');
+            $this->assertArrayContains($wallet->id, $body, 'data.*.limit.walletId');
+
+            $this->assertArrayHasKey('tags', $body['data'][$i]['limit']);
+            $this->assertCount(count($limits), $body['data'][$i]['limit']['tags']);
+            foreach ($tags as $tag) {
+                $this->assertArrayContains($tag->id, $body['data'][$i], 'limit.tags.*.id');
+            }
+        }
+    }
+
+    public function testCopyThrownException(): void
+    {
+        $auth = $this->makeAuth($user = $this->userFactory->create());
+
+        $wallet = $this->walletFactory->forUser($user)->create();
+
+        $sourceWallet = $this->walletFactory->forUser($user)->create();
+        $tags = $this->tagFactory->forUser($user)->createMany(2);
+        $this->limitFactory->forWallet($sourceWallet)->withTags($tags->toArray())->createMany(2);
+
+        $this->mock(LimitService::class, ['copy'], function (MockObject $mock) {
+            $mock->expects($this->once())->method('copy')->willThrowException(new \RuntimeException());
+        });
+
+        $response = $this->withAuth($auth)->post("/wallets/{$wallet->id}/limits/copy/{$sourceWallet->id}");
 
         $response->assertStatus(500);
 

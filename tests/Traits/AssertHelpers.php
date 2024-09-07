@@ -21,6 +21,13 @@ trait AssertHelpers
         $value = data_get($haystack, $key, []);
 
         if (is_array($value)) {
+            foreach ($value as &$item) {
+                if (is_float($item) || is_int($item)) {
+                    $item = (string) $item;
+                    $needle = (string) $needle;
+                }
+            }
+
             $this->assertContains($needle, $value, $debug);
             return;
         }
