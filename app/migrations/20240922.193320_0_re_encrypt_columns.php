@@ -68,6 +68,10 @@ class ReEncryptColumnsMigration extends Migration
 
     private function convert(string $value): string
     {
+        if ($value === '') {
+            return $value;
+        }
+
         return $this->encrypter->encrypt(
             $this->encrypter->decrypt($value, Cipher::AES256ECB),
             Cipher::AES256GCM,
