@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Tests\Feature\Database\Encrypter;
+namespace Tests\Feature\Service\Encrypter;
 
 use App\Config\AppConfig;
-use App\Database\Encrypter\Encrypter;
+use App\Service\Encrypter\Encrypter;
 use Spiral\Encrypter\Exception\EncrypterException;
 use Tests\Fixtures;
 use Tests\TestCase;

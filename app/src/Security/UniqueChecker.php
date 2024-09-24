@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Security;
 
-use App\Database\Encrypter\EncrypterInterface;
+use App\Service\Encrypter\EncrypterInterface;
 use Cycle\ORM\ORMInterface;
 use Spiral\Validator\AbstractChecker;
 

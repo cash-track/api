@@ -28,16 +28,16 @@ class User implements PasswordContainerInterface
     #[ORM\Column('primary')]
     public int|null $id = null;
 
-    #[ORM\Column(type: 'string(1536)', typecast: EncryptedTypecast::RULE)]
+    #[ORM\Column(type: 'string(1536)', typecast: EncryptedTypecast::STORE)]
     public string $name = '';
 
-    #[ORM\Column(type: 'string(1536)', name: 'last_name', nullable: true, typecast: EncryptedTypecast::RULE)]
+    #[ORM\Column(type: 'string(1536)', name: 'last_name', nullable: true, typecast: EncryptedTypecast::STORE)]
     public string|null $lastName = null;
 
-    #[ORM\Column(type: 'string(767)', name: 'nick_name', typecast: EncryptedTypecast::RULE)]
+    #[ORM\Column(type: 'string(767)', name: 'nick_name', typecast: EncryptedTypecast::QUERY)]
     public string $nickName = '';
 
-    #[ORM\Column(type: 'string(676)', typecast: EncryptedTypecast::RULE)]
+    #[ORM\Column(type: 'string(676)', typecast: EncryptedTypecast::QUERY)]
     public string $email = '';
 
     #[ORM\Column(type: 'boolean', name: 'is_email_confirmed', default: false)]

@@ -20,13 +20,13 @@ class GoogleAccount
     #[ORM\Column(type: 'int', name: 'user_id', primary: true)]
     public int $userId = 0;
 
-    #[ORM\Column(type: 'string', name: 'account_id', typecast: EncryptedTypecast::RULE)]
+    #[ORM\Column(type: 'string', name: 'account_id', typecast: EncryptedTypecast::STORE)]
     public string $accountId = '';
 
-    #[ORM\Column(type: 'string(1024)', name: 'picture_url', nullable: true, typecast: EncryptedTypecast::RULE)]
+    #[ORM\Column(type: 'string(1024)', name: 'picture_url', nullable: true, typecast: EncryptedTypecast::STORE)]
     public ?string $pictureUrl = null;
 
-    #[ORM\Column(type: 'text', typecast: EncryptedTypecast::RULE)]
+    #[ORM\Column(type: 'text', typecast: EncryptedTypecast::STORE)]
     public string $data = '';
 
     #[ORM\Column(type: 'datetime', name: 'created_at')]
