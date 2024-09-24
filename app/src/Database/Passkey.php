@@ -23,13 +23,13 @@ class Passkey
     #[ORM\Column(type: 'int', name: 'user_id')]
     public int $userId = 0;
 
-    #[ORM\Column(type: 'string(1536)', name: 'name', typecast: EncryptedTypecast::RULE)]
+    #[ORM\Column(type: 'string(1536)', name: 'name', typecast: EncryptedTypecast::STORE)]
     public string $name = '';
 
-    #[ORM\Column(type: 'string(6144)', name: 'key_id', typecast: EncryptedTypecast::RULE)]
+    #[ORM\Column(type: 'string(6144)', name: 'key_id', typecast: EncryptedTypecast::QUERY)]
     public string $keyId = '';
 
-    #[ORM\Column(type: 'text', typecast: EncryptedTypecast::RULE)]
+    #[ORM\Column(type: 'text', typecast: EncryptedTypecast::STORE)]
     public string $data = '';
 
     #[ORM\Column(type: 'datetime', name: 'created_at')]

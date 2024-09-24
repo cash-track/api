@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Repository;
 
-use App\Database\Encrypter\EncrypterInterface;
+use App\Service\Encrypter\EncrypterInterface;
 use Cycle\ORM\Select;
 use Cycle\ORM\Select\Repository;
 use ParagonIE\ConstantTime\Base64UrlSafe;
@@ -17,7 +17,7 @@ class PasskeyRepository extends Repository
 {
     /**
      * @param \Cycle\ORM\Select<\App\Database\Passkey> $select
-     * @param \App\Database\Encrypter\EncrypterInterface $encrypter
+     * @param \App\Service\Encrypter\EncrypterInterface $encrypter
      */
     public function __construct(
         Select $select,

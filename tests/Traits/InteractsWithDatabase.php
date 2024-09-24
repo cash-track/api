@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Traits;
 
-use App\Database\Encrypter\EncrypterInterface;
+use App\Service\Encrypter\EncrypterInterface;
 use Cycle\Database\DatabaseInterface;
 
 trait InteractsWithDatabase

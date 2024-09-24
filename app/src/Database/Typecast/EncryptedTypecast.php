@@ -4,15 +4,27 @@ declare(strict_types=1);
 
 namespace App\Database\Typecast;
 
+use App\Service\Encrypter\Cipher;
 use Cycle\ORM\Parser\CastableInterface;
 use Cycle\ORM\Parser\UncastableInterface;
 use Psr\Log\LoggerInterface;
-use App\Database\Encrypter\EncrypterInterface;
+use App\Service\Encrypter\EncrypterInterface;
 use Spiral\Encrypter\Exception\EncrypterException;
 
 final class EncryptedTypecast implements CastableInterface, UncastableInterface
 {
-    const RULE = 'encrypted';
+    // Encrypts database column using cipher which produces idempotent encrypted values
+    // which can be used in WHERE-like clauses against encrypted columns.
+    const QUERY = 'encrypted-query';
+
+    // Encrypts database column using strong encryption cipher that does not produce idempotent
+    // encrypted values and cannot be queries in WHERE-like clauses
+    const STORE = 'encrypted-store';
+
+    const CIPHERS = [
+        self::QUERY => Cipher::AES256ECB,
+        self::STORE => Cipher::AES256GCM,
+    ];
 
     private array $rules = [];
 
@@ -29,7 +41,7 @@ final class EncryptedTypecast implements CastableInterface, UncastableInterface
     public function setRules(array $rules): array
     {
         foreach ($rules as $key => $rule) {
-            if ($rule !== self::RULE) {
+            if ($rule !== self::QUERY && $rule !== self::STORE) {
                 continue;
             }
 
@@ -49,7 +61,7 @@ final class EncryptedTypecast implements CastableInterface, UncastableInterface
             }
 
             try {
-                $data[$column] = $this->encrypter->decrypt($data[$column]);
+                $data[$column] = $this->encrypter->decrypt($data[$column], $this->getCipherByRule($rule));
             } catch (EncrypterException $exception) {
                 $original = $data[$column];
 
@@ -78,7 +90,7 @@ final class EncryptedTypecast implements CastableInterface, UncastableInterface
             }
 
             try {
-                $data[$column] = $this->encrypter->encrypt($data[$column]);
+                $data[$column] = $this->encrypter->encrypt($data[$column], $this->getCipherByRule($rule));
             } catch (EncrypterException $exception) {
                 $this->logger->warning('Unable to encrypt database column', [
                     'column' => $column,
@@ -88,5 +100,10 @@ final class EncryptedTypecast implements CastableInterface, UncastableInterface
         }
 
         return $data;
+    }
+
+    protected function getCipherByRule(string $rule): ?Cipher
+    {
+        return static::CIPHERS[$rule] ?? null;
     }
 }

@@ -4,11 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Database\Typecast;
 
-use App\Database\Encrypter\EncrypterInterface;
-use App\Database\Typecast\EncryptedTypecast;
 use App\Database\Typecast\JsonTypecast;
 use Psr\Log\LoggerInterface;
-use Spiral\Encrypter\Exception\EncrypterException;
 use Tests\TestCase;
 
 class JsonTypecastTest extends TestCase

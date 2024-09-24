@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Security;
 
-use App\Database\Encrypter\EncrypterInterface;
+use App\Service\Encrypter\EncrypterInterface;
 use App\Security\UniqueChecker;
 use Cycle\ORM\ORMInterface;
 use Tests\Fixtures;

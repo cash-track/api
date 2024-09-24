@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Repository;
 
-use App\Database\Encrypter\EncrypterInterface;
+use App\Service\Encrypter\EncrypterInterface;
 use App\Database\User;
 use Cycle\ORM\Select;
 use Cycle\ORM\Select\Repository;
@@ -19,7 +19,7 @@ class UserRepository extends Repository implements ActorProviderInterface
 {
     /**
      * @param \Cycle\ORM\Select<User> $select
-     * @param \App\Database\Encrypter\EncrypterInterface $encrypter
+     * @param \App\Service\Encrypter\EncrypterInterface $encrypter
      */
     public function __construct(
         Select $select,
