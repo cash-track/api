@@ -31,11 +31,26 @@ class LimitService
         // TODO. Aggregate all limits using 1 query
 
         foreach ($limits as $limit) {
-            $amount = $this->chargeRepository->totalByWalletPKAndTagPKs(
+            $tagIds = array_map(fn (Tag $tag) => (int) $tag->id, $limit->getTags());
+
+            $limitAmount = $this->chargeRepository->totalByWalletPKAndTagPKs(
                 $limit->walletId,
-                array_map(fn (Tag $tag) => (int) $tag->id, $limit->getTags()),
+                $tagIds,
                 $limit->type
             );
+
+            // calculate total for opposite limit type to get the correction amount
+            $correctionAmount = $this->chargeRepository->totalByWalletPKAndTagPKs(
+                $limit->walletId,
+                $tagIds,
+                $limit->type == Limit::TYPE_INCOME ? Limit::TYPE_EXPENSE : Limit::TYPE_INCOME,
+            );
+
+            $amount = 0;
+
+            if ($correctionAmount < $limitAmount) {
+                $amount = round($limitAmount - $correctionAmount, 2);
+            }
 
             $list[] = new WalletLimit($limit, $amount);
         }
