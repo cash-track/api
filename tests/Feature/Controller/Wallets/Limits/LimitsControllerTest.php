@@ -110,21 +110,35 @@ class LimitsControllerTest extends TestCase implements DatabaseTransaction
         $chargesWithTwoTags = $this->chargeFactory->forUser($user)->forWallet($wallet)->withTags($tags->toArray())->createMany(4);
 
         $chargesTotal = 0;
+        $chargesCorrectionTotal = 0;
         foreach ($charges as $charge) {
             /** @var \App\Database\Charge $charge */
             if ($limit->type === $charge->type) {
                 $chargesTotal += $charge->amount;
+            } else {
+                $chargesCorrectionTotal += $charge->amount;
             }
         }
-        $chargesTotal = round($chargesTotal, 2);
+        if ($chargesCorrectionTotal >= $chargesTotal) {
+            $chargesTotal = 0.0;
+        } else {
+            $chargesTotal = round($chargesTotal - $chargesCorrectionTotal, 2);
+        }
 
         $chargesWithTwoTagsTotal = 0;
+        $chargesWithTwoTagsCorrectionTotal = 0;
         foreach ($chargesWithTwoTags as $charge) {
             if ($limitWithTwoTags->type === $charge->type) {
                 $chargesWithTwoTagsTotal += $charge->amount;
+            } else {
+                $chargesWithTwoTagsCorrectionTotal += $charge->amount;
             }
         }
-        $chargesWithTwoTagsTotal = round($chargesWithTwoTagsTotal, 2);
+        if ($chargesWithTwoTagsCorrectionTotal >= $chargesWithTwoTagsTotal) {
+            $chargesWithTwoTagsTotal = 0;
+        } else {
+            $chargesWithTwoTagsTotal = round($chargesWithTwoTagsTotal - $chargesWithTwoTagsCorrectionTotal, 2);
+        }
 
         $response = $this->withAuth($auth)->get("/wallets/{$wallet->id}/limits");
 
