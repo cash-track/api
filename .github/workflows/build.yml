@@ -6,6 +6,7 @@ on:
     types: [ published ]
 
 env:
+  REGISTRY: docker.io
   REPO: cashtrack/api
 
 jobs:
@@ -14,6 +15,8 @@ jobs:
     permissions:
       contents: read
       packages: write
+      id-token: write
+      attestations: write
 
     steps:
       - name: Checkout repository
@@ -52,7 +55,8 @@ jobs:
       # Build and push Docker image with Build (don't push on PR)
       # https://github.com/docker/build-push-action
       - name: Build and push
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
+        id: push
         with:
           context: .
           push: ${{ github.event_name != 'pull_request' }}
@@ -61,3 +65,11 @@ jobs:
           build-args: |
             GIT_COMMIT=${{ github.sha }}
             GIT_TAG=${{ github.ref_name }}
+
+      - name: Attest
+        uses: actions/attest-build-provenance@v1
+        id: attest
+        with:
+          subject-name: ${{ env.REGISTRY }}/${{ env.REPO }}
+          subject-digest: ${{ steps.push.outputs.digest }}
+          push-to-registry: true
