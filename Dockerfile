@@ -1,4 +1,4 @@
-FROM node:20-alpine3.18 as mjml
+FROM node:20-alpine3.18 AS mjml
 
 WORKDIR /templates
 
@@ -9,12 +9,12 @@ RUN npm install -g mjml &&  \
     ./build.sh ./out
 
 
-FROM php:8.2.4-alpine3.17 as backend
+FROM php:8.2.4-alpine3.17 AS backend
 
 ARG GIT_COMMIT
 ARG GIT_TAG
-ENV GIT_COMMIT ${GIT_COMMIT}
-ENV GIT_TAG ${GIT_TAG}
+ENV GIT_COMMIT=${GIT_COMMIT}
+ENV GIT_TAG=${GIT_TAG}
 
 RUN  --mount=type=bind,from=mlocati/php-extension-installer:1.5,source=/usr/bin/install-php-extensions,target=/usr/local/bin/install-php-extensions \
       install-php-extensions opcache zip xsl dom exif intl pcntl bcmath sockets mbstring pdo_mysql mysqli redis && \
