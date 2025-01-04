@@ -150,17 +150,22 @@ class LimitsControllerTest extends TestCase implements DatabaseTransaction
         $this->assertArrayHasKey('data', $body);
         $this->assertCount(2, $body['data']);
 
-        $this->assertEquals((string) $chargesTotal, (string) ($body['data'][0]['amount'] ?? null));
-        $this->assertEquals($limit->type, $body['data'][0]['limit']['operation'] ?? null);
-        $this->assertEquals($limit->amount, $body['data'][0]['limit']['amount'] ?? null);
-        $this->assertArrayContains($tag->id, $body['data'][0]['limit']['tags'], '*.id');
-
-        $this->assertEquals((string) $chargesWithTwoTagsTotal, (string) $body['data'][1]['amount']);
-        $this->assertEquals($limitWithTwoTags->type, $body['data'][1]['limit']['operation'] ?? null);
-        $this->assertEquals($limitWithTwoTags->amount, $body['data'][1]['limit']['amount'] ?? null);
-
-        foreach ($tags as $tag) {
-            $this->assertArrayContains($tag->id, $body['data'][1]['limit']['tags'], '*.id');
+        foreach ($body['data'] as $limitData) {
+            $this->assertArrayHasKey('limit', $limitData);
+            $this->assertArrayHasKey('amount', $limitData['limit']);
+            if ((string) $limitData['limit']['amount'] === (string) $limit->amount) {
+                $this->assertEquals((string) $chargesTotal, (string) ($limitData['amount'] ?? null));
+                $this->assertEquals($limit->type, $limitData['limit']['operation'] ?? null);
+                $this->assertEquals($limit->amount, $limitData['limit']['amount'] ?? null);
+                $this->assertArrayContains($tag->id, $limitData['limit']['tags'], '*.id');
+            } else {
+                $this->assertEquals((string) $chargesWithTwoTagsTotal, (string) $limitData['amount']);
+                $this->assertEquals($limitWithTwoTags->type, $limitData['limit']['operation'] ?? null);
+                $this->assertEquals($limitWithTwoTags->amount, $limitData['limit']['amount'] ?? null);
+                foreach ($tags as $item) {
+                    $this->assertArrayContains($item->id, $limitData['limit']['tags'], '*.id');
+                }
+            }
         }
     }
 
