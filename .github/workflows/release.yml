@@ -1,11 +1,18 @@
-name: build
+name: release
 
 on:
   workflow_dispatch:
+  release:
+    types: [ published ]
 
 env:
   REGISTRY: docker.io
   REPO: cashtrack/api
+  INFRA_REPO: cash-track/infra
+  INFRA_REPO_REF: main
+  CLUSTER: k8s-cash-track
+  NAMESPACE: cash-track
+  KUBECTL_BIN: ${{ vars.KUBECTL_BIN_URL }}
 
 jobs:
   build:
@@ -71,3 +78,60 @@ jobs:
           subject-name: ${{ env.REGISTRY }}/${{ env.REPO }}
           subject-digest: ${{ steps.push.outputs.digest }}
           push-to-registry: true
+
+  deploy:
+    runs-on: [self-hosted, Linux, x64]
+    needs:
+      - build
+    environment: prod
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout infra repository
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.INFRA_REPO }}
+          ref: ${{ env.INFRA_REPO_REF }}
+          path: deploy
+
+      - name: Install doctl
+        uses: digitalocean/action-doctl@v2
+        with:
+          token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+
+      - name: Install kubectl
+        run: |
+          curl -LO ${{ env.KUBECTL_BIN }}
+          chmod +x ./kubectl
+          sudo mv ./kubectl /usr/local/bin/kubectl
+
+      - name: Configure kubectl
+        run: doctl kubernetes cluster kubeconfig save --expiry-seconds 600 ${{ env.CLUSTER }}
+
+      # Extract metadata (tags, labels) for Docker
+      # https://github.com/docker/metadata-action
+      - name: Extract Docker metadata
+        if: github.event_name != 'pull_request'
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REPO }}
+          tags: |
+            type=semver,pattern={{version}}
+
+      - name: Update deployment
+        env:
+          IMAGE: ${{ env.REPO }}:${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.version'] }}
+        run: sed -i 's|${{ env.REPO }}:latest|'${IMAGE}'|' $GITHUB_WORKSPACE/deploy/services/api/deployment.yml
+
+      - name: Update definition
+        run: kubectl apply -f $GITHUB_WORKSPACE/deploy/services/api/
+
+      - name: Verify deployment
+        run: kubectl -n ${{ env.NAMESPACE }} rollout status deployment/api
+
+      - name: Verify service ready
+        run: kubectl -n ${{ env.NAMESPACE }} wait pods -l app=api --for condition=Ready --timeout=60s
+
