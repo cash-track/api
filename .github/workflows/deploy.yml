@@ -18,6 +18,7 @@ env:
 jobs:
   deploy:
     runs-on: [self-hosted, Linux, x64]
+    environment: prod
     permissions:
       contents: read
       packages: write
