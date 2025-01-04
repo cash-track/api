@@ -134,3 +134,4 @@ jobs:
 
       - name: Verify service ready
         run: kubectl -n ${{ env.NAMESPACE }} wait pods -l app=api --for condition=Ready --timeout=60s
+
