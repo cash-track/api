@@ -55,6 +55,10 @@ class LimitService
             $list[] = new WalletLimit($limit, $amount);
         }
 
+        usort($list, function (WalletLimit $a, WalletLimit $b) {
+            return $b->percentage <=> $a->percentage;
+        });
+
         return $list;
     }
 

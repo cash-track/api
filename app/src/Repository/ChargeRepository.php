@@ -288,8 +288,8 @@ class ChargeRepository extends Repository
                  ->where($titleCol, 'like', new Fragment("concat('%', ?, '%')", $query, $query, $query, $query))
                  ->groupBy($titleCol)
                  ->orderBy(new Fragment("{$titleCol} like concat(?, '%')"), SelectQuery::SORT_DESC)
-                 ->orderBy(new Fragment("ifnull(nullif(instr({$titleCol}, concat(' ', ?)), 0), 99999)"))
                  ->orderBy(new Expression("count({$titleCol})"), SelectQuery::SORT_DESC)
+                 ->orderBy(new Fragment("ifnull(nullif(instr({$titleCol}, concat(' ', ?)), 0), 99999)"))
                  ->orderBy(new Fragment("ifnull(nullif(instr({$titleCol}, ?), 0), 99999)"))
                  ->limit($limit)
                  ->fetchAll();
