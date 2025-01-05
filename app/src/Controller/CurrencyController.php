@@ -7,17 +7,17 @@ namespace App\Controller;
 use App\Repository\CurrencyRepository;
 use App\View\CurrenciesView;
 use Psr\Http\Message\ResponseInterface;
-use Spiral\Auth\AuthScope;
+use Spiral\Auth\AuthContextInterface;
 use Spiral\Router\Annotation\Route;
 
 final class CurrencyController extends AuthAwareController
 {
     public function __construct(
-        AuthScope $authScope,
+        AuthContextInterface $auth,
         protected CurrencyRepository $currencyRepository,
         protected CurrenciesView $currenciesView,
     ) {
-        parent::__construct($authScope);
+        parent::__construct($auth);
     }
 
     #[Route(route: '/currencies', name: 'currency.list', methods: 'GET', group: 'auth')]

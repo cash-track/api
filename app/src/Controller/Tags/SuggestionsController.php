@@ -9,13 +9,13 @@ use App\Repository\TagRepository;
 use App\Repository\UserRepository;
 use App\View\TagsView;
 use Psr\Http\Message\ResponseInterface;
-use Spiral\Auth\AuthScope;
+use Spiral\Auth\AuthContextInterface;
 use Spiral\Router\Annotation\Route;
 
 final class SuggestionsController extends AuthAwareController
 {
     public function __construct(
-        AuthScope $auth,
+        AuthContextInterface $auth,
         private readonly TagRepository $tagRepository,
         private readonly TagsView $tagsView,
         private readonly UserRepository $userRepository,

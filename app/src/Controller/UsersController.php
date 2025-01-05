@@ -9,20 +9,20 @@ use App\Repository\UserRepository;
 use App\View\UsersView;
 use App\View\UserView;
 use Psr\Http\Message\ResponseInterface;
-use Spiral\Auth\AuthScope;
+use Spiral\Auth\AuthContextInterface;
 use Spiral\Http\ResponseWrapper;
 use Spiral\Router\Annotation\Route;
 
 final class UsersController extends AuthAwareController
 {
     public function __construct(
-        AuthScope $authScope,
+        AuthContextInterface $auth,
         protected ResponseWrapper $response,
         protected UserRepository $userRepository,
         protected UserView $userView,
         protected UsersView $usersView,
     ) {
-        parent::__construct($authScope);
+        parent::__construct($auth);
     }
 
     #[Route(route: '/users/find/by-email/<query>', name: 'users.find.by-email', methods: 'GET', group: 'auth')]

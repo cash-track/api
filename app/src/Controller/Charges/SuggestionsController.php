@@ -8,14 +8,14 @@ use App\Controller\AuthAwareController;
 use App\Repository\ChargeRepository;
 use App\View\ChargeTitlesView;
 use Psr\Http\Message\ResponseInterface;
-use Spiral\Auth\AuthScope;
+use Spiral\Auth\AuthContextInterface;
 use Spiral\Http\ResponseWrapper;
 use Spiral\Router\Annotation\Route;
 
 final class SuggestionsController extends AuthAwareController
 {
     public function __construct(
-        AuthScope $auth,
+        AuthContextInterface $auth,
         protected ResponseWrapper $response,
         private readonly ChargeRepository $chargeRepository,
         private readonly ChargeTitlesView $chargeTitlesView,

@@ -17,7 +17,7 @@ use App\Service\Statistics\ChargeAmountGraph;
 use App\View\ChargesView;
 use App\View\CurrencyView;
 use Psr\Http\Message\ResponseInterface;
-use Spiral\Auth\AuthScope;
+use Spiral\Auth\AuthContextInterface;
 use Spiral\Http\Request\InputManager;
 use Spiral\Http\ResponseWrapper;
 use Spiral\Router\Annotation\Route;
@@ -25,7 +25,7 @@ use Spiral\Router\Annotation\Route;
 final class ChargesController extends AuthAwareController
 {
     public function __construct(
-        AuthScope $auth,
+        AuthContextInterface $auth,
         private readonly ResponseWrapper $response,
         private readonly TagRepository $tagRepository,
         private readonly ChargeRepository $chargeRepository,

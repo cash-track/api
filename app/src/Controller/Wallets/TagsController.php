@@ -9,14 +9,14 @@ use App\Repository\TagRepository;
 use App\Repository\WalletRepository;
 use App\View\TagsView;
 use Psr\Http\Message\ResponseInterface;
-use Spiral\Auth\AuthScope;
+use Spiral\Auth\AuthContextInterface;
 use Spiral\Http\ResponseWrapper;
 use Spiral\Router\Annotation\Route;
 
 final class TagsController extends Controller
 {
     public function __construct(
-        AuthScope $auth,
+        AuthContextInterface $auth,
         private ResponseWrapper $response,
         private WalletRepository $walletRepository,
         private TagRepository $tagRepository,

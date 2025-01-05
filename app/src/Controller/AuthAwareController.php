@@ -6,7 +6,7 @@ namespace App\Controller;
 
 use App\Database\User;
 use App\Exception\UnconfirmedProfileException;
-use Spiral\Auth\AuthScope;
+use Spiral\Auth\AuthContextInterface;
 use Spiral\Translator\Traits\TranslatorTrait;
 
 abstract class AuthAwareController
@@ -15,7 +15,7 @@ abstract class AuthAwareController
 
     protected User $user;
 
-    public function __construct(AuthScope $auth)
+    public function __construct(AuthContextInterface $auth)
     {
         $user = $auth->getActor();
 

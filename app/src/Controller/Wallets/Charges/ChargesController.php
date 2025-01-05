@@ -19,7 +19,7 @@ use App\View\ChargesView;
 use App\View\ChargeView;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Log\LoggerInterface;
-use Spiral\Auth\AuthScope;
+use Spiral\Auth\AuthContextInterface;
 use Spiral\Http\Request\InputManager;
 use Spiral\Http\ResponseWrapper;
 use Spiral\Router\Annotation\Route;
@@ -30,7 +30,7 @@ final class ChargesController extends Controller
     use TranslatorTrait;
 
     public function __construct(
-        AuthScope $auth,
+        AuthContextInterface $auth,
         private ResponseWrapper $response,
         private LoggerInterface $logger,
         private PaginationFactory $paginationFactory,

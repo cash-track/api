@@ -7,14 +7,14 @@ namespace App\Controller;
 use App\Mail\TestMail;
 use App\Service\Mailer\Mail;
 use App\Service\Mailer\MailerInterface;
-use Spiral\Auth\AuthScope;
+use Spiral\Auth\AuthContextInterface;
 use Spiral\Boot\EnvironmentInterface;
 use Spiral\Router\Annotation\Route;
 
 final class MailsController extends AuthAwareController
 {
     public function __construct(
-        AuthScope $auth,
+        AuthContextInterface $auth,
         protected MailerInterface $mailer,
         protected EnvironmentInterface $environment,
     ) {

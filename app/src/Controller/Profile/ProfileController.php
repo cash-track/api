@@ -17,7 +17,7 @@ use App\Service\UserService;
 use App\View\UserView;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Log\LoggerInterface;
-use Spiral\Auth\AuthScope;
+use Spiral\Auth\AuthContextInterface;
 use Spiral\Http\ResponseWrapper;
 use Spiral\Router\Annotation\Route;
 use Spiral\Translator\Traits\TranslatorTrait;
@@ -27,7 +27,7 @@ class ProfileController extends AuthAwareController
     use TranslatorTrait;
 
     public function __construct(
-        AuthScope $auth,
+        AuthContextInterface $auth,
         protected UserView $userView,
         protected LoggerInterface $logger,
         protected UserService $userService,

@@ -28,7 +28,7 @@ class CorsServiceTest extends TestCase
             'Origin' => $origin,
         ];
 
-        $response = $this->http()->optionsJson('/currencies', $requestHeaders);
+        $response = $this->optionsJson('/currencies', $requestHeaders);
 
         $response->assertHasHeader('Access-Control-Allow-Origin');
         $response->assertHasHeader('Access-Control-Allow-Methods');
@@ -47,7 +47,7 @@ class CorsServiceTest extends TestCase
             'Origin' => $origin,
         ];
 
-        $response = $this->http()->optionsJson('/currencies', $requestHeaders);
+        $response = $this->optionsJson('/currencies', $requestHeaders);
 
         $response->assertHeaderMissing('Access-Control-Allow-Origin');
         $response->assertHeaderMissing('Access-Control-Allow-Methods');
@@ -63,7 +63,7 @@ class CorsServiceTest extends TestCase
             'Origin' => $origin,
         ];
 
-        $response = $this->http()->optionsJson('/currencies', $requestHeaders);
+        $response = $this->optionsJson('/currencies', $requestHeaders);
 
         $response->assertHasHeader('Access-Control-Allow-Origin');
         $response->assertHasHeader('Vary');
@@ -82,7 +82,7 @@ class CorsServiceTest extends TestCase
             'Origin' => Fixtures::string(),
         ];
 
-        $response = $this->http()->optionsJson('/currencies', $requestHeaders);
+        $response = $this->optionsJson('/currencies', $requestHeaders);
 
         $response->assertHasHeader('Access-Control-Allow-Origin');
         $response->assertHasHeader('Vary');
@@ -102,7 +102,7 @@ class CorsServiceTest extends TestCase
             'Origin' => $origin,
         ];
 
-        $response = $this->http()->optionsJson('/currencies', $requestHeaders);
+        $response = $this->optionsJson('/currencies', $requestHeaders);
 
         $response->assertHasHeader('Access-Control-Allow-Origin');
         $response->assertHasHeader('Vary');
@@ -123,7 +123,7 @@ class CorsServiceTest extends TestCase
             'Origin' => $origin,
         ];
 
-        $response = $this->http()->optionsJson('/currencies', $requestHeaders);
+        $response = $this->optionsJson('/currencies', $requestHeaders);
 
         $response->assertHasHeader('Access-Control-Allow-Origin');
         $response->assertHasHeader('Access-Control-Allow-Credentials');
@@ -149,7 +149,7 @@ class CorsServiceTest extends TestCase
             'Origin' => $origin,
         ];
 
-        $response = $this->http()->optionsJson('/currencies', $requestHeaders);
+        $response = $this->optionsJson('/currencies', $requestHeaders);
 
         $response->assertHasHeader('Access-Control-Allow-Origin');
         $response->assertHasHeader('Access-Control-Allow-Methods');
@@ -177,7 +177,7 @@ class CorsServiceTest extends TestCase
             'Origin' => $origin,
         ];
 
-        $response = $this->http()->optionsJson('/currencies', $requestHeaders);
+        $response = $this->optionsJson('/currencies', $requestHeaders);
 
         $response->assertHasHeader('Access-Control-Allow-Origin');
         $response->assertHasHeader('Access-Control-Allow-Headers');
@@ -202,7 +202,7 @@ class CorsServiceTest extends TestCase
             'Origin' => $origin,
         ];
 
-        $response = $this->http()->optionsJson('/currencies', $requestHeaders);
+        $response = $this->optionsJson('/currencies', $requestHeaders);
 
         $response->assertHasHeader('Access-Control-Allow-Origin');
         $response->assertHasHeader('Access-Control-Expose-Headers');
@@ -227,7 +227,7 @@ class CorsServiceTest extends TestCase
             'Access-Control-Request-Method' => ['GET'],
         ];
 
-        $response = $this->http()->optionsJson('/currencies', $requestHeaders);
+        $response = $this->optionsJson('/currencies', $requestHeaders);
 
         $response->assertHeaderMissing('Access-Control-Allow-Origin');
         $response->assertHeaderMissing('Access-Control-Allow-Methods');
@@ -254,7 +254,7 @@ class CorsServiceTest extends TestCase
             'Origin' => $origin,
         ];
 
-        $response = $this->http()->optionsJson('/currencies', $requestHeaders);
+        $response = $this->optionsJson('/currencies', $requestHeaders);
 
         $response->assertHasHeader('Access-Control-Allow-Origin');
         $response->assertHasHeader('Access-Control-Allow-Methods');

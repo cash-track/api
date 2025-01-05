@@ -17,7 +17,7 @@ use App\Service\UserOptionsService;
 use App\Service\UserService;
 use Google;
 use Psr\Log\LoggerInterface;
-use Spiral\Auth\AuthScope;
+use Spiral\Auth\AuthContextInterface;
 use Spiral\Auth\TokenStorageInterface;
 use Spiral\Translator\Traits\TranslatorTrait;
 use Spiral\Translator\Translator;
@@ -27,7 +27,7 @@ class GoogleAuthService extends AuthService
     use TranslatorTrait;
 
     public function __construct(
-        protected AuthScope $auth,
+        protected AuthContextInterface $auth,
         protected Google\Client $client,
         protected Translator $translator,
         protected LoggerInterface $logger,
