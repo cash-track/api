@@ -12,6 +12,7 @@ use Cycle\Annotated\Annotation as ORM;
 use Cycle\ORM\Entity\Behavior;
 use Cycle\ORM\Parser\Typecast;
 
+/** @psalm-suppress InvalidArgument */
 #[ORM\Entity(repository: UserRepository::class, typecast: [
     Typecast::class,
     JsonTypecast::class,

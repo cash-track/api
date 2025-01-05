@@ -12,7 +12,7 @@ use App\Service\WalletService;
 use App\View\UsersView;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Log\LoggerInterface;
-use Spiral\Auth\AuthScope;
+use Spiral\Auth\AuthContextInterface;
 use Spiral\Http\ResponseWrapper;
 use Spiral\Router\Annotation\Route;
 use Spiral\Translator\Traits\TranslatorTrait;
@@ -22,7 +22,7 @@ final class UsersController extends Controller
     use TranslatorTrait;
 
     public function __construct(
-        AuthScope $auth,
+        AuthContextInterface $auth,
         private ResponseWrapper $response,
         private LoggerInterface $logger,
         private UsersView $usersView,

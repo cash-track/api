@@ -140,7 +140,7 @@ jobs:
           php app.php migrate -s -n
 
       - name: Run PHPUnit
-        run: ./vendor/bin/phpunit --coverage-clover=coverage.xml
+        run: XDEBUG_MODE=coverage ./vendor/bin/paratest --coverage-clover=coverage.xml
 
       - name: Upload Coverage To Codecov
         continue-on-error: true

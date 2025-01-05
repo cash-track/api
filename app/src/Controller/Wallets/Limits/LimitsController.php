@@ -16,7 +16,7 @@ use App\View\LimitView;
 use App\View\WalletLimitsView;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Log\LoggerInterface;
-use Spiral\Auth\AuthScope;
+use Spiral\Auth\AuthContextInterface;
 use Spiral\Http\ResponseWrapper;
 use Spiral\Router\Annotation\Route;
 use Throwable;
@@ -24,7 +24,7 @@ use Throwable;
 final class LimitsController extends Controller
 {
     public function __construct(
-        AuthScope $auth,
+        AuthContextInterface $auth,
         private readonly ResponseWrapper $response,
         private LoggerInterface $logger,
         private readonly WalletRepository $walletRepository,

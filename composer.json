@@ -31,7 +31,7 @@
         "spiral-packages/scheduler": "^2.1",
         "spiral/cycle-bridge": "^2.9",
         "spiral/filters-bridge": "^1.0",
-        "spiral/framework": "3.13.0",
+        "spiral/framework": "^3.14",
         "spiral/nyholm-bridge": "^1.3",
         "spiral/roadrunner-bridge": "^3.5.0",
         "spiral/roadrunner-cli": "^2.6",
@@ -46,10 +46,11 @@
         "web-auth/webauthn-lib": "^4.8"
     },
     "require-dev": {
+        "brianium/paratest": "^6.11",
         "phpunit/phpunit": "^9.6",
-        "qossmic/deptrac-shim": "^1.0",
-        "squizlabs/php_codesniffer": "3.*",
+        "qossmic/deptrac": "*",
         "spiral/testing": "^2.7",
+        "squizlabs/php_codesniffer": "3.*",
         "symfony/var-dumper": "^6.4",
         "vimeo/psalm": "^5.25.0"
     },
@@ -61,18 +62,18 @@
             "spiral get-binary"
         ],
         "checks": [
-            "./vendor/bin/phpunit",
+            "./vendor/bin/paratest",
             "./vendor/bin/phpcs -p -n --standard=PSR12 --colors --report=code ./app/src",
             "./vendor/bin/psalm --php-version=8.2 --show-info=true --no-cache"
         ],
         "phpunit": [
-            "./vendor/bin/phpunit"
+            "./vendor/bin/paratest"
         ],
         "phpcs": [
             "./vendor/bin/phpcs -p -n --standard=PSR12 --colors --report=code ./app/src"
         ],
         "psalm": [
-            "./vendor/bin/psalm --php-version=8.2 --show-info=true --no-cache"
+            "./vendor/bin/psalm --php-version=8.2 --show-info=true --no-cache --threads=1"
         ],
         "mjml": [
             "./app/views/email-templates/build.sh ../email"

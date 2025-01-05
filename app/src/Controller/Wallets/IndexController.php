@@ -8,14 +8,14 @@ use App\Database\Wallet;
 use App\Repository\WalletRepository;
 use App\View\WalletView;
 use Psr\Http\Message\ResponseInterface;
-use Spiral\Auth\AuthScope;
+use Spiral\Auth\AuthContextInterface;
 use Spiral\Http\ResponseWrapper;
 use Spiral\Router\Annotation\Route;
 
 final class IndexController extends Controller
 {
     public function __construct(
-        AuthScope $auth,
+        AuthContextInterface $auth,
         private ResponseWrapper $response,
         private WalletRepository $walletRepository,
         private WalletView $walletView,

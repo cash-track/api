@@ -10,7 +10,7 @@ use App\Repository\EmailConfirmationRepository;
 use App\Service\Auth\EmailConfirmationService;
 use App\View\EmailConfirmationView;
 use Psr\Http\Message\ResponseInterface;
-use Spiral\Auth\AuthScope;
+use Spiral\Auth\AuthContextInterface;
 use Spiral\Http\ResponseWrapper;
 use Spiral\Router\Annotation\Route;
 use Spiral\Translator\Traits\TranslatorTrait;
@@ -20,7 +20,7 @@ final class EmailConfirmationsController extends AuthAwareController
     use TranslatorTrait;
 
     public function __construct(
-        protected AuthScope $auth,
+        protected AuthContextInterface $auth,
         protected ResponseWrapper $response,
         protected EmailConfirmationView $emailConfirmationView,
         protected EmailConfirmationService $emailConfirmationService,

@@ -11,14 +11,14 @@ use App\Repository\UserRepository;
 use App\View\TagsView;
 use App\View\TagView;
 use Psr\Http\Message\ResponseInterface;
-use Spiral\Auth\AuthScope;
+use Spiral\Auth\AuthContextInterface;
 use Spiral\Http\ResponseWrapper;
 use Spiral\Router\Annotation\Route;
 
 final class CommonController extends AuthAwareController
 {
     public function __construct(
-        AuthScope $auth,
+        AuthContextInterface $auth,
         private ResponseWrapper $response,
         private TagRepository $tagRepository,
         private TagsView $tagsView,

@@ -12,7 +12,7 @@ use App\Service\UserOptionsService;
 use App\Service\UserService;
 use App\View\WalletsView;
 use Psr\Http\Message\ResponseInterface;
-use Spiral\Auth\AuthScope;
+use Spiral\Auth\AuthContextInterface;
 use Spiral\Http\Request\InputManager;
 use Spiral\Http\ResponseWrapper;
 use Spiral\Router\Annotation\Route;
@@ -20,7 +20,7 @@ use Spiral\Router\Annotation\Route;
 final class ListController extends Controller
 {
     public function __construct(
-        AuthScope $auth,
+        AuthContextInterface $auth,
         private ResponseWrapper $response,
         private WalletRepository $walletRepository,
         private WalletsView $walletsView,

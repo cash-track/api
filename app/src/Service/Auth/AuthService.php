@@ -15,7 +15,7 @@ use App\Service\UserOptionsService;
 use App\Service\UserService;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Log\LoggerInterface;
-use Spiral\Auth\AuthScope;
+use Spiral\Auth\AuthContextInterface;
 use Spiral\Auth\TokenInterface;
 use Spiral\Auth\TokenStorageInterface;
 use Spiral\Translator\Traits\TranslatorTrait;
@@ -28,7 +28,7 @@ class AuthService
     const RANDOM_PASSWORD_LENGTH = 32;
 
     public function __construct(
-        protected AuthScope $auth,
+        protected AuthContextInterface $auth,
         protected Translator $translator,
         protected LoggerInterface $logger,
         protected UserService $userService,

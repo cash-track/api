@@ -10,7 +10,7 @@ use App\Repository\ChargeRepository;
 use App\Repository\WalletRepository;
 use App\Service\ChargeWalletService;
 use Psr\Http\Message\ResponseInterface;
-use Spiral\Auth\AuthScope;
+use Spiral\Auth\AuthContextInterface;
 use Spiral\Http\Request\InputManager;
 use Spiral\Http\ResponseWrapper;
 use Spiral\Router\Annotation\Route;
@@ -18,7 +18,7 @@ use Spiral\Router\Annotation\Route;
 final class TotalController extends Controller
 {
     public function __construct(
-        AuthScope $auth,
+        AuthContextInterface $auth,
         private ResponseWrapper $response,
         private WalletRepository $walletRepository,
         private ChargeRepository $chargeRepository,

@@ -13,7 +13,7 @@ use App\Service\Auth\Passkey\PasskeyService;
 use App\View\PasskeysView;
 use App\View\PasskeyView;
 use Psr\Http\Message\ResponseInterface;
-use Spiral\Auth\AuthScope;
+use Spiral\Auth\AuthContextInterface;
 use Spiral\Http\ResponseWrapper;
 use Spiral\Router\Annotation\Route;
 use Spiral\Translator\Traits\TranslatorTrait;
@@ -23,7 +23,7 @@ final class PasskeyController extends AuthAwareController
     use TranslatorTrait;
 
     public function __construct(
-        AuthScope $auth,
+        AuthContextInterface $auth,
         protected PasskeyView $passkeyView,
         protected ResponseWrapper $response,
         protected PasskeysView $passkeysView,

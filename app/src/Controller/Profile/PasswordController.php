@@ -8,7 +8,7 @@ use App\Controller\AuthAwareController;
 use App\Request\Profile\UpdatePasswordRequest;
 use App\Service\Auth\AuthService;
 use Psr\Http\Message\ResponseInterface;
-use Spiral\Auth\AuthScope;
+use Spiral\Auth\AuthContextInterface;
 use Spiral\Http\ResponseWrapper;
 use Spiral\Router\Annotation\Route;
 use Spiral\Translator\Traits\TranslatorTrait;
@@ -18,7 +18,7 @@ final class PasswordController extends AuthAwareController
     use TranslatorTrait;
 
     public function __construct(
-        AuthScope $auth,
+        AuthContextInterface $auth,
         protected ResponseWrapper $response,
         protected AuthService $authService,
     ) {
