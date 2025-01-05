@@ -7,6 +7,7 @@ namespace App\Database;
 use App\Repository\CurrencyRepository;
 use Cycle\Annotated\Annotation as ORM;
 
+/** @psalm-suppress InvalidArgument */
 #[ORM\Entity(repository: CurrencyRepository::class)]
 class Currency
 {

@@ -13,6 +13,7 @@ use Cycle\ORM\Parser\Typecast;
 use Doctrine\Common\Collections\ArrayCollection;
 use Cycle\ORM\Entity\Behavior;
 
+/** @psalm-suppress InvalidArgument */
 #[ORM\Entity(repository: WalletRepository::class, typecast: [
     Typecast::class,
     EncryptedTypecast::class,

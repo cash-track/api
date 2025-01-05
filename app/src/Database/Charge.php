@@ -11,6 +11,7 @@ use Cycle\ORM\Entity\Behavior;
 use Cycle\ORM\Parser\Typecast;
 use Ramsey\Uuid\UuidInterface;
 
+/** @psalm-suppress InvalidArgument */
 #[ORM\Entity(repository: ChargeRepository::class, typecast: [
     Typecast::class,
 ])]

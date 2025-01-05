@@ -10,6 +10,7 @@ use Cycle\ORM\Collection\Pivoted\PivotedCollection;
 use Cycle\ORM\Entity\Behavior;
 use Cycle\ORM\Parser\Typecast;
 
+/** @psalm-suppress InvalidArgument */
 #[ORM\Entity(repository: LimitRepository::class, typecast: [
     Typecast::class,
 ])]

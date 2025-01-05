@@ -73,7 +73,7 @@
             "./vendor/bin/phpcs -p -n --standard=PSR12 --colors --report=code ./app/src"
         ],
         "psalm": [
-            "./vendor/bin/psalm --php-version=8.2 --show-info=true --no-cache"
+            "./vendor/bin/psalm --php-version=8.2 --show-info=true --no-cache --threads=1"
         ],
         "mjml": [
             "./app/views/email-templates/build.sh ../email"

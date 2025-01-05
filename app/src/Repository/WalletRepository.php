@@ -5,13 +5,15 @@ declare(strict_types=1);
 namespace App\Repository;
 
 use App\Database\Currency;
+use Cycle\ORM\RepositoryInterface;
 use Cycle\ORM\Select;
 use Cycle\ORM\Select\Repository;
 
 /**
  * @extends Repository<\App\Database\Wallet>
+ * @implements RepositoryInterface<\App\Database\Wallet>
  */
-class WalletRepository extends Repository
+class WalletRepository extends Repository implements RepositoryInterface
 {
     /**
      * @param int $userID

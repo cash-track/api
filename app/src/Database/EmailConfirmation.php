@@ -8,6 +8,7 @@ use App\Repository\EmailConfirmationRepository;
 use App\Service\Auth\EmailConfirmationService;
 use Cycle\Annotated\Annotation as ORM;
 
+/** @psalm-suppress InvalidArgument */
 #[ORM\Entity(repository: EmailConfirmationRepository::class)]
 #[ORM\Table(indexes: [
     new ORM\Table\Index(columns: ['token']),

@@ -7,6 +7,7 @@ namespace App\Database;
 use App\Repository\ForgotPasswordRequestRepository;
 use Cycle\Annotated\Annotation as ORM;
 
+/** @psalm-suppress InvalidArgument */
 #[ORM\Entity(repository: ForgotPasswordRequestRepository::class)]
 #[ORM\Table(indexes: [
     new ORM\Table\Index(columns: ['code']),

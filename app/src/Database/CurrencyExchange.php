@@ -8,6 +8,7 @@ use App\Repository\CurrencyExchangeRepository;
 use Cycle\Annotated\Annotation as ORM;
 use Cycle\ORM\Entity\Behavior;
 
+/** @psalm-suppress InvalidArgument */
 #[ORM\Entity(repository: CurrencyExchangeRepository::class)]
 #[Behavior\CreatedAt(field: 'createdAt', column: 'created_at')]
 #[Behavior\UpdatedAt(field: 'updatedAt', column: 'updated_at')]

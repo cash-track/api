@@ -8,6 +8,7 @@ use App\Repository\TagRepository;
 use Cycle\Annotated\Annotation as ORM;
 use Cycle\ORM\Entity\Behavior;
 
+/** @psalm-suppress InvalidArgument */
 #[ORM\Entity(repository: TagRepository::class)]
 #[Behavior\UpdatedAt(field: 'updatedAt', column: 'updated_at')]
 #[ORM\Table\Index(columns: ['name', 'user_id'], unique: true)]
