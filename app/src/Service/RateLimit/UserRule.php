@@ -6,10 +6,7 @@ namespace App\Service\RateLimit;
 
 class UserRule extends Rule
 {
-    /**
-     * @var string
-     */
-    const PREFIX = 'user:';
+    const string PREFIX = 'user:';
 
     protected string $userId = '';
 

@@ -42,7 +42,7 @@ final class ViewRenderer implements RendererInterface
             'error' => $exception->getMessage(),
         ];
 
-        $response->getBody()->write(\json_encode($payload));
+        $response->getBody()->write((string) \json_encode($payload));
 
         return $response;
     }

@@ -6,10 +6,7 @@ namespace App\Service\RateLimit;
 
 class GuestRule extends Rule
 {
-    /**
-     * @var string
-     */
-    const PREFIX = 'guest:';
+    const string PREFIX = 'guest:';
 
     protected string $clientIp = '';
 

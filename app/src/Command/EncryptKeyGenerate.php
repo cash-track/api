@@ -9,13 +9,13 @@ use Spiral\Encrypter\EncrypterFactory;
 
 class EncryptKeyGenerate extends Command
 {
-    protected const NAME = 'encrypt:gen';
+    protected const string NAME = 'encrypt:gen';
 
-    protected const DESCRIPTION = 'Generate OpenSSL key helper';
+    protected const string DESCRIPTION = 'Generate OpenSSL key helper';
 
-    protected const ARGUMENTS = [];
+    protected const array ARGUMENTS = [];
 
-    protected const OPTIONS = [];
+    protected const array OPTIONS = [];
 
     protected function perform(EncrypterFactory $enc): void
     {

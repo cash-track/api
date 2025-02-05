@@ -8,7 +8,7 @@ use Spiral\Core\InjectableConfig;
 
 class S3Config extends InjectableConfig
 {
-    public const CONFIG = 's3';
+    public const string CONFIG = 's3';
 
     /**
      * @internal For internal usage. Will be hydrated in the constructor.

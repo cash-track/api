@@ -10,7 +10,7 @@ use Spiral\Validator\AbstractChecker;
 
 class UniqueChecker extends AbstractChecker
 {
-    public const MESSAGES = [
+    public const array MESSAGES = [
         'verify' => 'error_value_is_not_unique'
     ];
 

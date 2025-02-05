@@ -25,7 +25,7 @@ class AuthService
 {
     use TranslatorTrait;
 
-    const RANDOM_PASSWORD_LENGTH = 32;
+    const int RANDOM_PASSWORD_LENGTH = 32;
 
     public function __construct(
         protected AuthContextInterface $auth,

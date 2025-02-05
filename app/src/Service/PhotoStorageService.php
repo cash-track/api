@@ -14,10 +14,10 @@ use Spiral\Queue\QueueInterface;
 
 class PhotoStorageService
 {
-    const DEFAULT_EXT = 'jpg';
-    const DEFAULT_MIME = 'image/jpeg';
-    const PHOTO_PATH = 'photos/';
-    const TMP_PATH = '/tmp/';
+    const string DEFAULT_EXT = 'jpg';
+    const string DEFAULT_MIME = 'image/jpeg';
+    const string PHOTO_PATH = 'photos/';
+    const string TMP_PATH = '/tmp/';
 
     public function __construct(
         private readonly LoggerInterface $logger,
@@ -134,7 +134,7 @@ class PhotoStorageService
 
     protected function downloadFile(string $url, string $downloadPath): ?int
     {
-        $result = file_put_contents($downloadPath, file_get_contents($url));
+        $result = file_put_contents($downloadPath, (string) file_get_contents($url));
 
         return is_int($result) ? $result : null;
     }

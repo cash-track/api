@@ -11,8 +11,8 @@ use Cycle\ORM\EntityManagerInterface;
 
 abstract class HelperService
 {
-    const TTL = 60 * 60;
-    const RESEND_TIME_LIMIT = 60;
+    const int TTL = 60 * 60;
+    const int RESEND_TIME_LIMIT = 60;
 
     /**
      * @var \Cycle\ORM\EntityManagerInterface

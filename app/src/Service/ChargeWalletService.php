@@ -10,7 +10,7 @@ use Cycle\ORM\EntityManagerInterface;
 
 class ChargeWalletService
 {
-    const PRECISION = 2;
+    const int PRECISION = 2;
 
     public function __construct(private readonly EntityManagerInterface $tr)
     {

@@ -9,8 +9,8 @@ use App\Service\Sort\SortType;
 
 class UserOptionsService
 {
-    protected const SORT_ROOT = 'sort';
-    protected const LOCALE_ROOT = 'locale';
+    protected const string SORT_ROOT = 'sort';
+    protected const string LOCALE_ROOT = 'locale';
 
     /**
      * Fetch the order from the user's options and specific order type

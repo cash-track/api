@@ -8,8 +8,8 @@ use Spiral\Core\InjectableConfig;
 
 class MailConfig extends InjectableConfig
 {
-    public const CONFIG = 'mail';
-    public const DRIVER_SMTP = 'smtp';
+    public const string CONFIG = 'mail';
+    public const string DRIVER_SMTP = 'smtp';
 
     /**
      * @internal For internal usage. Will be hydrated in the constructor.

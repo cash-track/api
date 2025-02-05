@@ -12,7 +12,7 @@ use Spiral\Bootloader\Http\HttpBootloader;
 
 class CorsBootloader extends Bootloader
 {
-    protected const BINDINGS = [
+    protected const array BINDINGS = [
         CorsInterface::class => CorsService::class,
     ];
 

@@ -8,7 +8,7 @@ use Spiral\Core\InjectableConfig;
 
 class CorsConfig extends InjectableConfig
 {
-    public const CONFIG = 'cors';
+    public const string CONFIG = 'cors';
 
     /**
      * @internal For internal usage. Will be hydrated in the constructor.

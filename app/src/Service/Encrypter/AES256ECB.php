@@ -8,12 +8,12 @@ use Spiral\Encrypter\Exception\EncrypterException;
 
 class AES256ECB implements CipherInterface
 {
-    const ALGO = 'aes-256-ecb';
+    const string ALGO = 'aes-256-ecb';
 
     public function encrypt(string $value, string $key): string
     {
         $payload = openssl_encrypt($value, static::ALGO, $key);
-        $payload !== false || throw new EncrypterException('Encryption unsuccessful: ' . openssl_error_string());
+        $payload !== false || throw new EncrypterException('Encryption unsuccessful: ' . (string) openssl_error_string());
 
         return $payload;
     }
@@ -23,7 +23,7 @@ class AES256ECB implements CipherInterface
         $value = openssl_decrypt($payload, static::ALGO, $key);
 
         if ($value === false) {
-            throw new EncrypterException('Decryption unsuccessful: ' . openssl_error_string());
+            throw new EncrypterException('Decryption unsuccessful: ' . (string) openssl_error_string());
         }
 
         return $value;

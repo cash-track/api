@@ -8,7 +8,7 @@ use Spiral\Core\InjectableConfig;
 
 class CdnConfig extends InjectableConfig
 {
-    public const CONFIG = 'cdn';
+    public const string CONFIG = 'cdn';
 
     /**
      * @internal For internal usage. Will be hydrated in the constructor.

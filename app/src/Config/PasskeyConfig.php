@@ -10,8 +10,8 @@ use Webauthn\PublicKeyCredentialParameters;
 
 class PasskeyConfig extends InjectableConfig
 {
-    public const CONFIG = 'passkey';
-    public const DEFAULT_TIMEOUT = 300000;
+    public const string CONFIG = 'passkey';
+    public const int DEFAULT_TIMEOUT = 300000;
 
     /**
      * @internal For internal usage. Will be hydrated in the constructor.

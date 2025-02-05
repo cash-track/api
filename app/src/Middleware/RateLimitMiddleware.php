@@ -20,7 +20,7 @@ class RateLimitMiddleware implements MiddlewareInterface
 {
     use TranslatorTrait;
 
-    const IP_HEADERS = [
+    const array IP_HEADERS = [
         'Cf-Original-Connecting-IP',
         'X-Real-IP',
         'X-Forwarded-For',

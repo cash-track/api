@@ -11,11 +11,11 @@ use Spiral\Bootloader\Auth\HttpAuthBootloader;
 
 class TokensBootloader extends Bootloader
 {
-    protected const DEPENDENCIES = [
+    protected const array DEPENDENCIES = [
         HttpAuthBootloader::class,
     ];
 
-    protected const SINGLETONS = [
+    protected const array SINGLETONS = [
         TokenStorageInterface::class => TokenStorage::class,
         RefreshTokenStorageInterface::class => RefreshTokenStorage::class,
     ];

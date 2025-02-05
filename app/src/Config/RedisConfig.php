@@ -8,7 +8,7 @@ use Spiral\Core\InjectableConfig;
 
 class RedisConfig extends InjectableConfig
 {
-    public const CONFIG = 'redis';
+    public const string CONFIG = 'redis';
 
     protected array $config = [
         'connection' => '',

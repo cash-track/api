@@ -6,10 +6,7 @@ namespace App\Service\RateLimit;
 
 class Rule implements RuleInterface
 {
-    /**
-     * @var string
-     */
-    const PREFIX = '';
+    const string PREFIX = '';
 
     public function __construct(
         protected int $limit = 0,

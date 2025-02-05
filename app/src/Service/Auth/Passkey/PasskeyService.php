@@ -43,7 +43,7 @@ class PasskeyService
 {
     use DataEncoder;
 
-    const CHALLENGE_TTL_SEC = 60 * 6; // 6 minutes
+    const int CHALLENGE_TTL_SEC = 60 * 6; // 6 minutes
 
     public function __construct(
         private readonly Redis $redis,

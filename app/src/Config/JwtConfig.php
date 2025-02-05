@@ -8,7 +8,7 @@ use Spiral\Core\InjectableConfig;
 
 class JwtConfig extends InjectableConfig
 {
-    public const CONFIG = 'jwt';
+    public const string CONFIG = 'jwt';
 
     /**
      * @internal For internal usage. Will be hydrated in the constructor.

@@ -15,7 +15,7 @@ use Spiral\Validator\FilterDefinition;
 
 class CreateRequest extends Filter implements HasFilterDefinition
 {
-    const DATE_FORMAT = 'Y-m-d H:i:s';
+    const string DATE_FORMAT = 'Y-m-d H:i:s';
 
     // TODO. Support custom currency with custom rate
 

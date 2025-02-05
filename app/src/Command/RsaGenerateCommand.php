@@ -14,16 +14,16 @@ use Symfony\Component\Console\Input\InputOption;
  */
 class RsaGenerateCommand extends Command
 {
-    const PUBLIC_KEY_PLACEHOLDER = '{rsa-public-key}';
-    const PRIVATE_KEY_PLACEHOLDER = '{rsa-private-key}';
+    const string PUBLIC_KEY_PLACEHOLDER = '{rsa-public-key}';
+    const string PRIVATE_KEY_PLACEHOLDER = '{rsa-private-key}';
 
-    protected const NAME = 'rsa:gen';
+    protected const string NAME = 'rsa:gen';
 
-    protected const DESCRIPTION = 'Generate public and private keys helper';
+    protected const string DESCRIPTION = 'Generate public and private keys helper';
 
-    protected const ARGUMENTS = [];
+    protected const array ARGUMENTS = [];
 
-    protected const OPTIONS = [
+    protected const array OPTIONS = [
         ['out-dir', 'd', InputOption::VALUE_OPTIONAL, 'Output directory for key files [example: app/config/]'],
         ['out-prefix', 'p', InputOption::VALUE_OPTIONAL, 'Output file name pattern for key files [example: app => app-public.key]'],
         ['mount', 'm', InputOption::VALUE_OPTIONAL, 'Mount RSA keys into given file'],
@@ -61,26 +61,26 @@ class RsaGenerateCommand extends Command
         // Create the private and public key
         $key = openssl_pkey_new($config);
         if ($key === false) {
-            $this->writeln('Unable to create new OpenSSL key: ' . openssl_error_string());
+            $this->writeln('Unable to create new OpenSSL key: ' . (string) openssl_error_string());
             return;
         }
 
         $privateKey = '';
         if (!openssl_pkey_export($key, $privateKey)) {
-            $this->writeln('Unable to extract private key from OpenSSL key: ' . openssl_error_string());
+            $this->writeln('Unable to extract private key from OpenSSL key: ' . (string) openssl_error_string());
             return;
         }
 
         $publicKey = openssl_pkey_get_details($key);
         if ($publicKey === false) {
-            $this->writeln('Unable to extract public key from OpenSSL key: ' . openssl_error_string());
+            $this->writeln('Unable to extract public key from OpenSSL key: ' . (string) openssl_error_string());
             return;
         }
 
         $publicKey = $publicKey["key"];
 
         $file = $this->option('mount');
-        if ($file !== null && is_string($file)) {
+        if ($file !== null && is_string($file) && $file !== '') {
             $this->mount($file, self::PUBLIC_KEY_PLACEHOLDER, $publicKey);
             $this->mount($file, self::PRIVATE_KEY_PLACEHOLDER, $privateKey);
 
@@ -98,7 +98,7 @@ class RsaGenerateCommand extends Command
     }
 
     /**
-     * @param string $file
+     * @param non-empty-string $file
      * @param string $placeholder
      * @param string $key
      * @return void

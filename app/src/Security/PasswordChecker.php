@@ -10,7 +10,7 @@ use Spiral\Validator\AbstractChecker;
 
 class PasswordChecker extends AbstractChecker
 {
-    public const MESSAGES = [
+    public const array MESSAGES = [
         'verify' => 'password_verify_error',
     ];
 
