@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Feature\Command;
+namespace Tests\Feature\Command;
 
 use App\Command\NewsletterSendCommand;
 use App\Repository\UserRepository;

@@ -30,7 +30,7 @@ class ChargeAmountGraph
     ) {
     }
 
-    public function groupBy(string $value = null, Group $default = Group::ByMonth): static
+    public function groupBy(?string $value = null, Group $default = Group::ByMonth): static
     {
         $this->grouping = Group::tryFrom($value ?? '') ?? $default;
 
@@ -44,7 +44,7 @@ class ChargeAmountGraph
         return $this;
     }
 
-    public function getGraph(Tag $tag = null, Wallet $wallet = null): array
+    public function getGraph(?Tag $tag = null, ?Wallet $wallet = null): array
     {
         $query = $this->buildQueryByTagAndWallet($tag, $wallet);
 
@@ -57,7 +57,7 @@ class ChargeAmountGraph
         return $data->format();
     }
 
-    protected function buildQueryByTagAndWallet(Tag $tag = null, Wallet $wallet = null): SelectQuery
+    protected function buildQueryByTagAndWallet(?Tag $tag = null, ?Wallet $wallet = null): SelectQuery
     {
         $query = $this->buildQuery();
 

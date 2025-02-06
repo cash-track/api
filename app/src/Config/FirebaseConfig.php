@@ -8,7 +8,7 @@ use Spiral\Core\InjectableConfig;
 
 class FirebaseConfig extends InjectableConfig
 {
-    public const CONFIG = 'firebase';
+    public const string CONFIG = 'firebase';
 
     /**
      * @internal For internal usage. Will be hydrated in the constructor.

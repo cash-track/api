@@ -21,12 +21,12 @@ final class ListController extends Controller
 {
     public function __construct(
         AuthContextInterface $auth,
-        private ResponseWrapper $response,
-        private WalletRepository $walletRepository,
-        private WalletsView $walletsView,
-        private UserOptionsService $userOptionsService,
-        private SortService $sortService,
-        private UserService $userService,
+        private readonly ResponseWrapper $response,
+        private readonly WalletRepository $walletRepository,
+        private readonly WalletsView $walletsView,
+        private readonly UserOptionsService $userOptionsService,
+        private readonly SortService $sortService,
+        private readonly UserService $userService,
     ) {
         parent::__construct($auth);
     }

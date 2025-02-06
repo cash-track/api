@@ -25,12 +25,12 @@ final class WalletsController extends Controller
 
     public function __construct(
         AuthContextInterface $auth,
-        private ResponseWrapper $response,
-        private LoggerInterface $logger,
-        private WalletRepository $walletRepository,
-        private WalletService $walletService,
-        private WalletView $walletView,
-        private CurrencyRepository $currencyRepository,
+        private readonly ResponseWrapper $response,
+        private readonly LoggerInterface $logger,
+        private readonly WalletRepository $walletRepository,
+        private readonly WalletService $walletService,
+        private readonly WalletView $walletView,
+        private readonly CurrencyRepository $currencyRepository,
     ) {
         parent::__construct($auth);
     }

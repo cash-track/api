@@ -10,9 +10,6 @@ use Spiral\Bootloader\Auth\AuthBootloader;
 
 class UserBootloader extends Bootloader
 {
-    /**
-     * @param \Spiral\Bootloader\Auth\AuthBootloader $auth
-     */
     public function boot(AuthBootloader $auth): void
     {
         $auth->addActorProvider(UserRepository::class);

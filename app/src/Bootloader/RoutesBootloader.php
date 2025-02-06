@@ -23,15 +23,15 @@ use Spiral\Router\Loader\Configurator\RoutingConfigurator;
 
 final class RoutesBootloader extends BaseRoutesBootloader
 {
-    protected const SINGLETONS = [
+    protected const array SINGLETONS = [
         ErrorsRendererInterface::class => JsonErrorsRenderer::class,
     ];
 
-    protected const BINDINGS = [
+    protected const array BINDINGS = [
         RateLimitInterface::class => RedisRateLimit::class,
     ];
 
-    protected const DEPENDENCIES = [
+    protected const array DEPENDENCIES = [
         AnnotatedRoutesBootloader::class,
     ];
 

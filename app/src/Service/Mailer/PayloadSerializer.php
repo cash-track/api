@@ -8,10 +8,6 @@ use ReflectionClass;
 
 trait PayloadSerializer
 {
-    /**
-     * @param array $payload
-     * @return object
-     */
     public static function fromPayload(array $payload): object
     {
         $class = $payload['class'] ?? self::class;

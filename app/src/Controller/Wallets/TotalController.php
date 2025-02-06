@@ -19,10 +19,10 @@ final class TotalController extends Controller
 {
     public function __construct(
         AuthContextInterface $auth,
-        private ResponseWrapper $response,
-        private WalletRepository $walletRepository,
-        private ChargeRepository $chargeRepository,
-        private ChargeWalletService $chargeWalletService,
+        private readonly ResponseWrapper $response,
+        private readonly WalletRepository $walletRepository,
+        private readonly ChargeRepository $chargeRepository,
+        private readonly ChargeWalletService $chargeWalletService,
     ) {
         parent::__construct($auth);
     }

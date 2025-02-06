@@ -13,15 +13,10 @@ use Cycle\Database\Injection\Parameter;
  */
 class CurrencyRepository extends Repository
 {
-    const FEATURED_USD = 'USD';
-    const FEATURED_EUR = 'EUR';
-    const FEATURED_UAH = 'UAH';
+    const string FEATURED_USD = 'USD';
+    const string FEATURED_EUR = 'EUR';
+    const string FEATURED_UAH = 'UAH';
 
-    /**
-     * Fetch default currency
-     *
-     * @return \App\Database\Currency|null
-     */
     public function getDefault(): ?Currency
     {
         /** @var \App\Database\Currency|null $currency */

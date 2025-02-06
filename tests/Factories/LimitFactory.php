@@ -18,7 +18,7 @@ class LimitFactory extends AbstractFactory
      */
     protected array $tags = [];
 
-    public function forWallet(?Wallet $wallet): LimitFactory
+    public function forWallet(?Wallet $wallet = null): LimitFactory
     {
         $this->wallet = $wallet;
 
@@ -53,7 +53,7 @@ class LimitFactory extends AbstractFactory
         return $items;
     }
 
-    public function create(Limit $limit = null): Limit
+    public function create(?Limit $limit = null): Limit
     {
         $limit = $limit ?? self::make();
 
@@ -85,17 +85,17 @@ class LimitFactory extends AbstractFactory
         return $limit;
     }
 
-    public static function income(Limit $limit = null): Limit
+    public static function income(?Limit $limit = null): Limit
     {
         return self::type($limit, Limit::TYPE_INCOME);
     }
 
-    public static function expense(Limit $limit = null): Limit
+    public static function expense(?Limit $limit = null): Limit
     {
         return self::type($limit, Limit::TYPE_EXPENSE);
     }
 
-    public static function type(Limit $limit = null, string $type): Limit
+    public static function type(?Limit $limit = null, string $type): Limit
     {
         if ($limit === null) {
             $limit = self::make();

@@ -8,7 +8,7 @@ use Spiral\Core\InjectableConfig;
 
 class GoogleApiConfig extends InjectableConfig
 {
-    public const CONFIG = 'google';
+    public const string CONFIG = 'google';
 
     /**
      * @internal For internal usage. Will be hydrated in the constructor.

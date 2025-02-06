@@ -8,7 +8,7 @@ use Redis;
 
 class RedisRateLimit implements RateLimitInterface
 {
-    const PREFIX = 'rate-limit:';
+    const string PREFIX = 'rate-limit:';
 
     public function __construct(
         protected readonly Redis $redis,

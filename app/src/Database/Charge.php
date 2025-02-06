@@ -19,8 +19,8 @@ use Ramsey\Uuid\UuidInterface;
 #[Behavior\UpdatedAt(field: 'updatedAt', column: 'updated_at')]
 class Charge
 {
-    const TYPE_INCOME  = '+';
-    const TYPE_EXPENSE = '-';
+    const string TYPE_INCOME  = '+';
+    const string TYPE_EXPENSE = '-';
 
     #[ORM\Column(type: 'uuid', primary: true, name: 'id')]
     public UuidInterface|null $id = null;

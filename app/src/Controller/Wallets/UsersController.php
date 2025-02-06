@@ -23,12 +23,12 @@ final class UsersController extends Controller
 
     public function __construct(
         AuthContextInterface $auth,
-        private ResponseWrapper $response,
-        private LoggerInterface $logger,
-        private UsersView $usersView,
-        private UserRepository $userRepository,
-        private WalletRepository $walletRepository,
-        private WalletService $walletService,
+        private readonly ResponseWrapper $response,
+        private readonly LoggerInterface $logger,
+        private readonly UsersView $usersView,
+        private readonly UserRepository $userRepository,
+        private readonly WalletRepository $walletRepository,
+        private readonly WalletService $walletService,
     ) {
         parent::__construct($auth);
     }

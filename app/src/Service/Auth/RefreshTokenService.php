@@ -12,49 +12,16 @@ use Spiral\Auth\AuthContext;
 use Spiral\Auth\AuthContextInterface;
 use Spiral\Auth\TokenInterface;
 use Spiral\Auth\TransportRegistry;
-use Spiral\Prototype\Annotation\Prototyped;
 
-/**
- * @Prototyped(property="refreshTokenService")
- */
 class RefreshTokenService
 {
-    /**
-     * @var \Spiral\Auth\ActorProviderInterface
-     */
-    private $actorProvider;
-
-    /**
-     * @var \App\Auth\RefreshTokenStorageInterface
-     */
-    private $tokenStorage;
-
-    /**
-     * @var \Spiral\Auth\TransportRegistry
-     */
-    private $transportRegistry;
-
-    /**
-     * RefreshTokenService constructor.
-     *
-     * @param \Spiral\Auth\ActorProviderInterface $actorProvider
-     * @param \App\Auth\RefreshTokenStorageInterface $tokenStorage
-     * @param \Spiral\Auth\TransportRegistry $transportRegistry
-     */
     public function __construct(
-        ActorProviderInterface $actorProvider,
-        RefreshTokenStorageInterface $tokenStorage,
-        TransportRegistry $transportRegistry
+        private readonly ActorProviderInterface $actorProvider,
+        private readonly RefreshTokenStorageInterface $tokenStorage,
+        private readonly TransportRegistry $transportRegistry
     ) {
-        $this->actorProvider = $actorProvider;
-        $this->tokenStorage = $tokenStorage;
-        $this->transportRegistry = $transportRegistry;
     }
 
-    /**
-     * @param \Psr\Http\Message\ServerRequestInterface $request
-     * @return \Spiral\Auth\AuthContextInterface
-     */
     public function getContextByRequest(ServerRequestInterface $request): AuthContextInterface
     {
         $context = new AuthContext($this->actorProvider);
@@ -78,10 +45,6 @@ class RefreshTokenService
         return $context;
     }
 
-    /**
-     * @param string $tokenID
-     * @return \Spiral\Auth\AuthContextInterface
-     */
     public function getContextByToken(string $tokenID): AuthContextInterface
     {
         $context = new AuthContext($this->actorProvider);
@@ -96,10 +59,6 @@ class RefreshTokenService
         return $context;
     }
 
-    /**
-     * @param \App\Database\User $user
-     * @return \Spiral\Auth\TokenInterface
-     */
     public function createToken(User $user): TokenInterface
     {
         return $this->tokenStorage->create([
@@ -108,9 +67,6 @@ class RefreshTokenService
         ]);
     }
 
-    /**
-     * @param \Spiral\Auth\TokenInterface $token
-     */
     public function close(TokenInterface $token): void
     {
         $this->tokenStorage->delete($token);

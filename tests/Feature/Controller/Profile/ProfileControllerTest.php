@@ -64,7 +64,7 @@ class ProfileControllerTest extends TestCase implements DatabaseTransaction
         $this->assertProfileResponse($user, $response);
     }
 
-    private function assertProfileResponse(User $user, TestResponse $response, array $fields = null): void
+    private function assertProfileResponse(User $user, TestResponse $response, ?array $fields = null): void
     {
         $body = $this->getJsonResponseBody($response);
 
@@ -349,7 +349,7 @@ class ProfileControllerTest extends TestCase implements DatabaseTransaction
                      ->onlyMethods(['store'])
                      ->getMock();
 
-        $mock->expects($this->once())
+        $mock->expects($this->exactly(2))
              ->method('store')
              ->willThrowException(new \RuntimeException('Storage exception.'));
 
@@ -434,7 +434,7 @@ class ProfileControllerTest extends TestCase implements DatabaseTransaction
                      ->onlyMethods(['store'])
                      ->getMock();
 
-        $mock->expects($this->once())
+        $mock->expects($this->exactly(2))
              ->method('store')
              ->willThrowException(new \RuntimeException('Storage exception.'));
 

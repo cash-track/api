@@ -31,15 +31,15 @@ final class ChargesController extends Controller
 
     public function __construct(
         AuthContextInterface $auth,
-        private ResponseWrapper $response,
-        private LoggerInterface $logger,
-        private PaginationFactory $paginationFactory,
-        private ChargesView $chargesView,
-        private ChargeView $chargeView,
-        private ChargeWalletService $chargeWalletService,
-        private ChargeRepository $chargeRepository,
-        private WalletRepository $walletRepository,
-        private TagRepository $tagRepository,
+        private readonly ResponseWrapper $response,
+        private readonly LoggerInterface $logger,
+        private readonly PaginationFactory $paginationFactory,
+        private readonly ChargesView $chargesView,
+        private readonly ChargeView $chargeView,
+        private readonly ChargeWalletService $chargeWalletService,
+        private readonly ChargeRepository $chargeRepository,
+        private readonly WalletRepository $walletRepository,
+        private readonly TagRepository $tagRepository,
     ) {
         parent::__construct($auth);
     }

@@ -9,19 +9,8 @@ use App\Database\Wallet;
 
 class UriService
 {
-    /**
-     * @var \App\Config\AppConfig
-     */
-    private $config;
-
-    /**
-     * UriService constructor.
-     *
-     * @param \App\Config\AppConfig $config
-     */
-    public function __construct(AppConfig $config)
+    public function __construct(private readonly AppConfig $config)
     {
-        $this->config = $config;
     }
 
     /**

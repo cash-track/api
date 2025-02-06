@@ -14,7 +14,7 @@ class UserFactory extends AbstractFactory
 
     public const DEFAULT_PASSWORD = 'secret';
 
-    public function create(User $user = null): User
+    public function create(?User $user = null): User
     {
         $user = $user ?? self::make();
 
@@ -63,7 +63,7 @@ class UserFactory extends AbstractFactory
         return self::withPassword(self::DEFAULT_PASSWORD, $user);
     }
 
-    public static function withPassword(string $password, User $user = null): User
+    public static function withPassword(string $password, ?User $user = null): User
     {
         if ($user === null) {
             return self::make();
@@ -74,7 +74,7 @@ class UserFactory extends AbstractFactory
         return $user;
     }
 
-    public static function emailConfirmed(User $user = null, bool $confirmed = true): User
+    public static function emailConfirmed(?User $user = null, bool $confirmed = true): User
     {
         if ($user === null) {
             $user = self::make();
@@ -85,7 +85,7 @@ class UserFactory extends AbstractFactory
         return $user;
     }
 
-    public static function emailNotConfirmed(User $user = null): User
+    public static function emailNotConfirmed(?User $user = null): User
     {
         return self::emailConfirmed($user, false);
     }

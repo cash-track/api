@@ -28,9 +28,6 @@ trait Paginator
         return $this;
     }
 
-    /**
-     * @return array
-     */
     public function getPaginationState(): array
     {
         if ($this->paginator instanceof PaginatorInterface) {

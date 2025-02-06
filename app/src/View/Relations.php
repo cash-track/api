@@ -9,11 +9,7 @@ trait Relations
      */
     protected array $relations = [];
 
-    /**
-     * @param string $relation
-     * @return $this
-     */
-    public function withRelation(string $relation)
+    public function withRelation(string $relation): self
     {
         $this->relations[] = $relation;
 
@@ -24,17 +20,13 @@ trait Relations
      * @param array<array-key, string> $relations
      * @return $this
      */
-    public function withRelations(array $relations)
+    public function withRelations(array $relations): self
     {
         $this->relations = $relations;
 
         return $this;
     }
 
-    /**
-     * @param string $relation
-     * @return bool
-     */
     protected function loaded(string $relation): bool
     {
         return in_array($relation, $this->relations);

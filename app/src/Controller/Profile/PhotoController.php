@@ -21,10 +21,10 @@ final class PhotoController extends AuthAwareController
 
     public function __construct(
         AuthContextInterface $auth,
-        protected LoggerInterface $logger,
-        protected UserService $userService,
-        protected ResponseWrapper $response,
-        protected PhotoStorageService $photoStorageService,
+        protected readonly LoggerInterface $logger,
+        protected readonly UserService $userService,
+        protected readonly ResponseWrapper $response,
+        protected readonly PhotoStorageService $photoStorageService,
     ) {
         parent::__construct($auth);
     }

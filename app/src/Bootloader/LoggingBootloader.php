@@ -18,7 +18,7 @@ class LoggingBootloader extends Bootloader
      *
      * @see \Spiral\Monolog\Config\MonologConfig::DEFAULT_CHANNEL
      */
-    const DEFAULT_CHANNEL = 'default';
+    const string DEFAULT_CHANNEL = 'default';
 
     public function init(MonologBootloader $monolog, EnvironmentInterface $env): void
     {

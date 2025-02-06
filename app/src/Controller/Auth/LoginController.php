@@ -18,8 +18,8 @@ final class LoginController extends Controller
 
     public function __construct(
         protected UserView $userView,
-        protected AuthService $authService,
         protected ResponseWrapper $response,
+        protected readonly AuthService $authService,
     ) {
         parent::__construct($userView, $response);
     }

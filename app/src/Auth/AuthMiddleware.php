@@ -20,8 +20,8 @@ class AuthMiddleware implements MiddlewareInterface
 {
     use TranslatorTrait;
 
-    const HEADER_USER_ID = 'X-Internal-UserId';
-    const USER_LOCALE = 'X-Internal-UserLocale';
+    const string HEADER_USER_ID = 'X-Internal-UserId';
+    const string USER_LOCALE = 'X-Internal-UserLocale';
 
     public function __construct(
         private readonly UserService $userService,

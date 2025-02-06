@@ -19,11 +19,11 @@ final class CommonController extends AuthAwareController
 {
     public function __construct(
         AuthContextInterface $auth,
-        private ResponseWrapper $response,
-        private TagRepository $tagRepository,
-        private TagsView $tagsView,
-        private TagView $tagView,
-        private UserRepository $userRepository,
+        private readonly ResponseWrapper $response,
+        private readonly TagRepository $tagRepository,
+        private readonly TagsView $tagsView,
+        private readonly TagView $tagView,
+        private readonly UserRepository $userRepository,
     ) {
         parent::__construct($auth);
     }

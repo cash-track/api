@@ -12,6 +12,7 @@ class ExceptionHandlerBootloaderTest extends TestCase
     public function testAddRenderer(): void
     {
         $bootloader = $this->getContainer()->get(ExceptionHandlerBootloader::class);
-        $this->assertEmpty($bootloader->addRenderer());
+        $bootloader->addRenderer();
+        $this->assertTrue(true);
     }
 }

@@ -20,12 +20,13 @@ use Spiral\Auth\TokenInterface;
 use Spiral\Auth\TokenStorageInterface;
 use Spiral\Translator\Traits\TranslatorTrait;
 use Spiral\Translator\Translator;
+use Symfony\Component\String\Slugger\SluggerInterface;
 
 class AuthService
 {
     use TranslatorTrait;
 
-    const RANDOM_PASSWORD_LENGTH = 32;
+    const int RANDOM_PASSWORD_LENGTH = 32;
 
     public function __construct(
         protected AuthContextInterface $auth,
@@ -39,6 +40,7 @@ class AuthService
         protected RefreshTokenService $refreshTokenService,
         protected GoogleAccountService $googleAccountService,
         protected EmailConfirmationService $emailConfirmationService,
+        protected SluggerInterface $slugger,
     ) {
     }
 
@@ -122,7 +124,7 @@ class AuthService
         return password_verify($password, $container->getPasswordHash());
     }
 
-    protected function createUser(User $user, string $locale = null): User
+    protected function createUser(User $user, ?string $locale = null): User
     {
         $currency = $this->currencyRepository->getDefault();
 
@@ -217,7 +219,7 @@ class AuthService
 
     protected function makeSafeNickName(string $string, int $attempts = 10): string
     {
-        $name = str_slug($string);
+        $name = $this->slugger->slug($string)->lower()->toString();
         $tag = '';
 
         while ($attempts > 0) {

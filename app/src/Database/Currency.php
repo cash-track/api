@@ -11,7 +11,7 @@ use Cycle\Annotated\Annotation as ORM;
 #[ORM\Entity(repository: CurrencyRepository::class)]
 class Currency
 {
-    const DEFAULT_CURRENCY_CODE = 'USD';
+    const string DEFAULT_CURRENCY_CODE = 'USD';
 
     #[ORM\Column(type: 'string(3)', primary: true)]
     public string|null $code = null;

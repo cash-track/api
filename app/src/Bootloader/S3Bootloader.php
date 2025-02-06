@@ -16,7 +16,7 @@ use Spiral\Core\Container;
 class S3Bootloader extends Bootloader
 {
     public function __construct(
-        private S3Config $config,
+        private readonly S3Config $config,
     ) {
     }
 

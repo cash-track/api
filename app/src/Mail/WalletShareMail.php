@@ -31,7 +31,7 @@ class WalletShareMail extends BaseMail
         parent::__construct($userHeader);
     }
 
-    public function hydrate(ORMInterface $orm)
+    public function hydrate(ORMInterface $orm): void
     {
         parent::hydrate($orm);
 

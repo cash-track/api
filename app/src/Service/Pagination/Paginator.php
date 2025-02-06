@@ -18,31 +18,15 @@ use Spiral\Pagination\PaginableInterface;
  */
 final class Paginator implements PaginatorInterface, \Countable
 {
-    /** @var int */
-    private $pageNumber = 1;
+    private int $pageNumber = 1;
 
-    /** @var int */
-    private $countPages = 1;
+    private int $countPages = 1;
 
-    /** @var int */
-    private $limit = 25;
-
-    /** @var int */
-    private $count = 0;
-
-    /** @var string|null */
-    private $parameter = null;
-
-    /**
-     * @param int         $limit
-     * @param int         $count
-     * @param string|null $parameter
-     */
-    public function __construct(int $limit = 25, int $count = 0, string $parameter = null)
-    {
-        $this->limit = $limit;
-        $this->count = $count;
-        $this->parameter = $parameter;
+    public function __construct(
+        private int $limit = 25,
+        private int $count = 0,
+        private readonly ?string $parameter = null,
+    ) {
     }
 
     /**
@@ -55,11 +39,6 @@ final class Paginator implements PaginatorInterface, \Countable
         return $this->parameter;
     }
 
-    /**
-     * {@inheritdoc}
-     *
-     * @return self
-     */
     public function withLimit(int $limit): self
     {
         $paginator = clone $this;
@@ -68,17 +47,11 @@ final class Paginator implements PaginatorInterface, \Countable
         return $paginator;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getLimit(): int
     {
         return $this->limit;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function withPage(int $number): self
     {
         $paginator = clone $this;
@@ -88,11 +61,6 @@ final class Paginator implements PaginatorInterface, \Countable
         return $paginator;
     }
 
-    /**
-     * {@inheritdoc}
-     *
-     * @return self
-     */
     public function withCount(int $count): self
     {
         $paginator = clone $this;
@@ -100,9 +68,6 @@ final class Paginator implements PaginatorInterface, \Countable
         return $paginator->setCount($count);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getPage(): int
     {
         if ($this->pageNumber < 1) {
@@ -116,17 +81,11 @@ final class Paginator implements PaginatorInterface, \Countable
         return $this->pageNumber;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getOffset(): int
     {
         return ($this->getPage() - 1) * $this->limit;
     }
 
-    /**
-     * @inheritdoc
-     */
     public function paginate(PaginableInterface $target): PaginatorInterface
     {
         $paginator = clone $this;
@@ -140,25 +99,16 @@ final class Paginator implements PaginatorInterface, \Countable
         return $paginator;
     }
 
-    /**
-     * @return int
-     */
     public function count(): int
     {
         return $this->count;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function countPages(): int
     {
         return $this->countPages;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function countDisplayed(): int
     {
         if ($this->getPage() == $this->countPages) {
@@ -168,17 +118,11 @@ final class Paginator implements PaginatorInterface, \Countable
         return $this->limit;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function isRequired(): bool
     {
         return ($this->countPages > 1);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function nextPage(): ?int
     {
         if ($this->getPage() != $this->countPages) {
@@ -188,9 +132,6 @@ final class Paginator implements PaginatorInterface, \Countable
         return null;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function previousPage(): ?int
     {
         if ($this->getPage() > 1) {
@@ -200,9 +141,6 @@ final class Paginator implements PaginatorInterface, \Countable
         return null;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function toArray(): array
     {
         return [
@@ -220,7 +158,6 @@ final class Paginator implements PaginatorInterface, \Countable
      * Non-Immutable version of withCount.
      *
      * @param int $count
-     *
      * @return self|$this
      */
     private function setCount(int $count): self

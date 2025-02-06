@@ -25,12 +25,12 @@ final class TagsController extends AuthAwareController
 
     public function __construct(
         AuthContextInterface $auth,
-        private ResponseWrapper $response,
-        private LoggerInterface $logger,
-        private TagRepository $tagRepository,
-        private TagService $tagService,
-        private TagsView $tagsView,
-        private TagView $tagView,
+        private readonly ResponseWrapper $response,
+        private readonly LoggerInterface $logger,
+        private readonly TagRepository $tagRepository,
+        private readonly TagService $tagService,
+        private readonly TagsView $tagsView,
+        private readonly TagView $tagView,
     ) {
         parent::__construct($auth);
     }

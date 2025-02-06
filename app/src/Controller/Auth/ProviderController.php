@@ -20,7 +20,7 @@ final class ProviderController extends Controller
     public function __construct(
         protected UserView $userView,
         protected ResponseWrapper $response,
-        protected GoogleAuthService $googleAuthService,
+        protected readonly GoogleAuthService $googleAuthService,
     ) {
         parent::__construct($userView, $response);
     }

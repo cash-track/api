@@ -13,8 +13,8 @@ use Spiral\Router\Annotation\Route;
 final class LogoutController
 {
     public function __construct(
-        protected AuthService $auth,
-        protected ResponseWrapper $response,
+        protected readonly AuthService $auth,
+        protected readonly ResponseWrapper $response,
     ) {
     }
 

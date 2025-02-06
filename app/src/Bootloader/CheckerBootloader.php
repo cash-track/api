@@ -12,9 +12,6 @@ use Spiral\Validator\Bootloader\ValidatorBootloader;
 
 class CheckerBootloader extends Bootloader
 {
-    /**
-     * @param \Spiral\Validator\Bootloader\ValidatorBootloader $validation
-     */
     public function boot(ValidatorBootloader $validation): void
     {
         $validation->addChecker('password', PasswordChecker::class);

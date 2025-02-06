@@ -11,14 +11,16 @@ use App\Mail\WalletShareMail;
 use App\Repository\CurrencyRepository;
 use App\Service\Mailer\MailerInterface;
 use Cycle\ORM\EntityManagerInterface;
+use Symfony\Component\String\Slugger\SluggerInterface;
 
 class WalletService
 {
     public function __construct(
-        private EntityManagerInterface $tr,
-        private CurrencyRepository $currencyRepository,
-        private UriService $uri,
-        private MailerInterface $mailer
+        private readonly EntityManagerInterface $tr,
+        private readonly CurrencyRepository $currencyRepository,
+        private readonly UriService $uri,
+        private readonly MailerInterface $mailer,
+        private readonly SluggerInterface $slugger,
     ) {
     }
 
@@ -43,11 +45,6 @@ class WalletService
         return $this->store($wallet);
     }
 
-    /**
-     * @param \App\Database\Wallet $wallet
-     * @return \App\Database\Wallet
-     * @throws \Throwable
-     */
     public function store(Wallet $wallet): Wallet
     {
         $this->tr->persist($wallet);
@@ -56,21 +53,12 @@ class WalletService
         return $wallet;
     }
 
-    /**
-     * @param \App\Database\Wallet $wallet
-     * @throws \Throwable
-     */
     public function delete(Wallet $wallet): void
     {
         $this->tr->delete($wallet);
         $this->tr->run();
     }
 
-    /**
-     * @param \App\Database\Wallet $wallet
-     * @return \App\Database\Wallet
-     * @throws \Throwable
-     */
     public function activate(Wallet $wallet): Wallet
     {
         if ($wallet->isActive) {
@@ -82,11 +70,6 @@ class WalletService
         return $this->store($wallet);
     }
 
-    /**
-     * @param \App\Database\Wallet $wallet
-     * @return \App\Database\Wallet
-     * @throws \Throwable
-     */
     public function disable(Wallet $wallet): Wallet
     {
         if (! $wallet->isActive) {
@@ -98,11 +81,6 @@ class WalletService
         return $this->store($wallet);
     }
 
-    /**
-     * @param \App\Database\Wallet $wallet
-     * @return \App\Database\Wallet
-     * @throws \Throwable
-     */
     public function archive(Wallet $wallet): Wallet
     {
         if ($wallet->isArchived) {
@@ -114,11 +92,6 @@ class WalletService
         return $this->store($wallet);
     }
 
-    /**
-     * @param \App\Database\Wallet $wallet
-     * @return \App\Database\Wallet
-     * @throws \Throwable
-     */
     public function unArchive(Wallet $wallet): Wallet
     {
         if (! $wallet->isArchived) {
@@ -130,13 +103,6 @@ class WalletService
         return $this->store($wallet);
     }
 
-    /**
-     * @param \App\Database\Wallet $wallet
-     * @param \App\Database\User $user
-     * @param \App\Database\User $sharer
-     * @return \App\Database\Wallet
-     * @throws \Throwable
-     */
     public function share(Wallet $wallet, User $user, User $sharer): Wallet
     {
         /** @psalm-suppress DocblockTypeContradiction */
@@ -157,12 +123,6 @@ class WalletService
         return $wallet;
     }
 
-    /**
-     * @param \App\Database\Wallet $wallet
-     * @param \App\Database\User $user
-     * @return \App\Database\Wallet
-     * @throws \Throwable
-     */
     public function revoke(Wallet $wallet, User $user): Wallet
     {
         /** @psalm-suppress InvalidArgument */
@@ -175,23 +135,13 @@ class WalletService
         return $this->store($wallet);
     }
 
-    /**
-     * @param \App\Database\Wallet $wallet
-     * @return \App\Database\Wallet
-     * @throws \Exception
-     */
     protected function setSlugByName(Wallet $wallet): Wallet
     {
-        $wallet->slug = str_slug($wallet->name . ' ' . bin2hex(random_bytes(3)));
+        $wallet->slug = $this->slugger->slug($wallet->name . ' ' . bin2hex(random_bytes(3)))->lower()->toString();
 
         return $wallet;
     }
 
-    /**
-     * @param \App\Database\Wallet $wallet
-     * @param string|null $defaultCurrencyCode
-     * @return \App\Database\Wallet
-     */
     protected function setDefaultCurrency(Wallet $wallet, ?string $defaultCurrencyCode): Wallet
     {
         $code = $defaultCurrencyCode ?? Currency::DEFAULT_CURRENCY_CODE;

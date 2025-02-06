@@ -12,7 +12,7 @@ use Spiral\Core\Container;
 
 class RedisBootloader extends Bootloader
 {
-    public function __construct(private RedisConfig $config, private LoggerInterface $logger)
+    public function __construct(private readonly RedisConfig $config, private readonly LoggerInterface $logger)
     {
     }
 

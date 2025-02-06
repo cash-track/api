@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App;
 
-use App\Bootloader;
 use Spiral\Boot\Bootloader\CoreBootloader;
 use Spiral\Bootloader as Framework;
 use Spiral\Bootloader\Views\TranslatedCacheBootloader;
@@ -34,7 +33,7 @@ use Spiral\Views\Bootloader\ViewsBootloader;
 
 class App extends Kernel
 {
-    protected const SYSTEM = [
+    protected const array SYSTEM = [
         CoreBootloader::class,
         TokenizerListenerBootloader::class,
         DotenvBootloader::class,
@@ -44,7 +43,7 @@ class App extends Kernel
      * List of components and extensions to be automatically registered
      * within system container on application start.
      */
-    protected const LOAD = [
+    protected const array LOAD = [
         // Logging and exceptions handling
         RoadRunnerBridge\LoggerBootloader::class,
         Bootloader\LoggingBootloader::class,
@@ -143,7 +142,8 @@ class App extends Kernel
     /*
      * Application specific services and extensions.
      */
-    protected const APP = [
+    protected const array APP = [
+        Bootloader\AppBootloader::class,
         Bootloader\RedisBootloader::class,
         Auth\AuthBootloader::class,
         Bootloader\RoutesBootloader::class,

@@ -14,8 +14,8 @@ final class CurrencyController extends AuthAwareController
 {
     public function __construct(
         AuthContextInterface $auth,
-        protected CurrencyRepository $currencyRepository,
-        protected CurrenciesView $currenciesView,
+        protected readonly CurrencyRepository $currencyRepository,
+        protected readonly CurrenciesView $currenciesView,
     ) {
         parent::__construct($auth);
     }

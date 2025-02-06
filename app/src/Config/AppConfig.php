@@ -8,7 +8,7 @@ use Spiral\Core\InjectableConfig;
 
 class AppConfig extends InjectableConfig
 {
-    public const CONFIG = 'app';
+    public const string CONFIG = 'app';
 
     /**
      * @internal For internal usage. Will be hydrated in the constructor.

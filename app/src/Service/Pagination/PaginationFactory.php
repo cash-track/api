@@ -17,30 +17,24 @@ use Spiral\Core\Exception\ScopeException;
 use Spiral\Core\FactoryInterface;
 
 /**
- * Pagination factory binded to active request scope in order to select page number.
+ * Pagination factory bind to active request scope in order to select page number.
  */
 final class PaginationFactory implements PaginationProviderInterface
 {
-    /** @var ContainerInterface */
-    private $container;
-
-    /** @var FactoryInterface */
-    private $factory;
-
-    /**
-     * @param ContainerInterface $container
-     * @param FactoryInterface   $factory
-     */
-    public function __construct(ContainerInterface $container, FactoryInterface $factory)
-    {
-        $this->container = $container;
-        $this->factory = $factory;
+    public function __construct(
+        private readonly ContainerInterface $container,
+        private readonly FactoryInterface $factory,
+    ) {
     }
 
     /**
      * {@inheritdoc}
      *
-     * @throws ScopeException When no request are available.
+     * @param string $parameter
+     * @param int $limit
+     * @return \App\Service\Pagination\PaginatorInterface
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
      */
     public function createPaginator(string $parameter = 'page', int $limit = 25): PaginatorInterface
     {

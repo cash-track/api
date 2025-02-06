@@ -11,6 +11,7 @@ use Spiral\Filters\Model\Filter;
 use Spiral\Filters\Model\FilterDefinitionInterface;
 use Spiral\Filters\Model\HasFilterDefinition;
 use Spiral\Validator\FilterDefinition;
+use Symfony\Component\String\Slugger\SluggerInterface;
 
 class CreateRequest extends Filter implements HasFilterDefinition
 {
@@ -25,6 +26,10 @@ class CreateRequest extends Filter implements HasFilterDefinition
 
     #[Data]
     public string $defaultCurrencyCode = '';
+
+    public function __construct(private readonly SluggerInterface $slugger)
+    {
+    }
 
     public function filterDefinition(): FilterDefinitionInterface
     {
@@ -59,7 +64,7 @@ class CreateRequest extends Filter implements HasFilterDefinition
         $wallet->totalAmount = 0;
 
         if (! $wallet->slug) {
-            $wallet->slug = str_slug($wallet->name);
+            $wallet->slug = $this->slugger->slug($wallet->name)->lower()->toString();
         }
 
         if (! $wallet->defaultCurrencyCode) {

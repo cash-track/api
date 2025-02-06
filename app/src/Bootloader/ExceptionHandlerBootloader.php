@@ -23,7 +23,7 @@ use Spiral\Http\Middleware\ErrorHandlerMiddleware\SuppressErrorsInterface;
  */
 final class ExceptionHandlerBootloader extends Bootloader
 {
-    protected const BINDINGS = [
+    protected const array BINDINGS = [
         SuppressErrorsInterface::class => EnvSuppressErrors::class,
         RendererInterface::class => ViewRenderer::class,
     ];

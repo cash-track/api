@@ -10,42 +10,15 @@ use App\Database\User;
 use App\Database\Wallet;
 use App\Repository\ChargeRepository;
 use App\Repository\WalletRepository;
-use Spiral\Prototype\Annotation\Prototyped;
 
-/**
- * @Prototyped(property="statistics")
- */
 class ProfileStatistics
 {
-    /**
-     * @var \App\Repository\ChargeRepository
-     */
-    private $chargeRepository;
-
-    /**
-     * @var \App\Repository\WalletRepository
-     */
-    private $walletRepository;
-
-    /**
-     * ProfileStatistics constructor.
-     *
-     * @param \App\Repository\WalletRepository $walletRepository
-     * @param \App\Repository\ChargeRepository $chargeRepository
-     */
     public function __construct(
-        WalletRepository $walletRepository,
-        ChargeRepository $chargeRepository
+        private readonly WalletRepository $walletRepository,
+        private readonly ChargeRepository $chargeRepository
     ) {
-        $this->walletRepository = $walletRepository;
-        $this->chargeRepository = $chargeRepository;
     }
 
-    /**
-     * @param \App\Database\User $user
-     * @param \App\Database\Currency $currency
-     * @return array
-     */
     public function getChargeFlow(User $user, Currency $currency): array
     {
         $walletIDs = array_map(function (Wallet $wallet) {
@@ -77,10 +50,6 @@ class ProfileStatistics
         return $data;
     }
 
-    /**
-     * @param \App\Database\User $user
-     * @return array
-     */
     public function getCounters(User $user): array
     {
         return [

@@ -29,7 +29,7 @@ class RefreshControllerTest extends TestCase implements DatabaseTransaction
      * @return string
      * @throws \Throwable
      */
-    protected function getRefreshToken(int $userId, \DateTimeImmutable $expiredAt = null): string
+    protected function getRefreshToken(int $userId, ?\DateTimeImmutable $expiredAt = null): string
     {
         /** @var RefreshTokenStorage $tokenStorage */
         $tokenStorage = $this->getContainer()->get(RefreshTokenStorage::class);

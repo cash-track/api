@@ -22,11 +22,7 @@ enum Cipher: string
     {
         class_exists($this->value) || throw new RuntimeException("Undefined cipher class {$this->value}");
 
-        $instance = new $this->value;
-
-        $instance instanceof CipherInterface || throw new RuntimeException('Cipher must be instance of ' . CipherInterface::class);
-
-        return $instance;
+        return new $this->value;
     }
 }
 // @codingStandardsIgnoreEnd

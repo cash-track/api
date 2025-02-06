@@ -20,10 +20,10 @@ final class ArchiveController extends Controller
 
     public function __construct(
         AuthContextInterface $auth,
-        private ResponseWrapper $response,
-        private LoggerInterface $logger,
-        private WalletService $walletService,
-        private WalletRepository $walletRepository,
+        private readonly ResponseWrapper $response,
+        private readonly LoggerInterface $logger,
+        private readonly WalletService $walletService,
+        private readonly WalletRepository $walletRepository,
     ) {
         parent::__construct($auth);
     }

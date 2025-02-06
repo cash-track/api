@@ -18,8 +18,8 @@ use Cycle\ORM\Parser\Typecast;
 #[Behavior\UpdatedAt(field: 'updatedAt', column: 'updated_at')]
 class Limit
 {
-    const TYPE_INCOME  = '+';
-    const TYPE_EXPENSE = '-';
+    const string TYPE_INCOME  = '+';
+    const string TYPE_EXPENSE = '-';
 
     #[ORM\Column('primary')]
     public int|null $id = null;

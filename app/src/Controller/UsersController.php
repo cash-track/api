@@ -17,10 +17,10 @@ final class UsersController extends AuthAwareController
 {
     public function __construct(
         AuthContextInterface $auth,
-        protected ResponseWrapper $response,
-        protected UserRepository $userRepository,
-        protected UserView $userView,
-        protected UsersView $usersView,
+        protected readonly ResponseWrapper $response,
+        protected readonly UserRepository $userRepository,
+        protected readonly UserView $userView,
+        protected readonly UsersView $usersView,
     ) {
         parent::__construct($auth);
     }

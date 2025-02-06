@@ -8,7 +8,7 @@ use Spiral\Core\InjectableConfig;
 
 class CdnConfig extends InjectableConfig
 {
-    public const CONFIG = 'cdn';
+    public const string CONFIG = 'cdn';
 
     /**
      * @internal For internal usage. Will be hydrated in the constructor.
@@ -18,17 +18,11 @@ class CdnConfig extends InjectableConfig
         'bucket' => null
     ];
 
-    /**
-     * @return string
-     */
     public function getHost(): string
     {
         return (string) $this->config['host'];
     }
 
-    /**
-     * @return string
-     */
     public function getBucket(): string
     {
         return (string) $this->config['bucket'];

@@ -20,25 +20,10 @@ use Symfony\Component\Mailer\Mailer as SymfonyMailer;
 
 class MailerBootloader extends Bootloader
 {
-    /**
-     * @var \App\Config\MailConfig
-     */
-    private $config;
-
-    /**
-     * FirebaseBootloader constructor.
-     *
-     * @param \App\Config\MailConfig $config
-     */
-    public function __construct(MailConfig $config)
+    public function __construct(private readonly MailConfig $config)
     {
-        $this->config = $config;
     }
 
-    /**
-     * @param \Spiral\Core\Container $container
-     * @return void
-     */
     public function boot(Container $container): void
     {
         $container->bind(MailerInterface::class, function (
@@ -66,9 +51,6 @@ class MailerBootloader extends Bootloader
         });
     }
 
-    /**
-     * @return \Symfony\Component\Mailer\Transport\TransportInterface
-     */
     private function getTransport(): Transport\TransportInterface
     {
         switch ($this->config->getDriver()) {
@@ -79,9 +61,6 @@ class MailerBootloader extends Bootloader
         throw new \RuntimeException('Unknown mail driver');
     }
 
-    /**
-     * @return \Symfony\Component\Mailer\Transport\TransportInterface
-     */
     private function getSmtpTransport(): Transport\TransportInterface
     {
         $transport = new Transport\Smtp\EsmtpTransport(

@@ -12,13 +12,10 @@ use Spiral\Bootloader\Http\HttpBootloader;
 
 class CorsBootloader extends Bootloader
 {
-    protected const BINDINGS = [
+    protected const array BINDINGS = [
         CorsInterface::class => CorsService::class,
     ];
 
-    /**
-     * @param \Spiral\Bootloader\Http\HttpBootloader $http
-     */
     public function boot(HttpBootloader $http): void
     {
         $http->addMiddleware(CorsMiddleware::class);

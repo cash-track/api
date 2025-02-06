@@ -13,14 +13,14 @@ class WalletFactory extends AbstractFactory
 {
     protected ?User $user = null;
 
-    public function forUser(?User $user): WalletFactory
+    public function forUser(?User $user = null): WalletFactory
     {
         $this->user = $user;
 
         return $this;
     }
 
-    public function create(Wallet $wallet = null): Wallet
+    public function create(?Wallet $wallet = null): Wallet
     {
         $wallet = $wallet ?? self::make();
 
@@ -54,7 +54,7 @@ class WalletFactory extends AbstractFactory
         return $wallet;
     }
 
-    public static function archived(Wallet $wallet = null): Wallet
+    public static function archived(?Wallet $wallet = null): Wallet
     {
         if ($wallet === null) {
             $wallet = self::make();
@@ -65,7 +65,7 @@ class WalletFactory extends AbstractFactory
         return $wallet;
     }
 
-    public static function disabled(Wallet $wallet = null): Wallet
+    public static function disabled(?Wallet $wallet = null): Wallet
     {
         if ($wallet === null) {
             $wallet = self::make();

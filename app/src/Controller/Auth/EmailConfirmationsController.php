@@ -20,11 +20,11 @@ final class EmailConfirmationsController extends AuthAwareController
     use TranslatorTrait;
 
     public function __construct(
-        protected AuthContextInterface $auth,
-        protected ResponseWrapper $response,
-        protected EmailConfirmationView $emailConfirmationView,
-        protected EmailConfirmationService $emailConfirmationService,
-        protected EmailConfirmationRepository $emailConfirmationRepository,
+        protected readonly AuthContextInterface $auth,
+        protected readonly ResponseWrapper $response,
+        protected readonly EmailConfirmationView $emailConfirmationView,
+        protected readonly EmailConfirmationService $emailConfirmationService,
+        protected readonly EmailConfirmationRepository $emailConfirmationRepository,
     ) {
         parent::__construct($auth);
     }

@@ -19,17 +19,11 @@ use Symfony\Component\Mime\Email;
 
 class Mailer implements MailerInterface
 {
-    const QUEUE_NAME = 'high-priority';
+    const string QUEUE_NAME = 'high-priority';
 
-    /**
-     * @var string
-     */
-    private $defaultFromName = '';
+    private string $defaultFromName = '';
 
-    /**
-     * @var string
-     */
-    private $defaultFromAddress = '';
+    private string $defaultFromAddress = '';
 
     public function __construct(
         private readonly SymfonyMailerInterface $mailer,
@@ -42,10 +36,6 @@ class Mailer implements MailerInterface
     ) {
     }
 
-    /**
-     * @param string $defaultFromName
-     * @return \App\Service\Mailer\MailerInterface
-     */
     public function setDefaultFromName(string $defaultFromName): MailerInterface
     {
         $this->defaultFromName = $defaultFromName;
@@ -53,10 +43,6 @@ class Mailer implements MailerInterface
         return $this;
     }
 
-    /**
-     * @param string $defaultFromAddress
-     * \App\Service\Mailer\MailerInterface
-     */
     public function setDefaultFromAddress(string $defaultFromAddress): MailerInterface
     {
         $this->defaultFromAddress = $defaultFromAddress;
