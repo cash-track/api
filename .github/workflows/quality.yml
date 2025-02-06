@@ -24,7 +24,7 @@ jobs:
         env:
           runner: self-hosted
         with:
-          php-version: '8.2'
+          php-version: '8.4'
           extensions: zip, xsl, dom, exif, intl, pcntl, bcmath, sockets, mbstring, pdo_mysql, mysqli, redis
           tools: composer
 
@@ -43,7 +43,7 @@ jobs:
         run: composer install --no-progress --no-interaction --prefer-dist --optimize-autoloader
 
       - name: Run Psalm
-        run: ./vendor/bin/psalm --php-version=8.2 --show-info=true --no-cache
+        run: composer run psalm
 
   coding-standards:
     name: Coding Standards
@@ -58,7 +58,7 @@ jobs:
         env:
           runner: self-hosted
         with:
-          php-version: '8.2'
+          php-version: '8.4'
           extensions: zip, xsl, dom, exif, intl, pcntl, bcmath, sockets, mbstring, pdo_mysql, mysqli, redis
           tools: composer
 
@@ -77,7 +77,7 @@ jobs:
         run: composer install --no-progress --no-interaction --prefer-dist --optimize-autoloader
 
       - name: Run Code Sniffer
-        run: ./vendor/bin/phpcs -p -n --standard=PSR12 --colors --report=code ./app/src
+        run: composer run phpcs
 
   tests:
     name: Tests
@@ -112,7 +112,7 @@ jobs:
         env:
           runner: self-hosted
         with:
-          php-version: '8.2'
+          php-version: '8.4'
           coverage: pcov
           extensions: zip, xsl, dom, exif, intl, pcntl, bcmath, sockets, mbstring, pdo_mysql, mysqli, redis
           tools: composer, phpunit
@@ -140,7 +140,7 @@ jobs:
           php app.php migrate -s -n
 
       - name: Run PHPUnit
-        run: XDEBUG_MODE=coverage ./vendor/bin/paratest --coverage-clover=coverage.xml
+        run: composer run phpunit:ci
 
       - name: Upload Coverage To Codecov
         continue-on-error: true

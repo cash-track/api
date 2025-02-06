@@ -12,14 +12,14 @@ class PasskeyFactory extends AbstractFactory
 {
     protected ?User $user = null;
 
-    public function forUser(?User $user): PasskeyFactory
+    public function forUser(?User $user = null): PasskeyFactory
     {
         $this->user = $user;
 
         return $this;
     }
 
-    public function create(Passkey $passkey = null): Passkey
+    public function create(?Passkey $passkey = null): Passkey
     {
         $passkey = $passkey ?? self::make();
 

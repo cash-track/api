@@ -18,17 +18,11 @@ class CdnConfig extends InjectableConfig
         'bucket' => null
     ];
 
-    /**
-     * @return string
-     */
     public function getHost(): string
     {
         return (string) $this->config['host'];
     }
 
-    /**
-     * @return string
-     */
     public function getBucket(): string
     {
         return (string) $this->config['bucket'];

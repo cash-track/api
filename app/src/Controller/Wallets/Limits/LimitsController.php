@@ -26,7 +26,7 @@ final class LimitsController extends Controller
     public function __construct(
         AuthContextInterface $auth,
         private readonly ResponseWrapper $response,
-        private LoggerInterface $logger,
+        private readonly LoggerInterface $logger,
         private readonly WalletRepository $walletRepository,
         private readonly LimitRepository $limitRepository,
         private readonly LimitService $limitService,

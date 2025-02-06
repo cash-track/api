@@ -75,28 +75,16 @@ class WalletRepository extends Repository implements RepositoryInterface
         return $wallets;
     }
 
-    /**
-     * @param int $userID
-     * @return int
-     */
     public function countAllByUserPK(int $userID): int
     {
         return $this->allByUserPK($userID)->count();
     }
 
-    /**
-     * @param int $userID
-     * @return int
-     */
     public function countArchivedByUserPK(int $userID): int
     {
         return $this->allByUserPK($userID)->where('is_archived', true)->count();
     }
 
-    /**
-     * @param int $userID
-     * @return \Cycle\ORM\Select
-     */
     protected function allByUserPK(int $userID): Select
     {
         return $this->select()->load('users')->where('users.id', $userID)->orderBy('created_at', 'DESC');

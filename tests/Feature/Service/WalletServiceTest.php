@@ -10,6 +10,7 @@ use App\Service\Mailer\MailerInterface;
 use App\Service\UriService;
 use App\Service\WalletService;
 use Cycle\ORM\EntityManagerInterface;
+use Symfony\Component\String\Slugger\SluggerInterface;
 use Tests\Factories\UserFactory;
 use Tests\Factories\WalletFactory;
 use Tests\Fixtures;
@@ -26,6 +27,7 @@ class WalletServiceTest extends TestCase
                             $this->getContainer()->get(CurrencyRepository::class),
                             $this->getContainer()->get(UriService::class),
                             $this->getContainer()->get(MailerInterface::class),
+                            $this->getContainer()->get(SluggerInterface::class),
                         ])
                         ->getMock();
 
@@ -51,6 +53,7 @@ class WalletServiceTest extends TestCase
                             $this->getContainer()->get(CurrencyRepository::class),
                             $this->getContainer()->get(UriService::class),
                             $this->getContainer()->get(MailerInterface::class),
+                            $this->getContainer()->get(SluggerInterface::class),
                         ])
                         ->getMock();
 
@@ -88,6 +91,7 @@ class WalletServiceTest extends TestCase
                             $currencyRepository,
                             $this->getContainer()->get(UriService::class),
                             $this->getContainer()->get(MailerInterface::class),
+                            $this->getContainer()->get(SluggerInterface::class),
                         ])
                         ->getMock();
 
@@ -113,6 +117,7 @@ class WalletServiceTest extends TestCase
                             $this->getContainer()->get(CurrencyRepository::class),
                             $this->getContainer()->get(UriService::class),
                             $this->getContainer()->get(MailerInterface::class),
+                            $this->getContainer()->get(SluggerInterface::class),
                         ])
                         ->getMock();
 
@@ -135,6 +140,7 @@ class WalletServiceTest extends TestCase
                             $this->getContainer()->get(CurrencyRepository::class),
                             $this->getContainer()->get(UriService::class),
                             $this->getContainer()->get(MailerInterface::class),
+                            $this->getContainer()->get(SluggerInterface::class),
                         ])
                         ->getMock();
 

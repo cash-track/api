@@ -17,10 +17,10 @@ final class TagsController extends Controller
 {
     public function __construct(
         AuthContextInterface $auth,
-        private ResponseWrapper $response,
-        private WalletRepository $walletRepository,
-        private TagRepository $tagRepository,
-        private TagsView $tagsView,
+        private readonly ResponseWrapper $response,
+        private readonly WalletRepository $walletRepository,
+        private readonly TagRepository $tagRepository,
+        private readonly TagsView $tagsView,
     ) {
         parent::__construct($auth);
     }

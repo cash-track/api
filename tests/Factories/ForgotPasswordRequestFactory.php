@@ -10,7 +10,7 @@ use Tests\Fixtures;
 
 class ForgotPasswordRequestFactory extends AbstractFactory
 {
-    public function create(ForgotPasswordRequest $request = null): ForgotPasswordRequest
+    public function create(?ForgotPasswordRequest $request = null): ForgotPasswordRequest
     {
         $request = $request ?? self::make();
 
@@ -30,12 +30,12 @@ class ForgotPasswordRequestFactory extends AbstractFactory
         return $request;
     }
 
-    public static function notThrottled(ForgotPasswordRequest $request = null): ForgotPasswordRequest
+    public static function notThrottled(?ForgotPasswordRequest $request = null): ForgotPasswordRequest
     {
         return self::notExpired($request);
     }
 
-    public static function throttled(ForgotPasswordRequest $request = null): ForgotPasswordRequest
+    public static function throttled(?ForgotPasswordRequest $request = null): ForgotPasswordRequest
     {
         if ($request === null) {
             $request = self::make();
@@ -48,7 +48,7 @@ class ForgotPasswordRequestFactory extends AbstractFactory
         return $request;
     }
 
-    public static function notExpired(ForgotPasswordRequest $request = null): ForgotPasswordRequest
+    public static function notExpired(?ForgotPasswordRequest $request = null): ForgotPasswordRequest
     {
         if ($request === null) {
             $request = self::make();
@@ -62,7 +62,7 @@ class ForgotPasswordRequestFactory extends AbstractFactory
         return $request;
     }
 
-    public static function expired(ForgotPasswordRequest $request = null): ForgotPasswordRequest
+    public static function expired(?ForgotPasswordRequest $request = null): ForgotPasswordRequest
     {
         if ($request === null) {
             $request = self::make();

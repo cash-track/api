@@ -21,6 +21,7 @@ use Spiral\Auth\AuthContextInterface;
 use Spiral\Auth\TokenStorageInterface;
 use Spiral\Translator\Traits\TranslatorTrait;
 use Spiral\Translator\Translator;
+use Symfony\Component\String\Slugger\SluggerInterface;
 
 class GoogleAuthService extends AuthService
 {
@@ -40,6 +41,7 @@ class GoogleAuthService extends AuthService
         protected RefreshTokenService $refreshTokenService,
         protected GoogleAccountService $googleAccountService,
         protected EmailConfirmationService $emailConfirmationService,
+        protected SluggerInterface $slugger,
         protected readonly GoogleAccountRepository $googleAccountRepository,
     ) {
         parent::__construct(
@@ -54,6 +56,7 @@ class GoogleAuthService extends AuthService
             $this->refreshTokenService,
             $this->googleAccountService,
             $this->emailConfirmationService,
+            $this->slugger,
         );
     }
 

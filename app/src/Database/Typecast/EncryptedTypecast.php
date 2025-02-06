@@ -15,13 +15,13 @@ final class EncryptedTypecast implements CastableInterface, UncastableInterface
 {
     // Encrypts database column using cipher which produces idempotent encrypted values
     // which can be used in WHERE-like clauses against encrypted columns.
-    const QUERY = 'encrypted-query';
+    const string QUERY = 'encrypted-query';
 
     // Encrypts database column using strong encryption cipher that does not produce idempotent
     // encrypted values and cannot be queries in WHERE-like clauses
-    const STORE = 'encrypted-store';
+    const string STORE = 'encrypted-store';
 
-    const CIPHERS = [
+    const array CIPHERS = [
         self::QUERY => Cipher::AES256ECB,
         self::STORE => Cipher::AES256GCM,
     ];

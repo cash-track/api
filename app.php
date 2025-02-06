@@ -9,7 +9,7 @@ use App\App;
 // settings for you.
 
 \mb_internal_encoding('UTF-8');
-\error_reporting(E_ALL | E_STRICT ^ E_DEPRECATED);
+\error_reporting(E_ALL | E_DEPRECATED);
 \ini_set('display_errors', 'stderr');
 
 require __DIR__ . '/vendor/autoload.php';

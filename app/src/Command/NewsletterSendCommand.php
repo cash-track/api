@@ -45,7 +45,7 @@ class NewsletterSendCommand extends Command
         private readonly UserRepository $repository,
         private readonly MailerInterface $mailer,
         private readonly LoggerInterface $logger,
-        string $name = null
+        ?string $name = null
     ) {
         parent::__construct($name);
     }

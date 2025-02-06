@@ -24,7 +24,7 @@ abstract class BaseMail extends Mail
         parent::__construct();
     }
 
-    public function hydrate(ORMInterface $orm)
+    public function hydrate(ORMInterface $orm): void
     {
         $this->user = $this->userHeader->hydrate($orm);
     }

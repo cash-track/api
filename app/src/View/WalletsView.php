@@ -20,7 +20,7 @@ class WalletsView
     ) {
     }
 
-    public function json(array $wallets, array $sort = null): ResponseInterface
+    public function json(array $wallets, ?array $sort = null): ResponseInterface
     {
         return $this->response->json([
             'data' => $this->map($this->applySort($wallets, $sort)),

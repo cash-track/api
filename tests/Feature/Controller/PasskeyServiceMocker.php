@@ -19,7 +19,7 @@ use Webauthn\TrustPath\EmptyTrustPath;
 
 trait PasskeyServiceMocker
 {
-    protected function makePasskeyAuthMock(array $methods = [], callable $expectation = null): MockObject|PasskeyService
+    protected function makePasskeyAuthMock(array $methods = [], ?callable $expectation = null): MockObject|PasskeyService
     {
         $redis = $this->getMockBuilder(\Redis::class)
                       ->disableOriginalConstructor()

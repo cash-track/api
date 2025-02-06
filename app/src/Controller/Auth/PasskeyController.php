@@ -24,8 +24,8 @@ final class PasskeyController extends Controller
 
     public function __construct(
         protected UserView $userView,
-        protected AuthService $authService,
         protected ResponseWrapper $response,
+        protected readonly AuthService $authService,
         protected readonly PasskeyService $passkeyService,
     ) {
         parent::__construct($userView, $response);

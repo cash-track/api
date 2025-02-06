@@ -17,11 +17,6 @@ class CurrencyRepository extends Repository
     const string FEATURED_EUR = 'EUR';
     const string FEATURED_UAH = 'UAH';
 
-    /**
-     * Fetch default currency
-     *
-     * @return \App\Database\Currency|null
-     */
     public function getDefault(): ?Currency
     {
         /** @var \App\Database\Currency|null $currency */

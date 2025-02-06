@@ -19,8 +19,8 @@ final class PasswordController extends AuthAwareController
 
     public function __construct(
         AuthContextInterface $auth,
-        protected ResponseWrapper $response,
-        protected AuthService $authService,
+        protected readonly ResponseWrapper $response,
+        protected readonly AuthService $authService,
     ) {
         parent::__construct($auth);
     }

@@ -31,49 +31,31 @@ class CorsConfig extends InjectableConfig
         return $this->config['allowedOrigins'];
     }
 
-    /**
-     * @return array
-     */
     public function getAllowedOriginsPatterns(): array
     {
         return $this->config['allowedOriginsPatterns'];
     }
 
-    /**
-     * @return bool
-     */
     public function getSupportsCredentials(): bool
     {
         return $this->config['supportsCredentials'];
     }
 
-    /**
-     * @return array
-     */
     public function getAllowedHeaders(): array
     {
         return $this->config['allowedHeaders'];
     }
 
-    /**
-     * @return array
-     */
     public function getExposedHeaders(): array
     {
         return $this->config['exposedHeaders'];
     }
 
-    /**
-     * @return array
-     */
     public function getAllowedMethods(): array
     {
         return $this->config['allowedMethods'];
     }
 
-    /**
-     * @return int
-     */
     public function getMaxAge(): int
     {
         return $this->config['maxAge'];

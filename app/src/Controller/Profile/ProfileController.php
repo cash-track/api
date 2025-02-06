@@ -28,13 +28,13 @@ class ProfileController extends AuthAwareController
 
     public function __construct(
         AuthContextInterface $auth,
-        protected UserView $userView,
-        protected LoggerInterface $logger,
-        protected UserService $userService,
-        protected ResponseWrapper $response,
-        protected CurrencyRepository $currencyRepository,
-        protected UserOptionsService $userOptionsService,
-        protected GoogleAccountRepository $googleAccountRepository,
+        protected readonly UserView $userView,
+        protected readonly LoggerInterface $logger,
+        protected readonly UserService $userService,
+        protected readonly ResponseWrapper $response,
+        protected readonly CurrencyRepository $currencyRepository,
+        protected readonly UserOptionsService $userOptionsService,
+        protected readonly GoogleAccountRepository $googleAccountRepository,
     ) {
         parent::__construct($auth);
     }

@@ -24,11 +24,11 @@ final class PasskeyController extends AuthAwareController
 
     public function __construct(
         AuthContextInterface $auth,
-        protected PasskeyView $passkeyView,
-        protected ResponseWrapper $response,
-        protected PasskeysView $passkeysView,
-        protected PasskeyService $passkeyAuthService,
-        protected PasskeyRepository $passkeyRepository,
+        protected readonly PasskeyView $passkeyView,
+        protected readonly ResponseWrapper $response,
+        protected readonly PasskeysView $passkeysView,
+        protected readonly PasskeyService $passkeyAuthService,
+        protected readonly PasskeyRepository $passkeyRepository,
     ) {
         parent::__construct($auth);
     }

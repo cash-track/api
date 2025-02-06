@@ -12,7 +12,7 @@ use Spiral\Boot\Bootloader\Bootloader;
 
 final class EntityBehaviorBootloader extends Bootloader
 {
-    protected const BINDINGS = [
+    protected const array BINDINGS = [
         CommandGeneratorInterface::class => EventDrivenCommandGenerator::class,
         EncrypterInterface::class => Encrypter::class,
     ];

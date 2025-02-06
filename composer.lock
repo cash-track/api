@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "d4c855205ed7472cc1c614181c67a3aa",
+    "content-hash": "43f7acaae9c8edec66fb0b956606aacc",
     "packages": [
         {
             "name": "aws/aws-crt-php",
@@ -62,16 +62,16 @@
         },
         {
             "name": "aws/aws-sdk-php",
-            "version": "3.339.6",
+            "version": "3.339.7",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aws/aws-sdk-php.git",
-                "reference": "cc0b21de3b1eaabb7d0a1ed4f3f067bad4be5f31"
+                "reference": "7b7e48ce7970c0416c5fda045df7b93948fbf643"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/cc0b21de3b1eaabb7d0a1ed4f3f067bad4be5f31",
-                "reference": "cc0b21de3b1eaabb7d0a1ed4f3f067bad4be5f31",
+                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/7b7e48ce7970c0416c5fda045df7b93948fbf643",
+                "reference": "7b7e48ce7970c0416c5fda045df7b93948fbf643",
                 "shasum": ""
             },
             "require": {
@@ -154,9 +154,9 @@
             "support": {
                 "forum": "https://github.com/aws/aws-sdk-php/discussions",
                 "issues": "https://github.com/aws/aws-sdk-php/issues",
-                "source": "https://github.com/aws/aws-sdk-php/tree/3.339.6"
+                "source": "https://github.com/aws/aws-sdk-php/tree/3.339.7"
             },
-            "time": "2025-02-04T19:03:40+00:00"
+            "time": "2025-02-05T19:06:15+00:00"
         },
         {
             "name": "beste/clock",
@@ -1060,16 +1060,16 @@
         },
         {
             "name": "cycle/migrations",
-            "version": "v4.2.4",
+            "version": "4.x-dev",
             "source": {
                 "type": "git",
                 "url": "https://github.com/cycle/migrations.git",
-                "reference": "e7289b8a036ebea60144bced7837706f94e7bd1c"
+                "reference": "0a99d7f85655ca7d682b4a8c30860e0f01b43506"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/cycle/migrations/zipball/e7289b8a036ebea60144bced7837706f94e7bd1c",
-                "reference": "e7289b8a036ebea60144bced7837706f94e7bd1c",
+                "url": "https://api.github.com/repos/cycle/migrations/zipball/0a99d7f85655ca7d682b4a8c30860e0f01b43506",
+                "reference": "0a99d7f85655ca7d682b4a8c30860e0f01b43506",
                 "shasum": ""
             },
             "require": {
@@ -1084,9 +1084,10 @@
                 "buggregator/trap": "^1.11",
                 "mockery/mockery": "^1.5",
                 "phpunit/phpunit": "^9.5",
-                "spiral/code-style": "~2.2.0",
-                "vimeo/psalm": "^5.25"
+                "spiral/code-style": "^2.2.0",
+                "vimeo/psalm": "^6.4"
             },
+            "default-branch": true,
             "type": "library",
             "autoload": {
                 "psr-4": {
@@ -1100,9 +1101,9 @@
             "description": "Database migrations, migration scaffolding",
             "support": {
                 "issues": "https://github.com/cycle/migrations/issues",
-                "source": "https://github.com/cycle/migrations/tree/v4.2.4"
+                "source": "https://github.com/cycle/migrations/tree/4.x"
             },
-            "time": "2024-10-24T17:37:13+00:00"
+            "time": "2025-02-06T11:59:51+00:00"
         },
         {
             "name": "cycle/orm",
@@ -6622,16 +6623,16 @@
         },
         {
             "name": "spiral/filters-bridge",
-            "version": "1.0.1",
+            "version": "1.0.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/spiral/filters-bridge.git",
-                "reference": "cea42b3c13cf8183b8f6053b5ee30e835836a257"
+                "reference": "dd34d5a61b24b3956928b27171f7a5771549b365"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/spiral/filters-bridge/zipball/cea42b3c13cf8183b8f6053b5ee30e835836a257",
-                "reference": "cea42b3c13cf8183b8f6053b5ee30e835836a257",
+                "url": "https://api.github.com/repos/spiral/filters-bridge/zipball/dd34d5a61b24b3956928b27171f7a5771549b365",
+                "reference": "dd34d5a61b24b3956928b27171f7a5771549b365",
                 "shasum": ""
             },
             "require": {
@@ -6679,7 +6680,7 @@
                 "issues": "https://github.com/spiral/framework/issues",
                 "source": "https://github.com/spiral/filters"
             },
-            "time": "2022-09-14T18:13:19+00:00"
+            "time": "2025-02-06T12:11:40+00:00"
         },
         {
             "name": "spiral/framework",
@@ -6995,6 +6996,91 @@
             "time": "2024-04-11T17:26:14+00:00"
         },
         {
+            "name": "spiral/grpc-client",
+            "version": "1.0.0-rc1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/spiral/grpc-client.git",
+                "reference": "1525a0987f7f62919de73e09f38476f4366ef129"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/spiral/grpc-client/zipball/1525a0987f7f62919de73e09f38476f4366ef129",
+                "reference": "1525a0987f7f62919de73e09f38476f4366ef129",
+                "shasum": ""
+            },
+            "require": {
+                "google/common-protos": "^1.3 || ^2.0 || ^3.0 || ^4.0",
+                "google/protobuf": "^3 || ^4",
+                "grpc/grpc": "^1.57",
+                "php": ">=8.1",
+                "psr/container": "^2.0",
+                "spiral/core": "^3.14",
+                "spiral/hmvc": "^3.14",
+                "spiral/tokenizer": "^3.13"
+            },
+            "require-dev": {
+                "buggregator/trap": "^1.11.1",
+                "ergebnis/phpunit-slow-test-detector": "^2.17",
+                "friendsofphp/php-cs-fixer": "^3.65",
+                "internal/dload": "^1.0.0",
+                "pestphp/pest": "^2.36",
+                "phpunit/phpunit": "^10.5.36",
+                "spiral/boot": "^3.14.7",
+                "spiral/code-style": "^2.2.1",
+                "vimeo/psalm": "^5.26.1"
+            },
+            "suggest": {
+                "ext-grpc": "Required to execute gRPC calls"
+            },
+            "type": "library",
+            "autoload": {
+                "files": [
+                    "src/stub.php"
+                ],
+                "psr-4": {
+                    "Spiral\\Grpc\\Client\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Anton Titov (wolfy-j)",
+                    "email": "wolfy-j@spiralscout.com"
+                },
+                {
+                    "name": "Pavel Butchnev (butschster)",
+                    "email": "pavel.buchnev@spiralscout.com"
+                },
+                {
+                    "name": "Aleksei Gagarin (roxblnfk)",
+                    "email": "alexey.gagarin@spiralscout.com"
+                },
+                {
+                    "name": "Maksim Smakouz (msmakouz)",
+                    "email": "maksim.smakouz@spiralscout.com"
+                }
+            ],
+            "description": "gRPC client",
+            "homepage": "https://spiral.dev",
+            "support": {
+                "chat": "https://discord.gg/V6EK4he",
+                "docs": "https://spiral.dev/docs",
+                "issues": "https://github.com/spiral/grpc-client/issues",
+                "source": "https://github.com/spiral/grpc-client"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/sponsors/spiral",
+                    "type": "github"
+                }
+            ],
+            "time": "2024-12-11T08:47:48+00:00"
+        },
+        {
             "name": "spiral/nyholm-bridge",
             "version": "v1.3.0",
             "source": {
@@ -7093,29 +7179,31 @@
         },
         {
             "name": "spiral/roadrunner-bridge",
-            "version": "v3.7.0",
+            "version": "v4.0.0-RC2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/spiral/roadrunner-bridge.git",
-                "reference": "4f166f9bb550a7c6d425b75239556a0010cdfda2"
+                "reference": "288607efa4e6fe4c773cf3f6e1b6fd2f05edc587"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/spiral/roadrunner-bridge/zipball/4f166f9bb550a7c6d425b75239556a0010cdfda2",
-                "reference": "4f166f9bb550a7c6d425b75239556a0010cdfda2",
+                "url": "https://api.github.com/repos/spiral/roadrunner-bridge/zipball/288607efa4e6fe4c773cf3f6e1b6fd2f05edc587",
+                "reference": "288607efa4e6fe4c773cf3f6e1b6fd2f05edc587",
                 "shasum": ""
             },
             "require": {
-                "grpc/grpc": "^1.42",
+                "grpc/grpc": "^1.57",
                 "php": ">=8.1",
-                "psr/http-factory": "^1.0.2",
+                "psr/http-factory": "^1.1",
                 "psr/simple-cache": "^3.0",
                 "roadrunner-php/app-logger": "^1.0",
                 "roadrunner-php/centrifugo": "^2.0",
                 "roadrunner-php/lock": "^1.0",
-                "spiral/roadrunner-grpc": "^3.2",
-                "spiral/roadrunner-http": "^3.0",
-                "spiral/roadrunner-jobs": "^4.0",
+                "spiral/grpc-client": "^1.0",
+                "spiral/hmvc": "^3.14",
+                "spiral/roadrunner-grpc": "^3.3",
+                "spiral/roadrunner-http": "^3.5",
+                "spiral/roadrunner-jobs": "^4.4",
                 "spiral/roadrunner-kv": "^4.0",
                 "spiral/roadrunner-metrics": "^3.0",
                 "spiral/roadrunner-tcp": "^3.1 || ^4.0",
@@ -7123,11 +7211,15 @@
                 "spiral/serializer": "^3.13"
             },
             "require-dev": {
-                "phpunit/phpunit": "^10.1",
+                "buggregator/trap": "^1.10",
+                "internal/dload": "^1.0.0",
+                "phpunit/phpunit": "^10.5",
+                "spiral/code-style": "^2.2",
                 "spiral/framework": "^3.14",
-                "spiral/nyholm-bridge": "^1.2",
+                "spiral/nyholm-bridge": "^1.3",
+                "spiral/roadrunner-cli": "^2.6",
                 "spiral/testing": "^2.8",
-                "vimeo/psalm": "^5.24"
+                "vimeo/psalm": "^5.25"
             },
             "suggest": {
                 "ext-protobuf": "For better performance, install the protobuf C extension."
@@ -7165,17 +7257,16 @@
             "support": {
                 "chat": "https://discord.gg/V6EK4he",
                 "docs": "https://spiral.dev/docs",
-                "forum": "https://forum.spiral.dev",
                 "issues": "https://github.com/spiral/roadrunner-bridge/issues",
                 "source": "https://github.com/spiral/roadrunner-bridge"
             },
             "funding": [
                 {
-                    "url": "https://github.com/sponsors/roadrunner-server",
+                    "url": "https://github.com/sponsors/spiral",
                     "type": "github"
                 }
             ],
-            "time": "2024-09-03T21:40:45+00:00"
+            "time": "2024-12-11T11:23:34+00:00"
         },
         {
             "name": "spiral/roadrunner-cli",
@@ -10469,15 +10560,6 @@
                 }
             ],
             "time": "2024-07-20T21:52:34+00:00"
-        },
-        {
-            "name": "voku/portable-utf8",
-            "version": "6.0.15",
-            "dist": {
-                "type": "zip",
-                "url": "https://github.com/YepYuYu/portable-utf8/archive/refs/tags/v6.0.15.zip"
-            },
-            "type": "library"
         },
         {
             "name": "web-auth/cose-lib",

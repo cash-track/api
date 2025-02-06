@@ -30,26 +30,16 @@ class RsaGenerateCommand extends Command
     ];
 
     /**
-     * @var \Spiral\Files\FilesInterface
-     */
-    private $files;
-
-    /**
      * RsaGenerateCommand constructor.
      *
      * @param \Spiral\Files\FilesInterface $files
      * @param string|null $name
      */
-    public function __construct(FilesInterface $files, string $name = null)
+    public function __construct(private readonly FilesInterface $files, ?string $name = null)
     {
         parent::__construct($name);
-
-        $this->files = $files;
     }
 
-    /**
-     * Perform command
-     */
     protected function perform(): void
     {
         $config = array(
@@ -117,20 +107,11 @@ class RsaGenerateCommand extends Command
         $this->files->write($file, $content);
     }
 
-    /**
-     * @param string $key
-     * @return string
-     */
     protected function convertRSAKeyToSingleLine(string $key): string
     {
         return base64_encode($key);
     }
 
-    /**
-     * @param string $name
-     * @param string $data
-     * @return string
-     */
     protected function writeFile(string $name, string $data): string
     {
         $path = $this->getKeyPath($name);
@@ -144,19 +125,11 @@ class RsaGenerateCommand extends Command
         return $path;
     }
 
-    /**
-     * @param string $name
-     * @return string
-     */
     protected function getKeyPath(string $name): string
     {
         return $this->getKeysDir() . $this->getKeyFileName($name);
     }
 
-    /**
-     * @param string $name
-     * @return string
-     */
     protected function getKeyFileName(string $name): string
     {
         $fileName = "{$name}.key";
@@ -170,9 +143,6 @@ class RsaGenerateCommand extends Command
         return $fileName;
     }
 
-    /**
-     * @return string
-     */
     protected function getKeysDir(): string
     {
         $dir = $this->option('out-dir');

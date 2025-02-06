@@ -21,14 +21,14 @@ class ChargeFactory extends AbstractFactory
      */
     protected array $tags = [];
 
-    public function forWallet(?Wallet $wallet): ChargeFactory
+    public function forWallet(?Wallet $wallet = null): ChargeFactory
     {
         $this->wallet = $wallet;
 
         return $this;
     }
 
-    public function forUser(?User $user): ChargeFactory
+    public function forUser(?User $user = null): ChargeFactory
     {
         $this->user = $user;
 
@@ -63,7 +63,7 @@ class ChargeFactory extends AbstractFactory
         return $items;
     }
 
-    public function create(Charge $charge = null): Charge
+    public function create(?Charge $charge = null): Charge
     {
         $charge = $charge ?? self::make();
 
@@ -102,17 +102,17 @@ class ChargeFactory extends AbstractFactory
         return $charge;
     }
 
-    public static function income(Charge $charge = null): Charge
+    public static function income(?Charge $charge = null): Charge
     {
         return self::type($charge, Charge::TYPE_INCOME);
     }
 
-    public static function expense(Charge $charge = null): Charge
+    public static function expense(?Charge $charge = null): Charge
     {
         return self::type($charge, Charge::TYPE_EXPENSE);
     }
 
-    public static function type(Charge $charge = null, string $type): Charge
+    public static function type(?Charge $charge = null, string $type = Charge::TYPE_EXPENSE): Charge
     {
         if ($charge === null) {
             $charge = self::make();

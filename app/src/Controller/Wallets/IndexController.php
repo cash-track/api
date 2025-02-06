@@ -16,9 +16,9 @@ final class IndexController extends Controller
 {
     public function __construct(
         AuthContextInterface $auth,
-        private ResponseWrapper $response,
-        private WalletRepository $walletRepository,
-        private WalletView $walletView,
+        private readonly ResponseWrapper $response,
+        private readonly WalletRepository $walletRepository,
+        private readonly WalletView $walletView,
     ) {
         parent::__construct($auth);
     }

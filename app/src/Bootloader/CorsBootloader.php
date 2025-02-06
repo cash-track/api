@@ -16,9 +16,6 @@ class CorsBootloader extends Bootloader
         CorsInterface::class => CorsService::class,
     ];
 
-    /**
-     * @param \Spiral\Bootloader\Http\HttpBootloader $http
-     */
     public function boot(HttpBootloader $http): void
     {
         $http->addMiddleware(CorsMiddleware::class);

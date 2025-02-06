@@ -10,7 +10,7 @@ use Tests\Fixtures;
 
 class GoogleAccountFactory extends AbstractFactory
 {
-    public function create(GoogleAccount $googleAccount = null): GoogleAccount
+    public function create(?GoogleAccount $googleAccount = null): GoogleAccount
     {
         $googleAccount = $googleAccount ?? self::make();
 

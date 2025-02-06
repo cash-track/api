@@ -12,14 +12,14 @@ class TagFactory extends AbstractFactory
 {
     protected ?User $user = null;
 
-    public function forUser(?User $user): TagFactory
+    public function forUser(?User $user = null): TagFactory
     {
         $this->user = $user;
 
         return $this;
     }
 
-    public function create(Tag $tag = null): Tag
+    public function create(?Tag $tag = null): Tag
     {
         $tag = $tag ?? self::make();
 

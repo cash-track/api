@@ -60,11 +60,6 @@ class ForgotPasswordService extends HelperService
         $this->mailer->send(new ForgotPasswordMail($user->getEntityHeader(), $this->uri->passwordReset($request->code)));
     }
 
-    /**
-     * @param \App\Database\ForgotPasswordRequest $request
-     * @return \App\Database\ForgotPasswordRequest
-     * @throws \Throwable
-     */
     public function store(ForgotPasswordRequest $request): ForgotPasswordRequest
     {
         $this->tr->persist($request);
@@ -73,12 +68,6 @@ class ForgotPasswordService extends HelperService
         return $request;
     }
 
-    /**
-     * @param string $code
-     * @param string $password
-     * @return void
-     * @throws \Throwable
-     */
     public function reset(string $code, string $password): void
     {
         $request = $this->repository->findByCode($code);

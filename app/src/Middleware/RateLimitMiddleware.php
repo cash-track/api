@@ -66,9 +66,9 @@ class RateLimitMiddleware implements MiddlewareInterface
 
     private function tooManyRequests(RateLimitHitInterface $hit): ResponseInterface
     {
-        return (new JsonResponse([
+        return new JsonResponse([
             'message' => $this->say('error_rate_limit_reached'),
-        ], 429))
+        ], 429)
             ->withAddedHeader('X-RateLimit-Limit', (string) $hit->getLimit())
             ->withAddedHeader('X-RateLimit-Remaining', (string) $hit->getRemaining())
             ->withAddedHeader('Retry-After', (string) $hit->getRetryAfter());

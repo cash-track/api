@@ -8,6 +8,7 @@ use App\Repository\UserRepository;
 use App\Service\GoogleAccountService;
 use App\Service\PhotoStorageService;
 use PHPUnit\Framework\MockObject\MockObject;
+use Symfony\Component\String\Slugger\SluggerInterface;
 use Tests\DatabaseTransaction;
 use Tests\Factories\GoogleAccountFactory;
 use Tests\Factories\UserFactory;
@@ -20,12 +21,15 @@ class GoogleProviderControllerTest extends TestCase implements DatabaseTransacti
 
     protected GoogleAccountFactory $googleAccountFactory;
 
+    protected SluggerInterface $slugger;
+
     protected function setUp(): void
     {
         parent::setUp();
 
         $this->userFactory = $this->getContainer()->get(UserFactory::class);
         $this->googleAccountFactory = $this->getContainer()->get(GoogleAccountFactory::class);
+        $this->slugger = $this->getContainer()->get(SluggerInterface::class);
     }
 
     protected function googleAccountInfo(): array
@@ -59,7 +63,7 @@ class GoogleProviderControllerTest extends TestCase implements DatabaseTransacti
         $this->getContainer()->bind(\Google\Client::class, fn() => $googleClient);
 
         $otherUser = UserFactory::make();
-        $otherUser->nickName = str_slug("{$firstName} {$lastName}");
+        $otherUser->nickName = $this->slugger->slug("{$firstName} {$lastName}")->toString();
         $this->userFactory->create($otherUser);
 
         $this->mock(PhotoStorageService::class, ['queueDownloadProfilePhoto'], function (MockObject $mock) use ($photoUrl) {

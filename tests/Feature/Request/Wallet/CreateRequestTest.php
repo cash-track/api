@@ -6,13 +6,14 @@ namespace Tests\Feature\Request\Wallet;
 
 use App\Database\Currency;
 use App\Request\Wallet\CreateRequest;
+use Symfony\Component\String\Slugger\SluggerInterface;
 use Tests\TestCase;
 
 class CreateRequestTest extends TestCase
 {
     public function testCreateWalletDefault(): void
     {
-        $request = new CreateRequest();
+        $request = new CreateRequest($this->getContainer()->get(SluggerInterface::class));
         $request->name = 'Test wallet';
 
         $wallet = $request->createWallet();

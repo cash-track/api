@@ -126,7 +126,7 @@ class PhotoControllerTest extends TestCase implements DatabaseTransaction
                                 ->onlyMethods(['store'])
                                 ->getMock();
 
-        $userServiceMock->expects($this->once())
+        $userServiceMock->expects($this->exactly(2))
                         ->method('store')
                         ->willThrowException(new \RuntimeException('Storage exception.'));
 

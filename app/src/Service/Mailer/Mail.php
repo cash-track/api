@@ -13,29 +13,16 @@ abstract class Mail
 {
     use PayloadSerializer;
 
-    /**
-     * @var \Symfony\Component\Mime\Email
-     */
-    private $message;
+    private Email $message;
 
-    /**
-     * @var string
-     */
-    private $viewName = '';
+    private string $viewName = '';
 
-    /**
-     * Mail constructor.
-     */
     public function __construct()
     {
         $this->message = new Email();
     }
 
-    /**
-     * @param \Cycle\ORM\ORMInterface $orm
-     * @return void
-     */
-    public function hydrate(ORMInterface $orm)
+    public function hydrate(ORMInterface $orm): void
     {
     }
 
@@ -46,9 +33,6 @@ abstract class Mail
      */
     abstract public function build(): Mail;
 
-    /**
-     * @return \Symfony\Component\Mime\Email
-     */
     public function getEmailMessage(): Email
     {
         return $this->message;
@@ -67,11 +51,6 @@ abstract class Mail
         return $this;
     }
 
-    /**
-     * @param string $address
-     * @param string $fullName
-     * @return \App\Service\Mailer\Mail
-     */
     public function from(string $address, string $fullName = ''): Mail
     {
         $this->message->from(new Address($address, $fullName));
@@ -79,11 +58,6 @@ abstract class Mail
         return $this;
     }
 
-    /**
-     * @param string $address
-     * @param string $fullName
-     * @return \App\Service\Mailer\Mail
-     */
     public function to(string $address, string $fullName = ''): Mail
     {
         $this->message->to(new Address($address, $fullName));
@@ -91,11 +65,6 @@ abstract class Mail
         return $this;
     }
 
-    /**
-     * @param string $address
-     * @param string $fullName
-     * @return \App\Service\Mailer\Mail
-     */
     public function replyTo(string $address, string $fullName = ''): Mail
     {
         $this->message->replyTo(new Address($address, $fullName));
@@ -103,11 +72,6 @@ abstract class Mail
         return $this;
     }
 
-    /**
-     * @param string $address
-     * @param string $fullName
-     * @return \App\Service\Mailer\Mail
-     */
     public function cc(string $address, string $fullName = ''): Mail
     {
         $this->message->cc(new Address($address, $fullName));
@@ -115,11 +79,6 @@ abstract class Mail
         return $this;
     }
 
-    /**
-     * @param string $address
-     * @param string $fullName
-     * @return \App\Service\Mailer\Mail
-     */
     public function bcc(string $address, string $fullName = ''): Mail
     {
         $this->message->bcc(new Address($address, $fullName));
@@ -127,10 +86,6 @@ abstract class Mail
         return $this;
     }
 
-    /**
-     * @param string $name
-     * @return \App\Service\Mailer\Mail
-     */
     public function view(string $name): Mail
     {
         $this->viewName = $name;
@@ -138,10 +93,6 @@ abstract class Mail
         return $this;
     }
 
-    /**
-     * @param \Spiral\Views\ViewsInterface $views
-     * @return $this
-     */
     public function render(ViewsInterface $views): Mail
     {
         $this->message->html($views->render($this->viewName, $this->buildRenderData()));
@@ -149,15 +100,11 @@ abstract class Mail
         return $this;
     }
 
-    /**
-     * @return array
-     * @throws \ReflectionException
-     */
     protected function buildRenderData(): array
     {
         $data = [];
 
-        foreach ((new \ReflectionClass($this))->getProperties() as $property) {
+        foreach (new \ReflectionClass($this)->getProperties() as $property) {
             if (! $property->isPublic()) {
                 continue;
             }

@@ -129,7 +129,7 @@ class PasswordControllerTest extends TestCase implements DatabaseTransaction
                      ->onlyMethods(['store'])
                      ->getMock();
 
-        $mock->expects($this->once())
+        $mock->expects($this->exactly(2))
              ->method('store')
              ->willThrowException(new \RuntimeException('Storage exception.'));
 

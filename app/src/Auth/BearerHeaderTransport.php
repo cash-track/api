@@ -45,7 +45,7 @@ final class BearerHeaderTransport implements HttpTransportInterface
         Request $request,
         Response $response,
         string $tokenID,
-        \DateTimeInterface $expiresAt = null
+        ?\DateTimeInterface $expiresAt = null
     ): Response {
         $headerLine = $this->buildHeaderLine($tokenID);
 

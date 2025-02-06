@@ -96,12 +96,7 @@ class ChargeRepository extends Repository
         return $charges;
     }
 
-    /**
-     * @param int $walletId
-     * @param array $tagIds
-     * @return array
-     */
-    public function findByWalletIdAndTagIdsWithPagination(int $walletId, array $tagIds = [])
+    public function findByWalletIdAndTagIdsWithPagination(int $walletId, array $tagIds = []): array
     {
         $query = $this->select()
                       ->load('user')
@@ -119,12 +114,7 @@ class ChargeRepository extends Repository
         return $query->fetchAll();
     }
 
-    /**
-     * @param int $walletId
-     * @param string|null $type
-     * @return float
-     */
-    public function totalByWalletPK(int $walletId, string $type = null): float
+    public function totalByWalletPK(int $walletId, ?string $type = null): float
     {
         $query = $this->select()->where('wallet_id', $walletId);
 
@@ -143,7 +133,7 @@ class ChargeRepository extends Repository
      * @param string|null $type
      * @return float
      */
-    public function totalByWalletPKAndTagPKs(int $walletId, array $tagIds, string $type = null): float
+    public function totalByWalletPKAndTagPKs(int $walletId, array $tagIds, ?string $type = null): float
     {
         /** @psalm-suppress InternalClass */
         $query = $this->select()->where('wallet_id', $walletId)->with('tags', [
@@ -173,12 +163,7 @@ class ChargeRepository extends Repository
                             ->sum($chargesAmountCol);
     }
 
-    /**
-     * @param int $tagId
-     * @param string|null $type
-     * @return float
-     */
-    public function totalByTagPK(int $tagId, string $type = null): float
+    public function totalByTagPK(int $tagId, ?string $type = null): float
     {
         /** @psalm-suppress InternalClass */
         $query = $this->select()->with('tags', [
@@ -200,7 +185,7 @@ class ChargeRepository extends Repository
      * @param string|null $type
      * @return array<int, float>
      */
-    public function totalByWalletPKGroupByTagPKs(int $walletID, array $tagIDs, string $type = null): array
+    public function totalByWalletPKGroupByTagPKs(int $walletID, array $tagIDs, ?string $type = null): array
     {
         /** @psalm-suppress InternalClass */
         $query = $this->select()->where('wallet_id', $walletID)->with('tags', [
@@ -235,13 +220,7 @@ class ChargeRepository extends Repository
         return $data;
     }
 
-    /**
-     * @param string $type
-     * @param array $walletIDs
-     * @param \DateTimeImmutable|null $dateFrom
-     * @return float
-     */
-    public function sumTotalByTypeByCurrencyFromDate(string $type, array $walletIDs, \DateTimeImmutable $dateFrom = null): float
+    public function sumTotalByTypeByCurrencyFromDate(string $type, array $walletIDs, ?\DateTimeImmutable $dateFrom = null): float
     {
         if (count($walletIDs) === 0) {
             return 0.0;
@@ -258,12 +237,7 @@ class ChargeRepository extends Repository
         return (float) $query->sum('amount');
     }
 
-    /**
-     * @param int $userID
-     * @param string|null $type
-     * @return int
-     */
-    public function countAllByUserPKByType(int $userID, string $type = null): int
+    public function countAllByUserPKByType(int $userID, ?string $type = null): int
     {
         $query = $this->select()->where('user_id', $userID);
 

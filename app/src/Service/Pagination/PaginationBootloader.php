@@ -16,11 +16,11 @@ use Spiral\Bootloader\Http\HttpBootloader;
 
 final class PaginationBootloader extends Bootloader
 {
-    protected const DEPENDENCIES = [
+    protected const array DEPENDENCIES = [
         HttpBootloader::class
     ];
 
-    protected const SINGLETONS = [
+    protected const array SINGLETONS = [
         PaginationProviderInterface::class => PaginationFactory::class
     ];
 }

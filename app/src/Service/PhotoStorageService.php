@@ -139,20 +139,11 @@ class PhotoStorageService
         return is_int($result) ? $result : null;
     }
 
-    /**
-     * @param string|null $fileName
-     * @return string
-     */
     protected function generateFileName(?string $fileName = ''): string
     {
         return md5(((string) $fileName) . microtime());
     }
 
-    /**
-     * @param string|null $fileName
-     * @param string $default
-     * @return string
-     */
     private function getFileExtension(?string $fileName, string $default = self::DEFAULT_EXT): string
     {
         if ($fileName === null) {

@@ -10,7 +10,7 @@ use Psr\Log\LoggerInterface;
 
 final class JsonTypecast implements CastableInterface, UncastableInterface
 {
-    const RULE = 'json';
+    const string RULE = 'json';
 
     private array $rules = [];
 
@@ -37,10 +37,6 @@ final class JsonTypecast implements CastableInterface, UncastableInterface
         return $rules;
     }
 
-    /**
-     * @param array $data
-     * @return array
-     */
     public function cast(array $data): array
     {
         foreach ($this->rules as $column => $rule) {
@@ -71,10 +67,6 @@ final class JsonTypecast implements CastableInterface, UncastableInterface
         return $data;
     }
 
-    /**
-     * @param array $data
-     * @return array
-     */
     public function uncast(array $data): array
     {
         foreach ($this->rules as $column => $rule) {

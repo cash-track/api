@@ -2,8 +2,6 @@
 
 namespace App\Service\Sort;
 
-use App\Service\Sort\Sortable;
-
 trait Sorter
 {
     /**
@@ -11,7 +9,7 @@ trait Sorter
      * @param array<array-key, int|string>|null $sort
      * @return array<array-key, Sortable>
      */
-    public function applySort(array $list, array $sort = null): array
+    public function applySort(array $list, ?array $sort = null): array
     {
         if ($sort === null || count($sort) === 0) {
             return $list;

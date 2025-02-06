@@ -15,8 +15,8 @@ final class MailsController extends AuthAwareController
 {
     public function __construct(
         AuthContextInterface $auth,
-        protected MailerInterface $mailer,
-        protected EnvironmentInterface $environment,
+        protected readonly MailerInterface $mailer,
+        protected readonly EnvironmentInterface $environment,
     ) {
         parent::__construct($auth);
     }

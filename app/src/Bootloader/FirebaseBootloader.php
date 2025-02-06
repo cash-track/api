@@ -12,25 +12,10 @@ use Spiral\Core\Container;
 
 class FirebaseBootloader extends Bootloader
 {
-    /**
-     * @var \App\Config\FirebaseConfig
-     */
-    private $config;
-
-    /**
-     * FirebaseBootloader constructor.
-     *
-     * @param \App\Config\FirebaseConfig $config
-     */
-    public function __construct(FirebaseConfig $config)
+    public function __construct(private readonly FirebaseConfig $config)
     {
-        $this->config = $config;
     }
 
-    /**
-     * @param \Spiral\Core\Container $container
-     * @return void
-     */
     public function boot(Container $container): void
     {
         $container->bind(Factory::class, function (): Factory {
@@ -48,9 +33,6 @@ class FirebaseBootloader extends Bootloader
         });
     }
 
-    /**
-     * @return array
-     */
     public function getServiceAccount(): array
     {
         return [

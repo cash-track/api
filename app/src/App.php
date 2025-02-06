@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App;
 
-use App\Bootloader;
 use Spiral\Boot\Bootloader\CoreBootloader;
 use Spiral\Bootloader as Framework;
 use Spiral\Bootloader\Views\TranslatedCacheBootloader;
@@ -144,6 +143,7 @@ class App extends Kernel
      * Application specific services and extensions.
      */
     protected const array APP = [
+        Bootloader\AppBootloader::class,
         Bootloader\RedisBootloader::class,
         Auth\AuthBootloader::class,
         Bootloader\RoutesBootloader::class,
