@@ -26,7 +26,7 @@ class ChargeAmountGraph
     protected array $tagIds = [];
 
     public function __construct(
-        private readonly ChargeRepository $chargeRepository
+        protected readonly ChargeRepository $chargeRepository
     ) {
     }
 

@@ -24,6 +24,9 @@ jobs:
       attestations: write
 
     steps:
+      - name: Setup Workspace
+        run: git config --global --add safe.directory $GITHUB_WORKSPACE
+
       - name: Checkout repository
         if: github.event_name != 'pull_request'
         uses: actions/checkout@v4
@@ -89,6 +92,9 @@ jobs:
       packages: write
 
     steps:
+      - name: Setup Workspace
+        run: git config --global --add safe.directory $GITHUB_WORKSPACE
+
       - name: Checkout infra repository
         uses: actions/checkout@v4
         with:

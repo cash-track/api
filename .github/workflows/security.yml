@@ -14,15 +14,11 @@ jobs:
     name: Security
     runs-on: [self-hosted, Linux, x64]
     steps:
+      - name: Setup Workspace
+        run: git config --global --add safe.directory $GITHUB_WORKSPACE
+
       - name: Checkout Repository
         uses: actions/checkout@v4
-
-      - name: Prepare Cache For Vulnerability Database
-        uses: actions/cache@v4
-        id: vulnerability-db-cache
-        with:
-          path: ~/.vulnerability-db/cache
-          key: vulnerability-db
 
       - name: Scan Packages For Vulnerability
         uses: symfonycorp/security-checker-action@v5

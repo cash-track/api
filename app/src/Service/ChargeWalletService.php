@@ -68,7 +68,7 @@ class ChargeWalletService
 
     public function totalByIncomeAndExpense(float $income, float $expense): float
     {
-        return $this->safeFloatNumber($income - $expense);
+        return static::safeFloatNumber($income - $expense);
     }
 
     protected function apply(Wallet $wallet, Charge $charge): Wallet
@@ -82,7 +82,7 @@ class ChargeWalletService
                 break;
         }
 
-        $wallet->totalAmount = $this->safeFloatNumber($wallet->totalAmount);
+        $wallet->totalAmount = static::safeFloatNumber($wallet->totalAmount);
 
         return $wallet;
     }
@@ -98,12 +98,12 @@ class ChargeWalletService
                 break;
         }
 
-        $wallet->totalAmount = $this->safeFloatNumber($wallet->totalAmount);
+        $wallet->totalAmount = static::safeFloatNumber($wallet->totalAmount);
 
         return $wallet;
     }
 
-    protected function safeFloatNumber(float $number): float
+    public static function safeFloatNumber(float $number): float
     {
         return round($number, self::PRECISION);
     }
