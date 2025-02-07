@@ -24,8 +24,8 @@ jobs:
         uses: actions/cache@v4
         id: vulnerability-db-cache
         with:
-          path: ~/.vulnerability-db/cache
-          key: vulnerability-db
+          path: ~/.symfony/cache
+          key: db
 
       - name: Scan Packages For Vulnerability
         uses: symfonycorp/security-checker-action@v5
