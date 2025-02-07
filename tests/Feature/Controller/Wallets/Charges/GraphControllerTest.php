@@ -513,6 +513,16 @@ class GraphControllerTest extends TestCase implements DatabaseTransaction
             ],
             [
                 $charges,
+                ['charge-type' => 'invalid', 'date-from' => '2022-05-31', 'date-to' => '2022-06-02'],
+                [
+                    // total, tags
+                    [2060, [1001, 1002, 1003]],
+                    [150.99, [1001]],
+                    [51.02, [1002, 1003]],
+                ]
+            ],
+            [
+                $charges,
                 ['date-from' => '2022-05-31', 'date-to' => '2022-06-02'],
                 [
                     // total, tags
