@@ -14,7 +14,6 @@ use App\Request\Charge\CreateRequest;
 use App\Request\Charge\MoveRequest;
 use App\Service\ChargeWalletService;
 use App\Service\Pagination\PaginationFactory;
-use App\Service\Statistics\ChargeAmountGraph;
 use App\View\ChargesView;
 use App\View\ChargeView;
 use Psr\Http\Message\ResponseInterface;
@@ -59,24 +58,6 @@ final class ChargesController extends Controller
             ->findByWalletIdAndTagIdsWithPagination((int) $wallet->id, $this->fetchFilteredTagIDs($input));
 
         return $this->chargesView->jsonPaginated($charges, $this->chargeRepository->getPaginationState());
-    }
-
-    #[Route(route: '/wallets/<walletId>/charges/graph', name: 'wallet.charge.graph', methods: 'GET', group: 'auth')]
-    public function graph(string $walletId, InputManager $input, ChargeAmountGraph $graph): ResponseInterface
-    {
-        $wallet = $this->walletRepository->findByPKByUserPK((int) $walletId, (int) $this->user->id);
-
-        if (! $wallet instanceof Wallet) {
-            return $this->response->create(404);
-        }
-
-        $graph->filter($input->query->fetch(['date-from', 'date-to']));
-        $graph->groupBy($input->query('group-by'));
-        $graph->groupByTags($this->fetchFilteredTagIDs($input));
-
-        return $this->response->json([
-            'data' => $graph->getGraph(wallet: $wallet),
-        ]);
     }
 
     #[Route(route: '/wallets/<walletId:\d+>/charges', name: 'wallet.charge.create', methods: 'POST', group: 'auth')]
