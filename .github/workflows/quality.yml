@@ -16,6 +16,9 @@ jobs:
     runs-on: [self-hosted, Linux, x64]
     container: shivammathur/node:latest
     steps:
+      - name: Setup Workspace
+        run: git config --global --add safe.directory $GITHUB_WORKSPACE
+
       - name: Checkout Repository
         uses: actions/checkout@v4
 
@@ -50,6 +53,9 @@ jobs:
     runs-on: [self-hosted, Linux, x64]
     container: shivammathur/node:latest
     steps:
+      - name: Setup Workspace
+        run: git config --global --add safe.directory $GITHUB_WORKSPACE
+
       - name: Checkout Repository
         uses: actions/checkout@v4
 
@@ -104,6 +110,9 @@ jobs:
         options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
 
     steps:
+      - name: Setup Workspace
+        run: git config --global --add safe.directory $GITHUB_WORKSPACE
+
       - name: Checkout Repository
         uses: actions/checkout@v4
 

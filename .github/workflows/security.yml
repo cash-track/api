@@ -14,6 +14,9 @@ jobs:
     name: Security
     runs-on: [self-hosted, Linux, x64]
     steps:
+      - name: Setup Workspace
+        run: git config --global --add safe.directory $GITHUB_WORKSPACE
+
       - name: Checkout Repository
         uses: actions/checkout@v4
 
