@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Feature\Controller\Charges;
+namespace Tests\Feature\Controller\Charges;
 
 use Tests\DatabaseTransaction;
 use Tests\Factories\ChargeFactory;

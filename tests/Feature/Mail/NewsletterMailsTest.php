@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Feature\Mail;
+namespace Tests\Feature\Mail;
 
 use App\Mail\Newsletter\DeletionNoticeMail;
 use App\Mail\Newsletter\TelegramChannelMail;

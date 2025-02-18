@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Feature\Service\Auth\Passkey;
+namespace Tests\Feature\Service\Auth\Passkey;
 
 use Tests\Feature\Controller\PasskeyServiceMocker;
 use Tests\TestCase;
