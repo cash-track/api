@@ -27,6 +27,7 @@ class UpdatePasswordRequest extends Filter implements HasFilterDefinition
     #[Data]
     public string $newPasswordConfirmation = '';
 
+    #[\Override]
     public function filterDefinition(): FilterDefinitionInterface
     {
         return new FilterDefinition(validationRules: [

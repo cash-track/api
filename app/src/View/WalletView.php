@@ -10,7 +10,7 @@ use Spiral\Core\Attribute\Singleton;
 use Spiral\Http\ResponseWrapper;
 
 #[Singleton]
-class WalletView
+final class WalletView
 {
     public function __construct(
         protected ResponseWrapper $response,

@@ -22,6 +22,7 @@ class UpdateRequest extends Filter implements HasFilterDefinition
     #[Data]
     public string $defaultCurrencyCode = '';
 
+    #[\Override]
     public function filterDefinition(): FilterDefinitionInterface
     {
         return new FilterDefinition(validationRules: [

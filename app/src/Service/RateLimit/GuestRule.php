@@ -15,6 +15,7 @@ class GuestRule extends Rule
         parent::__construct($limit, $ttl);
     }
 
+    #[\Override]
     public function key(): string
     {
         return static::PREFIX . $this->clientIp;

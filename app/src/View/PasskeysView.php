@@ -9,7 +9,7 @@ use Spiral\Core\Attribute\Singleton;
 use Spiral\Http\ResponseWrapper;
 
 #[Singleton]
-class PasskeysView
+final class PasskeysView
 {
     public function __construct(
         protected ResponseWrapper $response,

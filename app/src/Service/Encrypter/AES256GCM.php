@@ -6,11 +6,12 @@ namespace App\Service\Encrypter;
 
 use Spiral\Encrypter\Exception\EncrypterException;
 
-class AES256GCM implements CipherInterface
+final class AES256GCM implements CipherInterface
 {
     const string ALGO = 'aes-256-gcm';
     const int TAG_LENGTH = 16;
 
+    #[\Override]
     public function encrypt(string $value, string $key): string
     {
         $iv = openssl_random_pseudo_bytes((int) openssl_cipher_iv_length(static::ALGO));
@@ -30,6 +31,7 @@ class AES256GCM implements CipherInterface
         return base64_encode($iv . $payload . $tag);
     }
 
+    #[\Override]
     public function decrypt(string $payload, string $key): string
     {
         $packet = base64_decode($payload);

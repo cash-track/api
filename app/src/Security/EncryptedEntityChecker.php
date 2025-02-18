@@ -10,7 +10,7 @@ use Spiral\Core\Attribute\Singleton;
 use Spiral\Cycle\Validation\EntityChecker;
 
 #[Singleton]
-class EncryptedEntityChecker extends EntityChecker
+final class EncryptedEntityChecker extends EntityChecker
 {
     public function __construct(
         private readonly ORMInterface $orm,
@@ -19,6 +19,7 @@ class EncryptedEntityChecker extends EntityChecker
         parent::__construct($this->orm);
     }
 
+    #[\Override]
     public function exists(
         mixed $value,
         string $role,
@@ -33,6 +34,7 @@ class EncryptedEntityChecker extends EntityChecker
         return parent::exists($value, $role, $field, $ignoreCase, $multiple);
     }
 
+    #[\Override]
     public function unique(
         mixed $value,
         string $role,

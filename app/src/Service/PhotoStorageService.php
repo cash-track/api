@@ -40,6 +40,7 @@ class PhotoStorageService
     {
         $fileName = $this->generateFileName($uploadedFile->getClientFilename()) . '.' . $this->getFileExtension($uploadedFile->getClientFilename());
 
+        /** @psalm-suppress UndefinedMagicMethod */
         $result = $this->storage->putObject([
             'Bucket'             => $this->config->getBucket(),
             'ACL'                => 'public-read',
@@ -72,6 +73,7 @@ class PhotoStorageService
             return;
         }
 
+        /** @psalm-suppress UndefinedMagicMethod */
         $this->storage->deleteObject([
             'Bucket' => $this->config->getBucket(),
             'Key' => self::PHOTO_PATH . $fileName

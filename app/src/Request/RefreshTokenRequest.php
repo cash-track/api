@@ -15,6 +15,7 @@ class RefreshTokenRequest extends Filter implements HasFilterDefinition
     #[Data]
     public string $accessToken = '';
 
+    #[\Override]
     public function filterDefinition(): FilterDefinitionInterface
     {
         return new FilterDefinition(validationRules: [

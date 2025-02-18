@@ -46,9 +46,7 @@ class TokenStorage implements TokenStorageInterface
         $this->ttl = $config->getTtl();
     }
 
-    /**
-     * @inheritDoc
-     */
+    #[\Override]
     public function load(string $id): ?TokenInterface
     {
         // TODO. Validate token for the blacklisted
@@ -61,9 +59,7 @@ class TokenStorage implements TokenStorageInterface
         }
     }
 
-    /**
-     * @inheritDoc
-     */
+    #[\Override]
     public function create(array $payload, ?\DateTimeInterface $expiresAt = null): TokenInterface
     {
         $now = time();
@@ -90,9 +86,7 @@ class TokenStorage implements TokenStorageInterface
         return new Token($jwt, $payload, $expiresAt);
     }
 
-    /**
-     * @inheritDoc
-     */
+    #[\Override]
     public function delete(TokenInterface $token): void
     {
         // TODO: Implement delete() method. Add token to the blacklist

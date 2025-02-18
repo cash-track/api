@@ -17,7 +17,7 @@ use Spiral\Http\ResponseWrapper;
 use Spiral\Router\Annotation\Route;
 use Spiral\Translator\Traits\TranslatorTrait;
 
-class ProfileStatisticsController extends AuthAwareController
+final class ProfileStatisticsController extends AuthAwareController
 {
     use TranslatorTrait;
 

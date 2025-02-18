@@ -11,7 +11,7 @@ use Spiral\Core\Attribute\Singleton;
 use Spiral\Http\ResponseWrapper;
 
 #[Singleton]
-class UserShortView
+final class UserShortView
 {
     public function __construct(
         protected ResponseWrapper $response,

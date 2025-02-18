@@ -10,7 +10,7 @@ use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Spiral\Translator\Translator;
 
-class LocaleSelectorMiddleware implements MiddlewareInterface
+final class LocaleSelectorMiddleware implements MiddlewareInterface
 {
     /**
      * @var string[]
@@ -23,6 +23,7 @@ class LocaleSelectorMiddleware implements MiddlewareInterface
         $this->availableLocales = $this->translator->getCatalogueManager()->getLocales();
     }
 
+    #[\Override]
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
         $defaultLocale = $this->translator->getLocale();

@@ -2,6 +2,6 @@
 
 namespace App\Service\Auth;
 
-class ForgotPasswordThrottledException extends \RuntimeException
+final class ForgotPasswordThrottledException extends \RuntimeException
 {
 }

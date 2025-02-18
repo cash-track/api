@@ -10,7 +10,7 @@ use App\Security\UniqueChecker;
 use Spiral\Boot\Bootloader\Bootloader;
 use Spiral\Validator\Bootloader\ValidatorBootloader;
 
-class CheckerBootloader extends Bootloader
+final class CheckerBootloader extends Bootloader
 {
     public function boot(ValidatorBootloader $validation): void
     {

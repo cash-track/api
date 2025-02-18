@@ -14,21 +14,25 @@ class Rule implements RuleInterface
     ) {
     }
 
+    #[\Override]
     public function key(): string
     {
         return static::PREFIX;
     }
 
+    #[\Override]
     public function limit(): int
     {
         return $this->limit;
     }
 
+    #[\Override]
     public function ttl(): int
     {
         return $this->ttl;
     }
 
+    #[\Override]
     public function withLimit(int $limit): static
     {
         $self = clone $this;
@@ -36,6 +40,7 @@ class Rule implements RuleInterface
         return $self;
     }
 
+    #[\Override]
     public function withTtl(int $ttl): static
     {
         $self = clone $this;

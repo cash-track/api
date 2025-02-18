@@ -4,6 +4,6 @@ declare(strict_types=1);
 
 namespace App\Exception;
 
-class UnconfirmedProfileException extends \Exception
+final class UnconfirmedProfileException extends \Exception
 {
 }

@@ -12,7 +12,7 @@ use Spiral\Core\Attribute\Singleton;
 use Spiral\Http\ResponseWrapper;
 
 #[Singleton]
-class UserView
+final class UserView
 {
     public function __construct(
         protected ResponseWrapper $response,

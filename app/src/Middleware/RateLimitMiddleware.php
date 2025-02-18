@@ -32,6 +32,7 @@ class RateLimitMiddleware implements MiddlewareInterface
     ) {
     }
 
+    #[\Override]
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
         $userId = $request->getHeaderLine(AuthMiddleware::HEADER_USER_ID);

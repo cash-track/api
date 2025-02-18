@@ -32,6 +32,7 @@ class UserRepository extends Repository implements ActorProviderInterface
      * @param \Spiral\Auth\TokenInterface $token
      * @return object|null
      */
+    #[\Override]
     public function getActor(TokenInterface $token): ?object
     {
         if (! isset($token->getPayload()['sub'])) {

@@ -8,7 +8,7 @@ use App\Service\Encrypter\EncrypterInterface;
 use Cycle\ORM\ORMInterface;
 use Spiral\Validator\AbstractChecker;
 
-class UniqueChecker extends AbstractChecker
+final class UniqueChecker extends AbstractChecker
 {
     public const array MESSAGES = [
         'verify' => 'error_value_is_not_unique'

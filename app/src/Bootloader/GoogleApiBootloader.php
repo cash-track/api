@@ -9,7 +9,7 @@ use Google\Client;
 use Spiral\Boot\Bootloader\Bootloader;
 use Spiral\Core\Container;
 
-class GoogleApiBootloader extends Bootloader
+final class GoogleApiBootloader extends Bootloader
 {
     public function __construct(private readonly GoogleApiConfig $config)
     {

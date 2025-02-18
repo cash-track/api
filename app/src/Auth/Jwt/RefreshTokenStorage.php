@@ -10,7 +10,7 @@ use Spiral\Auth\Exception\TokenStorageException;
 use Spiral\Core\Attribute\Singleton;
 
 #[Singleton]
-class RefreshTokenStorage extends TokenStorage implements RefreshTokenStorageInterface
+final class RefreshTokenStorage extends TokenStorage implements RefreshTokenStorageInterface
 {
     /**
      * @var string
@@ -53,6 +53,7 @@ class RefreshTokenStorage extends TokenStorage implements RefreshTokenStorageInt
     /**
      * @return string
      */
+    #[\Override]
     protected function getVerifyKey(): string
     {
         return $this->publicKey;
@@ -61,6 +62,7 @@ class RefreshTokenStorage extends TokenStorage implements RefreshTokenStorageInt
     /**
      * @return string
      */
+    #[\Override]
     protected function getSigningKey(): string
     {
         return $this->privateKey;

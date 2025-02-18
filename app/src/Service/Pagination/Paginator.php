@@ -86,6 +86,7 @@ final class Paginator implements PaginatorInterface, \Countable
         return ($this->getPage() - 1) * $this->limit;
     }
 
+    #[\Override]
     public function paginate(PaginableInterface $target): PaginatorInterface
     {
         $paginator = clone $this;
@@ -99,6 +100,7 @@ final class Paginator implements PaginatorInterface, \Countable
         return $paginator;
     }
 
+    #[\Override]
     public function count(): int
     {
         return $this->count;
@@ -141,6 +143,7 @@ final class Paginator implements PaginatorInterface, \Countable
         return null;
     }
 
+    #[\Override]
     public function toArray(): array
     {
         return [

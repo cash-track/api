@@ -12,7 +12,7 @@ use Spiral\Core\Attribute\Singleton;
 use Spiral\Http\ResponseWrapper;
 
 #[Singleton]
-class LimitView
+final class LimitView
 {
     use Relations;
 

@@ -20,6 +20,7 @@ final class ViewRenderer implements RendererInterface
     ) {
     }
 
+    #[\Override]
     public function renderException(Request $request, int $code, \Throwable $exception): ResponseInterface
     {
         foreach (static::MAP as $className => $responseCode) {

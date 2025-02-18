@@ -11,7 +11,7 @@ use Spiral\Boot\Bootloader\Bootloader as FrameworkBootloader;
 use Spiral\Bootloader\Auth\HttpAuthBootloader;
 use Spiral\Core\BinderInterface;
 
-class AuthBootloader extends FrameworkBootloader
+final class AuthBootloader extends FrameworkBootloader
 {
     public function boot(HttpAuthBootloader $auth): void
     {

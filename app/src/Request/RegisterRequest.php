@@ -41,6 +41,7 @@ class RegisterRequest extends Filter implements HasFilterDefinition
     ) {
     }
 
+    #[\Override]
     public function filterDefinition(): FilterDefinitionInterface
     {
         return new FilterDefinition(validationRules: [

@@ -16,6 +16,7 @@ class SortSetRequest extends Filter implements HasFilterDefinition
     #[Data]
     public array $sort = [];
 
+    #[\Override]
     public function filterDefinition(): FilterDefinitionInterface
     {
         return new FilterDefinition(validationRules: [

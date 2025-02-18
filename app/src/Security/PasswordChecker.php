@@ -8,7 +8,7 @@ use App\Service\Auth\AuthService;
 use Cycle\ORM\ORMInterface;
 use Spiral\Validator\AbstractChecker;
 
-class PasswordChecker extends AbstractChecker
+final class PasswordChecker extends AbstractChecker
 {
     public const array MESSAGES = [
         'verify' => 'password_verify_error',

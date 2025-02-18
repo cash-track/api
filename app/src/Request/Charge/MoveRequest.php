@@ -19,6 +19,7 @@ class MoveRequest extends Filter implements HasFilterDefinition
     #[Data]
     public array $chargeIds = [];
 
+    #[\Override]
     public function filterDefinition(): FilterDefinitionInterface
     {
         return new FilterDefinition(validationRules: [

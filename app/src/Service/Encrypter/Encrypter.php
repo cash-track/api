@@ -15,6 +15,7 @@ class Encrypter implements EncrypterInterface
         $this->key = $this->appConfig->getDbEncrypterKey();
     }
 
+    #[\Override]
     public function encrypt(string $value, ?Cipher $cipher = null): string
     {
         if (! $this->isEnabled()) {
@@ -24,6 +25,7 @@ class Encrypter implements EncrypterInterface
         return $this->getCipherInstance($cipher)->encrypt($value, $this->key);
     }
 
+    #[\Override]
     public function decrypt(string $payload, ?Cipher $cipher = null): string
     {
         if (! $this->isEnabled()) {

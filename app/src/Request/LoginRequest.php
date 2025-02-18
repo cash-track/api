@@ -18,6 +18,7 @@ class LoginRequest extends Filter implements HasFilterDefinition
     #[Data]
     public string $password = '';
 
+    #[\Override]
     public function filterDefinition(): FilterDefinitionInterface
     {
         return new FilterDefinition(validationRules: [

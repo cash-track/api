@@ -6,7 +6,7 @@ namespace App\Auth\Jwt;
 
 use Spiral\Auth\TokenInterface;
 
-class Token implements TokenInterface
+final class Token implements TokenInterface
 {
     /**
      * @var string
@@ -35,25 +35,19 @@ class Token implements TokenInterface
         $this->payload = $payload;
     }
 
-    /**
-     * @inheritDoc
-     */
+    #[\Override]
     public function getID(): string
     {
         return $this->id;
     }
 
-    /**
-     * @inheritDoc
-     */
+    #[\Override]
     public function getExpiresAt(): ?\DateTimeInterface
     {
         return $this->expiresAt;
     }
 
-    /**
-     * @inheritDoc
-     */
+    #[\Override]
     public function getPayload(): array
     {
         return $this->payload;

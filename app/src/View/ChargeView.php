@@ -13,7 +13,7 @@ use Spiral\Core\Attribute\Singleton;
 use Spiral\Http\ResponseWrapper;
 
 #[Singleton]
-class ChargeView
+final class ChargeView
 {
     use Relations;
 

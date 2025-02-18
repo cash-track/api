@@ -13,7 +13,7 @@ use Spiral\Core\Container;
 /**
  * Note: It uses ~10MB of memory
  */
-class S3Bootloader extends Bootloader
+final class S3Bootloader extends Bootloader
 {
     public function __construct(
         private readonly S3Config $config,

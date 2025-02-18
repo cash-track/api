@@ -36,6 +36,7 @@ final class PaginationFactory implements PaginationProviderInterface
      * @throws \Psr\Container\ContainerExceptionInterface
      * @throws \Psr\Container\NotFoundExceptionInterface
      */
+    #[\Override]
     public function createPaginator(string $parameter = 'page', int $limit = 25): PaginatorInterface
     {
         if (!$this->container->has(ServerRequestInterface::class)) {

@@ -28,6 +28,7 @@ class CreateRequest extends Filter implements HasFilterDefinition
     #[Data]
     public array $tags = [];
 
+    #[\Override]
     public function filterDefinition(): FilterDefinitionInterface
     {
         return new FilterDefinition(validationRules: [

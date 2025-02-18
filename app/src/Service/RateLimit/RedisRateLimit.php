@@ -6,7 +6,7 @@ namespace App\Service\RateLimit;
 
 use Redis;
 
-class RedisRateLimit implements RateLimitInterface
+final class RedisRateLimit implements RateLimitInterface
 {
     const string PREFIX = 'rate-limit:';
 
@@ -15,6 +15,7 @@ class RedisRateLimit implements RateLimitInterface
     ) {
     }
 
+    #[\Override]
     public function hit(RuleInterface $rule): RateLimitHitInterface
     {
         if (! $this->redis->isConnected()) {

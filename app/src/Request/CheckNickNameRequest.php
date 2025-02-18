@@ -21,6 +21,7 @@ class CheckNickNameRequest extends Filter implements HasFilterDefinition
     #[Data]
     public string $nickName = '';
 
+    #[\Override]
     public function filterDefinition(): FilterDefinitionInterface
     {
         return new FilterDefinition(validationRules: self::validationRules());

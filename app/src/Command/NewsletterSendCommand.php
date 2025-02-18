@@ -15,7 +15,7 @@ use Spiral\Console\Attribute\AsCommand;
 use Spiral\Console\Attribute\Option;
 
 #[AsCommand(name: 'newsletter:send', description: 'Send newsletter email messages to many users')]
-class NewsletterSendCommand extends Command
+final class NewsletterSendCommand extends Command
 {
     #[Argument(description: 'Class name of mail to send [example: WelcomeMail]')]
     public string $mail = '';

@@ -15,6 +15,7 @@ class InitPasskeyRequest extends Filter implements HasFilterDefinition
     #[Data]
     public string $name = '';
 
+    #[\Override]
     public function filterDefinition(): FilterDefinitionInterface
     {
         return new FilterDefinition(validationRules: [

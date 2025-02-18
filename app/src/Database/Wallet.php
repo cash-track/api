@@ -161,6 +161,7 @@ class Wallet implements Sortable
     /**
      * @return int|string
      */
+    #[\Override]
     public function getSortIndex(): int|string
     {
         return $this->id ?? 0;

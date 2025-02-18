@@ -91,6 +91,7 @@ class User implements PasswordContainerInterface
     /**
      * {@inheritDoc}
      */
+    #[\Override]
     public function getPasswordHash(): string
     {
         return $this->password;
@@ -99,6 +100,7 @@ class User implements PasswordContainerInterface
     /**
      * {@inheritDoc}
      */
+    #[\Override]
     public function setPasswordHash(string $password): void
     {
         $this->password = $password;

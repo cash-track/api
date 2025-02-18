@@ -22,6 +22,7 @@ class ForgotPasswordResetRequest extends Filter implements HasFilterDefinition
     #[Data]
     public string $passwordConfirmation = '';
 
+    #[\Override]
     public function filterDefinition(): FilterDefinitionInterface
     {
         return new FilterDefinition(validationRules: [

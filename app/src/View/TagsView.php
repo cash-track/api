@@ -9,7 +9,7 @@ use Spiral\Core\Attribute\Singleton;
 use Spiral\Http\ResponseWrapper;
 
 #[Singleton]
-class TagsView
+final class TagsView
 {
     public function __construct(
         protected ResponseWrapper $response,

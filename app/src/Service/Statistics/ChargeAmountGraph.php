@@ -14,7 +14,7 @@ use Cycle\Database\Injection\Fragment;
 use Cycle\Database\Injection\Parameter;
 use Cycle\Database\Query\SelectQuery;
 
-class ChargeAmountGraph
+final class ChargeAmountGraph
 {
     /**
      * @use Filter<\App\Database\Charge>

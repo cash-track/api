@@ -56,6 +56,7 @@ class Mailer implements MailerInterface
      * @param \App\Service\Mailer\Mail $mail
      * @return void
      */
+    #[\Override]
     public function send(Mail $mail): void
     {
         $this->queue->push(SendMailJob::class, $mail->toPayload(), Options::onQueue(self::QUEUE_NAME));
@@ -67,6 +68,7 @@ class Mailer implements MailerInterface
      * @param \App\Service\Mailer\Mail $mail
      * @return void
      */
+    #[\Override]
     public function sendNow(Mail $mail): void
     {
         $this->mailer->send($this->build($mail));
@@ -78,6 +80,7 @@ class Mailer implements MailerInterface
      * @param \App\Service\Mailer\Mail $mail
      * @return string
      */
+    #[\Override]
     public function render(Mail $mail): string
     {
         return (string) $this->build($mail)->getHtmlBody();

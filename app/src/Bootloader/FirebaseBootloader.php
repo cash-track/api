@@ -10,7 +10,7 @@ use Nyholm\Psr7\Uri;
 use Spiral\Boot\Bootloader\Bootloader;
 use Spiral\Core\Container;
 
-class FirebaseBootloader extends Bootloader
+final class FirebaseBootloader extends Bootloader
 {
     public function __construct(private readonly FirebaseConfig $config)
     {

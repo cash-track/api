@@ -13,6 +13,7 @@ readonly class JsonErrorsRenderer implements ErrorsRendererInterface
     ) {
     }
 
+    #[\Override]
     public function render(array $errors, mixed $context = null): ResponseInterface
     {
         return $this->wrapper->json([

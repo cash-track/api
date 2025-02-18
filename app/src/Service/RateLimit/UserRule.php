@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Service\RateLimit;
 
-class UserRule extends Rule
+final class UserRule extends Rule
 {
     const string PREFIX = 'user:';
 
@@ -17,6 +17,7 @@ class UserRule extends Rule
         parent::__construct($limit, $ttl);
     }
 
+    #[\Override]
     public function key(): string
     {
         $key = static::PREFIX . $this->userId;

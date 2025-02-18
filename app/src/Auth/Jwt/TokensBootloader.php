@@ -9,7 +9,7 @@ use Spiral\Auth\TokenStorageInterface;
 use Spiral\Boot\Bootloader\Bootloader;
 use Spiral\Bootloader\Auth\HttpAuthBootloader;
 
-class TokensBootloader extends Bootloader
+final class TokensBootloader extends Bootloader
 {
     protected const array DEPENDENCIES = [
         HttpAuthBootloader::class,
