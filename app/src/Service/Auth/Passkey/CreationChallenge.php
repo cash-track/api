@@ -11,7 +11,7 @@ use Webauthn\PublicKeyCredentialCreationOptions;
 /**
  * @template-implements Arrayable<string, string|null>
  */
-class CreationChallenge implements Arrayable
+final class CreationChallenge implements Arrayable
 {
     public function __construct(
         private readonly SerializerInterface $serializer,
@@ -33,6 +33,7 @@ class CreationChallenge implements Arrayable
         );
     }
 
+    #[\Override]
     public function toArray(): array
     {
         return [

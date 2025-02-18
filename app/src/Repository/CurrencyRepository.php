@@ -11,7 +11,7 @@ use Cycle\Database\Injection\Parameter;
 /**
  * @extends Repository<\App\Database\Currency>
  */
-class CurrencyRepository extends Repository
+final class CurrencyRepository extends Repository
 {
     const string FEATURED_USD = 'USD';
     const string FEATURED_EUR = 'EUR';

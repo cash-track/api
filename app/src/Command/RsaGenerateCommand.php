@@ -12,7 +12,7 @@ use Symfony\Component\Console\Input\InputOption;
 /**
  * @psalm-suppress PropertyNotSetInConstructor
  */
-class RsaGenerateCommand extends Command
+final class RsaGenerateCommand extends Command
 {
     const string PUBLIC_KEY_PLACEHOLDER = '{rsa-public-key}';
     const string PRIVATE_KEY_PLACEHOLDER = '{rsa-private-key}';

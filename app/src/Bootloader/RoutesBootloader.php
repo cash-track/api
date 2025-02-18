@@ -35,6 +35,7 @@ final class RoutesBootloader extends BaseRoutesBootloader
         AnnotatedRoutesBootloader::class,
     ];
 
+    #[\Override]
     protected function globalMiddleware(): array
     {
         return [
@@ -47,6 +48,7 @@ final class RoutesBootloader extends BaseRoutesBootloader
         ];
     }
 
+    #[\Override]
     protected function middlewareGroups(): array
     {
         return [
@@ -61,6 +63,7 @@ final class RoutesBootloader extends BaseRoutesBootloader
         ];
     }
 
+    #[\Override]
     protected function defineRoutes(RoutingConfigurator $routes): void
     {
         //

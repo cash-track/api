@@ -11,7 +11,7 @@ use Spiral\Core\Attribute\Singleton;
 use Spiral\Http\ResponseWrapper;
 
 #[Singleton]
-class ChargesView
+final class ChargesView
 {
     use Relations;
 

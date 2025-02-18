@@ -6,11 +6,9 @@ namespace App\Mail;
 
 use App\Service\Mailer\Mail;
 
-class WelcomeMail extends BaseMail
+final class WelcomeMail extends BaseMail
 {
-    /**
-     * {@inheritDoc}
-     */
+    #[\Override]
     public function build(): Mail
     {
         return parent::build()->subject($this->say('welcome_mail_subject'))

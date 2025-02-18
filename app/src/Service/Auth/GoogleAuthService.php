@@ -23,7 +23,7 @@ use Spiral\Translator\Traits\TranslatorTrait;
 use Spiral\Translator\Translator;
 use Symfony\Component\String\Slugger\SluggerInterface;
 
-class GoogleAuthService extends AuthService
+final class GoogleAuthService extends AuthService
 {
     use TranslatorTrait;
 

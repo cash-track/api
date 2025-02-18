@@ -7,7 +7,7 @@ namespace App\Command;
 use Spiral\Console\Command;
 use Spiral\Encrypter\EncrypterFactory;
 
-class EncryptKeyGenerate extends Command
+final class EncryptKeyGenerate extends Command
 {
     protected const string NAME = 'encrypt:gen';
 

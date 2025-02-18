@@ -6,7 +6,7 @@ namespace App\Config;
 
 use Spiral\Core\InjectableConfig;
 
-class RedisConfig extends InjectableConfig
+final class RedisConfig extends InjectableConfig
 {
     public const string CONFIG = 'redis';
 

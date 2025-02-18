@@ -18,7 +18,7 @@ use Spiral\Views\ViewsInterface;
 use Symfony\Component\Mailer\Transport;
 use Symfony\Component\Mailer\Mailer as SymfonyMailer;
 
-class MailerBootloader extends Bootloader
+final class MailerBootloader extends Bootloader
 {
     public function __construct(private readonly MailConfig $config)
     {

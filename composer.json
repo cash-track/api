@@ -9,7 +9,7 @@
         "source": "https://github.com/cash-track/api"
     },
     "require": {
-        "php": ">=8.2",
+        "php": ">=8.4",
         "ext-mbstring": "*",
         "ext-openssl": "*",
         "ext-pdo": "*",

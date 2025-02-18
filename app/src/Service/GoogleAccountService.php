@@ -7,7 +7,7 @@ namespace App\Service;
 use App\Database\GoogleAccount;
 use Cycle\ORM\EntityManagerInterface;
 
-class GoogleAccountService
+final class GoogleAccountService
 {
     public function __construct(
         private readonly EntityManagerInterface $tr,

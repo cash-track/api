@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Service\Auth\Passkey\Response;
 
-class PasskeyInitResponse implements \JsonSerializable
+final class PasskeyInitResponse implements \JsonSerializable
 {
     use DataEncoder;
 
@@ -19,6 +19,7 @@ class PasskeyInitResponse implements \JsonSerializable
         return new self($challenge, self::encode($data));
     }
 
+    #[\Override]
     public function jsonSerialize(): mixed
     {
         return [

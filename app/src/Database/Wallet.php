@@ -20,7 +20,7 @@ use Cycle\ORM\Entity\Behavior;
 ])]
 #[Behavior\CreatedAt(field: 'createdAt', column: 'created_at')]
 #[Behavior\UpdatedAt(field: 'updatedAt', column: 'updated_at')]
-class Wallet implements Sortable
+final class Wallet implements Sortable
 {
     #[ORM\Column('primary')]
     public int|null $id = null;
@@ -161,6 +161,7 @@ class Wallet implements Sortable
     /**
      * @return int|string
      */
+    #[\Override]
     public function getSortIndex(): int|string
     {
         return $this->id ?? 0;

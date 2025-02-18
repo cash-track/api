@@ -10,12 +10,13 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 
-class CorsMiddleware implements MiddlewareInterface
+final class CorsMiddleware implements MiddlewareInterface
 {
     public function __construct(protected CorsInterface $service)
     {
     }
 
+    #[\Override]
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
         if ($this->service->isPreflightRequest($request)) {

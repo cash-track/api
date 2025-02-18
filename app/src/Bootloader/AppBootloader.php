@@ -8,7 +8,7 @@ use Spiral\Boot\Bootloader\Bootloader;
 use Symfony\Component\String\Slugger\AsciiSlugger;
 use Symfony\Component\String\Slugger\SluggerInterface;
 
-class AppBootloader extends Bootloader
+final class AppBootloader extends Bootloader
 {
     protected const array BINDINGS = [
         SluggerInterface::class => AsciiSlugger::class,

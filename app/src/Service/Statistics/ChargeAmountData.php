@@ -5,7 +5,7 @@ namespace App\Service\Statistics;
 use App\Service\Filter\Filter;
 use App\Service\Filter\FilterType;
 
-class ChargeAmountData
+final class ChargeAmountData
 {
     /**
      * @use Filter<\App\Database\Charge>

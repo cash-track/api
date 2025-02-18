@@ -26,9 +26,7 @@ final class BearerHeaderTransport implements HttpTransportInterface
         $this->header = $header;
     }
 
-    /**
-     * @inheritDoc
-     */
+    #[\Override]
     public function fetchToken(Request $request): ?string
     {
         if ($request->hasHeader($this->header)) {
@@ -38,9 +36,7 @@ final class BearerHeaderTransport implements HttpTransportInterface
         return null;
     }
 
-    /**
-     * @inheritDoc
-     */
+    #[\Override]
     public function commitToken(
         Request $request,
         Response $response,
@@ -56,9 +52,7 @@ final class BearerHeaderTransport implements HttpTransportInterface
         return $response->withAddedHeader($this->header, $headerLine);
     }
 
-    /**
-     * @inheritDoc
-     */
+    #[\Override]
     public function removeToken(Request $request, Response $response, string $tokenID): Response
     {
         return $response;

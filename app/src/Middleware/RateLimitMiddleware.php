@@ -16,7 +16,7 @@ use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Spiral\Translator\Traits\TranslatorTrait;
 
-class RateLimitMiddleware implements MiddlewareInterface
+final class RateLimitMiddleware implements MiddlewareInterface
 {
     use TranslatorTrait;
 
@@ -32,6 +32,7 @@ class RateLimitMiddleware implements MiddlewareInterface
     ) {
     }
 
+    #[\Override]
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
         $userId = $request->getHeaderLine(AuthMiddleware::HEADER_USER_ID);

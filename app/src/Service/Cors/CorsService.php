@@ -9,7 +9,7 @@ use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
-class CorsService implements CorsInterface
+final class CorsService implements CorsInterface
 {
     public function __construct(
         private readonly CorsConfig $config,
@@ -17,17 +17,20 @@ class CorsService implements CorsInterface
     ) {
     }
 
+    #[\Override]
     public function isPreflightRequest(ServerRequestInterface $request): bool
     {
         return $request->getMethod() === 'OPTIONS' && $request->hasHeader('Access-Control-Request-Method');
     }
 
+    #[\Override]
     public function handlePreflightRequest(ServerRequestInterface $request): ResponseInterface
     {
         $response = $this->addPreflightRequestHeaders($request, $this->responseFactory->createResponse(204));
         return $this->varyHeader($response, 'Access-Control-Request-Method');
     }
 
+    #[\Override]
     public function handleActualRequest(ServerRequestInterface $request, ResponseInterface $response): ResponseInterface
     {
         $response = $this->addActualRequestHeaders($request, $response);

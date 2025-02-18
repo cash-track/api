@@ -22,7 +22,7 @@ use Spiral\Http\ResponseWrapper;
 use Spiral\Router\Annotation\Route;
 use Spiral\Translator\Traits\TranslatorTrait;
 
-class ProfileController extends AuthAwareController
+final class ProfileController extends AuthAwareController
 {
     use TranslatorTrait;
 

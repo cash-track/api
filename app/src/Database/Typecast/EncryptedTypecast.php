@@ -38,6 +38,7 @@ final class EncryptedTypecast implements CastableInterface, UncastableInterface
      * @param array<non-empty-string, mixed> $rules
      * @return array<non-empty-string, mixed>
      */
+    #[\Override]
     public function setRules(array $rules): array
     {
         foreach ($rules as $key => $rule) {
@@ -53,6 +54,7 @@ final class EncryptedTypecast implements CastableInterface, UncastableInterface
         return $rules;
     }
 
+    #[\Override]
     public function cast(array $data): array
     {
         foreach ($this->rules as $column => $rule) {
@@ -82,6 +84,7 @@ final class EncryptedTypecast implements CastableInterface, UncastableInterface
         return $data;
     }
 
+    #[\Override]
     public function uncast(array $data): array
     {
         foreach ($this->rules as $column => $rule) {

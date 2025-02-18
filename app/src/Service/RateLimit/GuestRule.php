@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Service\RateLimit;
 
-class GuestRule extends Rule
+final class GuestRule extends Rule
 {
     const string PREFIX = 'guest:';
 
@@ -15,6 +15,7 @@ class GuestRule extends Rule
         parent::__construct($limit, $ttl);
     }
 
+    #[\Override]
     public function key(): string
     {
         return static::PREFIX . $this->clientIp;

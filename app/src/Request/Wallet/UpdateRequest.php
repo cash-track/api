@@ -11,7 +11,7 @@ use Spiral\Filters\Model\FilterDefinitionInterface;
 use Spiral\Filters\Model\HasFilterDefinition;
 use Spiral\Validator\FilterDefinition;
 
-class UpdateRequest extends Filter implements HasFilterDefinition
+final class UpdateRequest extends Filter implements HasFilterDefinition
 {
     #[Data]
     public string $name = '';
@@ -22,6 +22,7 @@ class UpdateRequest extends Filter implements HasFilterDefinition
     #[Data]
     public string $defaultCurrencyCode = '';
 
+    #[\Override]
     public function filterDefinition(): FilterDefinitionInterface
     {
         return new FilterDefinition(validationRules: [

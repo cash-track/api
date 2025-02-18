@@ -7,11 +7,9 @@ namespace App\Mail\Newsletter;
 use App\Mail\BaseMail;
 use App\Service\Mailer\Mail;
 
-class TelegramChannelMail extends BaseMail
+final class TelegramChannelMail extends BaseMail
 {
-    /**
-     * {@inheritDoc}
-     */
+    #[\Override]
     public function build(): Mail
     {
         return parent::build()->subject($this->say('telegram_channel_nl_mail_subject'))

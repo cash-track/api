@@ -11,7 +11,7 @@ use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Spiral\Translator\Translator;
 
-class UserLocaleSelectorMiddleware implements MiddlewareInterface
+final class UserLocaleSelectorMiddleware implements MiddlewareInterface
 {
     private array $availableLocales;
 
@@ -21,6 +21,7 @@ class UserLocaleSelectorMiddleware implements MiddlewareInterface
         $this->availableLocales = $this->translator->getCatalogueManager()->getLocales();
     }
 
+    #[\Override]
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
         $userLocale = $request->getAttribute(AuthMiddleware::USER_LOCALE);

@@ -11,7 +11,7 @@ use Spiral\Monolog\Bootloader\MonologBootloader;
 use Spiral\Boot\EnvironmentInterface;
 use Cycle\Database\Driver\MySQL\MySQLDriver;
 
-class LoggingBootloader extends Bootloader
+final class LoggingBootloader extends Bootloader
 {
     /**
      * Default log channel

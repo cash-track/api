@@ -12,7 +12,7 @@ use Cycle\ORM\Entity\Behavior;
 #[ORM\Entity(repository: CurrencyExchangeRepository::class)]
 #[Behavior\CreatedAt(field: 'createdAt', column: 'created_at')]
 #[Behavior\UpdatedAt(field: 'updatedAt', column: 'updated_at')]
-class CurrencyExchange
+final class CurrencyExchange
 {
     #[ORM\Column(type: 'primary')]
     public int|null $id = null;

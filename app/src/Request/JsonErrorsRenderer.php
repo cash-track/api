@@ -6,13 +6,14 @@ use Psr\Http\Message\ResponseInterface;
 use Spiral\Filters\ErrorsRendererInterface;
 use Spiral\Http\ResponseWrapper;
 
-readonly class JsonErrorsRenderer implements ErrorsRendererInterface
+final readonly class JsonErrorsRenderer implements ErrorsRendererInterface
 {
     public function __construct(
         private ResponseWrapper $wrapper
     ) {
     }
 
+    #[\Override]
     public function render(array $errors, mixed $context = null): ResponseInterface
     {
         return $this->wrapper->json([

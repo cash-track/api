@@ -13,7 +13,7 @@ use Cycle\Database\Injection\Fragment;
 use Cycle\Database\Injection\Parameter;
 use Cycle\Database\Query\SelectQuery;
 
-class ChargeTotalGraph
+final class ChargeTotalGraph
 {
     /**
      * @use Filter<\App\Database\Charge>

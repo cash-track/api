@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Service\RateLimit;
 
-class RuleFactory
+final class RuleFactory
 {
     public function getRule(string $userId = '', string $clientIp = ''): RuleInterface
     {

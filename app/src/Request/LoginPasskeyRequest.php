@@ -10,7 +10,7 @@ use Spiral\Filters\Model\FilterDefinitionInterface;
 use Spiral\Filters\Model\HasFilterDefinition;
 use Spiral\Validator\FilterDefinition;
 
-class LoginPasskeyRequest extends Filter implements HasFilterDefinition
+final class LoginPasskeyRequest extends Filter implements HasFilterDefinition
 {
     #[Data]
     public string $challenge = '';
@@ -18,6 +18,7 @@ class LoginPasskeyRequest extends Filter implements HasFilterDefinition
     #[Data]
     public string $data = '';
 
+    #[\Override]
     public function filterDefinition(): FilterDefinitionInterface
     {
         return new FilterDefinition(validationRules: [

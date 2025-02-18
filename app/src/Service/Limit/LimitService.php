@@ -11,7 +11,7 @@ use App\Repository\ChargeRepository;
 use App\Repository\LimitRepository;
 use Cycle\ORM\EntityManagerInterface;
 
-class LimitService
+final class LimitService
 {
     public function __construct(
         private readonly EntityManagerInterface $tr,

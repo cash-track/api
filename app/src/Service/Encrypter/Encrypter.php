@@ -6,7 +6,7 @@ namespace App\Service\Encrypter;
 
 use App\Config\AppConfig;
 
-class Encrypter implements EncrypterInterface
+final class Encrypter implements EncrypterInterface
 {
     private readonly string $key;
 
@@ -15,6 +15,7 @@ class Encrypter implements EncrypterInterface
         $this->key = $this->appConfig->getDbEncrypterKey();
     }
 
+    #[\Override]
     public function encrypt(string $value, ?Cipher $cipher = null): string
     {
         if (! $this->isEnabled()) {
@@ -24,6 +25,7 @@ class Encrypter implements EncrypterInterface
         return $this->getCipherInstance($cipher)->encrypt($value, $this->key);
     }
 
+    #[\Override]
     public function decrypt(string $payload, ?Cipher $cipher = null): string
     {
         if (! $this->isEnabled()) {

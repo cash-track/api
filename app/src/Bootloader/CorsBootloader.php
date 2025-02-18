@@ -10,7 +10,7 @@ use App\Service\Cors\CorsService;
 use Spiral\Boot\Bootloader\Bootloader;
 use Spiral\Bootloader\Http\HttpBootloader;
 
-class CorsBootloader extends Bootloader
+final class CorsBootloader extends Bootloader
 {
     protected const array BINDINGS = [
         CorsInterface::class => CorsService::class,

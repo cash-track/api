@@ -7,7 +7,7 @@ namespace App\Database;
 use Cycle\Annotated\Annotation as ORM;
 
 #[ORM\Entity]
-class TagLimit
+final class TagLimit
 {
     #[ORM\Column('primary')]
     public int|null $id = null;

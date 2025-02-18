@@ -6,7 +6,7 @@ namespace App\Config;
 
 use Spiral\Core\InjectableConfig;
 
-class MailConfig extends InjectableConfig
+final class MailConfig extends InjectableConfig
 {
     public const string CONFIG = 'mail';
     public const string DRIVER_SMTP = 'smtp';

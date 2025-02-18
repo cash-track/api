@@ -13,7 +13,7 @@ use Spiral\Filters\Model\HasFilterDefinition;
 use Spiral\Translator\Translator;
 use Spiral\Validator\FilterDefinition;
 
-class RegisterRequest extends Filter implements HasFilterDefinition
+final class RegisterRequest extends Filter implements HasFilterDefinition
 {
     #[Data]
     public string $name = '';
@@ -41,6 +41,7 @@ class RegisterRequest extends Filter implements HasFilterDefinition
     ) {
     }
 
+    #[\Override]
     public function filterDefinition(): FilterDefinitionInterface
     {
         return new FilterDefinition(validationRules: [

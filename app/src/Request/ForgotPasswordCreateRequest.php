@@ -11,11 +11,12 @@ use Spiral\Filters\Model\FilterDefinitionInterface;
 use Spiral\Filters\Model\HasFilterDefinition;
 use Spiral\Validator\FilterDefinition;
 
-class ForgotPasswordCreateRequest extends Filter implements HasFilterDefinition
+final class ForgotPasswordCreateRequest extends Filter implements HasFilterDefinition
 {
     #[Data]
     public string $email = '';
 
+    #[\Override]
     public function filterDefinition(): FilterDefinitionInterface
     {
         return new FilterDefinition(validationRules: [

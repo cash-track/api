@@ -7,7 +7,7 @@ namespace App\Mail;
 use App\Database\EntityHeader;
 use App\Service\Mailer\Mail;
 
-class EmailConfirmationMail extends BaseMail
+final class EmailConfirmationMail extends BaseMail
 {
     /**
      * @param \App\Database\EntityHeader<\App\Database\User> $userHeader
@@ -18,9 +18,7 @@ class EmailConfirmationMail extends BaseMail
         parent::__construct($userHeader);
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    #[\Override]
     public function build(): Mail
     {
         return parent::build()->subject($this->say('email_confirmation_mail_subject'))

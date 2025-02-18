@@ -12,7 +12,7 @@ use Cycle\ORM\Entity\Behavior;
 #[ORM\Entity(repository: TagRepository::class)]
 #[Behavior\UpdatedAt(field: 'updatedAt', column: 'updated_at')]
 #[ORM\Table\Index(columns: ['name', 'user_id'], unique: true)]
-class Tag
+final class Tag
 {
     #[ORM\Column(type: 'primary')]
     public int|null $id = null;

@@ -9,7 +9,7 @@ use Cycle\ORM\Select\Repository;
 /**
  * @template-extends Repository<\App\Database\Limit>
  */
-class LimitRepository extends Repository
+final class LimitRepository extends Repository
 {
     /**
      * @param int $limitId

@@ -8,7 +8,7 @@ use Spiral\Core\Attribute\Singleton;
 use Spiral\Http\ResponseWrapper;
 
 #[Singleton]
-class ChargeTitleView
+final class ChargeTitleView
 {
     public function __construct(
         protected ResponseWrapper $response,

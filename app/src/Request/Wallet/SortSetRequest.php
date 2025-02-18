@@ -11,11 +11,12 @@ use Spiral\Filters\Model\FilterDefinitionInterface;
 use Spiral\Filters\Model\HasFilterDefinition;
 use Spiral\Validator\FilterDefinition;
 
-class SortSetRequest extends Filter implements HasFilterDefinition
+final class SortSetRequest extends Filter implements HasFilterDefinition
 {
     #[Data]
     public array $sort = [];
 
+    #[\Override]
     public function filterDefinition(): FilterDefinitionInterface
     {
         return new FilterDefinition(validationRules: [

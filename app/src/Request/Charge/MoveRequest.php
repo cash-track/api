@@ -11,7 +11,7 @@ use Spiral\Filters\Model\FilterDefinitionInterface;
 use Spiral\Filters\Model\HasFilterDefinition;
 use Spiral\Validator\FilterDefinition;
 
-class MoveRequest extends Filter implements HasFilterDefinition
+final class MoveRequest extends Filter implements HasFilterDefinition
 {
     /**
      * @var array<array-key, string>
@@ -19,6 +19,7 @@ class MoveRequest extends Filter implements HasFilterDefinition
     #[Data]
     public array $chargeIds = [];
 
+    #[\Override]
     public function filterDefinition(): FilterDefinitionInterface
     {
         return new FilterDefinition(validationRules: [

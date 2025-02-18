@@ -10,11 +10,12 @@ use Spiral\Filters\Model\FilterDefinitionInterface;
 use Spiral\Filters\Model\HasFilterDefinition;
 use Spiral\Validator\FilterDefinition;
 
-class RefreshTokenRequest extends Filter implements HasFilterDefinition
+final class RefreshTokenRequest extends Filter implements HasFilterDefinition
 {
     #[Data]
     public string $accessToken = '';
 
+    #[\Override]
     public function filterDefinition(): FilterDefinitionInterface
     {
         return new FilterDefinition(validationRules: [

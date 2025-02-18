@@ -7,7 +7,7 @@ namespace App\Database;
 use Cycle\Annotated\Annotation as ORM;
 
 #[ORM\Entity]
-class TagCharge
+final class TagCharge
 {
     #[ORM\Column('primary')]
     public int|null $id = null;

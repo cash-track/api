@@ -11,7 +11,7 @@ use App\Database\Wallet;
 use App\Repository\ChargeRepository;
 use App\Repository\WalletRepository;
 
-class ProfileStatistics
+final class ProfileStatistics
 {
     public function __construct(
         private readonly WalletRepository $walletRepository,

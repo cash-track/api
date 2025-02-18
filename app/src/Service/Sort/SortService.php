@@ -7,7 +7,7 @@ namespace App\Service\Sort;
 use App\Database\User;
 use App\Service\UserOptionsService;
 
-class SortService
+final class SortService
 {
     public function __construct(
         protected UserOptionsService $optionsService,

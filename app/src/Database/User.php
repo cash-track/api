@@ -24,7 +24,7 @@ use Cycle\ORM\Parser\Typecast;
 ])]
 #[Behavior\CreatedAt(field: 'createdAt', column: 'created_at')]
 #[Behavior\UpdatedAt(field: 'updatedAt', column: 'updated_at')]
-class User implements PasswordContainerInterface
+final class User implements PasswordContainerInterface
 {
     #[ORM\Column('primary')]
     public int|null $id = null;
@@ -91,6 +91,7 @@ class User implements PasswordContainerInterface
     /**
      * {@inheritDoc}
      */
+    #[\Override]
     public function getPasswordHash(): string
     {
         return $this->password;
@@ -99,6 +100,7 @@ class User implements PasswordContainerInterface
     /**
      * {@inheritDoc}
      */
+    #[\Override]
     public function setPasswordHash(string $password): void
     {
         $this->password = $password;

@@ -9,7 +9,7 @@ use Spiral\Core\Attribute\Singleton;
 use Spiral\Http\ResponseWrapper;
 
 #[Singleton]
-class CurrenciesView
+final class CurrenciesView
 {
     public function __construct(
         protected ResponseWrapper $response,

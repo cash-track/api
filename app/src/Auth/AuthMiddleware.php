@@ -16,7 +16,7 @@ use Spiral\Auth\AuthContextInterface;
 use Spiral\Auth\Middleware\AuthMiddleware as Framework;
 use Spiral\Translator\Traits\TranslatorTrait;
 
-class AuthMiddleware implements MiddlewareInterface
+final class AuthMiddleware implements MiddlewareInterface
 {
     use TranslatorTrait;
 
@@ -29,9 +29,7 @@ class AuthMiddleware implements MiddlewareInterface
     ) {
     }
 
-    /**
-     * {@inheritdoc}
-     */
+    #[\Override]
     public function process(Request $request, RequestHandlerInterface $handler): Response
     {
         $authContext = $request->getAttribute(Framework::ATTRIBUTE);

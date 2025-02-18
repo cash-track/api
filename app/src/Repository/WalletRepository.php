@@ -13,7 +13,7 @@ use Cycle\ORM\Select\Repository;
  * @extends Repository<\App\Database\Wallet>
  * @implements RepositoryInterface<\App\Database\Wallet>
  */
-class WalletRepository extends Repository implements RepositoryInterface
+final class WalletRepository extends Repository implements RepositoryInterface
 {
     /**
      * @param int $userID

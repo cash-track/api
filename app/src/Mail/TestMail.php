@@ -6,11 +6,9 @@ namespace App\Mail;
 
 use App\Service\Mailer\Mail;
 
-class TestMail extends BaseMail
+final class TestMail extends BaseMail
 {
-    /**
-     * {@inheritDoc}
-     */
+    #[\Override]
     public function build(): Mail
     {
         return parent::build()->subject($this->say('test_mail_subject'))

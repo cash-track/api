@@ -16,7 +16,7 @@ use Cycle\ORM\Parser\Typecast;
 ])]
 #[Behavior\CreatedAt(field: 'createdAt', column: 'created_at')]
 #[Behavior\UpdatedAt(field: 'updatedAt', column: 'updated_at')]
-class Limit
+final class Limit
 {
     const string TYPE_INCOME  = '+';
     const string TYPE_EXPENSE = '-';

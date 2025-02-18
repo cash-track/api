@@ -24,14 +24,13 @@ abstract class BaseMail extends Mail
         parent::__construct();
     }
 
+    #[\Override]
     public function hydrate(ORMInterface $orm): void
     {
         $this->user = $this->userHeader->hydrate($orm);
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    #[\Override]
     public function build(): Mail
     {
         if ($this->user === null) {

@@ -15,7 +15,7 @@ use Cycle\Database\Injection\Parameter;
 /**
  * @extends Repository<\App\Database\Charge>
  */
-class ChargeRepository extends Repository
+final class ChargeRepository extends Repository
 {
     /**
      * @use Paginator<\App\Database\Charge>

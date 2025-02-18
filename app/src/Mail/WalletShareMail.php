@@ -10,7 +10,7 @@ use App\Database\Wallet;
 use App\Service\Mailer\Mail;
 use Cycle\ORM\ORMInterface;
 
-class WalletShareMail extends BaseMail
+final class WalletShareMail extends BaseMail
 {
     public ?User $sharer = null;
 
@@ -31,6 +31,7 @@ class WalletShareMail extends BaseMail
         parent::__construct($userHeader);
     }
 
+    #[\Override]
     public function hydrate(ORMInterface $orm): void
     {
         parent::hydrate($orm);
@@ -39,9 +40,7 @@ class WalletShareMail extends BaseMail
         $this->wallet = $this->walletHeader->hydrate($orm);
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    #[\Override]
     public function build(): Mail
     {
         return parent::build()->subject($this->say('wallet_share_mail_subject'))

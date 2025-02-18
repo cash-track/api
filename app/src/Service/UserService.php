@@ -7,7 +7,7 @@ namespace App\Service;
 use App\Database\User;
 use Cycle\ORM\EntityManagerInterface;
 
-class UserService
+final class UserService
 {
     public function __construct(private readonly EntityManagerInterface $tr)
     {

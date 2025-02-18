@@ -6,7 +6,7 @@ namespace App\Service\Statistics;
 
 use App\Service\ChargeWalletService;
 
-class ChargeTotalData
+final class ChargeTotalData
 {
     protected array $data = [];
 

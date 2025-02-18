@@ -9,7 +9,7 @@ use Spiral\Core\Attribute\Singleton;
 use Spiral\Http\ResponseWrapper;
 
 #[Singleton]
-class WalletLimitsView
+final class WalletLimitsView
 {
     use Relations;
 

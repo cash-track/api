@@ -7,7 +7,7 @@ namespace App\Service\Auth;
 use App\Database\User;
 use Spiral\Auth\TokenInterface;
 
-class Authentication
+final class Authentication
 {
     public function __construct(
         public User $user,

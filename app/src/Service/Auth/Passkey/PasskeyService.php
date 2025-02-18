@@ -39,7 +39,7 @@ use Webauthn\PublicKeyCredentialRpEntity;
 use Webauthn\PublicKeyCredentialSource;
 use Webauthn\PublicKeyCredentialUserEntity;
 
-class PasskeyService
+final class PasskeyService
 {
     use DataEncoder;
 

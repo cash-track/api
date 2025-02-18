@@ -11,7 +11,7 @@ use Webauthn\PublicKeyCredentialRequestOptions;
 /**
  * @template-implements Arrayable<string, string|null>
  */
-class RequestChallenge implements Arrayable
+final class RequestChallenge implements Arrayable
 {
     public function __construct(
         private readonly SerializerInterface $serializer,
@@ -27,6 +27,7 @@ class RequestChallenge implements Arrayable
         return new RequestChallenge($serializer, (string) ($data['challenge'] ?? ''), $instance);
     }
 
+    #[\Override]
     public function toArray(): array
     {
         return [

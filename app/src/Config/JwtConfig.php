@@ -6,7 +6,7 @@ namespace App\Config;
 
 use Spiral\Core\InjectableConfig;
 
-class JwtConfig extends InjectableConfig
+final class JwtConfig extends InjectableConfig
 {
     public const string CONFIG = 'jwt';
 

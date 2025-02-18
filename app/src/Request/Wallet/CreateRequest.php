@@ -13,7 +13,7 @@ use Spiral\Filters\Model\HasFilterDefinition;
 use Spiral\Validator\FilterDefinition;
 use Symfony\Component\String\Slugger\SluggerInterface;
 
-class CreateRequest extends Filter implements HasFilterDefinition
+final class CreateRequest extends Filter implements HasFilterDefinition
 {
     #[Data]
     public string $name = '';
@@ -31,6 +31,7 @@ class CreateRequest extends Filter implements HasFilterDefinition
     {
     }
 
+    #[\Override]
     public function filterDefinition(): FilterDefinitionInterface
     {
         return new FilterDefinition(validationRules: [

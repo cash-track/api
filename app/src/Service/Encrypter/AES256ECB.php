@@ -6,10 +6,11 @@ namespace App\Service\Encrypter;
 
 use Spiral\Encrypter\Exception\EncrypterException;
 
-class AES256ECB implements CipherInterface
+final class AES256ECB implements CipherInterface
 {
     const string ALGO = 'aes-256-ecb';
 
+    #[\Override]
     public function encrypt(string $value, string $key): string
     {
         $payload = openssl_encrypt($value, static::ALGO, $key);
@@ -18,6 +19,7 @@ class AES256ECB implements CipherInterface
         return $payload;
     }
 
+    #[\Override]
     public function decrypt(string $payload, string $key): string
     {
         $value = openssl_decrypt($payload, static::ALGO, $key);

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Service\RateLimit;
 
-class RateLimitHit implements RateLimitHitInterface
+final class RateLimitHit implements RateLimitHitInterface
 {
     public function __construct(
         protected RuleInterface $rule,
@@ -13,16 +13,19 @@ class RateLimitHit implements RateLimitHitInterface
     ) {
     }
 
+    #[\Override]
     public function isReached(): bool
     {
         return $this->counter >= $this->rule->limit();
     }
 
+    #[\Override]
     public function getLimit(): int
     {
         return $this->rule->limit();
     }
 
+    #[\Override]
     public function getRemaining(): int
     {
         if ($this->rule->limit() > $this->counter) {
@@ -32,11 +35,13 @@ class RateLimitHit implements RateLimitHitInterface
         return 0;
     }
 
+    #[\Override]
     public function getRetryAfter(): int
     {
         return $this->ttl;
     }
 
+    #[\Override]
     public function getRule(): RuleInterface
     {
         return $this->rule;

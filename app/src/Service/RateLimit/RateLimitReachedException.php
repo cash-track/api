@@ -6,7 +6,7 @@ namespace App\Service\RateLimit;
 
 use RuntimeException;
 
-class RateLimitReachedException extends RuntimeException
+final class RateLimitReachedException extends RuntimeException
 {
     public function __construct(
         protected RateLimitHitInterface $hit,

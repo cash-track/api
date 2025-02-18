@@ -13,7 +13,7 @@ use Spiral\Filters\Model\FilterDefinitionInterface;
 use Spiral\Filters\Model\HasFilterDefinition;
 use Spiral\Validator\FilterDefinition;
 
-class CreateRequest extends Filter implements HasFilterDefinition
+final class CreateRequest extends Filter implements HasFilterDefinition
 {
     #[Data]
     public string $type = '';
@@ -28,6 +28,7 @@ class CreateRequest extends Filter implements HasFilterDefinition
     #[Data]
     public array $tags = [];
 
+    #[\Override]
     public function filterDefinition(): FilterDefinitionInterface
     {
         return new FilterDefinition(validationRules: [

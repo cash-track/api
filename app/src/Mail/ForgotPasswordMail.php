@@ -7,7 +7,7 @@ namespace App\Mail;
 use App\Database\EntityHeader;
 use App\Service\Mailer\Mail;
 
-class ForgotPasswordMail extends BaseMail
+final class ForgotPasswordMail extends BaseMail
 {
     /**
      * @param \App\Database\EntityHeader<\App\Database\User> $userHeader
@@ -18,9 +18,7 @@ class ForgotPasswordMail extends BaseMail
         parent::__construct($userHeader);
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    #[\Override]
     public function build(): Mail
     {
         return parent::build()->subject($this->say('forgot_password_mail_subject'))

@@ -9,7 +9,7 @@ use Cycle\Annotated\Annotation as ORM;
 
 /** @psalm-suppress InvalidArgument */
 #[ORM\Entity(repository: CurrencyRepository::class)]
-class Currency
+final class Currency
 {
     const string DEFAULT_CURRENCY_CODE = 'USD';
 

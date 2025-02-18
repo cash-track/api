@@ -15,7 +15,7 @@ use Cycle\Database\Query\SelectQuery;
 /**
  * @extends Repository<\App\Database\User>
  */
-class UserRepository extends Repository implements ActorProviderInterface
+final class UserRepository extends Repository implements ActorProviderInterface
 {
     /**
      * @param \Cycle\ORM\Select<User> $select
@@ -32,6 +32,7 @@ class UserRepository extends Repository implements ActorProviderInterface
      * @param \Spiral\Auth\TokenInterface $token
      * @return object|null
      */
+    #[\Override]
     public function getActor(TokenInterface $token): ?object
     {
         if (! isset($token->getPayload()['sub'])) {
