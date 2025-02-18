@@ -8,7 +8,7 @@ use Cose\Algorithm\Algorithm;
 use Spiral\Core\InjectableConfig;
 use Webauthn\PublicKeyCredentialParameters;
 
-final class PasskeyConfig extends InjectableConfig
+class PasskeyConfig extends InjectableConfig
 {
     public const string CONFIG = 'passkey';
     public const int DEFAULT_TIMEOUT = 300000;

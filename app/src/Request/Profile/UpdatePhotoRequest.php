@@ -12,7 +12,7 @@ use Spiral\Filters\Model\FilterDefinitionInterface;
 use Spiral\Filters\Model\HasFilterDefinition;
 use Spiral\Validator\FilterDefinition;
 
-final class UpdatePhotoRequest extends Filter implements HasFilterDefinition
+class UpdatePhotoRequest extends Filter implements HasFilterDefinition
 {
     #[File]
     public ?UploadedFileInterface $photo = null;

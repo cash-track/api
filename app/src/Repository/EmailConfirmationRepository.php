@@ -9,7 +9,7 @@ use Cycle\ORM\Select\Repository;
 /**
  * @extends Repository<\App\Database\EmailConfirmation>
  */
-final class EmailConfirmationRepository extends Repository
+class EmailConfirmationRepository extends Repository
 {
     /**
      * @param string $token

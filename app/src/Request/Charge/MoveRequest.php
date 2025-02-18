@@ -11,7 +11,7 @@ use Spiral\Filters\Model\FilterDefinitionInterface;
 use Spiral\Filters\Model\HasFilterDefinition;
 use Spiral\Validator\FilterDefinition;
 
-final class MoveRequest extends Filter implements HasFilterDefinition
+class MoveRequest extends Filter implements HasFilterDefinition
 {
     /**
      * @var array<array-key, string>

@@ -17,7 +17,7 @@ use Symfony\Component\Mailer\MailerInterface as SymfonyMailerInterface;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\Mime\Email;
 
-final class Mailer implements MailerInterface
+class Mailer implements MailerInterface
 {
     const string QUEUE_NAME = 'high-priority';
 

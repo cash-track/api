@@ -9,7 +9,7 @@ use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
-final class CorsService implements CorsInterface
+class CorsService implements CorsInterface
 {
     public function __construct(
         private readonly CorsConfig $config,

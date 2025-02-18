@@ -17,7 +17,7 @@ use Ramsey\Uuid\UuidInterface;
 ])]
 #[Behavior\Uuid\Uuid4(field: 'id', column: 'id')]
 #[Behavior\UpdatedAt(field: 'updatedAt', column: 'updated_at')]
-final class Charge
+class Charge
 {
     const string TYPE_INCOME  = '+';
     const string TYPE_EXPENSE = '-';

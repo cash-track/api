@@ -10,7 +10,7 @@ use Cycle\ORM\ORMInterface;
 /**
  * @template TEntity of object
  */
-final class EntityHeader
+class EntityHeader
 {
     use PayloadSerializer;
 

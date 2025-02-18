@@ -8,7 +8,7 @@ use App\Database\Charge;
 use App\Database\Wallet;
 use Cycle\ORM\EntityManagerInterface;
 
-final class ChargeWalletService
+class ChargeWalletService
 {
     const int PRECISION = 2;
 

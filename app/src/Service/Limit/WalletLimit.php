@@ -4,7 +4,7 @@ namespace App\Service\Limit;
 
 use App\Database\Limit;
 
-final readonly class WalletLimit
+readonly class WalletLimit
 {
     public float $percentage;
 

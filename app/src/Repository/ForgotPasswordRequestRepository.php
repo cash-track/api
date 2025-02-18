@@ -9,7 +9,7 @@ use Cycle\ORM\Select\Repository;
 /**
  * @extends Repository<\App\Database\ForgotPasswordRequest>
  */
-final class ForgotPasswordRequestRepository extends Repository
+class ForgotPasswordRequestRepository extends Repository
 {
     /**
      * @param string $code

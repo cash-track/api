@@ -13,7 +13,7 @@ use Webauthn\PublicKeyCredential;
 /**
  * @template-extends Repository<\App\Database\Passkey>
  */
-final class PasskeyRepository extends Repository
+class PasskeyRepository extends Repository
 {
     /**
      * @param \Cycle\ORM\Select<\App\Database\Passkey> $select

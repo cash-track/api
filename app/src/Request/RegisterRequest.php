@@ -13,7 +13,7 @@ use Spiral\Filters\Model\HasFilterDefinition;
 use Spiral\Translator\Translator;
 use Spiral\Validator\FilterDefinition;
 
-final class RegisterRequest extends Filter implements HasFilterDefinition
+class RegisterRequest extends Filter implements HasFilterDefinition
 {
     #[Data]
     public string $name = '';

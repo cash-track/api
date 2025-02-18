@@ -8,7 +8,7 @@ use Cycle\Annotated\Annotation as ORM;
 
 #[ORM\Entity]
 #[ORM\Table\Index(['user_id', 'wallet_id'], true)]
-final class UserWallet
+class UserWallet
 {
     #[ORM\Column('primary')]
     public int|null $id = null;

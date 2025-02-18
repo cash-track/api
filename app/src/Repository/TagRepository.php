@@ -13,7 +13,7 @@ use Cycle\Database\Injection\Parameter;
 /**
  * @extends Repository<\App\Database\Tag>
  */
-final class TagRepository extends Repository
+class TagRepository extends Repository
 {
     /**
      * @param int $userID

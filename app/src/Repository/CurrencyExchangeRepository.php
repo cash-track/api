@@ -9,6 +9,6 @@ use Cycle\ORM\Select\Repository;
 /**
  * @extends Repository<\App\Database\CurrencyExchange>
  */
-final class CurrencyExchangeRepository extends Repository
+class CurrencyExchangeRepository extends Repository
 {
 }

@@ -6,7 +6,7 @@ use Psr\Http\Message\ResponseInterface;
 use Spiral\Filters\ErrorsRendererInterface;
 use Spiral\Http\ResponseWrapper;
 
-final readonly class JsonErrorsRenderer implements ErrorsRendererInterface
+readonly class JsonErrorsRenderer implements ErrorsRendererInterface
 {
     public function __construct(
         private ResponseWrapper $wrapper

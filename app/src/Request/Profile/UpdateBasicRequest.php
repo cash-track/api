@@ -15,7 +15,7 @@ use Spiral\Filters\Model\HasFilterDefinition;
 use Spiral\Translator\Translator;
 use Spiral\Validator\FilterDefinition;
 
-final class UpdateBasicRequest extends Filter implements HasFilterDefinition
+class UpdateBasicRequest extends Filter implements HasFilterDefinition
 {
     #[Header(key: AuthMiddleware::HEADER_USER_ID)]
     public int $id = 0;

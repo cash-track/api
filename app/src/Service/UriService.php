@@ -7,7 +7,7 @@ namespace App\Service;
 use App\Config\AppConfig;
 use App\Database\Wallet;
 
-final class UriService
+class UriService
 {
     public function __construct(private readonly AppConfig $config)
     {

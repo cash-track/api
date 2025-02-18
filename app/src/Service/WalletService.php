@@ -13,7 +13,7 @@ use App\Service\Mailer\MailerInterface;
 use Cycle\ORM\EntityManagerInterface;
 use Symfony\Component\String\Slugger\SluggerInterface;
 
-final class WalletService
+class WalletService
 {
     public function __construct(
         private readonly EntityManagerInterface $tr,

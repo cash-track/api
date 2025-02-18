@@ -15,7 +15,7 @@ use Cycle\Database\Query\SelectQuery;
 /**
  * @extends Repository<\App\Database\User>
  */
-final class UserRepository extends Repository implements ActorProviderInterface
+class UserRepository extends Repository implements ActorProviderInterface
 {
     /**
      * @param \Cycle\ORM\Select<User> $select

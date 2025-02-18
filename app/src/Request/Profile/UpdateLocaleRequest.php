@@ -11,7 +11,7 @@ use Spiral\Filters\Model\HasFilterDefinition;
 use Spiral\Translator\Translator;
 use Spiral\Validator\FilterDefinition;
 
-final class UpdateLocaleRequest extends Filter implements HasFilterDefinition
+class UpdateLocaleRequest extends Filter implements HasFilterDefinition
 {
     #[Data]
     public string $locale = '';

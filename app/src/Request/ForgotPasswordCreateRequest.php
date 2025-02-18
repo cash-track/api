@@ -11,7 +11,7 @@ use Spiral\Filters\Model\FilterDefinitionInterface;
 use Spiral\Filters\Model\HasFilterDefinition;
 use Spiral\Validator\FilterDefinition;
 
-final class ForgotPasswordCreateRequest extends Filter implements HasFilterDefinition
+class ForgotPasswordCreateRequest extends Filter implements HasFilterDefinition
 {
     #[Data]
     public string $email = '';

@@ -10,7 +10,7 @@ use Spiral\Filters\Model\FilterDefinitionInterface;
 use Spiral\Filters\Model\HasFilterDefinition;
 use Spiral\Validator\FilterDefinition;
 
-final class LoginRequest extends Filter implements HasFilterDefinition
+class LoginRequest extends Filter implements HasFilterDefinition
 {
     #[Data]
     public string $email = '';

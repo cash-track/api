@@ -8,7 +8,7 @@ use App\Database\Tag;
 use App\Database\User;
 use Cycle\ORM\EntityManagerInterface;
 
-final class TagService
+class TagService
 {
     public function __construct(
         private EntityManagerInterface $tr,

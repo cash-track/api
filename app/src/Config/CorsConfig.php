@@ -6,7 +6,7 @@ namespace App\Config;
 
 use Spiral\Core\InjectableConfig;
 
-final class CorsConfig extends InjectableConfig
+class CorsConfig extends InjectableConfig
 {
     public const string CONFIG = 'cors';
 

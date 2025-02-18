@@ -10,7 +10,7 @@ use Spiral\Filters\Model\FilterDefinitionInterface;
 use Spiral\Filters\Model\HasFilterDefinition;
 use Spiral\Validator\FilterDefinition;
 
-final class InitPasskeyRequest extends Filter implements HasFilterDefinition
+class InitPasskeyRequest extends Filter implements HasFilterDefinition
 {
     #[Data]
     public string $name = '';

@@ -6,7 +6,7 @@ namespace App\Service\Encrypter;
 
 use App\Config\AppConfig;
 
-final class Encrypter implements EncrypterInterface
+class Encrypter implements EncrypterInterface
 {
     private readonly string $key;
 

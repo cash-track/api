@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Service\RateLimit;
 
-final class GuestRule extends Rule
+class GuestRule extends Rule
 {
     const string PREFIX = 'guest:';
 

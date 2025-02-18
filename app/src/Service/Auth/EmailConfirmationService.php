@@ -15,7 +15,7 @@ use App\Service\UriService;
 use Cycle\ORM\EntityManagerInterface;
 use Spiral\Translator\Traits\TranslatorTrait;
 
-final class EmailConfirmationService extends HelperService
+class EmailConfirmationService extends HelperService
 {
     use TranslatorTrait;
 

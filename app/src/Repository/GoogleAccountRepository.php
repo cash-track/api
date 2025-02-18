@@ -10,7 +10,7 @@ use Cycle\ORM\Select\Repository;
 /**
  * @extends Repository<\App\Database\GoogleAccount>
  */
-final class GoogleAccountRepository extends Repository
+class GoogleAccountRepository extends Repository
 {
     /**
      * @param \App\Database\User $user

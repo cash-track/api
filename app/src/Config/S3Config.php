@@ -6,7 +6,7 @@ namespace App\Config;
 
 use Spiral\Core\InjectableConfig;
 
-final class S3Config extends InjectableConfig
+class S3Config extends InjectableConfig
 {
     public const string CONFIG = 's3';
 

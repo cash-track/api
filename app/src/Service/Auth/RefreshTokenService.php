@@ -13,7 +13,7 @@ use Spiral\Auth\AuthContextInterface;
 use Spiral\Auth\TokenInterface;
 use Spiral\Auth\TransportRegistry;
 
-final class RefreshTokenService
+class RefreshTokenService
 {
     public function __construct(
         private readonly ActorProviderInterface $actorProvider,

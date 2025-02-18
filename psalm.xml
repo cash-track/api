@@ -14,6 +14,11 @@
                 <directory name="app/src"/>
             </errorLevel>
         </InvalidClassConstantType>
+        <ClassMustBeFinal>
+            <errorLevel type="suppress">
+                <directory name="app/src"/>
+            </errorLevel>
+        </ClassMustBeFinal>
         <DeprecatedInterface>
             <errorLevel type="suppress">
                 <file name="app/src/Security/EncryptedEntityChecker.php" />

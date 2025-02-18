@@ -6,7 +6,7 @@ namespace App\Mail;
 
 use App\Service\Mailer\Mail;
 
-final class TestMail extends BaseMail
+class TestMail extends BaseMail
 {
     #[\Override]
     public function build(): Mail

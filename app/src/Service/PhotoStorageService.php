@@ -12,7 +12,7 @@ use Psr\Http\Message\UploadedFileInterface;
 use Psr\Log\LoggerInterface;
 use Spiral\Queue\QueueInterface;
 
-final class PhotoStorageService
+class PhotoStorageService
 {
     const string DEFAULT_EXT = 'jpg';
     const string DEFAULT_MIME = 'image/jpeg';

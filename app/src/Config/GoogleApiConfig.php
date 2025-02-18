@@ -6,7 +6,7 @@ namespace App\Config;
 
 use Spiral\Core\InjectableConfig;
 
-final class GoogleApiConfig extends InjectableConfig
+class GoogleApiConfig extends InjectableConfig
 {
     public const string CONFIG = 'google';
 

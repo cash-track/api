@@ -6,7 +6,7 @@ namespace App\Config;
 
 use Spiral\Core\InjectableConfig;
 
-final class CdnConfig extends InjectableConfig
+class CdnConfig extends InjectableConfig
 {
     public const string CONFIG = 'cdn';
 

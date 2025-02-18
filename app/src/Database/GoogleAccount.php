@@ -16,7 +16,7 @@ use Cycle\ORM\Parser\Typecast;
     EncryptedTypecast::class,
 ])]
 #[Behavior\UpdatedAt(field: 'updatedAt', column: 'updated_at')]
-final class GoogleAccount
+class GoogleAccount
 {
     #[ORM\Column(type: 'int', name: 'user_id', primary: true)]
     public int $userId = 0;

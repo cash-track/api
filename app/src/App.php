@@ -31,7 +31,7 @@ use Spiral\Validation\Bootloader\ValidationBootloader;
 use Spiral\Validator\Bootloader\ValidatorBootloader;
 use Spiral\Views\Bootloader\ViewsBootloader;
 
-final class App extends Kernel
+class App extends Kernel
 {
     protected const array SYSTEM = [
         CoreBootloader::class,

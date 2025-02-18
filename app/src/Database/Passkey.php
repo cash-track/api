@@ -16,7 +16,7 @@ use Cycle\ORM\Parser\Typecast;
     EncryptedTypecast::class,
 ])]
 #[Behavior\CreatedAt(field: 'createdAt', column: 'created_at')]
-final class Passkey
+class Passkey
 {
     #[ORM\Column('primary')]
     public int|null $id = null;

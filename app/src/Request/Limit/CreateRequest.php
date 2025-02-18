@@ -13,7 +13,7 @@ use Spiral\Filters\Model\FilterDefinitionInterface;
 use Spiral\Filters\Model\HasFilterDefinition;
 use Spiral\Validator\FilterDefinition;
 
-final class CreateRequest extends Filter implements HasFilterDefinition
+class CreateRequest extends Filter implements HasFilterDefinition
 {
     #[Data]
     public string $type = '';

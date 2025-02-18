@@ -13,7 +13,7 @@ use Spiral\Filters\Model\FilterDefinitionInterface;
 use Spiral\Filters\Model\HasFilterDefinition;
 use Spiral\Validator\FilterDefinition;
 
-final class UpdatePasswordRequest extends Filter implements HasFilterDefinition
+class UpdatePasswordRequest extends Filter implements HasFilterDefinition
 {
     #[Header(key: AuthMiddleware::HEADER_USER_ID)]
     public int $id = 0;

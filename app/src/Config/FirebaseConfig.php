@@ -6,7 +6,7 @@ namespace App\Config;
 
 use Spiral\Core\InjectableConfig;
 
-final class FirebaseConfig extends InjectableConfig
+class FirebaseConfig extends InjectableConfig
 {
     public const string CONFIG = 'firebase';
 

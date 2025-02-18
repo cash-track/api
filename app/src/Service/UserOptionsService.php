@@ -7,7 +7,7 @@ namespace App\Service;
 use App\Database\User;
 use App\Service\Sort\SortType;
 
-final class UserOptionsService
+class UserOptionsService
 {
     protected const string SORT_ROOT = 'sort';
     protected const string LOCALE_ROOT = 'locale';

@@ -16,7 +16,7 @@ use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Spiral\Translator\Traits\TranslatorTrait;
 
-final class RateLimitMiddleware implements MiddlewareInterface
+class RateLimitMiddleware implements MiddlewareInterface
 {
     use TranslatorTrait;
 

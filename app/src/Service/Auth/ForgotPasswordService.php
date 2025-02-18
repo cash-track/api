@@ -14,7 +14,7 @@ use App\Service\UriService;
 use Cycle\ORM\EntityManagerInterface;
 use Spiral\Translator\Traits\TranslatorTrait;
 
-final class ForgotPasswordService extends HelperService
+class ForgotPasswordService extends HelperService
 {
     use TranslatorTrait;
 

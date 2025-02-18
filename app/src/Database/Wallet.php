@@ -20,7 +20,7 @@ use Cycle\ORM\Entity\Behavior;
 ])]
 #[Behavior\CreatedAt(field: 'createdAt', column: 'created_at')]
 #[Behavior\UpdatedAt(field: 'updatedAt', column: 'updated_at')]
-final class Wallet implements Sortable
+class Wallet implements Sortable
 {
     #[ORM\Column('primary')]
     public int|null $id = null;

@@ -14,7 +14,7 @@ use Cycle\Annotated\Annotation as ORM;
     new ORM\Table\Index(columns: ['token']),
     new ORM\Table\Index(columns: ['email'], unique: true),
 ])]
-final class EmailConfirmation
+class EmailConfirmation
 {
     #[ORM\Column(type: 'string', primary: true)]
     public string|null $email = null;
