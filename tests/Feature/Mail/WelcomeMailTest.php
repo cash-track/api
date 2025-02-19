@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Feature\Mail;
+namespace Tests\Feature\Mail;
 
 use App\Mail\WelcomeMail;
 use Symfony\Component\Mime\Address;

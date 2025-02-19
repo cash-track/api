@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Feature\Database;
+namespace Tests\Feature\Database;
 
 use App\Database\Passkey;
 use Tests\Factories\UserFactory;

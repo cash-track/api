@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Feature\View;
+namespace Tests\Feature\View;
 
 use App\View\PasskeyView;
 use Tests\TestCase;
