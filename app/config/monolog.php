@@ -49,7 +49,7 @@ return [
      */
     'processors' => [
         'default' => [
-            // ...
+            \Spiral\Telemetry\Monolog\TelemetryProcessor::class,
         ],
         'stdout' => [
             [

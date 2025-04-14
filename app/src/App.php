@@ -16,6 +16,7 @@ use Spiral\Filters\Bootloader\FiltersBootloader;
 use Spiral\League\Event\Bootloader\EventBootloader;
 use Spiral\Monolog\Bootloader as Monolog;
 use Spiral\Nyholm\Bootloader\NyholmBootloader;
+use Spiral\OpenTelemetry\Bootloader\OpenTelemetryBootloader;
 use Spiral\Prototype\Bootloader as Prototype;
 use Spiral\Queue\Bootloader\QueueBootloader;
 use Spiral\Router\Bootloader as Router;
@@ -44,6 +45,8 @@ class App extends Kernel
      * within system container on application start.
      */
     protected const array LOAD = [
+        OpenTelemetryBootloader::class,
+
         // Logging and exceptions handling
         RoadRunnerBridge\LoggerBootloader::class,
         Bootloader\LoggingBootloader::class,

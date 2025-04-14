@@ -7,11 +7,23 @@ server:
   command: 'php app.php'
   relay: pipes
 
+otel:
+  resource:
+    service_name: "api-server"
+    service_version: "${OTEL_SERVICE_VERSION:-1.0.0}"
+    service_namespace: "${OTEL_SERVICE_NAMESPACE:-cash-track}"
+    service_instance_id: "${OTEL_SERVICE_INSTANCE_ID:-UUID}"
+  client: "${OTEL_EXPORTER_OTLP_CLIENT:-grpc}"
+  insecure: "${OTEL_EXPORTER_OTLP_INSECURE:-true}"
+  exporter: otlp
+  endpoint: "${OTEL_EXPORTER_OTLP_ENDPOINT:-127.0.0.1:4317}"
+
 http:
   address: 0.0.0.0:8080
   middleware:
     - http_metrics
     - gzip
+    - otel
   pool:
     num_workers: ${RR_HTTP_NUM_WORKERS}
     supervisor:
