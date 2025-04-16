@@ -7,6 +7,7 @@ namespace App\Bootloader;
 use App\Auth\AuthMiddleware;
 use App\Middleware\LocaleSelectorMiddleware;
 use App\Middleware\RateLimitMiddleware;
+use App\Middleware\TraceContextMiddleware;
 use App\Middleware\UserLocaleSelectorMiddleware;
 use App\Request\JsonErrorsRenderer;
 use App\Service\RateLimit\RateLimitInterface;
@@ -39,6 +40,7 @@ final class RoutesBootloader extends BaseRoutesBootloader
     protected function globalMiddleware(): array
     {
         return [
+            TraceContextMiddleware::class,
             LocaleSelectorMiddleware::class,
             ErrorHandlerMiddleware::class,
             JsonPayloadMiddleware::class,
