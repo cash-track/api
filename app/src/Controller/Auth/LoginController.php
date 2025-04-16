@@ -8,6 +8,7 @@ use App\Request\LoginRequest;
 use App\Service\Auth\Authentication;
 use App\Service\Auth\AuthService;
 use App\View\UserView;
+use OpenTelemetry\API\Trace\StatusCode;
 use Psr\Http\Message\ResponseInterface;
 use Spiral\Http\ResponseWrapper;
 use Spiral\Router\Annotation\Route;
@@ -40,6 +41,9 @@ final class LoginController extends Controller
                         'result' => $auth !== null,
                         'user.id' => $auth?->user?->id
                     ]);
+                    $span->setStatus(
+                        $auth !== null ? StatusCode::STATUS_OK : StatusCode::STATUS_ERROR
+                    );
 
                     return $auth;
                 },

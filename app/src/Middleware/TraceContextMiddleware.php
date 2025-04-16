@@ -24,9 +24,7 @@ final class TraceContextMiddleware implements MiddlewareInterface
 
         $response = $tracer->trace(
             name: \sprintf('%s %s', $request->getMethod(), (string) $request->getUri()),
-            callback: function () use ($request, $handler) {
-                return $handler->handle($request);
-            },
+            callback: fn () => $handler->handle($request),
             attributes: [
                 'http.method' => $request->getMethod(),
                 'http.url' => $request->getUri(),
@@ -35,10 +33,6 @@ final class TraceContextMiddleware implements MiddlewareInterface
             scoped: true,
             traceKind: TraceKind::SERVER
         );
-
-        foreach ($tracer->getContext() as $key => $value) {
-            $response = $response->withHeader($key, $value);
-        }
 
         return $response;
     }
