@@ -16,7 +16,7 @@ otel:
   client: "${OTEL_EXPORTER_OTLP_CLIENT:-grpc}"
   insecure: "${OTEL_EXPORTER_OTLP_INSECURE:-true}"
   exporter: otlp
-  endpoint: "${OTEL_EXPORTER_OTLP_ENDPOINT:-127.0.0.1:4317}"
+  endpoint: "${OTEL_EXPORTER_OTLP_ENDPOINT_RR:-127.0.0.1:4317}"
 
 http:
   address: 0.0.0.0:8080
