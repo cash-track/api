@@ -64,7 +64,7 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=registry,ref=${{ env.REPO }}:latest
-          cache-to: type=inline
+          cache-to: type=registry,ref=${{ env.REPO }}:latest,mode=max
           build-args: |
             GIT_COMMIT=${{ github.sha }}
             GIT_TAG=${{ github.ref_name }}

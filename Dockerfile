@@ -17,9 +17,13 @@ ENV GIT_COMMIT=${GIT_COMMIT}
 ENV GIT_TAG=${GIT_TAG}
 ENV OTEL_SERVICE_VERSION=${GIT_TAG}
 
-RUN  --mount=type=bind,from=mlocati/php-extension-installer:1.5,source=/usr/bin/install-php-extensions,target=/usr/local/bin/install-php-extensions \
-      install-php-extensions opcache zip xsl dom exif intl pcntl bcmath sockets mbstring pdo_mysql mysqli redis opentelemetry grpc protobuf && \
-     apk del --no-cache  ${PHPIZE_DEPS} ${BUILD_DEPENDS}
+# Install PHP extensions by running a script based on file to cache docker layer
+COPY --from=mlocati/php-extension-installer /usr/bin/install-php-extensions /usr/local/bin/
+RUN chmod +x /usr/local/bin/install-php-extensions
+COPY docker/php-extensions.txt /etc/php-extensions.txt
+COPY docker/install-wrapper.sh /usr/local/bin/install-wrapper.sh
+RUN chmod +x /usr/local/bin/install-wrapper.sh
+RUN /usr/local/bin/install-wrapper.sh /etc/php-extensions.txt
 
 COPY --from=ghcr.io/roadrunner-server/roadrunner:2024.3.4 /usr/bin/rr /usr/bin/rr
 
