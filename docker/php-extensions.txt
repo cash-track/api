@@ -1,0 +1,16 @@
+opcache
+zip
+xsl
+dom
+exif
+intl
+pcntl
+bcmath
+sockets
+mbstring
+pdo_mysql
+mysqli
+redis
+opentelemetry
+grpc
+protobuf
