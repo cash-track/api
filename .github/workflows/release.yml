@@ -2,8 +2,11 @@ name: release
 
 on:
   workflow_dispatch:
-  release:
-    types: [ published ]
+  push:
+    tags:
+      - 'v*'
+    tags-ignore:
+      - 'base/v*'
 
 env:
   REGISTRY: docker.io

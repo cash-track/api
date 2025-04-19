@@ -1,12 +1,9 @@
 name: build-base
 
 on:
-  workflow_dispatch:
-    inputs:
-      baseImageTag:
-        description: 'semver image tag (1.0.0)'
-        type: string
-        required: true
+  push:
+    tags:
+      - 'base/v*'
 
 env:
   REGISTRY: docker.io
@@ -46,6 +43,9 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: ${{ env.REPO }}
+          tags: |
+            type=sha
+            type=semver,pattern={{version}}
 
       # Setup BuildX
       # https://github.com/docker/setup-buildx-action
@@ -64,10 +64,7 @@ jobs:
           context: .
           push: ${{ github.event_name != 'pull_request' }}
           file: ./base.Dockerfile
-          tags: |
-            ${{ env.REPO }}:${{ github.sha }}
-            ${{ env.REPO }}:${{ inputs.baseImageTag }}
-            ${{ env.REPO }}:latest
+          tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=registry,ref=${{ env.REPO }}:latest
           cache-to: type=registry,ref=${{ env.REPO }}:latest,mode=max
