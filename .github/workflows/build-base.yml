@@ -45,7 +45,7 @@ jobs:
           images: ${{ env.REPO }}
           tags: |
             type=sha
-            type=semver,pattern={{version}}
+            type=match,pattern=base/v(.*),group=1
 
       # Setup BuildX
       # https://github.com/docker/setup-buildx-action
