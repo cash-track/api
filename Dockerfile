@@ -9,7 +9,7 @@ RUN npm install -g mjml &&  \
     ./build.sh ./out
 
 
-FROM php:8.4.3-alpine3.21 AS backend
+FROM cashtrack/base-php:1.0.1 AS backend
 
 ARG GIT_COMMIT
 ARG GIT_TAG
@@ -17,30 +17,18 @@ ENV GIT_COMMIT=${GIT_COMMIT}
 ENV GIT_TAG=${GIT_TAG}
 ENV OTEL_SERVICE_VERSION=${GIT_TAG}
 
-# Install PHP extensions by running a script based on file to cache docker layer
-COPY --from=mlocati/php-extension-installer /usr/bin/install-php-extensions /usr/local/bin/
-RUN chmod +x /usr/local/bin/install-php-extensions
-COPY docker/php-extensions.txt /etc/php-extensions.txt
-COPY docker/install-wrapper.sh /usr/local/bin/install-wrapper.sh
-RUN chmod +x /usr/local/bin/install-wrapper.sh
-RUN /usr/local/bin/install-wrapper.sh /etc/php-extensions.txt
-
-COPY --from=ghcr.io/roadrunner-server/roadrunner:2024.3.4 /usr/bin/rr /usr/bin/rr
-
-COPY --from=composer /usr/bin/composer /usr/bin/composer
-
-COPY --from=mjml /templates/out /app/app/views/email
-
 WORKDIR /app
 
-COPY composer.json /app
-COPY composer.lock /app
+COPY --from=mjml --chown=appuser:appgroup /templates/out /app/app/views/email
 
-ENV COMPOSER_ALLOW_SUPERUSER=1
-RUN composer install --ignore-platform-reqs --optimize-autoloader --no-dev --no-scripts
+COPY --chown=appuser:appgroup composer.json /app
+COPY --chown=appuser:appgroup composer.lock /app
 
-COPY . /app
+RUN composer install --ignore-platform-reqs --optimize-autoloader --no-dev --no-scripts --no-interaction --no-progress
+
+COPY --chown=appuser:appgroup . /app
 
 EXPOSE 8080/tcp
 
-ENTRYPOINT [ "rr", "serve", "-c", "/app/.rr.yaml" ]
+ENTRYPOINT ["/usr/bin/rr", "serve", "-c", "/app/.rr.yaml"]
+CMD []

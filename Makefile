@@ -5,6 +5,12 @@ export
 CONTAINER_NAME=cashtrack_api
 CONTAINER_PORT=8080
 
+# Base deploy config
+BASE_REPO=cashtrack/base-php
+BASE_IMAGE_RELEASE=$(BASE_REPO):$(BASE_RELEASE_VERSION)
+BASE_IMAGE_DEV=$(BASE_REPO):dev
+BASE_IMAGE_LATEST=$(BASE_REPO):latest
+
 # Deploy config
 REPO=cashtrack/api
 IMAGE_RELEASE=$(REPO):$(RELEASE_VERSION)
@@ -12,10 +18,21 @@ IMAGE_DEV=$(REPO):dev
 IMAGE_LATEST=$(REPO):latest
 WORKDIR=$(shell pwd)
 
-.PHONY: build tag push start stop network phpcs psalm test-env-start test-env-stop email-build
+.PHONY: build-base tag-base push-base build tag push start stop network phpcs psalm test-env-start test-env-stop email-build
+
+build-base:
+	docker build -f base.Dockerfile -t $(BASE_IMAGE_DEV) .
+
+tag-base:
+	docker tag $(BASE_IMAGE_DEV) $(BASE_IMAGE_RELEASE)
+	docker tag $(BASE_IMAGE_DEV) $(BASE_IMAGE_LATEST)
+
+push-base:
+	docker push $(BASE_IMAGE_RELEASE)
+	docker push $(BASE_IMAGE_LATEST)
 
 build:
-	docker build . -t $(IMAGE_DEV)
+	docker build -t $(IMAGE_DEV) .
 
 tag:
 	docker tag $(IMAGE_DEV) $(IMAGE_RELEASE)
