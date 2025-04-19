@@ -87,7 +87,8 @@ jobs:
 
   tests:
     name: Tests
-    runs-on: [self-hosted, Linux, x64]
+#    runs-on: [self-hosted, Linux, x64]
+    runs-on: ubuntu-latest
     container: shivammathur/node:latest
     permissions:
       contents: read
