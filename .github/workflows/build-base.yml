@@ -63,6 +63,7 @@ jobs:
         with:
           context: .
           push: ${{ github.event_name != 'pull_request' }}
+          file: ./base.Dockerfile
           tags: |
             ${{ env.REPO }}:${{ github.sha }}
             ${{ env.REPO }}:${{ inputs.baseImageTag }}
