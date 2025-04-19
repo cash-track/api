@@ -5,8 +5,6 @@ on:
   push:
     tags:
       - 'v*'
-    tags-ignore:
-      - 'base/v*'
 
 env:
   REGISTRY: docker.io
