@@ -9,7 +9,7 @@ RUN npm install -g mjml &&  \
     ./build.sh ./out
 
 
-FROM cashtrack/base-php:1.0.3 AS backend
+FROM cashtrack/base-php:1.0.5 AS backend
 
 ARG GIT_COMMIT
 ARG GIT_TAG
