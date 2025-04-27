@@ -16,8 +16,6 @@ ARG GIT_TAG
 ENV GIT_COMMIT=${GIT_COMMIT}
 ENV GIT_TAG=${GIT_TAG}
 ENV OTEL_SERVICE_VERSION=${GIT_TAG}
-ENV OTEL_RESOURCE_ATTRIBUTES="service.instance.id=${OTEL_SERVICE_INSTANCE_ID},\
-service.version=${OTEL_SERVICE_VERSION}"
 
 WORKDIR /app
 
@@ -32,5 +30,5 @@ COPY --chown=appuser:appgroup . /app
 
 EXPOSE 8080/tcp
 
-ENTRYPOINT ["/usr/bin/rr", "serve", "-c", "/app/.rr.yaml"]
+ENTRYPOINT ["/app/docker-entrypoint.sh"]
 CMD []

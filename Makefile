@@ -32,7 +32,7 @@ push-base:
 	docker push $(BASE_IMAGE_LATEST)
 
 build:
-	docker build -t $(IMAGE_DEV) .
+	docker build -t $(IMAGE_DEV) . # --platform=linux/amd64
 
 tag:
 	docker tag $(IMAGE_DEV) $(IMAGE_RELEASE)
