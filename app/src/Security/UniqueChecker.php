@@ -44,7 +44,12 @@ final class UniqueChecker extends AbstractChecker
             $select->where($field, '!=', $value);
         }
 
-        return $select->fetchOne() === null;
+        try {
+            return $select->fetchOne() === null;
+        } catch (\Throwable) {
+            // If an error occurs, most likely related to found user, we assume the value is not unique.
+            return false;
+        }
     }
 
     private function withValues(array $fields): array
