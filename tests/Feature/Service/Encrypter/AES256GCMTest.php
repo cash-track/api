@@ -36,4 +36,22 @@ class AES256GCMTest extends TestCase
 
         $this->assertEquals($message, $encrypter->decrypt($encrypted, $key . Fixtures::string(1)));
     }
+
+    public function testEncryptDecryptEmptyString(): void
+    {
+        $key = Fixtures::string();
+        $message = '';
+
+        $encrypter = new AES256GCM();
+        $encrypted = $encrypter->encrypt($message, $key);
+
+        $this->assertEquals($message, $encrypter->decrypt($encrypted, $key));
+    }
+
+    public function testDecryptEmptyString(): void
+    {
+        $encrypter = new AES256GCM();
+
+        $this->assertEquals('', $encrypter->decrypt('', Fixtures::string()));
+    }
 }

@@ -16,6 +16,8 @@ class JsonTypecastTest extends TestCase
         $typecast->setRules(['options' => 'json']);
 
         $this->assertEquals([], $typecast->cast([]));
+        $this->assertEquals(['options' => []], $typecast->cast(['options' => '']));
+        $this->assertEquals(['options' => []], $typecast->cast(['options' => '[]']));
         $this->assertEquals(['options' => 1], $typecast->cast(['options' => 1]));
     }
 

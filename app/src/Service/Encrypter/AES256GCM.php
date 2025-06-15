@@ -34,6 +34,10 @@ final class AES256GCM implements CipherInterface
     #[\Override]
     public function decrypt(string $payload, string $key): string
     {
+        if ($payload === '') {
+            return '';
+        }
+
         $packet = base64_decode($payload);
         $ivLength = (int) openssl_cipher_iv_length(static::ALGO);
         $iv = substr($packet, 0, $ivLength);

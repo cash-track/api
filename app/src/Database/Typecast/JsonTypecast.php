@@ -46,6 +46,11 @@ final class JsonTypecast implements CastableInterface, UncastableInterface
                 continue;
             }
 
+            if ($data[$column] === '') {
+                $data[$column] = [];
+                continue;
+            }
+
             try {
                 $data[$column] = json_decode($data[$column], true, 512, JSON_THROW_ON_ERROR);
             } catch (\JsonException $exception) {

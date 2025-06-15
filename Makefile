@@ -3,7 +3,7 @@ export
 
 # Local config
 CONTAINER_NAME=cashtrack_api
-CONTAINER_PORT=8080
+CONTAINER_PORT=8081
 
 # Base deploy config
 BASE_REPO=cashtrack/base-php
@@ -51,6 +51,21 @@ start:
       -v $(WORKDIR):/app \
       --net cash-track-local \
       $(IMAGE_DEV) \
+      -o "http.pool.debug=true" \
+      -o "logs.mode=development" \
+      -o "logs.encoding=console" \
+      -o "logs.level=debug"
+
+start-prod:
+	docker run \
+      --rm \
+      --name $(CONTAINER_NAME) \
+      --platform=linux/amd64 \
+      -p $(CONTAINER_PORT):8080 \
+      --env-file .env \
+      -v $(WORKDIR)/runtime/prod:/app/runtime \
+      --net cash-track-local \
+      cashtrack/api:1.9.6 \
       -o "http.pool.debug=true" \
       -o "logs.mode=development" \
       -o "logs.encoding=console" \
