@@ -42,7 +42,7 @@ final class JsonTypecast implements CastableInterface, UncastableInterface
     public function cast(array $data): array
     {
         foreach ($this->rules as $column => $rule) {
-            if (! isset($data[$column]) || !is_string($data[$column])) {
+            if (! isset($data[$column]) || !is_string($data[$column]) || $data[$column] === '') {
                 continue;
             }
 
