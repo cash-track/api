@@ -138,7 +138,7 @@ class TotalControllerTest extends TestCase implements DatabaseTransaction
                 [
                     'date-from' => '00-13-2022',
                     'date-to' => '40-00-2022',
-                ]
+                ],
             ],
             [
                 [
@@ -149,7 +149,7 @@ class TotalControllerTest extends TestCase implements DatabaseTransaction
                 [
                     'date-from' => '01-06-2022',
                     'date-to' => '04-06-2022',
-                ]
+                ],
             ],
             [
                 [
@@ -160,7 +160,7 @@ class TotalControllerTest extends TestCase implements DatabaseTransaction
                 [
                     'date-from' => '02-06-2022',
                     'date-to' => '03-06-2022',
-                ]
+                ],
             ],
             [
                 [
@@ -170,7 +170,7 @@ class TotalControllerTest extends TestCase implements DatabaseTransaction
                 ],
                 [
                     'date-from' => '02-06-2022',
-                ]
+                ],
             ],
             [
                 [
@@ -180,7 +180,7 @@ class TotalControllerTest extends TestCase implements DatabaseTransaction
                 ],
                 [
                     'date-to' => '03-06-2022',
-                ]
+                ],
             ],
         ];
     }
@@ -338,7 +338,7 @@ class TotalControllerTest extends TestCase implements DatabaseTransaction
                 [
                     'date-from' => '00-13-2022',
                     'date-to' => '40-00-2022',
-                ]
+                ],
             ],
             [
                 [
@@ -349,7 +349,7 @@ class TotalControllerTest extends TestCase implements DatabaseTransaction
                 [
                     'date-from' => '01-06-2022',
                     'date-to' => '04-06-2022',
-                ]
+                ],
             ],
             [
                 [
@@ -360,7 +360,7 @@ class TotalControllerTest extends TestCase implements DatabaseTransaction
                 [
                     'date-from' => '02-06-2022',
                     'date-to' => '03-06-2022',
-                ]
+                ],
             ],
             [
                 [
@@ -370,7 +370,7 @@ class TotalControllerTest extends TestCase implements DatabaseTransaction
                 ],
                 [
                     'date-from' => '02-06-2022',
-                ]
+                ],
             ],
             [
                 [
@@ -380,7 +380,7 @@ class TotalControllerTest extends TestCase implements DatabaseTransaction
                 ],
                 [
                     'date-to' => '03-06-2022',
-                ]
+                ],
             ],
         ];
     }
@@ -414,7 +414,7 @@ class TotalControllerTest extends TestCase implements DatabaseTransaction
         }
 
         $this->chargeFactory->forUser($user)->forWallet($wallet)->withTags([
-            $this->tagFactory->forUser($user)->create()
+            $this->tagFactory->forUser($user)->create(),
         ])->createMany(4);
 
         $query['tags'] = (string) $tag->id;
@@ -428,5 +428,47 @@ class TotalControllerTest extends TestCase implements DatabaseTransaction
         $this->assertArrayContains($tag->id, $body, 'data.tags.0.tagId');
         $this->assertArrayContains($total['income'], $body, 'data.tags.0.totalIncomeAmount');
         $this->assertArrayContains($total['expense'], $body, 'data.tags.0.totalExpenseAmount');
+    }
+
+    public function testTotalOutOfSyncFixesWalletsTotal(): void
+    {
+        $auth = $this->makeAuth($user = $this->userFactory->create());
+
+        $wallet = $this->walletFactory->forUser($user)->create();
+
+        $this->chargeFactory->forUser($user)->forWallet($wallet);
+
+        $chargesAmount = rand(5, 20);
+        $totalIncome = 0.0;
+        $totalExpense = 0.0;
+
+        for ($i = 0; $i < $chargesAmount; $i++) {
+            $charge = $this->chargeFactory->create();
+
+            if ($charge->type === Charge::TYPE_INCOME) {
+                $totalIncome += $charge->amount;
+            } else {
+                $totalExpense += $charge->amount;
+            }
+        }
+
+        $correctTotal = $total = round($totalIncome - $totalExpense, 2);
+        $wallet->totalAmount = $correctTotal - 10;
+        $this->walletFactory->persist($wallet);
+
+        $response = $this->withAuth($auth)->get("/wallets/{$wallet->id}/total");
+
+        $response->assertOk();
+
+        $body = $this->getJsonResponseBody($response);
+
+        $this->assertArrayContains($total, $body, 'data.totalAmount');
+        $this->assertArrayContains($totalIncome, $body, 'data.totalIncomeAmount');
+        $this->assertArrayContains($totalExpense, $body, 'data.totalExpenseAmount');
+
+        $this->assertDatabaseHas('wallets', [
+            'id' => $wallet->id,
+            'total_amount' => $correctTotal,
+        ]);
     }
 }

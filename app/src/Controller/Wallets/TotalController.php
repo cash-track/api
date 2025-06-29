@@ -47,6 +47,8 @@ final class TotalController extends Controller
             'totalExpenseAmount' => $expense,
         ];
 
+        $this->totalSafeCheckByInput($wallet, $input, $income, $expense);
+
         $tagIDs = $this->fetchFilteredTagIDs($input);
 
         if (count($tagIDs) > 0) {
@@ -77,5 +79,14 @@ final class TotalController extends Controller
         }
 
         return $data;
+    }
+
+    private function totalSafeCheckByInput(Wallet $wallet, InputManager $input, float $income, float $expense): void
+    {
+        if ($input->query->has('date-from') || $input->query->has('date-to') || $input->query->has('tags')) {
+            return;
+        }
+
+        $this->chargeWalletService->totalSafeCheck($wallet, $income, $expense);
     }
 }
