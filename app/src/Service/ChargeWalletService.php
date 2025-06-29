@@ -103,6 +103,20 @@ class ChargeWalletService
         return $wallet;
     }
 
+    public function totalSafeCheck(Wallet $wallet, float $income, float $expense): void
+    {
+        $total = $this->totalByIncomeAndExpense($income, $expense);
+
+        if ($wallet->totalAmount === $total) {
+            return;
+        }
+
+        $wallet->totalAmount = $total;
+
+        $this->tr->persist($wallet);
+        $this->tr->run();
+    }
+
     public static function safeFloatNumber(float $number): float
     {
         return round($number, self::PRECISION);
