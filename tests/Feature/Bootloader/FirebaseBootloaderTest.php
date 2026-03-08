@@ -23,7 +23,7 @@ class FirebaseBootloaderTest extends TestCase
         $class->getProperty('config')->setValue($config, [
             'databaseUri'             => Fixtures::url(),
             'storageBucket'           => Fixtures::string(),
-            'projectId'               => Fixtures::string(),
+            'projectId'               => 'test-project-' . Fixtures::integer(1000, 9999),
             'privateKeyId'            => Fixtures::string(),
             'privateKey'              => Fixtures::string(),
             'clientEmail'             => Fixtures::email(),
