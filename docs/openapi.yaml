@@ -1,0 +1,3127 @@
+openapi: 3.1.0
+
+info:
+  title: Cash-Track API
+  version: 1.0.0
+  license:
+    name: Proprietary
+    url: https://cash-track.app
+  description: |
+    Cash-Track is a personal finance management SaaS. This API powers the mobile and web clients.
+
+    ## Authentication
+    Most endpoints require a **JWT Bearer token** obtained via `/auth/login`, `/auth/register`,
+    or one of the social/passkey login flows.
+
+    Tokens come in pairs:
+    - **Access token** — short-lived (~1 hour). Send in `Authorization: Bearer <token>`.
+    - **Refresh token** — long-lived (~7 days). Use `POST /auth/refresh` to get a new pair.
+
+    ## Email Confirmation
+    After registration the user receives a confirmation email. Creating wallets, charges, and tags
+    requires a confirmed email address. Use the `/auth/email/confirmation` group to check status
+    or resend the link.
+
+    ## Error Responses
+    Standard errors return an `Error` object. Validation failures return a `ValidationError`
+    object with per-field messages (HTTP 422).
+
+    ## Timestamps
+    All timestamps in responses are **RFC 3339 / W3C** strings (e.g. `2024-01-15T10:30:00+00:00`).
+
+servers:
+  - url: https://api.cash-track.app
+    description: Production
+  - url: https://api.dev-cash-track.app
+    description: Local development
+
+tags:
+  - name: Auth
+    description: Registration, login, token management
+  - name: Email Confirmation
+    description: Email address verification flow
+  - name: Password
+    description: Forgot-password and reset flow
+  - name: Profile
+    description: Authenticated user profile
+  - name: Passkeys
+    description: WebAuthn passkey management
+  - name: Wallets
+    description: Wallet CRUD and lifecycle management
+  - name: Wallet Users
+    description: Shared wallet membership
+  - name: Wallet Tags
+    description: Tags scoped to a wallet
+  - name: Wallet Totals
+    description: Wallet income/expense statistics
+  - name: Charges
+    description: Financial transactions inside a wallet
+  - name: Charge Graphs
+    description: Time-series graphs for charges
+  - name: Limits
+    description: Budget limits per wallet and tag
+  - name: Tags
+    description: User-level tags for categorising charges
+  - name: Tag Charges
+    description: Charges filtered by a tag
+  - name: Currencies
+    description: Supported currencies
+  - name: Users
+    description: User lookup utilities
+  - name: Health
+    description: Service availability
+
+# ---------------------------------------------------------------------------
+# PATHS
+# ---------------------------------------------------------------------------
+paths:
+
+  # =========================================================================
+  # HEALTH
+  # =========================================================================
+  /healthcheck:
+    get:
+      operationId: healthcheck
+      summary: Health check
+      description: Returns HTTP 200 when the service is up. No authentication required.
+      tags: [Health]
+      security: []
+      responses:
+        "200":
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+        "503":
+          description: Service unavailable
+
+  # =========================================================================
+  # AUTH
+  # =========================================================================
+  /auth/register:
+    post:
+      operationId: authRegister
+      summary: Register a new account
+      description: |
+        Creates a new user account and immediately issues an access + refresh token pair.
+        A confirmation email is sent asynchronously; the account can be used right away
+        but some operations (wallets, charges, tags) require email confirmation first.
+      tags: [Auth]
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterRequest"
+            example:
+              name: Jane
+              lastName: Doe
+              nickName: jane_doe
+              email: jane@example.com
+              password: secret123
+              passwordConfirmation: secret123
+              locale: en
+      responses:
+        "200":
+          description: Account created — tokens issued
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+
+  /auth/register/check/nick-name:
+    post:
+      operationId: authCheckNickNameRegister
+      summary: Check nick-name availability (registration)
+      description: |
+        Validates that the supplied nick-name is not already taken. Call this during
+        registration form validation before submitting the full registration request.
+      tags: [Auth]
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [nickName]
+              properties:
+                nickName:
+                  type: string
+                  minLength: 3
+                  description: Nick-name to check
+      responses:
+        "200":
+          description: Nick-name is available
+        "422":
+          $ref: "#/components/responses/ValidationError"
+
+  /auth/login:
+    post:
+      operationId: authLogin
+      summary: Login with email and password
+      description: |
+        Authenticates with email/password credentials and returns a token pair.
+        Returns `400` with a descriptive message when credentials are wrong.
+      tags: [Auth]
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+      responses:
+        "200":
+          description: Authenticated — tokens issued
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+
+  /auth/refresh:
+    post:
+      operationId: authRefresh
+      summary: Refresh access token
+      description: |
+        Issues a new access + refresh token pair. The old refresh token is invalidated.
+        The `accessToken` body field is optional — when omitted the server reads the
+        current token from the `Authorization` header.
+      tags: [Auth]
+      security: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                accessToken:
+                  type: string
+                  description: Current (possibly expired) access token. Optional.
+      responses:
+        "200":
+          description: New token pair issued
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /auth/logout:
+    post:
+      operationId: authLogout
+      summary: Logout / invalidate refresh token
+      description: |
+        Revokes the refresh token so it cannot be used to mint new access tokens.
+        Pass the refresh token in the body to invalidate a specific session; omit
+        it to invalidate the session derived from the current access token.
+      tags: [Auth]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                refreshToken:
+                  type: string
+                  description: Refresh token to revoke. Omit to revoke the current session.
+      responses:
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "200":
+          description: Logged out successfully
+
+  /auth/login/passkey/init:
+    get:
+      operationId: authPasskeyLoginInit
+      summary: Initialise WebAuthn login challenge
+      description: |
+        Returns the WebAuthn `PublicKeyCredentialRequestOptions` challenge that the
+        client must pass to `navigator.credentials.get()`. Call this before
+        `POST /auth/login/passkey`.
+      tags: [Auth]
+      security: []
+      responses:
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "200":
+          description: WebAuthn challenge options
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Raw `PublicKeyCredentialRequestOptions` JSON
+
+  /auth/login/passkey:
+    post:
+      operationId: authPasskeyLogin
+      summary: Complete WebAuthn passkey login
+      description: |
+        Verifies the WebAuthn assertion response produced by the authenticator and,
+        on success, issues a token pair.
+      tags: [Auth]
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PasskeyLoginRequest"
+      responses:
+        "200":
+          description: Authenticated via passkey — tokens issued
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+
+  /auth/provider/google:
+    post:
+      operationId: authGoogle
+      summary: Login or register via Google OAuth
+      description: |
+        Accepts a Google ID token (obtained client-side via Google Sign-In SDK).
+        The server verifies it with the Firebase Admin SDK and either creates a new
+        account or links the Google identity to an existing account, then issues a
+        token pair.
+      tags: [Auth]
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [token]
+              properties:
+                token:
+                  type: string
+                  description: Google ID token from the client SDK
+      responses:
+        "200":
+          description: Authenticated via Google — tokens issued
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+
+  # =========================================================================
+  # EMAIL CONFIRMATION
+  # =========================================================================
+  /auth/email/confirmation:
+    get:
+      operationId: emailConfirmationStatus
+      summary: Get email confirmation status
+      description: Returns the current state of the email confirmation for the authenticated user.
+      tags: [Email Confirmation]
+      security:
+        - bearerAuth: []
+      responses:
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "200":
+          description: Email confirmation status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EmailConfirmation"
+
+  /auth/email/confirmation/confirm/{token}:
+    get:
+      operationId: emailConfirmationConfirm
+      summary: Confirm email with token
+      description: |
+        Marks the user's email as confirmed. The `token` is included in the confirmation
+        email sent to the user. Typically opened in a browser via the email link.
+      tags: [Email Confirmation]
+      security: []
+      parameters:
+        - name: token
+          in: path
+          required: true
+          description: Confirmation token from the email link
+          schema:
+            type: string
+      responses:
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "200":
+          description: Email confirmed successfully
+        "400":
+          $ref: "#/components/responses/BadRequest"
+
+  /auth/email/confirmation/resend:
+    post:
+      operationId: emailConfirmationResend
+      summary: Resend confirmation email
+      description: |
+        Sends a new confirmation email. Rate-limited — check `isThrottled` and `timeSentAgo`
+        in the confirmation status before calling.
+      tags: [Email Confirmation]
+      security:
+        - bearerAuth: []
+      responses:
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "200":
+          description: Confirmation email sent
+        "400":
+          $ref: "#/components/responses/BadRequest"
+
+  # =========================================================================
+  # PASSWORD
+  # =========================================================================
+  /auth/password/forgot:
+    post:
+      operationId: passwordForgotCreate
+      summary: Request a password reset
+      description: |
+        Sends a password reset code to the provided email address if an account exists.
+        Always returns 200 to avoid user enumeration.
+      tags: [Password]
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email]
+              properties:
+                email:
+                  type: string
+                  format: email
+      responses:
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "200":
+          description: Reset email sent (if account exists)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+
+  /auth/password/reset:
+    post:
+      operationId: passwordReset
+      summary: Reset password with code
+      description: |
+        Completes the password reset flow. The `code` is included in the reset email.
+        On success the old password is replaced; existing sessions remain valid until
+        their access tokens expire.
+      tags: [Password]
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PasswordResetRequest"
+      responses:
+        "200":
+          description: Password changed successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+
+  # =========================================================================
+  # PROFILE
+  # =========================================================================
+  /profile:
+    get:
+      operationId: profileGet
+      summary: Get current user profile
+      description: Returns the full profile of the authenticated user.
+      tags: [Profile]
+      security:
+        - bearerAuth: []
+      responses:
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "200":
+          description: User profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+
+    put:
+      operationId: profileUpdate
+      summary: Update profile
+      description: |
+        Updates the user's basic profile fields. All fields are required.
+        Nick-name uniqueness is validated — use `POST /profile/check/nick-name`
+        to pre-validate during form entry.
+      tags: [Profile]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateProfileRequest"
+      responses:
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "200":
+          description: Updated user profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+
+  /profile/check/nick-name:
+    post:
+      operationId: profileCheckNickName
+      summary: Check nick-name availability (profile update)
+      description: Validates nick-name uniqueness excluding the current user's own nick-name.
+      tags: [Profile]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [nickName]
+              properties:
+                nickName:
+                  type: string
+                  minLength: 3
+      responses:
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "200":
+          description: Nick-name is available
+        "422":
+          $ref: "#/components/responses/ValidationError"
+
+  /profile/locale:
+    put:
+      operationId: profileUpdateLocale
+      summary: Update user locale
+      description: Updates only the locale preference without requiring other profile fields.
+      tags: [Profile]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [locale]
+              properties:
+                locale:
+                  type: string
+                  description: BCP 47 locale code (e.g. `en`, `uk`)
+                  example: en
+      responses:
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "200":
+          description: Locale updated
+
+  /profile/social:
+    get:
+      operationId: profileSocialAccounts
+      summary: List connected social accounts
+      description: Returns which social providers are connected to the current account.
+      tags: [Profile]
+      security:
+        - bearerAuth: []
+      responses:
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "200":
+          description: Social account connections
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      google:
+                        type: boolean
+                        description: Whether a Google account is linked
+
+  /profile/password:
+    put:
+      operationId: profileUpdatePassword
+      summary: Change password
+      description: |
+        Changes the authenticated user's password. The current password must be provided
+        for verification. Existing sessions are not invalidated.
+      tags: [Profile]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdatePasswordRequest"
+      responses:
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "200":
+          description: Password changed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+
+  /profile/photo:
+    put:
+      operationId: profileUpdatePhoto
+      summary: Upload profile photo
+      description: |
+        Replaces the user's profile photo. Accepts a JPEG/PNG/WebP image.
+        Constraints: max 5 MB, dimensions between 50×50 and 5000×5000 px.
+        The response includes the public CDN URL of the stored photo.
+      tags: [Profile]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [photo]
+              properties:
+                photo:
+                  type: string
+                  format: binary
+                  description: Image file (JPEG / PNG / WebP, max 5 MB, 50–5000 px)
+      responses:
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "200":
+          description: Photo uploaded
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  fileName:
+                    type: [string, "null"]
+                  url:
+                    type: string
+                    format: uri
+        "422":
+          $ref: "#/components/responses/ValidationError"
+
+  /profile/statistics/charges-flow:
+    get:
+      operationId: profileChargesFlow
+      summary: Charges income/expense flow
+      description: |
+        Returns the total income and expense amounts across all of the user's wallets,
+        expressed in the user's default currency.
+      tags: [Profile]
+      security:
+        - bearerAuth: []
+      responses:
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "200":
+          description: Charges flow statistics
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      income:
+                        type: number
+                        format: float
+                      expense:
+                        type: number
+                        format: float
+                      currency:
+                        $ref: "#/components/schemas/Currency"
+
+  /profile/statistics/counters:
+    get:
+      operationId: profileCounters
+      summary: Profile counters
+      description: Returns aggregate counters such as total wallets, charges, and tags.
+      tags: [Profile]
+      security:
+        - bearerAuth: []
+      responses:
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "200":
+          description: Profile counters
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+                    description: Map of counter names to integer values
+
+  /profile/wallets/latest:
+    get:
+      operationId: profileWalletsLatest
+      summary: Latest wallets with recent charges
+      description: |
+        Returns the user's most recently active wallets each pre-loaded with their
+        latest charges. Useful for dashboard widgets.
+      tags: [Profile]
+      security:
+        - bearerAuth: []
+      responses:
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "200":
+          description: Latest wallets
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Wallet"
+
+  # =========================================================================
+  # PASSKEYS (profile)
+  # =========================================================================
+  /profile/passkey:
+    get:
+      operationId: passkeyList
+      summary: List registered passkeys
+      description: Returns all WebAuthn passkeys registered for the authenticated user.
+      tags: [Passkeys]
+      security:
+        - bearerAuth: []
+      responses:
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "200":
+          description: List of passkeys
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Passkey"
+
+    post:
+      operationId: passkeyStore
+      summary: Register a new passkey
+      description: |
+        Completes the passkey registration flow. Call `POST /profile/passkey/init` first
+        to get the creation options, pass them to `navigator.credentials.create()`, then
+        submit the result here.
+      tags: [Passkeys]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StorePasskeyRequest"
+      responses:
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "200":
+          description: Passkey registered
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Passkey"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+
+  /profile/passkey/init:
+    post:
+      operationId: passkeyInitRegistration
+      summary: Initialise passkey registration
+      description: |
+        Returns `PublicKeyCredentialCreationOptions` that must be passed to
+        `navigator.credentials.create()`. The `name` field labels the passkey
+        in the management UI.
+      tags: [Passkeys]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name]
+              properties:
+                name:
+                  type: string
+                  minLength: 3
+                  description: Human-readable label for this passkey (e.g. "iPhone 15")
+      responses:
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "200":
+          description: WebAuthn creation options
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Raw `PublicKeyCredentialCreationOptions` JSON
+
+  /profile/passkey/{id}:
+    delete:
+      operationId: passkeyDelete
+      summary: Delete a passkey
+      description: Permanently removes a registered passkey. The user loses the ability to log in via that authenticator.
+      tags: [Passkeys]
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/PasskeyIdParam"
+      responses:
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "200":
+          description: Passkey deleted
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  # =========================================================================
+  # WALLETS
+  # =========================================================================
+  /wallets:
+    get:
+      operationId: walletList
+      summary: List all wallets
+      description: Returns every wallet the authenticated user has access to, including shared wallets.
+      tags: [Wallets]
+      security:
+        - bearerAuth: []
+      responses:
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "200":
+          description: All wallets
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Wallet"
+
+    post:
+      operationId: walletCreate
+      summary: Create a wallet
+      description: |
+        Creates a new wallet owned by the authenticated user. Requires a confirmed email.
+        The `slug` is auto-generated from the name if omitted.
+      tags: [Wallets]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateWalletRequest"
+      responses:
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "200":
+          description: Created wallet
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Wallet"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+
+  /wallets/unarchived:
+    get:
+      operationId: walletListUnarchived
+      summary: List unarchived wallets
+      description: Returns active (non-archived) wallets with their user-defined sort order applied.
+      tags: [Wallets]
+      security:
+        - bearerAuth: []
+      responses:
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "200":
+          description: Unarchived wallets
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Wallet"
+
+  /wallets/unarchived/sort:
+    post:
+      operationId: walletSortUnarchived
+      summary: Set wallet sort order
+      description: |
+        Persists the display order of unarchived wallets for the current user.
+        Send the full ordered array of wallet IDs.
+      tags: [Wallets]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [ids]
+              properties:
+                ids:
+                  type: array
+                  items:
+                    type: integer
+                  description: Wallet IDs in the desired display order
+      responses:
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "200":
+          description: Sort order saved
+
+  /wallets/archived:
+    get:
+      operationId: walletListArchived
+      summary: List archived wallets
+      description: Returns wallets that have been archived by the user.
+      tags: [Wallets]
+      security:
+        - bearerAuth: []
+      responses:
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "200":
+          description: Archived wallets
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/WalletShort"
+
+  /wallets/has-limits:
+    get:
+      operationId: walletListHasLimits
+      summary: List wallets that have budget limits
+      description: Returns wallets for which at least one limit has been configured.
+      tags: [Wallets]
+      security:
+        - bearerAuth: []
+      responses:
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "200":
+          description: Wallets with limits
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/WalletShort"
+
+  /wallets/{id}:
+    parameters:
+      - $ref: "#/components/parameters/WalletIdParam"
+
+    get:
+      operationId: walletGet
+      summary: Get wallet details
+      description: Returns full wallet details including members and the most recent charges.
+      tags: [Wallets]
+      security:
+        - bearerAuth: []
+      responses:
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "200":
+          description: Wallet details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Wallet"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+    put:
+      operationId: walletUpdate
+      summary: Update wallet
+      description: Replaces mutable wallet fields. All listed fields are required.
+      tags: [Wallets]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateWalletRequest"
+      responses:
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "200":
+          description: Updated wallet
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Wallet"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+
+    delete:
+      operationId: walletDelete
+      summary: Delete wallet
+      description: |
+        Permanently deletes the wallet and all its charges. This action is irreversible.
+        Only the wallet owner may delete it.
+      tags: [Wallets]
+      security:
+        - bearerAuth: []
+      responses:
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "200":
+          description: Wallet deleted
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /wallets/{id}/activate:
+    post:
+      operationId: walletActivate
+      summary: Activate wallet
+      description: Sets `isActive = true`. Inactive wallets are hidden in most list views.
+      tags: [Wallets]
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/WalletIdParam"
+      responses:
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "200":
+          description: Wallet activated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Wallet"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /wallets/{id}/disable:
+    post:
+      operationId: walletDisable
+      summary: Disable wallet
+      description: Sets `isActive = false`. The wallet remains accessible but hidden in default views.
+      tags: [Wallets]
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/WalletIdParam"
+      responses:
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "200":
+          description: Wallet disabled
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Wallet"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /wallets/{id}/archive:
+    post:
+      operationId: walletArchive
+      summary: Archive wallet
+      description: |
+        Marks the wallet as archived. Archived wallets are excluded from normal listings
+        but retain all their charges and can be unarchived at any time.
+      tags: [Wallets]
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/WalletIdParam"
+      responses:
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "200":
+          description: Wallet archived
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Wallet"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /wallets/{id}/un-archive:
+    post:
+      operationId: walletUnarchive
+      summary: Unarchive wallet
+      description: Restores a previously archived wallet to the active wallet list.
+      tags: [Wallets]
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/WalletIdParam"
+      responses:
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "200":
+          description: Wallet unarchived
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Wallet"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  # =========================================================================
+  # WALLET USERS (sharing)
+  # =========================================================================
+  /wallets/{id}/users:
+    get:
+      operationId: walletUsersList
+      summary: List wallet members
+      description: Returns all users who have access to the wallet (owner + invited members).
+      tags: [Wallet Users]
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/WalletIdParam"
+      responses:
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "200":
+          description: Wallet members
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/UserShort"
+
+  /wallets/{id}/users/{userId}:
+    parameters:
+      - $ref: "#/components/parameters/WalletIdParam"
+      - $ref: "#/components/parameters/UserIdParam"
+
+    patch:
+      operationId: walletUserAdd
+      summary: Add user to wallet
+      description: |
+        Grants another user access to the wallet. The user is found by email or nick-name.
+        Use `GET /users/find/by-email/{query}` to look up users before adding.
+      tags: [Wallet Users]
+      security:
+        - bearerAuth: []
+      responses:
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "200":
+          description: User added to wallet
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+    delete:
+      operationId: walletUserRemove
+      summary: Remove user from wallet
+      description: Revokes a member's access to the wallet. The owner cannot remove themselves.
+      tags: [Wallet Users]
+      security:
+        - bearerAuth: []
+      responses:
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "200":
+          description: User removed from wallet
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  # =========================================================================
+  # WALLET TAGS
+  # =========================================================================
+  /wallets/{id}/tags:
+    get:
+      operationId: walletTagsList
+      summary: List tags used in wallet
+      description: Returns all tags that appear on charges in this wallet.
+      tags: [Wallet Tags]
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/WalletIdParam"
+      responses:
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "200":
+          description: Tags used in wallet
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Tag"
+
+  /wallets/{walletId}/tags/find/{query}:
+    get:
+      operationId: walletTagsFind
+      summary: Search tags within a wallet
+      description: Full-text search over tag names scoped to a wallet. Useful for autocomplete.
+      tags: [Wallet Tags]
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/WalletIdQueryParam"
+        - name: query
+          in: path
+          required: true
+          description: Search string (min 1 character)
+          schema:
+            type: string
+      responses:
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "200":
+          description: Matching tags
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Tag"
+
+  # =========================================================================
+  # WALLET TOTALS
+  # =========================================================================
+  /wallets/{id}/total:
+    get:
+      operationId: walletTotal
+      summary: Get wallet income/expense totals
+      description: |
+        Returns the overall income, expense, and net total for the wallet,
+        plus per-tag breakdowns. All amounts are in the wallet's default currency.
+      tags: [Wallet Totals]
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/WalletIdParam"
+      responses:
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "200":
+          description: Wallet totals
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/WalletTotal"
+
+  # =========================================================================
+  # CHARGES
+  # =========================================================================
+  /wallets/{walletId}/charges:
+    parameters:
+      - $ref: "#/components/parameters/WalletIdQueryParam"
+
+    get:
+      operationId: chargeList
+      summary: List wallet charges
+      description: |
+        Returns a paginated list of charges for the wallet, ordered newest first.
+        Use `page` and `limit` for pagination.
+      tags: [Charges]
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/PageParam"
+        - $ref: "#/components/parameters/LimitParam"
+      responses:
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "200":
+          description: Paginated charges
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChargePaginatedResponse"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+    post:
+      operationId: chargeCreate
+      summary: Create a charge
+      description: |
+        Records a new financial transaction. Requires a confirmed email.
+        `type` is `+` for income and `-` for expense.
+        `dateTime` defaults to the current server time when omitted and must be in the past.
+      tags: [Charges]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateChargeRequest"
+            examples:
+              expense:
+                summary: Expense charge
+                value:
+                  type: "-"
+                  amount: 42.50
+                  title: Lunch
+                  description: Sushi with the team
+                  tags: [1, 3]
+                  dateTime: "2024-06-01 13:00:00"
+              income:
+                summary: Income charge
+                value:
+                  type: "+"
+                  amount: 3000.00
+                  title: Salary
+      responses:
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "200":
+          description: Created charge
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Charge"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+
+  /wallets/{walletId}/charges/{chargeId}:
+    parameters:
+      - $ref: "#/components/parameters/WalletIdQueryParam"
+      - $ref: "#/components/parameters/ChargeIdParam"
+
+    put:
+      operationId: chargeUpdate
+      summary: Update a charge
+      description: Replaces all mutable fields of a charge. All listed fields are required.
+      tags: [Charges]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateChargeRequest"
+      responses:
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "200":
+          description: Updated charge
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Charge"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+
+    delete:
+      operationId: chargeDelete
+      summary: Delete a charge
+      description: Permanently removes a charge. The wallet total is recalculated.
+      tags: [Charges]
+      security:
+        - bearerAuth: []
+      responses:
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "200":
+          description: Charge deleted
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /wallets/{walletId}/charges/move/{targetWalletId}:
+    post:
+      operationId: chargeMove
+      summary: Move charges to another wallet
+      description: |
+        Moves one or more charges from this wallet to a target wallet.
+        The caller must have access to both wallets.
+      tags: [Charges]
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/WalletIdQueryParam"
+        - name: targetWalletId
+          in: path
+          required: true
+          description: Destination wallet ID
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [chargeIds]
+              properties:
+                chargeIds:
+                  type: array
+                  minItems: 1
+                  items:
+                    type: string
+                    format: uuid
+                  description: IDs of charges to move
+      responses:
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "200":
+          description: Charges moved
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+
+  /charges/title/suggestions/{query}:
+    get:
+      operationId: chargeTitleSuggestions
+      summary: Charge title autocomplete
+      description: |
+        Returns the most frequently used charge titles matching `query` for the current user.
+        Useful for autocomplete when creating a new charge.
+      tags: [Charges]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: query
+          in: path
+          required: true
+          description: Partial title to search for
+          schema:
+            type: string
+            minLength: 1
+      responses:
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "200":
+          description: Matching charge titles with usage counts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ChargeTitleSuggestion"
+
+  # =========================================================================
+  # CHARGE GRAPHS
+  # =========================================================================
+  /wallets/{walletId}/charges/graph/amount:
+    get:
+      operationId: chargeGraphAmount
+      summary: Amount graph (time series)
+      description: |
+        Returns charge amounts aggregated by date, day-of-week, or month.
+        Used for bar/line charts on the wallet detail screen.
+      tags: [Charge Graphs]
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/WalletIdQueryParam"
+        - name: groupBy
+          in: query
+          description: Aggregation granularity
+          schema:
+            type: string
+            enum: [date, day, month]
+            default: date
+        - name: type
+          in: query
+          description: Filter by charge type
+          schema:
+            type: string
+            enum: ["+", "-"]
+      responses:
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "200":
+          description: Amount graph data points
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        label:
+                          type: string
+                        amount:
+                          type: number
+                          format: float
+
+  /wallets/{walletId}/charges/graph/total:
+    get:
+      operationId: chargeGraphTotal
+      summary: Total graph by type
+      description: |
+        Returns cumulative income vs expense over time for charting a balance curve.
+      tags: [Charge Graphs]
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/WalletIdQueryParam"
+      responses:
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "200":
+          description: Total graph data
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        label:
+                          type: string
+                        income:
+                          type: number
+                          format: float
+                        expense:
+                          type: number
+                          format: float
+
+  # =========================================================================
+  # LIMITS
+  # =========================================================================
+  /wallets/{id}/limits:
+    parameters:
+      - $ref: "#/components/parameters/WalletIdParam"
+
+    get:
+      operationId: limitList
+      summary: List wallet limits
+      description: |
+        Returns all budget limits for the wallet. Each limit includes the current
+        expenditure as a percentage of the limit amount.
+      tags: [Limits]
+      security:
+        - bearerAuth: []
+      responses:
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "200":
+          description: Wallet limits with progress
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/WalletLimit"
+
+    post:
+      operationId: limitCreate
+      summary: Create a budget limit
+      description: |
+        Creates a new budget limit for a set of tags within a wallet.
+        Requires at least one tag. The limit fires when charges matching the
+        given tags exceed `amount`.
+      tags: [Limits]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateLimitRequest"
+      responses:
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "200":
+          description: Created limit
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Limit"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+
+  /wallets/{walletId}/limits/{limitId}:
+    parameters:
+      - $ref: "#/components/parameters/WalletIdQueryParam"
+      - $ref: "#/components/parameters/LimitIdParam"
+
+    put:
+      operationId: limitUpdate
+      summary: Update a limit
+      description: Replaces all fields of an existing budget limit.
+      tags: [Limits]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateLimitRequest"
+      responses:
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "200":
+          description: Updated limit
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Limit"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+
+    delete:
+      operationId: limitDelete
+      summary: Delete a limit
+      description: Permanently removes a budget limit.
+      tags: [Limits]
+      security:
+        - bearerAuth: []
+      responses:
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "200":
+          description: Limit deleted
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /wallets/{walletId}/limits/copy/{sourceWalletId}:
+    post:
+      operationId: limitCopy
+      summary: Copy limits from another wallet
+      description: |
+        Copies all budget limits from `sourceWalletId` into the target wallet.
+        Existing limits in the target wallet are not removed. Tags are matched by name.
+      tags: [Limits]
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/WalletIdQueryParam"
+        - name: sourceWalletId
+          in: path
+          required: true
+          description: Wallet to copy limits from
+          schema:
+            type: integer
+      responses:
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "200":
+          description: Limits copied
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  # =========================================================================
+  # TAGS
+  # =========================================================================
+  /tags:
+    get:
+      operationId: tagList
+      summary: List user tags
+      description: Returns all tags owned by the authenticated user.
+      tags: [Tags]
+      security:
+        - bearerAuth: []
+      responses:
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "200":
+          description: User's tags
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Tag"
+
+    post:
+      operationId: tagCreate
+      summary: Create a tag
+      description: |
+        Creates a new tag for the current user. Requires confirmed email.
+        Tag names must be unique per user, 3–255 characters, and contain no spaces.
+      tags: [Tags]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateTagRequest"
+            example:
+              name: food
+              icon: "🍔"
+              color: "#FF5733"
+      responses:
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "200":
+          description: Created tag
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Tag"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+
+  /tags/{id}:
+    parameters:
+      - $ref: "#/components/parameters/TagIdParam"
+
+    put:
+      operationId: tagUpdate
+      summary: Update a tag
+      description: Replaces tag name, icon, and color.
+      tags: [Tags]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateTagRequest"
+      responses:
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "200":
+          description: Updated tag
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Tag"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+
+    delete:
+      operationId: tagDelete
+      summary: Delete a tag
+      description: |
+        Permanently deletes a tag and removes it from all charges it was attached to.
+        Budget limits referencing this tag are also removed.
+      tags: [Tags]
+      security:
+        - bearerAuth: []
+      responses:
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "200":
+          description: Tag deleted
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /tags/common:
+    get:
+      operationId: tagCommonList
+      summary: List common (shared) tags
+      description: |
+        Returns tags from shared wallets that the current user has access to but does
+        not own. Useful for cross-wallet reporting.
+      tags: [Tags]
+      security:
+        - bearerAuth: []
+      responses:
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "200":
+          description: Common tags
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Tag"
+
+  /tags/common/{id}:
+    get:
+      operationId: tagCommonGet
+      summary: Get a common tag
+      description: Returns details for a single tag from a shared wallet.
+      tags: [Tags]
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/TagIdParam"
+      responses:
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "200":
+          description: Common tag details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Tag"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /tags/suggestions/{query}:
+    get:
+      operationId: tagSuggestions
+      summary: Tag autocomplete
+      description: Returns tags matching `query` for the current user, sorted by usage frequency.
+      tags: [Tags]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: query
+          in: path
+          required: true
+          description: Partial tag name
+          schema:
+            type: string
+            minLength: 1
+      responses:
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "200":
+          description: Matching tags
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Tag"
+
+  # =========================================================================
+  # TAG CHARGES
+  # =========================================================================
+  /tags/{id}/charges:
+    get:
+      operationId: tagChargeList
+      summary: List charges by tag
+      description: Returns a paginated list of charges that have this tag attached.
+      tags: [Tag Charges]
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/TagIdParam"
+        - $ref: "#/components/parameters/PageParam"
+        - $ref: "#/components/parameters/LimitParam"
+      responses:
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "200":
+          description: Paginated charges for this tag
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChargePaginatedResponse"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /tags/{id}/charges/total:
+    get:
+      operationId: tagChargeTotal
+      summary: Tag income/expense totals
+      description: |
+        Returns the total income, expense, and net amount for all charges
+        tagged with this tag across all of the user's wallets.
+      tags: [Tag Charges]
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/TagIdParam"
+      responses:
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "200":
+          description: Tag totals
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/ChargeTotal"
+
+  /tags/{id}/charges/graph:
+    get:
+      operationId: tagChargeGraph
+      summary: Tag amount graph
+      description: Returns charge amounts over time for a specific tag.
+      tags: [Tag Charges]
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/TagIdParam"
+      responses:
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "200":
+          description: Tag amount graph
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        label:
+                          type: string
+                        amount:
+                          type: number
+                          format: float
+
+  # =========================================================================
+  # CURRENCIES
+  # =========================================================================
+  /currencies:
+    get:
+      operationId: currencyList
+      summary: List all currencies
+      description: Returns every currency supported by the application including live exchange rates.
+      tags: [Currencies]
+      security:
+        - bearerAuth: []
+      responses:
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "200":
+          description: All currencies
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Currency"
+
+  /currencies/featured:
+    get:
+      operationId: currencyFeatured
+      summary: List featured currencies
+      description: Returns a curated subset of the most commonly used currencies.
+      tags: [Currencies]
+      security:
+        - bearerAuth: []
+      responses:
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "200":
+          description: Featured currencies
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Currency"
+
+  # =========================================================================
+  # USERS (lookup utilities)
+  # =========================================================================
+  /users/find/by-email/{query}:
+    get:
+      operationId: userFindByEmail
+      summary: Find user by email
+      description: |
+        Searches for a user whose email matches `query`. Used when adding members to
+        a shared wallet. Returns a short user object to avoid exposing sensitive data.
+      tags: [Users]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: query
+          in: path
+          required: true
+          description: Email address or partial email to search for
+          schema:
+            type: string
+            format: email
+      responses:
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "200":
+          description: Matched user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserShort"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /users/find/by-common-wallets:
+    get:
+      operationId: userFindByCommonWallets
+      summary: Find users via shared wallets
+      description: |
+        Returns all users who share at least one wallet with the authenticated user.
+        Useful for populating sharing suggestions.
+      tags: [Users]
+      security:
+        - bearerAuth: []
+      responses:
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "200":
+          description: Users from common wallets
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/UserShort"
+
+# ---------------------------------------------------------------------------
+# COMPONENTS
+# ---------------------------------------------------------------------------
+components:
+
+  # -------------------------------------------------------------------------
+  # SECURITY SCHEMES
+  # -------------------------------------------------------------------------
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: |
+        JWT access token obtained from `/auth/login`, `/auth/register`, or any social
+        login endpoint. Tokens expire after ~1 hour. Refresh via `POST /auth/refresh`.
+
+  # -------------------------------------------------------------------------
+  # PARAMETERS
+  # -------------------------------------------------------------------------
+  parameters:
+    WalletIdParam:
+      name: id
+      in: path
+      required: true
+      description: Wallet integer ID
+      schema:
+        type: integer
+        minimum: 1
+
+    WalletIdQueryParam:
+      name: walletId
+      in: path
+      required: true
+      description: Wallet integer ID
+      schema:
+        type: integer
+        minimum: 1
+
+    ChargeIdParam:
+      name: chargeId
+      in: path
+      required: true
+      description: Charge UUID
+      schema:
+        type: string
+        format: uuid
+
+    TagIdParam:
+      name: id
+      in: path
+      required: true
+      description: Tag integer ID
+      schema:
+        type: integer
+        minimum: 1
+
+    LimitIdParam:
+      name: limitId
+      in: path
+      required: true
+      description: Limit integer ID
+      schema:
+        type: integer
+        minimum: 1
+
+    PasskeyIdParam:
+      name: id
+      in: path
+      required: true
+      description: Passkey integer ID
+      schema:
+        type: integer
+        minimum: 1
+
+    UserIdParam:
+      name: userId
+      in: path
+      required: true
+      description: User integer ID
+      schema:
+        type: integer
+        minimum: 1
+
+    PageParam:
+      name: page
+      in: query
+      description: Page number (1-based)
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+
+    LimitParam:
+      name: limit
+      in: query
+      description: Items per page
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+
+  # -------------------------------------------------------------------------
+  # SCHEMAS
+  # -------------------------------------------------------------------------
+  schemas:
+
+    # -----------------------------------------------------------------------
+    # AUTH / TOKEN
+    # -----------------------------------------------------------------------
+    AuthResponse:
+      type: object
+      description: Successful authentication result — includes a token pair and user identity.
+      required:
+        - data
+        - accessToken
+        - accessTokenExpiredAt
+        - refreshToken
+        - refreshTokenExpiredAt
+      properties:
+        data:
+          type: object
+          description: Minimal user identity (id and type only at this stage)
+          properties:
+            type:
+              type: string
+              example: user
+            id:
+              type: integer
+        accessToken:
+          type: string
+          description: "Short-lived JWT (~1 hour). Send as `Authorization: Bearer <token>`."
+        accessTokenExpiredAt:
+          type: string
+          format: date-time
+          description: Expiry timestamp for the access token (RFC 3339)
+        refreshToken:
+          type: string
+          description: Long-lived refresh token (~7 days). Use with `POST /auth/refresh`.
+        refreshTokenExpiredAt:
+          type: string
+          format: date-time
+          description: Expiry timestamp for the refresh token (RFC 3339)
+
+    RegisterRequest:
+      type: object
+      required:
+        - name
+        - nickName
+        - email
+        - password
+        - passwordConfirmation
+        - locale
+      properties:
+        name:
+          type: string
+          minLength: 1
+          description: User's first name
+        lastName:
+          type: [string, "null"]
+          description: User's last name (optional)
+        nickName:
+          type: string
+          minLength: 3
+          pattern: "^[a-zA-Z0-9_]+$"
+          description: Unique nick-name (alphanumeric + underscore)
+        email:
+          type: string
+          format: email
+          description: Must be unique across all accounts
+        password:
+          type: string
+          minLength: 6
+          format: password
+        passwordConfirmation:
+          type: string
+          minLength: 6
+          format: password
+          description: Must match `password`
+        locale:
+          type: string
+          description: BCP 47 locale code (e.g. `en`, `uk`)
+          example: en
+
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+
+    PasskeyLoginRequest:
+      type: object
+      required:
+        - challenge
+        - data
+      properties:
+        challenge:
+          type: string
+          description: Challenge string received from `GET /auth/login/passkey/init`
+        data:
+          type: string
+          description: JSON-stringified `PublicKeyCredential` assertion response from the authenticator
+
+    StorePasskeyRequest:
+      type: object
+      required:
+        - challenge
+        - data
+      properties:
+        challenge:
+          type: string
+          description: Challenge string received from `POST /profile/passkey/init`
+        data:
+          type: string
+          description: JSON-stringified `PublicKeyCredential` creation response from the authenticator
+
+    PasswordResetRequest:
+      type: object
+      required:
+        - code
+        - password
+        - passwordConfirmation
+      properties:
+        code:
+          type: string
+          description: Reset code sent to the user's email
+        password:
+          type: string
+          minLength: 6
+          format: password
+        passwordConfirmation:
+          type: string
+          minLength: 6
+          format: password
+          description: Must match `password`
+
+    UpdatePasswordRequest:
+      type: object
+      required:
+        - currentPassword
+        - newPassword
+        - newPasswordConfirmation
+      properties:
+        currentPassword:
+          type: string
+          format: password
+          description: The user's existing password for verification
+        newPassword:
+          type: string
+          minLength: 6
+          format: password
+        newPasswordConfirmation:
+          type: string
+          minLength: 6
+          format: password
+          description: Must match `newPassword`
+
+    # -----------------------------------------------------------------------
+    # USER
+    # -----------------------------------------------------------------------
+    User:
+      type: object
+      description: Full user profile.
+      required:
+        - type
+        - id
+        - name
+        - nickName
+        - email
+        - isEmailConfirmed
+        - createdAt
+        - updatedAt
+        - locale
+      properties:
+        type:
+          type: string
+          enum: [user]
+          readOnly: true
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+        lastName:
+          type: [string, "null"]
+        nickName:
+          type: string
+        email:
+          type: string
+          format: email
+        isEmailConfirmed:
+          type: boolean
+        photoUrl:
+          type: [string, "null"]
+          format: uri
+          description: CDN URL for the profile photo
+        defaultCurrencyCode:
+          type: [string, "null"]
+          description: ISO 4217 currency code (e.g. `USD`)
+          example: USD
+        defaultCurrency:
+          $ref: "#/components/schemas/Currency"
+        locale:
+          type: string
+          description: BCP 47 locale code
+          example: en
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+        updatedAt:
+          type: string
+          format: date-time
+          readOnly: true
+
+    UserShort:
+      type: object
+      description: Minimal user representation used in shared contexts.
+      required:
+        - type
+        - id
+        - name
+        - nickName
+      properties:
+        type:
+          type: string
+          enum: [userShort]
+          readOnly: true
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+        lastName:
+          type: [string, "null"]
+        nickName:
+          type: string
+        photoUrl:
+          type: [string, "null"]
+          format: uri
+
+    UpdateProfileRequest:
+      type: object
+      required:
+        - name
+        - nickName
+        - defaultCurrencyCode
+        - locale
+      properties:
+        name:
+          type: string
+          minLength: 1
+        lastName:
+          type: [string, "null"]
+        nickName:
+          type: string
+          minLength: 3
+          pattern: "^[a-zA-Z0-9_]+$"
+        defaultCurrencyCode:
+          type: string
+          description: ISO 4217 currency code; must exist in the currencies list
+          example: USD
+        locale:
+          type: string
+          description: BCP 47 locale code
+          example: en
+
+    # -----------------------------------------------------------------------
+    # EMAIL CONFIRMATION
+    # -----------------------------------------------------------------------
+    EmailConfirmation:
+      type: object
+      description: Email confirmation state for the authenticated user.
+      required:
+        - type
+        - email
+        - createdAt
+        - resendTimeLimit
+        - validTimeLimit
+        - timeSentAgo
+        - isThrottled
+        - isValid
+      properties:
+        type:
+          type: string
+          enum: [emailConfirmation]
+          readOnly: true
+        email:
+          type: string
+          format: email
+        createdAt:
+          type: string
+          format: date-time
+        resendTimeLimit:
+          type: integer
+          description: Seconds that must pass before a resend is allowed
+        validTimeLimit:
+          type: integer
+          description: Seconds the confirmation token remains valid
+        timeSentAgo:
+          type: integer
+          description: Seconds elapsed since the confirmation email was sent
+        isThrottled:
+          type: boolean
+          description: Whether the resend is currently rate-limited
+        isValid:
+          type: boolean
+          description: Whether the confirmation token is still valid (not expired)
+
+    # -----------------------------------------------------------------------
+    # PASSKEY
+    # -----------------------------------------------------------------------
+    Passkey:
+      type: object
+      description: A registered WebAuthn passkey.
+      required:
+        - type
+        - id
+        - name
+        - createdAt
+      properties:
+        type:
+          type: string
+          enum: [passkey]
+          readOnly: true
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          description: Human-readable label (e.g. "iPhone 15")
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+        usedAt:
+          type: [string, "null"]
+          format: date-time
+          description: Timestamp of last use (null if never used since registration)
+
+    # -----------------------------------------------------------------------
+    # WALLET
+    # -----------------------------------------------------------------------
+    Wallet:
+      type: object
+      description: Full wallet with members and latest charges pre-loaded.
+      required:
+        - type
+        - id
+        - name
+        - slug
+        - totalAmount
+        - isActive
+        - isPublic
+        - isArchived
+        - createdAt
+        - updatedAt
+      properties:
+        type:
+          type: string
+          enum: [wallet]
+          readOnly: true
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+        slug:
+          type: string
+          description: URL-friendly unique identifier for the wallet
+        totalAmount:
+          type: number
+          format: float
+          description: Net balance (income minus expense)
+        isActive:
+          type: boolean
+        isPublic:
+          type: boolean
+          description: Whether the wallet is publicly visible
+        isArchived:
+          type: boolean
+        defaultCurrencyCode:
+          type: [string, "null"]
+          example: USD
+        defaultCurrency:
+          $ref: "#/components/schemas/Currency"
+        users:
+          type: array
+          items:
+            $ref: "#/components/schemas/UserShort"
+          description: Members who have access to this wallet
+        latestCharges:
+          type: array
+          items:
+            $ref: "#/components/schemas/Charge"
+          description: Most recent charges (preview, not full paginated list)
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+        updatedAt:
+          type: string
+          format: date-time
+          readOnly: true
+
+    WalletShort:
+      type: object
+      description: Minimal wallet representation used as a nested field inside charges and limits.
+      required:
+        - type
+        - id
+        - name
+        - slug
+        - totalAmount
+        - isActive
+        - isPublic
+        - isArchived
+        - createdAt
+        - updatedAt
+      properties:
+        type:
+          type: string
+          enum: [walletShort]
+          readOnly: true
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+        slug:
+          type: string
+        totalAmount:
+          type: number
+          format: float
+        isActive:
+          type: boolean
+        isPublic:
+          type: boolean
+        isArchived:
+          type: boolean
+        defaultCurrencyCode:
+          type: [string, "null"]
+        defaultCurrency:
+          $ref: "#/components/schemas/Currency"
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+        updatedAt:
+          type: string
+          format: date-time
+          readOnly: true
+
+    CreateWalletRequest:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          minLength: 1
+          description: Wallet display name
+        slug:
+          type: [string, "null"]
+          pattern: "^[a-zA-Z0-9_-]+$"
+          description: Unique URL-friendly slug. Auto-generated from name when omitted.
+        isPublic:
+          type: boolean
+          default: false
+        defaultCurrencyCode:
+          type: [string, "null"]
+          description: ISO 4217 code; must exist in the currencies list
+          example: USD
+
+    UpdateWalletRequest:
+      type: object
+      required:
+        - name
+        - isPublic
+        - defaultCurrencyCode
+      properties:
+        name:
+          type: string
+          minLength: 1
+        isPublic:
+          type: boolean
+        defaultCurrencyCode:
+          type: string
+          description: ISO 4217 code; must exist in the currencies list
+          example: USD
+
+    WalletTotal:
+      type: object
+      description: Income/expense breakdown for a wallet.
+      properties:
+        totalAmount:
+          type: number
+          format: float
+          description: Net total (income minus expense)
+        totalIncomeAmount:
+          type: number
+          format: float
+        totalExpenseAmount:
+          type: number
+          format: float
+        tags:
+          type: array
+          items:
+            type: object
+            properties:
+              tagId:
+                type: integer
+              totalIncomeAmount:
+                type: number
+                format: float
+              totalExpenseAmount:
+                type: number
+                format: float
+
+    # -----------------------------------------------------------------------
+    # CHARGE
+    # -----------------------------------------------------------------------
+    Charge:
+      type: object
+      description: A single financial transaction.
+      required:
+        - type
+        - id
+        - operation
+        - amount
+        - title
+        - userId
+        - walletId
+        - dateTime
+        - createdAt
+        - updatedAt
+      properties:
+        type:
+          type: string
+          enum: [charge]
+          readOnly: true
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+          description: UUID primary key
+        operation:
+          type: string
+          enum: ["+", "-"]
+          description: "`+` = income, `-` = expense"
+        amount:
+          type: number
+          format: float
+          minimum: 0.01
+        title:
+          type: string
+        description:
+          type: [string, "null"]
+        userId:
+          type: integer
+          description: ID of the user who created the charge
+        walletId:
+          type: integer
+        dateTime:
+          type: string
+          format: date-time
+          description: When the transaction occurred (in the past)
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+        updatedAt:
+          type: string
+          format: date-time
+          readOnly: true
+        user:
+          $ref: "#/components/schemas/UserShort"
+        tags:
+          type: array
+          items:
+            $ref: "#/components/schemas/Tag"
+        wallet:
+          $ref: "#/components/schemas/WalletShort"
+
+    CreateChargeRequest:
+      type: object
+      required:
+        - type
+        - amount
+        - title
+      properties:
+        type:
+          type: string
+          enum: ["+", "-"]
+          description: "`+` = income, `-` = expense"
+        amount:
+          type: number
+          format: float
+          minimum: 0.01
+        title:
+          type: string
+          minLength: 1
+        description:
+          type: [string, "null"]
+        tags:
+          type: array
+          items:
+            type: integer
+          description: Tag IDs to attach (must belong to the user or accessible shared wallet)
+        dateTime:
+          type: string
+          description: "Transaction date in `Y-m-d H:i:s` format (e.g. `2024-06-01 13:00:00`). Defaults to now."
+          example: "2024-06-01 13:00:00"
+
+    ChargePaginatedResponse:
+      type: object
+      required:
+        - data
+        - pagination
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/Charge"
+        pagination:
+          $ref: "#/components/schemas/Pagination"
+
+    ChargeTitleSuggestion:
+      type: object
+      description: A previously used charge title with its frequency.
+      properties:
+        type:
+          type: string
+          enum: [chargeTitle]
+        title:
+          type: string
+        count:
+          type: integer
+          description: Number of times this title has been used
+
+    ChargeTotal:
+      type: object
+      description: Aggregate income/expense totals (used for tag and wallet statistics).
+      properties:
+        totalAmount:
+          type: number
+          format: float
+        totalIncomeAmount:
+          type: number
+          format: float
+        totalExpenseAmount:
+          type: number
+          format: float
+        currency:
+          $ref: "#/components/schemas/Currency"
+
+    # -----------------------------------------------------------------------
+    # TAG
+    # -----------------------------------------------------------------------
+    Tag:
+      type: object
+      description: A label attached to charges for categorisation.
+      required:
+        - type
+        - id
+        - name
+        - userId
+        - createdAt
+        - updatedAt
+      properties:
+        type:
+          type: string
+          enum: [tag]
+          readOnly: true
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          minLength: 3
+          maxLength: 255
+          description: No spaces allowed; unique per user
+        icon:
+          type: [string, "null"]
+          description: Emoji or short string (1–10 characters)
+          example: "🍔"
+        color:
+          type: [string, "null"]
+          pattern: "^#[0-9A-Fa-f]{6}$"
+          description: Hex color code
+          example: "#FF5733"
+        userId:
+          type: integer
+          description: Owner user ID
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+        updatedAt:
+          type: string
+          format: date-time
+          readOnly: true
+
+    CreateTagRequest:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          minLength: 3
+          maxLength: 255
+          pattern: "^\\S+$"
+          description: Must be unique per user and contain no spaces
+        icon:
+          type: [string, "null"]
+          minLength: 1
+          maxLength: 10
+          description: Emoji or short symbol
+        color:
+          type: [string, "null"]
+          pattern: "^#[0-9A-Fa-f]{6}$"
+          description: Hex color code (e.g. `#FF5733`)
+
+    # -----------------------------------------------------------------------
+    # LIMIT
+    # -----------------------------------------------------------------------
+    Limit:
+      type: object
+      description: A budget ceiling for charges matching a set of tags in a wallet.
+      required:
+        - type
+        - id
+        - operation
+        - amount
+        - walletId
+        - createdAt
+        - updatedAt
+        - tags
+      properties:
+        type:
+          type: string
+          enum: [limit]
+          readOnly: true
+        id:
+          type: integer
+          readOnly: true
+        operation:
+          type: string
+          enum: ["+", "-"]
+          description: "`+` = income limit, `-` = expense limit"
+        amount:
+          type: number
+          format: float
+          minimum: 0.01
+        walletId:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+        updatedAt:
+          type: string
+          format: date-time
+          readOnly: true
+        tags:
+          type: array
+          items:
+            $ref: "#/components/schemas/Tag"
+        wallet:
+          $ref: "#/components/schemas/WalletShort"
+
+    WalletLimit:
+      type: object
+      description: A limit with its current spend as a percentage.
+      required:
+        - amount
+        - percentage
+        - limit
+      properties:
+        amount:
+          type: number
+          format: float
+          description: Current amount spent / earned matching this limit's tags
+        percentage:
+          type: number
+          format: float
+          description: "Current spend as a fraction of the limit (0–1+). Values > 1 mean the limit is exceeded."
+          example: 0.75
+        limit:
+          $ref: "#/components/schemas/Limit"
+
+    CreateLimitRequest:
+      type: object
+      required:
+        - type
+        - amount
+        - tags
+      properties:
+        type:
+          type: string
+          enum: ["+", "-"]
+          description: "`+` = income limit, `-` = expense limit"
+        amount:
+          type: number
+          format: float
+          minimum: 0.01
+        tags:
+          type: array
+          minItems: 1
+          items:
+            type: integer
+          description: Tag IDs that this limit applies to (min 1)
+
+    # -----------------------------------------------------------------------
+    # CURRENCY
+    # -----------------------------------------------------------------------
+    Currency:
+      type: object
+      description: A supported currency with live exchange rate.
+      required:
+        - type
+        - id
+        - code
+        - name
+        - char
+        - rate
+        - updatedAt
+      properties:
+        type:
+          type: string
+          enum: [currency]
+          readOnly: true
+        id:
+          type: string
+          description: ISO 4217 code (same as `code`)
+          example: USD
+        code:
+          type: string
+          minLength: 3
+          maxLength: 3
+          description: ISO 4217 currency code
+          example: USD
+        name:
+          type: string
+          description: Full currency name
+          example: US Dollar
+        char:
+          type: string
+          description: Currency symbol
+          example: "$"
+        rate:
+          type: number
+          format: float
+          description: Exchange rate relative to the base currency (USD)
+        updatedAt:
+          type: string
+          format: date-time
+          description: When the exchange rate was last updated
+
+    # -----------------------------------------------------------------------
+    # PAGINATION
+    # -----------------------------------------------------------------------
+    Pagination:
+      type: object
+      required:
+        - page
+        - limit
+        - total
+        - totalPages
+      properties:
+        page:
+          type: integer
+          minimum: 1
+        limit:
+          type: integer
+          minimum: 1
+          maximum: 100
+        total:
+          type: integer
+          minimum: 0
+          description: Total number of items across all pages
+        totalPages:
+          type: integer
+          minimum: 0
+        hasNext:
+          type: boolean
+        hasPrev:
+          type: boolean
+
+    # -----------------------------------------------------------------------
+    # COMMON RESPONSES
+    # -----------------------------------------------------------------------
+    MessageResponse:
+      type: object
+      description: Simple message response for success acknowledgements.
+      properties:
+        message:
+          type: string
+
+    Error:
+      type: object
+      description: Standard error envelope.
+      required:
+        - message
+      properties:
+        error:
+          type: string
+          description: Machine-readable error code (optional)
+        message:
+          type: string
+          description: Human-readable error description
+
+    ValidationError:
+      type: object
+      description: Field-level validation failures (HTTP 422).
+      required:
+        - errors
+      properties:
+        errors:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
+          description: Map of field names to arrays of error messages
+          example:
+            email:
+              - "Must be a valid email address"
+            password:
+              - "Must be at least 6 characters"
+
+  # -------------------------------------------------------------------------
+  # REUSABLE RESPONSES
+  # -------------------------------------------------------------------------
+  responses:
+    BadRequest:
+      description: Bad request — invalid input or business rule violation
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+          example:
+            error: INVALID_CREDENTIALS
+            message: The provided credentials are incorrect.
+
+    Unauthorized:
+      description: Authentication required or token expired
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+          example:
+            message: Unauthenticated.
+
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+          example:
+            message: Resource not found.
+
+    ValidationError:
+      description: Validation failed — see `errors` for field-level details
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ValidationError"
+
+# ---------------------------------------------------------------------------
+# GLOBAL SECURITY
+# ---------------------------------------------------------------------------
+security:
+  - bearerAuth: []
