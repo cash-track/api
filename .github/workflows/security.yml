@@ -12,13 +12,15 @@ concurrency:
 jobs:
   security:
     name: Security
-    runs-on: [self-hosted, Linux, x64]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - name: Setup Workspace
         run: git config --global --add safe.directory $GITHUB_WORKSPACE
 
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
 
       - name: Scan Packages For Vulnerability
-        uses: symfonycorp/security-checker-action@v5
+        uses: symfonycorp/security-checker-action@258311ef7ac571f1310780ef3d79fc5abef642b5  # v5
