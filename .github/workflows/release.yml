@@ -1,144 +1,24 @@
 name: release
 
 on:
-  workflow_dispatch:
   push:
-    tags:
-      - 'v*'
+    tags: ['v*.*.*']
 
-env:
-  REGISTRY: docker.io
-  REPO: cashtrack/api
-  INFRA_REPO: cash-track/infra
-  INFRA_REPO_REF: main
-  CLUSTER: k8s-cash-track
-  NAMESPACE: cash-track
-  KUBECTL_BIN: ${{ vars.KUBECTL_BIN_URL }}
+permissions:
+  contents: read
+  id-token: write
+  attestations: write
 
 jobs:
   build:
-    runs-on: [self-hosted, Linux, x64]
-    permissions:
-      contents: read
-      packages: write
-      id-token: write
-      attestations: write
-
-    steps:
-      - name: Setup Workspace
-        run: git config --global --add safe.directory $GITHUB_WORKSPACE
-
-      - name: Checkout repository
-        if: github.event_name != 'pull_request'
-        uses: actions/checkout@v4
-
-      # Login against a Docker registry except on PR
-      # https://github.com/docker/login-action
-      - name: Login to Docker Hub
-        if: github.event_name != 'pull_request'
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKER_HUB_USER }}
-          password: ${{ secrets.DOCKER_HUB_TOKEN }}
-
-      # Extract metadata (tags, labels) for Docker
-      # https://github.com/docker/metadata-action
-      - name: Extract Docker metadata
-        if: github.event_name != 'pull_request'
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ${{ env.REPO }}
-          tags: |
-            type=sha
-            type=semver,pattern={{version}}
-
-      # Setup BuildX
-      # https://github.com/docker/setup-buildx-action
-      - name: Setup BuildX
-        uses: docker/setup-buildx-action@v3
-        id: buildx
-        with:
-          install: true
-
-      # Build and push Docker image with Build (don't push on PR)
-      # https://github.com/docker/build-push-action
-      - name: Build and push
-        uses: docker/build-push-action@v6
-        id: push
-        with:
-          context: .
-          push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          build-args: |
-            GIT_COMMIT=${{ github.sha }}
-            GIT_TAG=${{ github.ref_name }}
-
-      - name: Attest
-        uses: actions/attest-build-provenance@v1
-        id: attest
-        with:
-          subject-name: ${{ env.REGISTRY }}/${{ env.REPO }}
-          subject-digest: ${{ steps.push.outputs.digest }}
-          push-to-registry: true
-
+    uses: cash-track/.github/.github/workflows/build.yml@main
+    with:
+      image: cashtrack/api
+    secrets: inherit
   deploy:
-    runs-on: [self-hosted, Linux, x64]
-    needs:
-      - build
-    environment: prod
-    permissions:
-      contents: read
-      packages: write
-
-    steps:
-      - name: Setup Workspace
-        run: git config --global --add safe.directory $GITHUB_WORKSPACE
-
-      - name: Checkout infra repository
-        uses: actions/checkout@v4
-        with:
-          repository: ${{ env.INFRA_REPO }}
-          ref: ${{ env.INFRA_REPO_REF }}
-          path: deploy
-
-      - name: Install doctl
-        uses: digitalocean/action-doctl@v2
-        with:
-          token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
-
-      - name: Install kubectl
-        run: |
-          curl -LO ${{ env.KUBECTL_BIN }}
-          chmod +x ./kubectl
-          sudo mv ./kubectl /usr/local/bin/kubectl
-
-      - name: Configure kubectl
-        run: doctl kubernetes cluster kubeconfig save --expiry-seconds 600 ${{ env.CLUSTER }}
-
-      # Extract metadata (tags, labels) for Docker
-      # https://github.com/docker/metadata-action
-      - name: Extract Docker metadata
-        if: github.event_name != 'pull_request'
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ${{ env.REPO }}
-          tags: |
-            type=semver,pattern={{version}}
-
-      - name: Update deployment
-        env:
-          IMAGE: ${{ env.REPO }}:${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.version'] }}
-        run: sed -i 's|${{ env.REPO }}:latest|'${IMAGE}'|' $GITHUB_WORKSPACE/deploy/services/api/deployment.yml
-
-      - name: Update definition
-        run: kubectl apply -f $GITHUB_WORKSPACE/deploy/services/api/
-
-      - name: Verify deployment
-        run: kubectl -n ${{ env.NAMESPACE }} rollout status deployment/api
-
-      - name: Verify service ready
-        run: kubectl -n ${{ env.NAMESPACE }} wait pods -l app=api --for condition=Ready --timeout=60s
-
+    needs: build
+    uses: cash-track/.github/.github/workflows/deploy.yml@main
+    with:
+      service: api
+      post_deploy_cmds: 'php app.php migrate -s -n'
+    secrets: inherit
