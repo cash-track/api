@@ -7,6 +7,7 @@ permissions:
   contents: read
   id-token: write
   attestations: write
+  artifact-metadata: write
 
 jobs:
   build:
