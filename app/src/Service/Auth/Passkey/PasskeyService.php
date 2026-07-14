@@ -30,13 +30,14 @@ use Webauthn\AuthenticatorAssertionResponseValidator;
 use Webauthn\AuthenticatorAttestationResponse;
 use Webauthn\AuthenticatorAttestationResponseValidator;
 use Webauthn\AuthenticatorSelectionCriteria;
+use Webauthn\CeremonyStep\CeremonyStepManagerFactory;
+use Webauthn\CredentialRecord;
 use Webauthn\Denormalizer\WebauthnSerializerFactory;
 use Webauthn\PublicKeyCredential;
 use Webauthn\PublicKeyCredentialCreationOptions;
 use Webauthn\PublicKeyCredentialDescriptor;
 use Webauthn\PublicKeyCredentialRequestOptions;
 use Webauthn\PublicKeyCredentialRpEntity;
-use Webauthn\PublicKeyCredentialSource;
 use Webauthn\PublicKeyCredentialUserEntity;
 
 class PasskeyService
@@ -75,10 +76,31 @@ class PasskeyService
 
     protected function getSerializer(): SerializerInterface
     {
-        $manager = new AttestationStatementSupportManager();
-        $manager->add(NoneAttestationStatementSupport::create());
-
         return (new WebauthnSerializerFactory($this->getAttestationStatementSupportManager()))->create();
+    }
+
+    protected function getCeremonyStepManagerFactory(): CeremonyStepManagerFactory
+    {
+        $factory = new CeremonyStepManagerFactory();
+        $factory->setAttestationStatementSupportManager($this->getAttestationStatementSupportManager());
+        $factory->setExtensionOutputCheckerHandler(ExtensionOutputCheckerHandler::create());
+        $factory->setAlgorithmManager($this->getAlgorithmManager());
+
+        return $factory;
+    }
+
+    /**
+     * @return array<array-key, mixed>
+     * @throws \JsonException
+     */
+    protected function normalizeToArray(object $object): array
+    {
+        return (array) json_decode(
+            $this->getSerializer()->serialize($object, 'json'),
+            true,
+            512,
+            JSON_THROW_ON_ERROR,
+        );
     }
 
     public function initAuth(): \JsonSerializable
@@ -95,7 +117,7 @@ class PasskeyService
 
         $this->storeRequestOptions($challenge, $options);
 
-        return PasskeyInitResponse::create($challenge, $options->jsonSerialize());
+        return PasskeyInitResponse::create($challenge, $this->normalizeToArray($options));
     }
 
     /**
@@ -133,20 +155,17 @@ class PasskeyService
             throw new PasskeyNotFoundException('Unregistered passkey');
         }
 
-        $existingCredentialSource = $this->getSerializer()->deserialize($passkey->data, PublicKeyCredentialSource::class, 'json');
+        $existingCredentialRecord = $this->getSerializer()->deserialize($passkey->data, CredentialRecord::class, 'json');
 
         $authenticatorAssertionResponseValidator = AuthenticatorAssertionResponseValidator::create(
-            null,
-            null,
-            ExtensionOutputCheckerHandler::create(),
-            $this->getAlgorithmManager()
+            $this->getCeremonyStepManagerFactory()->requestCeremony(),
         );
 
-        $credentialSource = $authenticatorAssertionResponseValidator->check(
-            credentialId: $existingCredentialSource,
+        $credentialRecord = $authenticatorAssertionResponseValidator->check(
+            credentialRecord: $existingCredentialRecord,
             authenticatorAssertionResponse: $credential->response,
             publicKeyCredentialRequestOptions: $options->options,
-            request: $this->config->getServiceId(),
+            host: $this->config->getServiceId(),
             userHandle: null,
         );
 
@@ -155,7 +174,7 @@ class PasskeyService
             throw new UserNotFoundException('User not found');
         }
 
-        $this->update($passkey, $credentialSource);
+        $this->update($passkey, $credentialRecord);
         $this->forgetOptions($challenge);
 
         return $user;
@@ -164,10 +183,7 @@ class PasskeyService
     public function store(User $user, string $challenge, string $data): Passkey
     {
         $authenticatorAttestationResponseValidator = AuthenticatorAttestationResponseValidator::create(
-            $this->getAttestationStatementSupportManager(),
-            null,
-            null,
-            ExtensionOutputCheckerHandler::create(),
+            $this->getCeremonyStepManagerFactory()->creationCeremony(),
         );
 
         $credential = $this->getSerializer()->deserialize(self::decode($data), PublicKeyCredential::class, 'json');
@@ -192,12 +208,12 @@ class PasskeyService
         return $passkey;
     }
 
-    public function persist(User $user, CreationChallenge $creation, PublicKeyCredentialSource $credential): Passkey
+    public function persist(User $user, CreationChallenge $creation, CredentialRecord $credential): Passkey
     {
         $passkey = new Passkey();
         $passkey->name = $creation->name;
         $passkey->setUser($user);
-        $passkey->setData($credential->jsonSerialize());
+        $passkey->setData($this->normalizeToArray($credential));
 
         $this->tr->persist($passkey);
         $this->tr->run();
@@ -205,10 +221,10 @@ class PasskeyService
         return $passkey;
     }
 
-    protected function update(Passkey $passkey, PublicKeyCredentialSource $credential): Passkey
+    protected function update(Passkey $passkey, CredentialRecord $credential): Passkey
     {
         $passkey->usedAt = new \DateTimeImmutable();
-        $passkey->setData($credential->jsonSerialize());
+        $passkey->setData($this->normalizeToArray($credential));
 
         $this->tr->persist($passkey);
         $this->tr->run();
@@ -237,7 +253,7 @@ class PasskeyService
 
         $this->storeCreationOptions($keyName, $challenge, $options);
 
-        return PasskeyInitResponse::create($challenge, $options->jsonSerialize());
+        return PasskeyInitResponse::create($challenge, $this->normalizeToArray($options));
     }
 
     public function delete(Passkey $passkey): void
