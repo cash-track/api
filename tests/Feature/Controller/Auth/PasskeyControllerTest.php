@@ -92,10 +92,10 @@ class PasskeyControllerTest extends TestCase implements DatabaseTransaction
         $this->assertArrayHasKey('userVerification', $decoded);
         $this->assertEquals('required', $decoded['userVerification']);
 
-        $this->assertArrayHasKey('extensions', $decoded);
-        $this->assertIsArray($decoded['extensions']);
-        $this->assertArrayHasKey('credProps', $decoded['extensions']);
-        $this->assertTrue($decoded['extensions']['credProps']);
+        // credProps is a registration-only extension (reports whether the *created* credential
+        // is discoverable); it must not be attached to login/authentication options, or browsers
+        // reject the ceremony with NotSupportedError.
+        $this->assertArrayNotHasKey('extensions', $decoded);
 
         $this->assertArrayHasKey('timeout', $decoded);
         $this->assertEquals($config->getTimeout(), $decoded['timeout']);
