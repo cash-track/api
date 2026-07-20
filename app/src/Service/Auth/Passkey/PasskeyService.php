@@ -112,7 +112,6 @@ class PasskeyService
             rpId: $this->config->getServiceId(),
             userVerification: PublicKeyCredentialRequestOptions::USER_VERIFICATION_REQUIREMENT_REQUIRED,
             timeout: $this->config->getTimeout(),
-            extensions: $this->getExtensions(),
         );
 
         $this->storeRequestOptions($challenge, $options);
