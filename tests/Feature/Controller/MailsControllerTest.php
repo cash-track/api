@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace Tests\Feature\Controller;
 
 use App\Controller\MailsController;
+use App\Database\EntityHeader;
+use App\Database\User;
+use App\Mail\TestMail;
 use App\Service\Mailer\MailerInterface;
 use Spiral\Auth\AuthContextInterface;
 use Spiral\Boot\EnvironmentInterface;
@@ -15,77 +18,78 @@ class MailsControllerTest extends TestCase
 {
     public function testTestDisabledDebugDoNothing(): void
     {
-        $authContext = $this->getMockBuilder(AuthContextInterface::class)->getMock();
-        $authContext->method('getActor')->willReturn(null);
-
-        $this->getContainer()->bind(AuthContextInterface::class, fn () => $authContext);
-        $auth = $this->getContainer()->get(AuthContextInterface::class);
-
-        $mailer = $this->getMockBuilder(MailerInterface::class)->getMock();
+        $mailer = $this->makeMailer();
         $mailer->expects($this->never())->method('send');
 
-        $environment = $this->getMockBuilder(EnvironmentInterface::class)->getMock();
-        $environment->method('get')->with('DEBUG')->willReturn(false);
-
-        $controller = new MailsController($auth, $mailer, $environment);
-        $controller->test();
+        $this->makeController($mailer, UserFactory::make(), debug: false)->test();
     }
 
     public function testTestEnabledDebugSendMessage(): void
     {
         $user = UserFactory::make();
 
-        $authContext = $this->getMockBuilder(AuthContextInterface::class)->getMock();
-        $authContext->method('getActor')->willReturn($user);
+        $mailer = $this->makeMailer();
+        $mailer->expects($this->once())
+               ->method('send')
+               ->with($this->callback($this->isTestMailFor($user)));
 
-        $this->getContainer()->bind(AuthContextInterface::class, fn () => $authContext);
-        $auth = $this->getContainer()->get(AuthContextInterface::class);
-
-        $mailer = $this->getMockBuilder(MailerInterface::class)->getMock();
-        $mailer->expects($this->once())->method('send');
-
-        $environment = $this->getMockBuilder(EnvironmentInterface::class)->getMock();
-        $environment->method('get')->with('DEBUG')->willReturn(true);
-
-        $controller = new MailsController($auth, $mailer, $environment);
-        $controller->test();
+        $this->makeController($mailer, $user, debug: true)->test();
     }
 
     public function testPreviewDisabledDebugDoNothing(): void
     {
-        $authContext = $this->getMockBuilder(AuthContextInterface::class)->getMock();
-        $authContext->method('getActor')->willReturn(null);
-
-        $this->getContainer()->bind(AuthContextInterface::class, fn () => $authContext);
-        $auth = $this->getContainer()->get(AuthContextInterface::class);
-
-        $mailer = $this->getMockBuilder(MailerInterface::class)->getMock();
+        $mailer = $this->makeMailer();
         $mailer->expects($this->never())->method('render');
 
-        $environment = $this->getMockBuilder(EnvironmentInterface::class)->getMock();
-        $environment->method('get')->with('DEBUG')->willReturn(false);
+        $controller = $this->makeController($mailer, UserFactory::make(), debug: false);
 
-        $controller = new MailsController($auth, $mailer, $environment);
-        $controller->preview();
+        $this->assertEquals('ok', $controller->preview());
     }
 
     public function testPreviewEnabledDebugRenderMessage(): void
     {
         $user = UserFactory::make();
 
-        $authContext = $this->getMockBuilder(AuthContextInterface::class)->getMock();
-        $authContext->method('getActor')->willReturn($user);
+        $mailer = $this->makeMailer();
+        $mailer->expects($this->once())
+               ->method('render')
+               ->with($this->callback($this->isTestMailFor($user)))
+               ->willReturn('<html>test</html>');
 
-        $this->getContainer()->bind(AuthContextInterface::class, fn () => $authContext);
-        $auth = $this->getContainer()->get(AuthContextInterface::class);
+        $controller = $this->makeController($mailer, $user, debug: true);
 
-        $mailer = $this->getMockBuilder(MailerInterface::class)->getMock();
-        $mailer->expects($this->once())->method('render');
+        $this->assertEquals('<html>test</html>', $controller->preview());
+    }
+
+    /**
+     * Both routes are `group: 'auth'`, so the actor is always a resolved User — AuthAwareController
+     * refuses to construct otherwise.
+     */
+    private function makeController(MailerInterface $mailer, User $actor, bool $debug): MailsController
+    {
+        $auth = $this->getMockBuilder(AuthContextInterface::class)->getMock();
+        $auth->method('getActor')->willReturn($actor);
 
         $environment = $this->getMockBuilder(EnvironmentInterface::class)->getMock();
-        $environment->method('get')->with('DEBUG')->willReturn(true);
+        $environment->method('get')->with('DEBUG')->willReturn($debug);
 
-        $controller = new MailsController($auth, $mailer, $environment);
-        $controller->preview();
+        return new MailsController($auth, $mailer, $environment);
+    }
+
+    private function makeMailer(): MailerInterface
+    {
+        return $this->getMockBuilder(MailerInterface::class)->getMock();
+    }
+
+    private function isTestMailFor(User $user): \Closure
+    {
+        return function ($mail) use ($user) {
+            $this->assertInstanceOf(TestMail::class, $mail);
+            $this->assertInstanceOf(EntityHeader::class, $mail->userHeader);
+            $this->assertEquals(User::class, $mail->userHeader->role);
+            $this->assertEquals(['id' => $user->id], $mail->userHeader->params);
+
+            return true;
+        };
     }
 }

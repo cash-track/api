@@ -366,8 +366,6 @@ paths:
           schema:
             type: string
       responses:
-        "401":
-          $ref: "#/components/responses/Unauthorized"
         "200":
           description: Email confirmed successfully
         "400":

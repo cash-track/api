@@ -44,23 +44,6 @@ final class EmailConfirmationsController extends AuthAwareController
         return $this->emailConfirmationView->json($confirmation);
     }
 
-    #[Route(route: '/auth/email/confirmation/confirm/<token>', name: 'auth.email.confirm')]
-    public function confirm(string $token): ResponseInterface
-    {
-        try {
-            $this->emailConfirmationService->confirm($token);
-        } catch (\Throwable $exception) {
-            return $this->response->json([
-                'message' => $this->say('email_confirmation_confirm_failure'),
-                'error' => $exception->getMessage(),
-            ], 400);
-        }
-
-        return $this->response->json([
-            'message' => $this->say('email_confirmation_ok'),
-        ]);
-    }
-
     #[Route(route: '/auth/email/confirmation/resend', name: 'auth.email.resend', methods: 'POST', group: 'auth')]
     public function reSend(): ResponseInterface
     {

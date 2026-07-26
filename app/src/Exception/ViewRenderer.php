@@ -12,7 +12,8 @@ use Spiral\Http\ErrorHandler\RendererInterface;
 final class ViewRenderer implements RendererInterface
 {
     const MAP = [
-        UnconfirmedProfileException::class => 403
+        UnconfirmedProfileException::class => 403,
+        AuthenticationRequiredException::class => 401,
     ];
 
     public function __construct(
