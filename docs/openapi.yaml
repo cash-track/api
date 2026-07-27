@@ -29,6 +29,15 @@ info:
     ## Timestamps
     All timestamps in responses are **RFC 3339 / W3C** strings (e.g. `2024-01-15T10:30:00+00:00`).
 
+    ## Response Headers
+    Every response — success or error — carries `X-Ct-Api-Version` (git tag of the running
+    image) and `X-Ct-Api-Sha` (git commit SHA), so a caller can identify exactly which build
+    served a request. Either header is omitted if the image was built without that value (e.g.
+    a local dev build outside Docker). These headers are only documented once, on the shared
+    error responses below (`BadRequest`, `Unauthorized`, `NotFound`, `ValidationError`) — they
+    are not repeated on every inline 2xx response schema for brevity, but apply to all of them
+    too.
+
 servers:
   - url: https://api.cash-track.app
     description: Production
@@ -3080,11 +3089,34 @@ components:
               - "Must be at least 6 characters"
 
   # -------------------------------------------------------------------------
+  # REUSABLE HEADERS
+  # -------------------------------------------------------------------------
+  headers:
+    ApiVersion:
+      description: |
+        Git tag of the running API image (e.g. `v1.4.2`). Present on every response; omitted
+        entirely (rather than sent empty) when the image was built without a tag.
+      schema:
+        type: string
+
+    ApiSha:
+      description: |
+        Git commit SHA of the running API image. Present on every response; omitted entirely
+        (rather than sent empty) when the image was built without a commit SHA.
+      schema:
+        type: string
+
+  # -------------------------------------------------------------------------
   # REUSABLE RESPONSES
   # -------------------------------------------------------------------------
   responses:
     BadRequest:
       description: Bad request — invalid input or business rule violation
+      headers:
+        X-Ct-Api-Version:
+          $ref: "#/components/headers/ApiVersion"
+        X-Ct-Api-Sha:
+          $ref: "#/components/headers/ApiSha"
       content:
         application/json:
           schema:
@@ -3095,6 +3127,11 @@ components:
 
     Unauthorized:
       description: Authentication required or token expired
+      headers:
+        X-Ct-Api-Version:
+          $ref: "#/components/headers/ApiVersion"
+        X-Ct-Api-Sha:
+          $ref: "#/components/headers/ApiSha"
       content:
         application/json:
           schema:
@@ -3104,6 +3141,11 @@ components:
 
     NotFound:
       description: Resource not found
+      headers:
+        X-Ct-Api-Version:
+          $ref: "#/components/headers/ApiVersion"
+        X-Ct-Api-Sha:
+          $ref: "#/components/headers/ApiSha"
       content:
         application/json:
           schema:
@@ -3113,6 +3155,11 @@ components:
 
     ValidationError:
       description: Validation failed — see `errors` for field-level details
+      headers:
+        X-Ct-Api-Version:
+          $ref: "#/components/headers/ApiVersion"
+        X-Ct-Api-Sha:
+          $ref: "#/components/headers/ApiSha"
       content:
         application/json:
           schema:
