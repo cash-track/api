@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Bootloader;
 
 use App\Auth\AuthMiddleware;
+use App\Middleware\ApiVersionMiddleware;
 use App\Middleware\LocaleSelectorMiddleware;
 use App\Middleware\RateLimitMiddleware;
 use App\Middleware\TraceContextMiddleware;
@@ -42,6 +43,7 @@ final class RoutesBootloader extends BaseRoutesBootloader
         return [
             TraceContextMiddleware::class,
             LocaleSelectorMiddleware::class,
+            ApiVersionMiddleware::class,
             ErrorHandlerMiddleware::class,
             JsonPayloadMiddleware::class,
             HttpCollector::class,
