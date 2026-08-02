@@ -229,6 +229,36 @@ class LimitsControllerTest extends TestCase implements DatabaseTransaction
         $this->assertEquals((string) $expected, (string) $body['data'][0]['amount']);
     }
 
+    public function testListReturnLimitsSkipsEmptyTagGroups(): void
+    {
+        $auth = $this->makeAuth($user = $this->userFactory->create());
+        $wallet = $this->walletFactory->forUser($user)->create();
+
+        $tag = $this->tagFactory->forUser($user)->create();
+
+        $charge = ChargeFactory::expense();
+        $charge->amount = 20.0;
+        $this->chargeFactory->forUser($user)->forWallet($wallet)->withTags([$tag])->create($charge);
+
+        // A group with no tags (not reachable through the API's validation, but possible
+        // for pre-existing data) must be skipped rather than break the calculation.
+        $this->limitFactory->forWallet($wallet)
+            ->withTagGroups([
+                ['connection' => LimitTagGroup::CONNECTION_AND, 'tags' => [$tag]],
+                ['connection' => LimitTagGroup::CONNECTION_OR, 'tags' => []],
+            ])
+            ->create(LimitFactory::expense());
+
+        $response = $this->withAuth($auth)->get("/wallets/{$wallet->id}/limits");
+
+        $response->assertOk();
+
+        $body = $this->getJsonResponseBody($response);
+
+        $this->assertCount(1, $body['data']);
+        $this->assertEquals((string) $charge->amount, (string) $body['data'][0]['amount']);
+    }
+
     public function testCreateRequireAuth(): void
     {
         $wallet = $this->walletFactory->create();
