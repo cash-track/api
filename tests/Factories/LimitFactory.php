@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Factories;
 
 use App\Database\Limit;
+use App\Database\LimitTagGroup;
 use App\Database\Wallet;
 use Doctrine\Common\Collections\ArrayCollection;
 use Tests\Fixtures;
@@ -18,6 +19,11 @@ class LimitFactory extends AbstractFactory
      */
     protected array $tags = [];
 
+    /**
+     * @var array<array-key, array{connection?: string, tags?: array<array-key, \App\Database\Tag>}>
+     */
+    protected array $tagGroups = [];
+
     public function forWallet(?Wallet $wallet = null): LimitFactory
     {
         $this->wallet = $wallet;
@@ -28,6 +34,16 @@ class LimitFactory extends AbstractFactory
     public function withTags(array $tags = []): LimitFactory
     {
         $this->tags = $tags;
+
+        return $this;
+    }
+
+    /**
+     * @param array<array-key, array{connection?: string, tags?: array<array-key, \App\Database\Tag>}> $tagGroups
+     */
+    public function withTagGroups(array $tagGroups = []): LimitFactory
+    {
+        $this->tagGroups = $tagGroups;
 
         return $this;
     }
@@ -65,6 +81,18 @@ class LimitFactory extends AbstractFactory
             $limit->tags->add($tag);
         }
 
+        foreach ($this->tagGroups as $group) {
+            $tagGroup = new LimitTagGroup();
+            $tagGroup->connection = $group['connection'] ?? LimitTagGroup::CONNECTION_OR;
+            $tagGroup->setLimit($limit);
+
+            foreach ($group['tags'] ?? [] as $tag) {
+                $tagGroup->tags->add($tag);
+            }
+
+            $limit->tagGroups[] = $tagGroup;
+        }
+
         $this->persist($limit);
 
         return $limit;
@@ -87,15 +115,15 @@ class LimitFactory extends AbstractFactory
 
     public static function income(?Limit $limit = null): Limit
     {
-        return self::type($limit, Limit::TYPE_INCOME);
+        return self::type(Limit::TYPE_INCOME, $limit);
     }
 
     public static function expense(?Limit $limit = null): Limit
     {
-        return self::type($limit, Limit::TYPE_EXPENSE);
+        return self::type(Limit::TYPE_EXPENSE, $limit);
     }
 
-    public static function type(?Limit $limit = null, string $type): Limit
+    public static function type(string $type, ?Limit $limit = null): Limit
     {
         if ($limit === null) {
             $limit = self::make();

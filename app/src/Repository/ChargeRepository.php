@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Repository;
 
+use App\Database\LimitTagGroup;
 use App\Service\Filter\Filter;
 use Cycle\Database\Injection\Expression;
 use Cycle\Database\Injection\Fragment;
@@ -131,10 +132,16 @@ class ChargeRepository extends Repository
      * @param int $walletId
      * @param array<int, int> $tagIds
      * @param string|null $type
+     * @param string $connection LimitTagGroup::CONNECTION_AND requires a charge to carry every tag in $tagIds;
+     *                           LimitTagGroup::CONNECTION_OR requires only one of them.
      * @return float
      */
-    public function totalByWalletPKAndTagPKs(int $walletId, array $tagIds, ?string $type = null): float
-    {
+    public function totalByWalletPKAndTagPKs(
+        int $walletId,
+        array $tagIds,
+        ?string $type = null,
+        string $connection = LimitTagGroup::CONNECTION_AND,
+    ): float {
         /** @psalm-suppress InternalClass */
         $query = $this->select()->where('wallet_id', $walletId)->with('tags', [
             'method' => AbstractLoader::LEFT_JOIN,
@@ -153,8 +160,11 @@ class ChargeRepository extends Repository
 
         $query = $query->buildQuery()
                        ->columns([$chargesIdCol, $chargesAmountCol])
-                       ->groupBy($chargesIdCol)
-                       ->having(new Fragment("count(distinct {$tagsIdCol}) = ?", count($tagIds)));
+                       ->groupBy($chargesIdCol);
+
+        if ($connection === LimitTagGroup::CONNECTION_AND) {
+            $query = $query->having(new Fragment("count(distinct {$tagsIdCol}) = ?", count($tagIds)));
+        }
 
         return (float) $this->select()
                             ->buildQuery()

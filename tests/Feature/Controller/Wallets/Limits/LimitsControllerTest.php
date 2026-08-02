@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Controller\Wallets\Limits;
 
+use App\Database\LimitTagGroup;
 use App\Service\Limit\LimitService;
 use PHPUnit\Framework\MockObject\MockObject;
 use Tests\DatabaseTransaction;
@@ -36,6 +37,24 @@ class LimitsControllerTest extends TestCase implements DatabaseTransaction
         $this->limitFactory = $this->getContainer()->get(LimitFactory::class);
         $this->tagFactory = $this->getContainer()->get(TagFactory::class);
         $this->chargeFactory = $this->getContainer()->get(ChargeFactory::class);
+    }
+
+    /**
+     * Fetches the `limit_tag_group_id` of the (only) group created for a limit and
+     * asserts the pivot row linking it to $tagId exists.
+     */
+    protected function assertTagGroupHasTag(int $limitId, int $tagId): void
+    {
+        $groups = $this->queryDatabase('limit_tag_groups', ['limit_id' => $limitId]);
+
+        $this->assertNotEmpty($groups, "No limit_tag_groups row found for limit {$limitId}");
+
+        $groupIds = array_column($groups, 'id');
+
+        $this->assertDatabaseHas('tag_limit_tag_groups', [
+            'limit_tag_group_id' => ['in' => $groupIds],
+            'tag_id' => $tagId,
+        ]);
     }
 
     public function testListRequireAuth(): void
@@ -102,11 +121,15 @@ class LimitsControllerTest extends TestCase implements DatabaseTransaction
         $this->chargeFactory->forUser($user)->forWallet($wallet)->createMany(4);
 
         $tag = $this->tagFactory->forUser($user)->create();
-        $limit = $this->limitFactory->forWallet($wallet)->withTags([$tag])->create();
+        $limit = $this->limitFactory->forWallet($wallet)->withTagGroups([
+            ['connection' => LimitTagGroup::CONNECTION_AND, 'tags' => [$tag]],
+        ])->create();
         $charges = $this->chargeFactory->forUser($user)->forWallet($wallet)->withTags([$tag])->createMany(4);
 
         $tags = $this->tagFactory->forUser($user)->createMany(2);
-        $limitWithTwoTags = $this->limitFactory->forWallet($wallet)->withTags($tags->toArray())->create();
+        $limitWithTwoTags = $this->limitFactory->forWallet($wallet)->withTagGroups([
+            ['connection' => LimitTagGroup::CONNECTION_AND, 'tags' => $tags->toArray()],
+        ])->create();
         $chargesWithTwoTags = $this->chargeFactory->forUser($user)->forWallet($wallet)->withTags($tags->toArray())->createMany(4);
 
         $chargesTotal = 0;
@@ -153,20 +176,87 @@ class LimitsControllerTest extends TestCase implements DatabaseTransaction
         foreach ($body['data'] as $limitData) {
             $this->assertArrayHasKey('limit', $limitData);
             $this->assertArrayHasKey('amount', $limitData['limit']);
+            $this->assertEquals([], $limitData['limit']['tags']);
+
             if ((string) $limitData['limit']['amount'] === (string) $limit->amount) {
                 $this->assertEquals((string) $chargesTotal, (string) ($limitData['amount'] ?? null));
                 $this->assertEquals($limit->type, $limitData['limit']['operation'] ?? null);
                 $this->assertEquals($limit->amount, $limitData['limit']['amount'] ?? null);
-                $this->assertArrayContains($tag->id, $limitData['limit']['tags'], '*.id');
+                $this->assertArrayContains($tag->id, $limitData['limit']['tagGroups'], '*.tags.*.id');
             } else {
                 $this->assertEquals((string) $chargesWithTwoTagsTotal, (string) $limitData['amount']);
                 $this->assertEquals($limitWithTwoTags->type, $limitData['limit']['operation'] ?? null);
                 $this->assertEquals($limitWithTwoTags->amount, $limitData['limit']['amount'] ?? null);
                 foreach ($tags as $item) {
-                    $this->assertArrayContains($item->id, $limitData['limit']['tags'], '*.id');
+                    $this->assertArrayContains($item->id, $limitData['limit']['tagGroups'], '*.tags.*.id');
                 }
             }
         }
+    }
+
+    public function testListReturnLimitsSumsAcrossGroupsWithoutDedup(): void
+    {
+        $auth = $this->makeAuth($user = $this->userFactory->create());
+        $wallet = $this->walletFactory->forUser($user)->create();
+
+        $tagA = $this->tagFactory->forUser($user)->create();
+        $tagB = $this->tagFactory->forUser($user)->create();
+
+        // Charge matches both group A ([tagA], AND) and group B ([tagB], OR).
+        $charge = ChargeFactory::expense();
+        $charge->amount = 42.5;
+        $sharedCharge = $this->chargeFactory->forUser($user)->forWallet($wallet)
+            ->withTags([$tagA, $tagB])
+            ->create($charge);
+
+        $this->limitFactory->forWallet($wallet)
+            ->withTagGroups([
+                ['connection' => LimitTagGroup::CONNECTION_AND, 'tags' => [$tagA]],
+                ['connection' => LimitTagGroup::CONNECTION_OR, 'tags' => [$tagB]],
+            ])
+            ->create(LimitFactory::expense());
+
+        $response = $this->withAuth($auth)->get("/wallets/{$wallet->id}/limits");
+
+        $response->assertOk();
+
+        $body = $this->getJsonResponseBody($response);
+
+        $this->assertCount(1, $body['data']);
+
+        // The shared charge matches both groups, so it must be counted twice (no dedup).
+        $expected = round($sharedCharge->amount * 2, 2);
+        $this->assertEquals((string) $expected, (string) $body['data'][0]['amount']);
+    }
+
+    public function testListReturnLimitsSkipsEmptyTagGroups(): void
+    {
+        $auth = $this->makeAuth($user = $this->userFactory->create());
+        $wallet = $this->walletFactory->forUser($user)->create();
+
+        $tag = $this->tagFactory->forUser($user)->create();
+
+        $charge = ChargeFactory::expense();
+        $charge->amount = 20.0;
+        $this->chargeFactory->forUser($user)->forWallet($wallet)->withTags([$tag])->create($charge);
+
+        // A group with no tags (not reachable through the API's validation, but possible
+        // for pre-existing data) must be skipped rather than break the calculation.
+        $this->limitFactory->forWallet($wallet)
+            ->withTagGroups([
+                ['connection' => LimitTagGroup::CONNECTION_AND, 'tags' => [$tag]],
+                ['connection' => LimitTagGroup::CONNECTION_OR, 'tags' => []],
+            ])
+            ->create(LimitFactory::expense());
+
+        $response = $this->withAuth($auth)->get("/wallets/{$wallet->id}/limits");
+
+        $response->assertOk();
+
+        $body = $this->getJsonResponseBody($response);
+
+        $this->assertCount(1, $body['data']);
+        $this->assertEquals((string) $charge->amount, (string) $body['data'][0]['amount']);
     }
 
     public function testCreateRequireAuth(): void
@@ -178,7 +268,7 @@ class LimitsControllerTest extends TestCase implements DatabaseTransaction
         $response = $this->post("/wallets/{$wallet->id}/limits", [
             'type' => $limit->type,
             'amount' => $limit->amount,
-            'tags' => null,
+            'tagGroups' => null,
         ]);
 
         $response->assertUnauthorized();
@@ -193,7 +283,7 @@ class LimitsControllerTest extends TestCase implements DatabaseTransaction
         $response = $this->post("/wallets/{$walletId}/limits", [
             'type' => $limit->type,
             'amount' => $limit->amount,
-            'tags' => null,
+            'tagGroups' => null,
         ]);
 
         $response->assertUnauthorized();
@@ -211,7 +301,7 @@ class LimitsControllerTest extends TestCase implements DatabaseTransaction
         $response = $this->withAuth($auth)->post("/wallets/{$walletId}/limits", [
             'type' => $limit->type,
             'amount' => $limit->amount,
-            'tags' => [$tag->id],
+            'tagGroups' => [['operation' => 'and', 'tags' => [$tag->id]]],
         ]);
 
         $response->assertNotFound();
@@ -229,7 +319,7 @@ class LimitsControllerTest extends TestCase implements DatabaseTransaction
         $response = $this->withAuth($auth)->post("/wallets/{$wallet->id}/limits", [
             'type' => $limit->type,
             'amount' => $limit->amount,
-            'tags' => [$tag->id],
+            'tagGroups' => [['operation' => 'and', 'tags' => [$tag->id]]],
         ]);
 
         $response->assertNotFound();
@@ -238,22 +328,27 @@ class LimitsControllerTest extends TestCase implements DatabaseTransaction
     public function createValidationFailsDataProvider(): array
     {
         return [
-            [[], ['type', 'amount', 'tags']],
+            [[], ['type', 'amount', 'tagGroups']],
             [[
                 'type' => 'W',
                 'amount' => 'false',
-                'tags' => false,
-            ], ['type', 'amount', 'tags',]],
+                'tagGroups' => false,
+            ], ['type', 'amount', 'tagGroups']],
             [[
                 'type' => '+',
                 'amount' => 0,
-                'tags' => [],
-            ], ['amount', 'tags']],
+                'tagGroups' => [],
+            ], ['amount', 'tagGroups']],
             [[
                 'type' => '+',
                 'amount' => -1,
-                'tags' => [-1],
-            ], ['amount', 'tags']],
+                'tagGroups' => [['operation' => 'and', 'tags' => [-1]]],
+            ], ['amount', 'tagGroups']],
+            [[
+                'type' => '+',
+                'amount' => 1,
+                'tagGroups' => [['operation' => 'xor', 'tags' => [-1]]],
+            ], ['tagGroups']],
         ];
     }
 
@@ -294,7 +389,7 @@ class LimitsControllerTest extends TestCase implements DatabaseTransaction
         $response = $this->withAuth($auth)->post("/wallets/{$wallet->id}/limits", [
             'type' => $limit->type,
             'amount' => $limit->amount,
-            'tags' => $tags->map(fn($tag) => $tag->id)->toArray(),
+            'tagGroups' => [['operation' => 'and', 'tags' => $tags->map(fn($tag) => $tag->id)->toArray()]],
         ]);
 
         $response->assertOk();
@@ -304,6 +399,9 @@ class LimitsControllerTest extends TestCase implements DatabaseTransaction
         $this->assertArrayHasKey('id', $body['data']);
         $this->assertArrayContains($limit->type, $body, 'data.operation');
         $this->assertArrayContains($limit->amount, $body, 'data.amount');
+        $this->assertEquals([], $body['data']['tags']);
+        $this->assertCount(1, $body['data']['tagGroups']);
+        $this->assertEquals('and', $body['data']['tagGroups'][0]['connection']);
 
         $this->assertDatabaseHas('limits', [
             'type' => $limit->type,
@@ -311,12 +409,51 @@ class LimitsControllerTest extends TestCase implements DatabaseTransaction
             'wallet_id' => $wallet->id,
         ]);
 
+        $this->assertDatabaseHas('limit_tag_groups', [
+            'limit_id' => $body['data']['id'],
+            'connection' => 'and',
+        ]);
+
         foreach ($tags as $tag) {
-            $this->assertDatabaseHas('tag_limits', [
-                'tag_id' => $tag->id,
-                'limit_id' => $body['data']['id'],
-            ]);
+            $this->assertTagGroupHasTag((int) $body['data']['id'], (int) $tag->id);
         }
+    }
+
+    public function testCreateStoreLimitWithMultipleTagGroups(): void
+    {
+        $auth = $this->makeAuth($user = $this->userFactory->create());
+
+        $wallet = $this->walletFactory->forUser($user)->create();
+
+        $limit = LimitFactory::make();
+        $tagA = $this->tagFactory->forUser($user)->create();
+        $tagB = $this->tagFactory->forUser($user)->create();
+        $tagC = $this->tagFactory->forUser($user)->create();
+
+        $response = $this->withAuth($auth)->post("/wallets/{$wallet->id}/limits", [
+            'type' => $limit->type,
+            'amount' => $limit->amount,
+            'tagGroups' => [
+                ['operation' => 'and', 'tags' => [$tagA->id]],
+                ['operation' => 'or', 'tags' => [$tagB->id, $tagC->id]],
+            ],
+        ]);
+
+        $response->assertOk();
+
+        $body = $this->getJsonResponseBody($response);
+
+        $this->assertCount(2, $body['data']['tagGroups']);
+
+        $connections = array_map(fn($group) => $group['connection'], $body['data']['tagGroups']);
+        sort($connections);
+        $this->assertEquals(['and', 'or'], $connections);
+
+        $this->assertArrayContains($tagA->id, $body['data']['tagGroups'], '*.tags.*.id');
+        $this->assertArrayContains($tagB->id, $body['data']['tagGroups'], '*.tags.*.id');
+        $this->assertArrayContains($tagC->id, $body['data']['tagGroups'], '*.tags.*.id');
+
+        $this->assertDatabaseCount(2, 'limit_tag_groups', ['limit_id' => $body['data']['id']]);
     }
 
     public function testCreateThrownException(): void
@@ -335,7 +472,7 @@ class LimitsControllerTest extends TestCase implements DatabaseTransaction
         $response = $this->withAuth($auth)->post("/wallets/{$wallet->id}/limits", [
             'type' => $limit->type,
             'amount' => $limit->amount,
-            'tags' => $tags->map(fn($tag) => $tag->id)->toArray(),
+            'tagGroups' => [['operation' => 'and', 'tags' => $tags->map(fn($tag) => $tag->id)->toArray()]],
         ]);
 
         $response->assertStatus(500);
@@ -404,7 +541,7 @@ class LimitsControllerTest extends TestCase implements DatabaseTransaction
         $response = $this->withAuth($auth)->put("/wallets/{$walletId}/limits/{$limitId}", [
             'type' => $updatedLimit->type,
             'amount' => $updatedLimit->amount,
-            'tags' => [$tag->id],
+            'tagGroups' => [['operation' => 'and', 'tags' => [$tag->id]]],
         ]);
 
         $response->assertNotFound();
@@ -422,7 +559,7 @@ class LimitsControllerTest extends TestCase implements DatabaseTransaction
         $response = $this->withAuth($auth)->put("/wallets/{$wallet->id}/limits/{$limitId}", [
             'type' => $updatedLimit->type,
             'amount' => $updatedLimit->amount,
-            'tags' => [$tag->id],
+            'tagGroups' => [['operation' => 'and', 'tags' => [$tag->id]]],
         ]);
 
         $response->assertNotFound();
@@ -440,7 +577,7 @@ class LimitsControllerTest extends TestCase implements DatabaseTransaction
         $response = $this->withAuth($auth)->put("/wallets/{$wallet->id}/limits/{$limit->id}", [
             'type' => $updatedLimit->type,
             'amount' => $updatedLimit->amount,
-            'tags' => [$tag->id],
+            'tagGroups' => [['operation' => 'and', 'tags' => [$tag->id]]],
         ]);
 
         $response->assertNotFound();
@@ -449,22 +586,22 @@ class LimitsControllerTest extends TestCase implements DatabaseTransaction
     public function updateValidationFailsDataProvider(): array
     {
         return [
-            [[], ['type', 'amount', 'tags']],
+            [[], ['type', 'amount', 'tagGroups']],
             [[
                 'type' => 'W',
                 'amount' => 'false',
-                'tags' => '',
-            ], ['type', 'amount', 'tags']],
+                'tagGroups' => '',
+            ], ['type', 'amount', 'tagGroups']],
             [[
                 'type' => '+',
                 'amount' => 0,
-                'tags' => [],
-            ], ['amount', 'tags']],
+                'tagGroups' => [],
+            ], ['amount', 'tagGroups']],
             [[
                 'type' => '+',
                 'amount' => -1,
-                'tags' => [-1],
-            ], ['amount', 'tags']],
+                'tagGroups' => [['operation' => 'and', 'tags' => [-1]]],
+            ], ['amount', 'tagGroups']],
         ];
     }
 
@@ -503,7 +640,7 @@ class LimitsControllerTest extends TestCase implements DatabaseTransaction
         $response = $this->withAuth($auth)->post("/wallets/{$wallet->id}/limits", [
             'type' => $limit->type,
             'amount' => $limit->amount,
-            'tags' => [$tag->id],
+            'tagGroups' => [['operation' => 'and', 'tags' => [$tag->id]]],
         ]);
 
         $response->assertOk();
@@ -516,17 +653,16 @@ class LimitsControllerTest extends TestCase implements DatabaseTransaction
         $response = $this->withAuth($auth)->put("/wallets/{$wallet->id}/limits/{$limitId}", [
             'type' => $updatedLimit->type,
             'amount' => $updatedLimit->amount,
-            'tags' => [$updatedTag->id],
+            'tagGroups' => [['operation' => 'or', 'tags' => [$updatedTag->id]]],
         ]);
 
         $response->assertOk();
 
         $body = $this->getJsonResponseBody($response);
 
-
         $this->assertArrayContains($updatedLimit->type, $body, 'data.operation');
         $this->assertArrayContains($updatedLimit->amount, $body, 'data.amount');
-        $this->assertArrayContains($updatedTag->id, $body, 'data.tags.*.id');
+        $this->assertArrayContains($updatedTag->id, $body, 'data.tagGroups.*.tags.*.id');
 
         $this->assertDatabaseHas('limits', [
             'type' => $updatedLimit->type,
@@ -534,10 +670,15 @@ class LimitsControllerTest extends TestCase implements DatabaseTransaction
             'wallet_id' => $wallet->id,
         ]);
 
-        $this->assertDatabaseHas('tag_limits', [
-            'tag_id' => $updatedTag->id,
+        $this->assertDatabaseHas('limit_tag_groups', [
             'limit_id' => $limitId,
+            'connection' => 'or',
         ]);
+        $this->assertTagGroupHasTag((int) $limitId, (int) $updatedTag->id);
+
+        // Old group's tag must no longer be attached to this limit.
+        $oldGroups = $this->queryDatabase('limit_tag_groups', ['limit_id' => $limitId]);
+        $this->assertCount(1, $oldGroups);
     }
 
     public function testUpdateThrownException(): void
@@ -557,7 +698,7 @@ class LimitsControllerTest extends TestCase implements DatabaseTransaction
         $response = $this->withAuth($auth)->put("/wallets/{$wallet->id}/limits/{$limit->id}", [
             'type' => $updatedLimit->type,
             'amount' => $updatedLimit->amount,
-            'tags' => [$tag->id],
+            'tagGroups' => [['operation' => 'and', 'tags' => [$tag->id]]],
         ]);
 
         $response->assertStatus(500);
@@ -642,7 +783,7 @@ class LimitsControllerTest extends TestCase implements DatabaseTransaction
         $response = $this->withAuth($auth)->post("/wallets/{$wallet->id}/limits", [
             'type' => $limit->type,
             'amount' => $limit->amount,
-            'tags' => [$tag->id],
+            'tagGroups' => [['operation' => 'and', 'tags' => [$tag->id]]],
         ]);
 
         $response->assertOk();
@@ -659,8 +800,7 @@ class LimitsControllerTest extends TestCase implements DatabaseTransaction
             'wallet_id' => $wallet->id,
         ]);
 
-        $this->assertDatabaseMissing('tag_limits', [
-            'tag_id' => $tag->id,
+        $this->assertDatabaseMissing('limit_tag_groups', [
             'limit_id' => $limitId,
         ]);
 
@@ -753,7 +893,9 @@ class LimitsControllerTest extends TestCase implements DatabaseTransaction
 
         $sourceWallet = $this->walletFactory->forUser($user)->create();
         $tags = $this->tagFactory->forUser($user)->createMany(2);
-        $limits = $this->limitFactory->forWallet($sourceWallet)->withTags($tags->toArray())->createMany(2);
+        $limits = $this->limitFactory->forWallet($sourceWallet)->withTagGroups([
+            ['connection' => LimitTagGroup::CONNECTION_AND, 'tags' => $tags->toArray()],
+        ])->createMany(2);
 
         $response = $this->withAuth($auth)->post("/wallets/{$wallet->id}/limits/copy/{$sourceWallet->id}");
 
@@ -771,10 +913,11 @@ class LimitsControllerTest extends TestCase implements DatabaseTransaction
             $this->assertArrayContains($limit->amount, $body, 'data.*.limit.amount');
             $this->assertArrayContains($wallet->id, $body, 'data.*.limit.walletId');
 
-            $this->assertArrayHasKey('tags', $body['data'][$i]['limit']);
-            $this->assertCount(count($limits), $body['data'][$i]['limit']['tags']);
+            $this->assertArrayHasKey('tagGroups', $body['data'][$i]['limit']);
+            $this->assertCount(1, $body['data'][$i]['limit']['tagGroups']);
+            $this->assertCount(count($tags), $body['data'][$i]['limit']['tagGroups'][0]['tags']);
             foreach ($tags as $tag) {
-                $this->assertArrayContains($tag->id, $body['data'][$i], 'limit.tags.*.id');
+                $this->assertArrayContains($tag->id, $body['data'][$i]['limit']['tagGroups'], '*.tags.*.id');
             }
         }
     }
@@ -787,7 +930,9 @@ class LimitsControllerTest extends TestCase implements DatabaseTransaction
 
         $sourceWallet = $this->walletFactory->forUser($user)->create();
         $tags = $this->tagFactory->forUser($user)->createMany(2);
-        $this->limitFactory->forWallet($sourceWallet)->withTags($tags->toArray())->createMany(2);
+        $this->limitFactory->forWallet($sourceWallet)->withTagGroups([
+            ['connection' => LimitTagGroup::CONNECTION_AND, 'tags' => $tags->toArray()],
+        ])->createMany(2);
 
         $this->mock(LimitService::class, ['copy'], function (MockObject $mock) {
             $mock->expects($this->once())->method('copy')->willThrowException(new \RuntimeException());

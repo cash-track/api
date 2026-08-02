@@ -9,6 +9,7 @@ return [
     'error_loading_default_currency'        => 'Unable to load default currency.',
     'error_password_confirmation_not_match' => 'The password confirmation does not match.',
     'error_wallet_does_not_exists'          => 'One or more wallets does not exists.',
+    'error_limit_tag_groups_invalid'        => 'Tag groups are not valid.',
     'error_nick_name_claimed'               => 'Nick name already claimed.',
     'error_value_is_not_unique'             => 'Value should be unique.',
     'error_profile_not_confirmed'           => 'You are not allowed to perform this action as your profile is not confirmed.',

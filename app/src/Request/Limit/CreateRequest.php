@@ -23,10 +23,10 @@ class CreateRequest extends Filter implements HasFilterDefinition
     public float $amount = 0.0;
 
     /**
-     * @var array<array-key, int>
+     * @var array<array-key, array{operation: string, tags: array<array-key, int>}>
      */
     #[Data]
-    public array $tags = [];
+    public array $tagGroups = [];
 
     #[\Override]
     public function filterDefinition(): FilterDefinitionInterface
@@ -41,10 +41,10 @@ class CreateRequest extends Filter implements HasFilterDefinition
                 'type::notEmpty',
                 ['number::higher', 0]
             ],
-            'tags' => [
+            'tagGroups' => [
                 'type::notEmpty',
                 ['array::longer', 0],
-                ['array::of', ['entity:exists', Tag::class, 'id']],
+                ['limit-tag-groups::valid', Tag::class],
             ],
         ]);
     }
