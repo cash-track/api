@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Bootloader;
 
 use App\Security\EncryptedEntityChecker;
+use App\Security\LimitTagGroupsChecker;
 use App\Security\PasswordChecker;
 use App\Security\UniqueChecker;
 use Spiral\Boot\Bootloader\Bootloader;
@@ -17,5 +18,6 @@ final class CheckerBootloader extends Bootloader
         $validation->addChecker('password', PasswordChecker::class);
         $validation->addChecker('unique', UniqueChecker::class);
         $validation->addChecker('encrypted-entity', EncryptedEntityChecker::class);
+        $validation->addChecker('limit-tag-groups', LimitTagGroupsChecker::class);
     }
 }

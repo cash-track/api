@@ -9,6 +9,7 @@ return [
     'error_loading_default_currency'        => 'Неможливо завантажити валюту за замовчуванням.',
     'error_password_confirmation_not_match' => 'Підтвердження паролю не збігається.',
     'error_wallet_does_not_exists'          => 'Один чи більше гаманець більше не існує.',
+    'error_limit_tag_groups_invalid'        => 'Групи тегів некоректні.',
     'error_nick_name_claimed'               => 'Нікнейм вже зайнято.',
     'error_value_is_not_unique'             => 'Значення має бути унікальним.',
     'error_profile_not_confirmed'           => 'Вам не дозволено здійснити бажану операцію, так як Ваш профіль не підтверджено.',

@@ -48,6 +48,12 @@ class Limit
     #[ORM\Relation\ManyToMany(target: Tag::class, through: TagLimit::class, collection: 'doctrine')]
     public PivotedCollection $tags;
 
+    /**
+     * @var array<int, \App\Database\LimitTagGroup>
+     */
+    #[ORM\Relation\HasMany(target: LimitTagGroup::class, outerKey: 'limit_id', collection: 'array')]
+    public array $tagGroups = [];
+
     public function __construct()
     {
         $this->wallet = new Wallet();
@@ -83,5 +89,23 @@ class Limit
         }
 
         return $tags;
+    }
+
+    /**
+     * @return array<int, \App\Database\LimitTagGroup>
+     */
+    public function getTagGroups(): array
+    {
+        $tagGroups = [];
+
+        foreach ($this->tagGroups as $tagGroup) {
+            if (! $tagGroup instanceof LimitTagGroup) {
+                continue;
+            }
+
+            $tagGroups[] = $tagGroup;
+        }
+
+        return $tagGroups;
     }
 }

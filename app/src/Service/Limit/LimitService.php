@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Service\Limit;
 
 use App\Database\Limit;
+use App\Database\LimitTagGroup;
 use App\Database\Tag;
 use App\Database\Wallet;
 use App\Repository\ChargeRepository;
@@ -31,20 +32,33 @@ class LimitService
         // TODO. Aggregate all limits using 1 query
 
         foreach ($limits as $limit) {
-            $tagIds = array_map(fn (Tag $tag) => (int) $tag->id, $limit->getTags());
+            $limitAmount = 0.0;
+            $correctionAmount = 0.0;
 
-            $limitAmount = $this->chargeRepository->totalByWalletPKAndTagPKs(
-                $limit->walletId,
-                $tagIds,
-                $limit->type
-            );
+            // Each group's amount is summed literally: charges matched by more than one
+            // group are counted again for every group they match, by design.
+            foreach ($limit->getTagGroups() as $tagGroup) {
+                $tagIds = array_map(fn (Tag $tag) => (int) $tag->id, $tagGroup->getTags());
 
-            // calculate total for opposite limit type to get the correction amount
-            $correctionAmount = $this->chargeRepository->totalByWalletPKAndTagPKs(
-                $limit->walletId,
-                $tagIds,
-                $limit->type == Limit::TYPE_INCOME ? Limit::TYPE_EXPENSE : Limit::TYPE_INCOME,
-            );
+                if ($tagIds === []) {
+                    continue;
+                }
+
+                $limitAmount += $this->chargeRepository->totalByWalletPKAndTagPKs(
+                    $limit->walletId,
+                    $tagIds,
+                    $limit->type,
+                    $tagGroup->connection,
+                );
+
+                // calculate total for opposite limit type to get the correction amount
+                $correctionAmount += $this->chargeRepository->totalByWalletPKAndTagPKs(
+                    $limit->walletId,
+                    $tagIds,
+                    $limit->type == Limit::TYPE_INCOME ? Limit::TYPE_EXPENSE : Limit::TYPE_INCOME,
+                    $tagGroup->connection,
+                );
+            }
 
             $amount = 0;
 
@@ -71,6 +85,7 @@ class LimitService
     {
         $sourceLimits = $this->limitRepository->findAllByWalletPK((int) $source->id);
 
+        $limits = [];
         $list = [];
 
         foreach ($sourceLimits as $sourceLimit) {
@@ -81,13 +96,25 @@ class LimitService
             $limit->amount = $sourceLimit->amount;
             $limit->setWallet($target);
 
-            foreach ($sourceLimit->tags as $tag) {
-                $limit->tags->add($tag);
+            foreach ($sourceLimit->getTagGroups() as $sourceTagGroup) {
+                $tagGroup = new LimitTagGroup();
+                $tagGroup->connection = $sourceTagGroup->connection;
+                $tagGroup->setLimit($limit);
+
+                foreach ($sourceTagGroup->getTags() as $tag) {
+                    $tagGroup->tags->add($tag);
+                }
+
+                $limit->tagGroups[] = $tagGroup;
             }
 
-            $this->tr->persist($limit);
+            $limits[] = $limit;
 
             $list[] = new WalletLimit($limit, 0);
+        }
+
+        foreach ($limits as $limit) {
+            $this->tr->persist($limit);
         }
 
         $this->tr->run();

@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\View;
 
 use App\Database\Limit;
-use App\Database\Tag;
 use App\Database\Wallet;
 use Psr\Http\Message\ResponseInterface;
 use Spiral\Core\Attribute\Singleton;
@@ -18,10 +17,9 @@ final class LimitView
 
     public function __construct(
         protected ResponseWrapper $response,
-        protected TagsView $tagsView,
+        protected LimitTagGroupView $limitTagGroupView,
         protected WalletShortView $walletShortView,
     ) {
-        $this->withRelations([Tag::class]);
     }
 
     public function json(Limit $limit): ResponseInterface
@@ -46,7 +44,8 @@ final class LimitView
             'createdAt'   => $limit->createdAt->format(DATE_W3C),
             'updatedAt'   => $limit->updatedAt->format(DATE_W3C),
 
-            'tags'        => $this->loaded(Tag::class) ? $this->tagsView->map($limit->getTags()) : [],
+            'tags'        => [],
+            'tagGroups'   => $this->limitTagGroupView->map($limit->getTagGroups()),
             'wallet'      => $this->loaded(Wallet::class) ? $this->walletShortView->map($limit->getWallet()) : null,
         ];
     }

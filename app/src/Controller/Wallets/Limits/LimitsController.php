@@ -6,6 +6,7 @@ namespace App\Controller\Wallets\Limits;
 
 use App\Controller\Wallets\Controller;
 use App\Database\Limit;
+use App\Database\LimitTagGroup;
 use App\Database\Wallet;
 use App\Repository\LimitRepository;
 use App\Repository\TagRepository;
@@ -66,11 +67,7 @@ final class LimitsController extends Controller
         $limit->amount = $request->amount;
         $limit->setWallet($wallet);
 
-        $tags = $this->tagRepository->findAllByPKsAndUserPKs($request->tags, $wallet->getUserIDs());
-
-        foreach ($tags as $tag) {
-            $limit->tags->add($tag);
-        }
+        $this->attachTagGroups($limit, $request->tagGroups, $wallet->getUserIDs());
 
         try {
             $this->limitService->store($limit);
@@ -109,12 +106,8 @@ final class LimitsController extends Controller
         $limit->type = $request->type;
         $limit->amount = $request->amount;
 
-        $limit->tags->clear();
-        $tags = $this->tagRepository->findAllByPKsAndUserPKs($request->tags, $wallet->getUserIDs());
-
-        foreach ($tags as $tag) {
-            $limit->tags->add($tag);
-        }
+        $limit->tagGroups = [];
+        $this->attachTagGroups($limit, $request->tagGroups, $wallet->getUserIDs());
 
         try {
             $this->limitService->store($limit);
@@ -202,5 +195,26 @@ final class LimitsController extends Controller
         }
 
         return $this->walletLimitsView->json($limits);
+    }
+
+    /**
+     * @param array<array-key, array{operation: string, tags: array<array-key, int>}> $tagGroups
+     * @param array<array-key, int> $userIDs
+     */
+    private function attachTagGroups(Limit $limit, array $tagGroups, array $userIDs): void
+    {
+        foreach ($tagGroups as $group) {
+            $tagGroup = new LimitTagGroup();
+            $tagGroup->connection = $group['operation'] ?? LimitTagGroup::CONNECTION_OR;
+            $tagGroup->setLimit($limit);
+
+            $tags = $this->tagRepository->findAllByPKsAndUserPKs($group['tags'] ?? [], $userIDs);
+
+            foreach ($tags as $tag) {
+                $tagGroup->tags->add($tag);
+            }
+
+            $limit->tagGroups[] = $tagGroup;
+        }
     }
 }

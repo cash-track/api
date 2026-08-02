@@ -29,4 +29,12 @@ class LimitTest extends TestCase
 
         $this->assertCount(0, $limit->getTags());
     }
+
+    public function testGetTagGroupsVerifyType(): void
+    {
+        $limit = new Limit();
+        $limit->tagGroups[] = null;
+
+        $this->assertCount(0, $limit->getTagGroups());
+    }
 }

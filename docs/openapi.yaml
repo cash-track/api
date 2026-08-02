@@ -1596,9 +1596,9 @@ paths:
       operationId: limitCreate
       summary: Create a budget limit
       description: |
-        Creates a new budget limit for a set of tags within a wallet.
-        Requires at least one tag. The limit fires when charges matching the
-        given tags exceed `amount`.
+        Creates a new budget limit for a wallet from one or more tag groups.
+        Requires at least one tag group. The limit fires when the summed
+        charges matching each group's tags exceed `amount`.
       tags: [Limits]
       security:
         - bearerAuth: []
@@ -2883,9 +2883,35 @@ components:
     # -----------------------------------------------------------------------
     # LIMIT
     # -----------------------------------------------------------------------
+    LimitTagGroup:
+      type: object
+      description: |
+        A group of tags within a limit. Charges are matched against each group
+        independently using its `connection` (`and` requires every tag in the
+        group to be present on a charge, `or` requires any one of them); the
+        limit's totals are the sum across all its groups, without deduplicating
+        charges matched by more than one group.
+      required:
+        - type
+        - connection
+        - tags
+      properties:
+        type:
+          type: string
+          enum: [limitTagGroup]
+          readOnly: true
+        connection:
+          type: string
+          enum: ["and", "or"]
+          description: How this group's tags are matched against a charge's tags
+        tags:
+          type: array
+          items:
+            $ref: "#/components/schemas/Tag"
+
     Limit:
       type: object
-      description: A budget ceiling for charges matching a set of tags in a wallet.
+      description: A budget ceiling for charges matching a set of tag groups in a wallet.
       required:
         - type
         - id
@@ -2895,6 +2921,7 @@ components:
         - createdAt
         - updatedAt
         - tags
+        - tagGroups
       properties:
         type:
           type: string
@@ -2925,6 +2952,12 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/Tag"
+          deprecated: true
+          description: Deprecated, always empty. Use `tagGroups` instead.
+        tagGroups:
+          type: array
+          items:
+            $ref: "#/components/schemas/LimitTagGroup"
         wallet:
           $ref: "#/components/schemas/WalletShort"
 
@@ -2948,12 +2981,29 @@ components:
         limit:
           $ref: "#/components/schemas/Limit"
 
+    CreateLimitTagGroupRequest:
+      type: object
+      required:
+        - operation
+        - tags
+      properties:
+        operation:
+          type: string
+          enum: ["and", "or"]
+          description: How this group's tags are matched against a charge's tags
+        tags:
+          type: array
+          minItems: 1
+          items:
+            type: integer
+          description: Tag IDs in this group (min 1)
+
     CreateLimitRequest:
       type: object
       required:
         - type
         - amount
-        - tags
+        - tagGroups
       properties:
         type:
           type: string
@@ -2965,10 +3015,19 @@ components:
           minimum: 0.01
         tags:
           type: array
-          minItems: 1
           items:
             type: integer
-          description: Tag IDs that this limit applies to (min 1)
+          deprecated: true
+          description: Deprecated and ignored. Use `tagGroups` instead.
+        tagGroups:
+          type: array
+          minItems: 1
+          items:
+            $ref: "#/components/schemas/CreateLimitTagGroupRequest"
+          description: |
+            Tag groups this limit applies to (min 1). Each group's tags are
+            matched using its own `operation`; totals are summed across groups
+            without deduplicating charges matched by more than one group.
 
     # -----------------------------------------------------------------------
     # CURRENCY

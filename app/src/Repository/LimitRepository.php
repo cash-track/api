@@ -19,7 +19,7 @@ class LimitRepository extends Repository
     public function findByPKByWalletPK(int $limitId, int $walletId)
     {
         return $this->select()
-                    ->load('tags')
+                    ->load('tagGroups.tags')
                     ->wherePK($limitId)
                     ->where('wallet_id', $walletId)
                     ->fetchOne();
@@ -32,7 +32,7 @@ class LimitRepository extends Repository
     public function findAllByWalletPK(int $walletId): array
     {
         return $this->select()
-                    ->load('tags')
+                    ->load('tagGroups.tags')
                     ->where('wallet_id', $walletId)
                     ->fetchAll();
     }
