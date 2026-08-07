@@ -12,12 +12,14 @@ use App\Repository\UserRepository;
 use App\Service\Auth\Passkey\Exception\InvalidChallengeException;
 use App\Service\Auth\Passkey\Exception\InvalidClientResponseException;
 use App\Service\Auth\Passkey\Exception\PasskeyNotFoundException;
+use App\Service\Auth\Passkey\Exception\PasskeyServiceUnavailableException;
 use App\Service\Auth\Passkey\Exception\UserNotFoundException;
 use App\Service\Auth\Passkey\Response\DataEncoder;
 use App\Service\Auth\Passkey\Response\PasskeyInitResponse;
 use Cose\Algorithm\Manager;
 use Cycle\ORM\EntityManagerInterface;
 use ParagonIE\ConstantTime\Base64UrlSafe;
+use Psr\Log\LoggerInterface;
 use Redis;
 use Symfony\Component\Serializer\SerializerInterface;
 use Webauthn\AttestationStatement\AttestationStatementSupportManager;
@@ -52,6 +54,7 @@ class PasskeyService
         private readonly EntityManagerInterface $tr,
         private readonly PasskeyRepository $repository,
         private readonly UserRepository $userRepository,
+        private readonly LoggerInterface $logger,
     ) {
     }
 
@@ -103,6 +106,9 @@ class PasskeyService
         );
     }
 
+    /**
+     * @throws PasskeyServiceUnavailableException
+     */
     public function initAuth(): \JsonSerializable
     {
         $challenge = $this->generateChallenge();
@@ -130,6 +136,7 @@ class PasskeyService
      * @throws \App\Service\Auth\Passkey\Exception\InvalidClientResponseException
      * @throws \App\Service\Auth\Passkey\Exception\PasskeyNotFoundException
      * @throws \App\Service\Auth\Passkey\Exception\UserNotFoundException
+     * @throws PasskeyServiceUnavailableException
      */
     public function authenticate(string $challenge, string $data): User
     {
@@ -179,6 +186,9 @@ class PasskeyService
         return $user;
     }
 
+    /**
+     * @throws PasskeyServiceUnavailableException
+     */
     public function store(User $user, string $challenge, string $data): Passkey
     {
         $authenticatorAttestationResponseValidator = AuthenticatorAttestationResponseValidator::create(
@@ -231,6 +241,9 @@ class PasskeyService
         return $passkey;
     }
 
+    /**
+     * @throws PasskeyServiceUnavailableException
+     */
     public function init(User $user, string $keyName): \JsonSerializable
     {
         $challenge = $this->generateChallenge();
@@ -271,9 +284,17 @@ class PasskeyService
         $creation = new CreationChallenge($this->getSerializer(), $name, $challenge, $options);
 
         $cacheKey = $this->challengeCacheKey($challenge);
+        // Outside the try block: a serialization failure is a bug, not a Redis outage.
+        $data = $creation->toArray();
 
-        $this->redis->hMSet($cacheKey, $creation->toArray());
-        $this->redis->expire($cacheKey, self::CHALLENGE_TTL_SEC);
+        $this->assertRedisAvailable();
+
+        try {
+            $this->redis->hMSet($cacheKey, $data);
+            $this->redis->expire($cacheKey, self::CHALLENGE_TTL_SEC);
+        } catch (\Throwable $exception) {
+            throw $this->unavailable($exception);
+        }
     }
 
     protected function storeRequestOptions(string $challenge, PublicKeyCredentialRequestOptions $options): void
@@ -281,20 +302,42 @@ class PasskeyService
         $request = new RequestChallenge($this->getSerializer(), $challenge, $options);
 
         $cacheKey = $this->challengeCacheKey($challenge);
+        // Outside the try block: see storeCreationOptions().
+        $data = $request->toArray();
 
-        $this->redis->hMSet($cacheKey, $request->toArray());
-        $this->redis->expire($cacheKey, self::CHALLENGE_TTL_SEC);
+        $this->assertRedisAvailable();
+
+        try {
+            $this->redis->hMSet($cacheKey, $data);
+            $this->redis->expire($cacheKey, self::CHALLENGE_TTL_SEC);
+        } catch (\Throwable $exception) {
+            throw $this->unavailable($exception);
+        }
     }
 
     protected function forgetOptions(string $challenge): void
     {
         $cacheKey = $this->challengeCacheKey($challenge);
-        $this->redis->del($cacheKey);
+
+        $this->assertRedisAvailable();
+
+        try {
+            $this->redis->del($cacheKey);
+        } catch (\Throwable $exception) {
+            throw $this->unavailable($exception);
+        }
     }
 
     protected function getCreationOptions(string $challenge): ?CreationChallenge
     {
-        $data = $this->redis->hGetAll($this->challengeCacheKey($challenge));
+        $this->assertRedisAvailable();
+
+        try {
+            $data = $this->redis->hGetAll($this->challengeCacheKey($challenge));
+        } catch (\Throwable $exception) {
+            throw $this->unavailable($exception);
+        }
+
         if (! is_array($data)) {
             return null;
         }
@@ -304,7 +347,14 @@ class PasskeyService
 
     protected function getRequestOptions(string $challenge): ?RequestChallenge
     {
-        $data = $this->redis->hGetAll($this->challengeCacheKey($challenge));
+        $this->assertRedisAvailable();
+
+        try {
+            $data = $this->redis->hGetAll($this->challengeCacheKey($challenge));
+        } catch (\Throwable $exception) {
+            throw $this->unavailable($exception);
+        }
+
         if (! is_array($data)) {
             return null;
         }
@@ -315,6 +365,32 @@ class PasskeyService
     protected function challengeCacheKey(string $challenge): string
     {
         return "passkeys:challenge:{$challenge}";
+    }
+
+    /**
+     * Triggers ReconnectingRedis's reconnect and turns a still-down Redis into a 503, not a 500.
+     *
+     * @throws PasskeyServiceUnavailableException
+     */
+    private function assertRedisAvailable(): void
+    {
+        if (! $this->redis->isConnected()) {
+            throw new PasskeyServiceUnavailableException('Passkey challenge storage is currently unavailable.');
+        }
+    }
+
+    /** Covers a connected client failing mid-command; logs the original exception, which the response drops. */
+    private function unavailable(\Throwable $exception): PasskeyServiceUnavailableException
+    {
+        $this->logger->error('Passkey challenge storage is unavailable', [
+            'error' => get_class($exception),
+            'message' => $exception->getMessage(),
+        ]);
+
+        return new PasskeyServiceUnavailableException(
+            'Passkey challenge storage is currently unavailable.',
+            previous: $exception,
+        );
     }
 
     protected function getUserEntity(User $user): PublicKeyCredentialUserEntity

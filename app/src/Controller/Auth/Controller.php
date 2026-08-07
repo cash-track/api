@@ -53,4 +53,12 @@ abstract class Controller
             'message' => $message ?? $this->say('error_authentication_exception'),
         ], 500);
     }
+
+    protected function responseServiceUnavailable(string $error = '', ?string $message = null): ResponseInterface
+    {
+        return $this->response->json([
+            'error' => $error,
+            'message' => $message ?? $this->say('error_service_unavailable'),
+        ], 503);
+    }
 }

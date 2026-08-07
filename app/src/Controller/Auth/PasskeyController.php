@@ -9,6 +9,7 @@ use App\Service\Auth\AuthService;
 use App\Service\Auth\Passkey\Exception\InvalidChallengeException;
 use App\Service\Auth\Passkey\Exception\InvalidClientResponseException;
 use App\Service\Auth\Passkey\Exception\PasskeyNotFoundException;
+use App\Service\Auth\Passkey\Exception\PasskeyServiceUnavailableException;
 use App\Service\Auth\Passkey\Exception\UserNotFoundException;
 use App\Service\Auth\Passkey\PasskeyService;
 use App\View\UserView;
@@ -36,6 +37,11 @@ final class PasskeyController extends Controller
     {
         try {
             $response = $this->passkeyService->initAuth();
+        } catch (PasskeyServiceUnavailableException $exception) {
+            return $this->responseServiceUnavailable(
+                error: $exception->getMessage(),
+                message: $this->say('error_auth_passkey_unavailable'),
+            );
         } catch (\Throwable $exception) {
             return $this->responseAuthenticationException(
                 error: $exception->getMessage(),
@@ -70,6 +76,11 @@ final class PasskeyController extends Controller
             return $this->responseAuthenticationFailure(
                 error: $exception->getMessage(),
                 message: $this->say('error_authentication_passkey'),
+            );
+        } catch (PasskeyServiceUnavailableException $exception) {
+            return $this->responseServiceUnavailable(
+                error: $exception->getMessage(),
+                message: $this->say('error_auth_passkey_unavailable'),
             );
         } catch (\Throwable $exception) {
             return $this->responseAuthenticationException($exception->getMessage());

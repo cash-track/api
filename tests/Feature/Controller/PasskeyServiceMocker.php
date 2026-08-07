@@ -13,6 +13,7 @@ use App\Service\Auth\Passkey\PasskeyService;
 use Cycle\ORM\EntityManagerInterface;
 use ParagonIE\ConstantTime\Base64UrlSafe;
 use PHPUnit\Framework\MockObject\MockObject;
+use Psr\Log\LoggerInterface;
 use Tests\Factories\PasskeyFactory;
 use Webauthn\PublicKeyCredentialParameters;
 use Webauthn\TrustPath\EmptyTrustPath;
@@ -24,6 +25,9 @@ trait PasskeyServiceMocker
         $redis = $this->getMockBuilder(\Redis::class)
                       ->disableOriginalConstructor()
                       ->getMock();
+        // Default to "connected" so existing tests keep exercising the happy path;
+        // RedisUnavailableTest-style tests override this to prove the outage path.
+        $redis->method('isConnected')->willReturn(true);
 
         $config = $this->getContainer()->get(PasskeyConfig::class);
 
@@ -33,9 +37,11 @@ trait PasskeyServiceMocker
 
         $userRepository = $this->getContainer()->get(UserRepository::class);
 
+        $logger = $this->getContainer()->get(LoggerInterface::class);
+
         $passkeyAuthService = $this->getMockBuilder(PasskeyService::class)
                                    ->setConstructorArgs([
-                                       $redis, $config, $tr, $repository, $userRepository,
+                                       $redis, $config, $tr, $repository, $userRepository, $logger,
                                    ])
                                    ->onlyMethods($methods)
                                    ->getMock();

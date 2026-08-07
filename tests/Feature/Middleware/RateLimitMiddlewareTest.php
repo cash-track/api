@@ -35,7 +35,16 @@ class RateLimitMiddlewareTest extends TestCase
     {
         /** @var \Redis $redis */
         $redis = $this->getContainer()->get(\Redis::class);
-        $redis->del($redis->keys('CT:testing:*'));
+
+        $keys = $redis->keys('*');
+
+        if (is_array($keys) && $keys !== []) {
+            // del() re-applies OPT_PREFIX, so it must be stripped from keys() results first.
+            $redis->del(array_map(
+                static fn(string $key): string => substr($key, strlen('CT:testing:')),
+                $keys,
+            ));
+        }
 
         parent::tearDown();
     }

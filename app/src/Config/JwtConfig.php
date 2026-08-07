@@ -19,6 +19,10 @@ class JwtConfig extends InjectableConfig
         'refreshTtl' => null,
         'publicKey' => null,
         'privateKey' => null,
+        'issuer' => null,
+        'audience' => null,
+        'accessPublicKey' => null,
+        'accessPrivateKey' => null,
     ];
 
     public function getSecret(): string
@@ -44,5 +48,37 @@ class JwtConfig extends InjectableConfig
     public function getPrivateKey(): string
     {
         return base64_decode((string) $this->config['privateKey']);
+    }
+
+    public function getIssuer(): string
+    {
+        return (string) $this->config['issuer'];
+    }
+
+    public function getAudience(): string
+    {
+        return (string) $this->config['audience'];
+    }
+
+    public function getAccessPublicKey(): string
+    {
+        return base64_decode((string) $this->config['accessPublicKey']);
+    }
+
+    public function getAccessPrivateKey(): string
+    {
+        return base64_decode((string) $this->config['accessPrivateKey']);
+    }
+
+    /** JWT/JWKS `kid` for the current RSA access keypair; empty when none is configured. */
+    public function getAccessKeyId(): string
+    {
+        $publicKey = $this->getAccessPublicKey();
+
+        if ($publicKey === '') {
+            return '';
+        }
+
+        return substr(hash('sha256', $publicKey), 0, 16);
     }
 }

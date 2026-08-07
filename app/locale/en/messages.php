@@ -5,6 +5,7 @@ return [
     'error_authentication_failure'          => 'Wrong email or password.',
     'error_token_authentication_failure'    => 'Invalid access token.',
     'error_authentication_exception'        => 'Unable to authenticate. Please try again later.',
+    'error_service_unavailable'             => 'Service is temporarily unavailable. Please try again shortly.',
     'error_unknown_currency'                => 'Unable to find currency.',
     'error_loading_default_currency'        => 'Unable to load default currency.',
     'error_password_confirmation_not_match' => 'The password confirmation does not match.',
@@ -18,6 +19,7 @@ return [
     'error_auth_passkey_invalid_challenge'  => 'Authentication attempt is not verified. Please try again.',
     'error_auth_passkey_invalid_response'   => 'Authentication response is not valid. Please try again.',
     'error_auth_passkey_unregistered'       => 'Provided passkey is not registered. Please use passkey added before.',
+    'error_auth_passkey_unavailable'        => 'Passkey sign-in is temporarily unavailable. Please try again shortly.',
 
     'email_confirmation_confirm_failure' => 'Unable to confirm your email.',
     'email_confirmation_ok'              => 'Your email has been confirmed.',

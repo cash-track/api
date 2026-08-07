@@ -5,6 +5,7 @@ return [
     'error_authentication_failure'          => 'Невірний email або пароль.',
     'error_token_authentication_failure'    => 'Хибний токен доступу.',
     'error_authentication_exception'        => 'Неможливо автентифікувати. Будь ласка, спробуйте ще раз пізніше.',
+    'error_service_unavailable'             => 'Сервіс тимчасово недоступний. Будь ласка, спробуйте пізніше.',
     'error_unknown_currency'                => 'Неможливо знайти валюту.',
     'error_loading_default_currency'        => 'Неможливо завантажити валюту за замовчуванням.',
     'error_password_confirmation_not_match' => 'Підтвердження паролю не збігається.',
@@ -18,6 +19,7 @@ return [
     'error_auth_passkey_invalid_challenge'  => 'Невідома спроба авторизації. Будь ласка, спробуйте ще раз.',
     'error_auth_passkey_invalid_response'   => 'Не успішна авторизація. Будь ласка, спробуйте ще раз.',
     'error_auth_passkey_unregistered'       => 'Ключ доступу не знайдено. Будь ласка, використовуйте ключ доступу доданий раніше.',
+    'error_auth_passkey_unavailable'        => 'Вхід за допомогою ключа доступу тимчасово недоступний. Будь ласка, спробуйте пізніше.',
 
     'email_confirmation_confirm_failure' => 'Неможливо підтвердити ваш email.',
     'email_confirmation_ok'              => 'Ваш email було підтверджено.',
