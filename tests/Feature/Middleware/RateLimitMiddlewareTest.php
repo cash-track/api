@@ -88,4 +88,50 @@ class RateLimitMiddlewareTest extends TestCase
         $this->assertEquals('0', $response->getHeaderLine('X-RateLimit-Remaining'));
         $this->assertEquals($rule->ttl(), $response->getHeaderLine('Retry-After'));
     }
+
+    public function testFetchIpFallsBackToRemoteAddrWhenNoIpHeaderPresent(): void
+    {
+        $remoteAddr = long2ip(Fixtures::integer());
+
+        $rateLimit = $this->getContainer()->get(RateLimitInterface::class);
+
+        $ruleFactory = $this->getMockBuilder(RuleFactory::class)->getMock();
+        $ruleFactory->method('getRule')->with('', $remoteAddr)->willReturn(new GuestRule(5));
+
+        $middleware = new RateLimitMiddleware($rateLimit, $ruleFactory);
+
+        $request = $this->getMockBuilder(ServerRequestInterface::class)->getMock();
+        $request->method('getHeaderLine')->with('X-Internal-UserId')->willReturn('');
+        $request->method('getHeader')->willReturnMap([
+            ['Cf-Original-Connecting-IP', []],
+            ['X-Real-IP', []],
+            ['X-Forwarded-For', []],
+        ]);
+        $request->method('getServerParams')->willReturn(['REMOTE_ADDR' => $remoteAddr]);
+
+        $handler = $this->getMockBuilder(RequestHandlerInterface::class)->getMock();
+        $handler->method('handle')->willReturn(new JsonResponse([], 201));
+
+        $response = $middleware->process($request, $handler);
+
+        $this->assertEquals(201, $response->getStatusCode());
+    }
+
+    /**
+     * Regression (D1): a forged X-Internal-UserId sent directly to the API on an unauthenticated
+     * 'web'-group route must not upgrade the rate limit from GuestRule (100/60s, IP-keyed) to
+     * UserRule (1000/60s). InternalHeadersMiddleware strips the header globally before this
+     * group middleware ever sees it.
+     */
+    public function testWebGroupRateLimitUnaffectedByForgedInternalUserIdHeader(): void
+    {
+        $response = $this->post('/auth/register/check/nick-name', [
+            'nickName' => Fixtures::string(),
+        ], [
+            'X-Internal-UserId' => '999999',
+        ]);
+
+        $response->assertOk();
+        $response->assertHasHeader('X-RateLimit-Limit', '100');
+    }
 }

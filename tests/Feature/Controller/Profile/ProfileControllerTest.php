@@ -120,6 +120,30 @@ class ProfileControllerTest extends TestCase implements DatabaseTransaction
         $this->assertArrayHasKey('message', $body);
     }
 
+    /**
+     * Regression: a forged X-Internal-UserId header sent directly to the API (bypassing the
+     * gateway) must not leak into the auth-resolved header. Before the fix this appended to the
+     * real user id (e.g. "999999,42"), which crashed CheckNickNameRequest's int cast with a 500.
+     * The "own nickname passes" check only succeeds when $id resolves to exactly the JWT user's
+     * id, so a 200 here also proves the header wasn't left as the forged value.
+     */
+    public function testCheckNickNamePassForCurrentDespiteForgedInternalUserIdHeader(): void
+    {
+        $auth = $this->makeAuth($user = $this->userFactory->create());
+
+        $response = $this->withAuth($auth)->post('/profile/check/nick-name', [
+            'nickName' => $user->nickName,
+        ], [
+            'X-Internal-UserId' => '999999',
+        ]);
+
+        $response->assertOk();
+
+        $body = $this->getJsonResponseBody($response);
+
+        $this->assertArrayHasKey('message', $body);
+    }
+
     public function testCheckNickNameFailsForClaimed(): void
     {
         $existingUser = $this->userFactory->create();

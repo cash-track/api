@@ -47,7 +47,7 @@ final class AuthMiddleware implements MiddlewareInterface
         $this->trackActiveAt($actor);
 
         return $handler->handle(
-            $request->withAddedHeader(self::HEADER_USER_ID, (string) $actor->id)
+            $request->withHeader(self::HEADER_USER_ID, (string) $actor->id)
                     ->withAttribute(self::USER_LOCALE, $this->userOptionsService->getLocale($actor))
         );
     }

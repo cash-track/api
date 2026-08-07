@@ -62,7 +62,7 @@ class RateLimitMiddleware implements MiddlewareInterface
             }
         }
 
-        return '';
+        return (string) ($request->getServerParams()['REMOTE_ADDR'] ?? '');
     }
 
     private function tooManyRequests(RateLimitHitInterface $hit): ResponseInterface
