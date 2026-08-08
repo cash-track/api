@@ -61,4 +61,11 @@ abstract class Controller
             'message' => $message ?? $this->say('error_service_unavailable'),
         ], 503);
     }
+
+    protected function responseLoginThrottled(int $retryAfter): ResponseInterface
+    {
+        return $this->response->json([
+            'message' => sprintf($this->say('error_login_throttled'), $retryAfter),
+        ], 429)->withAddedHeader('Retry-After', (string) $retryAfter);
+    }
 }

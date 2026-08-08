@@ -15,6 +15,7 @@ return [
     'error_value_is_not_unique'             => 'Value should be unique.',
     'error_profile_not_confirmed'           => 'You are not allowed to perform this action as your profile is not confirmed.',
     'error_rate_limit_reached'              => 'Too many requests. Please try again later.',
+    'error_login_throttled'                 => 'Too many failed login attempts. Please try again in %d seconds.',
     'error_authentication_passkey'          => 'Passkey validation failed. Please try again.',
     'error_auth_passkey_invalid_challenge'  => 'Authentication attempt is not verified. Please try again.',
     'error_auth_passkey_invalid_response'   => 'Authentication response is not valid. Please try again.',

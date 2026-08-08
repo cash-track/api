@@ -38,7 +38,7 @@ class RateLimitMiddleware implements MiddlewareInterface
         $userId = $request->getHeaderLine(AuthMiddleware::HEADER_USER_ID);
         $clientIp = $this->fetchIp($request);
 
-        $rule = $this->ruleFactory->getRule($userId, $clientIp);
+        $rule = $this->ruleFactory->getRule($userId, $clientIp, $request->getMethod(), $request->getUri()->getPath());
 
         try {
             $hit = $this->rateLimit->hit($rule);

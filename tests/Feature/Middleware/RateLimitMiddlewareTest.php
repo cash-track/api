@@ -10,6 +10,7 @@ use App\Service\RateLimit\RateLimitInterface;
 use App\Service\RateLimit\RuleFactory;
 use Laminas\Diactoros\Response\JsonResponse;
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Message\UriInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Spiral\Config\ConfiguratorInterface;
 use Spiral\Config\Patch\Set;
@@ -58,9 +59,12 @@ class RateLimitMiddlewareTest extends TestCase
         $rateLimit = $this->getContainer()->get(RateLimitInterface::class);
 
         $ruleFactory = $this->getMockBuilder(RuleFactory::class)->getMock();
-        $ruleFactory->method('getRule')->with('123', $ip)->willReturn($rule = new GuestRule(5));
+        $ruleFactory->method('getRule')->with('123', $ip, 'GET', '/wallets')->willReturn($rule = new GuestRule(5));
 
         $middleware = new RateLimitMiddleware($rateLimit, $ruleFactory);
+
+        $uri = $this->getMockBuilder(UriInterface::class)->getMock();
+        $uri->method('getPath')->willReturn('/wallets');
 
         $request = $this->getMockBuilder(ServerRequestInterface::class)->getMock();
         $request->method('getHeaderLine')->with('X-Internal-UserId')->willReturn('123');
@@ -69,6 +73,8 @@ class RateLimitMiddlewareTest extends TestCase
             ['X-Real-IP', [$ip2]],
             ['X-Forwarded-For', [$ip3]],
         ]);
+        $request->method('getMethod')->willReturn('GET');
+        $request->method('getUri')->willReturn($uri);
 
         $handler = $this->getMockBuilder(RequestHandlerInterface::class)->getMock();
         $handler->method('handle')->willReturn(new JsonResponse([], 201));
@@ -96,9 +102,12 @@ class RateLimitMiddlewareTest extends TestCase
         $rateLimit = $this->getContainer()->get(RateLimitInterface::class);
 
         $ruleFactory = $this->getMockBuilder(RuleFactory::class)->getMock();
-        $ruleFactory->method('getRule')->with('', $remoteAddr)->willReturn(new GuestRule(5));
+        $ruleFactory->method('getRule')->with('', $remoteAddr, 'GET', '/wallets')->willReturn(new GuestRule(5));
 
         $middleware = new RateLimitMiddleware($rateLimit, $ruleFactory);
+
+        $uri = $this->getMockBuilder(UriInterface::class)->getMock();
+        $uri->method('getPath')->willReturn('/wallets');
 
         $request = $this->getMockBuilder(ServerRequestInterface::class)->getMock();
         $request->method('getHeaderLine')->with('X-Internal-UserId')->willReturn('');
@@ -108,6 +117,8 @@ class RateLimitMiddlewareTest extends TestCase
             ['X-Forwarded-For', []],
         ]);
         $request->method('getServerParams')->willReturn(['REMOTE_ADDR' => $remoteAddr]);
+        $request->method('getMethod')->willReturn('GET');
+        $request->method('getUri')->willReturn($uri);
 
         $handler = $this->getMockBuilder(RequestHandlerInterface::class)->getMock();
         $handler->method('handle')->willReturn(new JsonResponse([], 201));
@@ -133,5 +144,44 @@ class RateLimitMiddlewareTest extends TestCase
 
         $response->assertOk();
         $response->assertHasHeader('X-RateLimit-Limit', '100');
+    }
+
+    /**
+     * P2-4 Part 1 (D1, D2): /auth/login gets its own per-endpoint guest bucket (15/min/IP),
+     * enforced end-to-end through real Redis, and that bucket must not share a counter with the
+     * default guest bucket used by every other unauthenticated route.
+     */
+    public function testLoginEndpointGuestRateLimitIsEnforcedAndIndependentFromDefaultBucket(): void
+    {
+        // Mirrors testHandleGuest above: a fixed-window counter rejects the request that makes
+        // the counter reach the limit, so only limit()-1 requests actually succeed.
+        for ($i = 14; $i > 0; $i--) {
+            $response = $this->post('/auth/login', [
+                'email' => Fixtures::email(),
+                'password' => Fixtures::string(),
+            ]);
+
+            $response->assertStatus(400);
+            $response->assertHasHeader('X-RateLimit-Limit', '15');
+            $response->assertHasHeader('X-RateLimit-Remaining', (string) $i);
+        }
+
+        $response = $this->post('/auth/login', [
+            'email' => Fixtures::email(),
+            'password' => Fixtures::string(),
+        ]);
+
+        $response->assertStatus(429);
+        $response->assertHasHeader('X-RateLimit-Limit', '15');
+        $response->assertHasHeader('X-RateLimit-Remaining', '0');
+
+        // D1: same IP, different (default-bucket) route — must still have its full 100 budget.
+        $nickNameResponse = $this->post('/auth/register/check/nick-name', [
+            'nickName' => Fixtures::string(),
+        ]);
+
+        $nickNameResponse->assertOk();
+        $nickNameResponse->assertHasHeader('X-RateLimit-Limit', '100');
+        $nickNameResponse->assertHasHeader('X-RateLimit-Remaining', '99');
     }
 }
