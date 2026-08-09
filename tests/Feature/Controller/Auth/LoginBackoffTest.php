@@ -77,6 +77,26 @@ class LoginBackoffTest extends TestCase implements DatabaseTransaction
         ]);
     }
 
+    /**
+     * Retry-After is `until - time()`, both whole-second unix timestamps captured a few
+     * milliseconds apart (the deadline is written during one request and read during the
+     * next). If that gap straddles a second boundary, truncation under-reports the delay by
+     * exactly one second — it can never over-report, so $expectedSeconds - 1 is the only other
+     * valid reading, not a flake to paper over with a wider tolerance.
+     */
+    private function assertRetryAfterCloseTo(TestResponse $response, int $expectedSeconds): void
+    {
+        $response->assertHasHeader('Retry-After');
+
+        $actual = (int) $response->getOriginalResponse()->getHeaderLine('Retry-After');
+
+        $this->assertContains(
+            $actual,
+            [$expectedSeconds - 1, $expectedSeconds],
+            "Retry-After was [$actual], expected [$expectedSeconds] (or one less due to time() truncation).",
+        );
+    }
+
     public function testFailedLoginsIncrementAttemptsAndSuccessResetsState(): void
     {
         /** @var \Redis $redis */
@@ -115,7 +135,7 @@ class LoginBackoffTest extends TestCase implements DatabaseTransaction
         $response = $this->attemptLogin($user->email, Fixtures::string());
 
         $response->assertStatus(429);
-        $response->assertHasHeader('Retry-After', '2');
+        $this->assertRetryAfterCloseTo($response, 2);
 
         // The throttled request is rejected before AuthService::login() ever runs, so it must
         // not count as an additional failure.
@@ -147,7 +167,7 @@ class LoginBackoffTest extends TestCase implements DatabaseTransaction
 
         $blocked = $this->attemptLogin($user->email, Fixtures::string());
         $blocked->assertStatus(429);
-        $blocked->assertHasHeader('Retry-After', '2');
+        $this->assertRetryAfterCloseTo($blocked, 2);
 
         sleep(3);
 
@@ -158,7 +178,7 @@ class LoginBackoffTest extends TestCase implements DatabaseTransaction
         // The delay must have grown from 2s to 4s — proof it is not frozen at its first value.
         $blockedAgain = $this->attemptLogin($user->email, Fixtures::string());
         $blockedAgain->assertStatus(429);
-        $blockedAgain->assertHasHeader('Retry-After', '4');
+        $this->assertRetryAfterCloseTo($blockedAgain, 4);
 
         // Wait out the grown window, then submit the correct password.
         sleep(5);
@@ -189,7 +209,7 @@ class LoginBackoffTest extends TestCase implements DatabaseTransaction
         $response = $this->attemptLogin($user->email, UserFactory::DEFAULT_PASSWORD);
 
         $response->assertStatus(429);
-        $response->assertHasHeader('Retry-After', '60');
+        $this->assertRetryAfterCloseTo($response, 60);
     }
 
     public function testDifferentEmailsHaveIndependentCounters(): void
@@ -233,7 +253,7 @@ class LoginBackoffTest extends TestCase implements DatabaseTransaction
 
         $realBlocked->assertStatus(429);
         $fakeBlocked->assertStatus(429);
-        $realBlocked->assertHasHeader('Retry-After', '2');
-        $fakeBlocked->assertHasHeader('Retry-After', '2');
+        $this->assertRetryAfterCloseTo($realBlocked, 2);
+        $this->assertRetryAfterCloseTo($fakeBlocked, 2);
     }
 }
