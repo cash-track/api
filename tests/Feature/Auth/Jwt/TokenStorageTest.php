@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Auth\Jwt;
 
+use App\Auth\Jwt\Token;
 use App\Auth\Jwt\TokenStorage;
 use App\Config\JwtConfig;
 use Firebase\JWT\JWT;
@@ -194,6 +195,33 @@ class TokenStorageTest extends TestCase
         $this->assertNull($storage->load('not-a-jwt'));
     }
 
+    public function testTokenWithNonJsonHeaderIsRejected(): void
+    {
+        $storage = new TokenStorage($this->makeConfig(), $this->disconnectedRedis());
+
+        $malformed = JWT::urlsafeB64Encode('not-json-at-all') . '.' . JWT::urlsafeB64Encode('{}') . '.sig';
+
+        $this->assertNull($storage->load($malformed));
+    }
+
+    public function testTokenWithNonObjectHeaderIsRejected(): void
+    {
+        $storage = new TokenStorage($this->makeConfig(), $this->disconnectedRedis());
+
+        $malformed = JWT::urlsafeB64Encode('"just-a-string"') . '.' . JWT::urlsafeB64Encode('{}') . '.sig';
+
+        $this->assertNull($storage->load($malformed));
+    }
+
+    public function testTokenWithMissingAlgHeaderIsRejected(): void
+    {
+        $storage = new TokenStorage($this->makeConfig(), $this->disconnectedRedis());
+
+        $malformed = JWT::urlsafeB64Encode('{"typ":"JWT"}') . '.' . JWT::urlsafeB64Encode('{}') . '.sig';
+
+        $this->assertNull($storage->load($malformed));
+    }
+
     public function testBlacklistedTokenIsRejected(): void
     {
         $redis = $this->getMockBuilder(Redis::class)->onlyMethods(['isConnected', 'exists'])->getMock();
@@ -220,6 +248,17 @@ class TokenStorageTest extends TestCase
         $storage = new TokenStorage($this->makeConfig(), $redis);
 
         $storage->delete($storage->create(['sub' => 1]));
+    }
+
+    public function testDeleteIsNoOpWhenTokenHasNoJti(): void
+    {
+        $redis = $this->getMockBuilder(Redis::class)->onlyMethods(['isConnected', 'setex'])->getMock();
+        $redis->method('isConnected')->willReturn(true);
+        $redis->expects($this->never())->method('setex');
+
+        $storage = new TokenStorage($this->makeConfig(), $redis);
+
+        $storage->delete(new Token('irrelevant', ['sub' => 1]));
     }
 
     public function testDeleteSkipsAlreadyExpiredToken(): void
@@ -268,6 +307,23 @@ class TokenStorageTest extends TestCase
         $token = $storage->create(['sub' => 1]);
 
         $this->assertNotNull($storage->load($token->getID()));
+    }
+
+    /**
+     * A token without a jti claim (e.g. issued before jti was added) must skip the blacklist
+     * lookup entirely rather than checking against an empty key.
+     */
+    public function testLoadSkipsBlacklistCheckWhenTokenHasNoJti(): void
+    {
+        $redis = $this->getMockBuilder(Redis::class)->onlyMethods(['isConnected', 'exists'])->getMock();
+        $redis->method('isConnected')->willReturn(true);
+        $redis->expects($this->never())->method('exists');
+
+        $storage = new TokenStorage($this->makeConfig(), $redis);
+
+        $tokenWithoutJti = JWT::encode(['sub' => 1], self::HMAC_SECRET, 'HS256');
+
+        $this->assertNotNull($storage->load($tokenWithoutJti));
     }
 
     /**
