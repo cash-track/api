@@ -27,6 +27,7 @@
         "kreait/firebase-php": "^8.0",
         "laminas/laminas-diactoros": "^3.5",
         "lcobucci/jwt": "^5.5",
+        "open-telemetry/api": "^1.7",
         "open-telemetry/exporter-otlp": "^1.2",
         "open-telemetry/transport-grpc": "^1.1",
         "phpdocumentor/reflection-docblock": "^5.4",

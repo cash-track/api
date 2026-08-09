@@ -9,6 +9,7 @@ use App\Database\Passkey;
 use App\Repository\PasskeyRepository;
 use App\Request\Profile\InitPasskeyRequest;
 use App\Request\Profile\StorePasskeyRequest;
+use App\Service\Auth\Passkey\Exception\PasskeyServiceUnavailableException;
 use App\Service\Auth\Passkey\PasskeyService;
 use App\View\PasskeysView;
 use App\View\PasskeyView;
@@ -44,6 +45,11 @@ final class PasskeyController extends AuthAwareController
     {
         try {
             $response = $this->passkeyAuthService->init($this->user, $request->name);
+        } catch (PasskeyServiceUnavailableException $exception) {
+            return $this->response->json([
+                'message' => $this->say('error_service_unavailable'),
+                'error'   => $exception->getMessage(),
+            ], 503);
         } catch (\Throwable $exception) {
             return $this->response->json([
                 'message' => $this->say('passkey_init_exception'),
@@ -59,6 +65,11 @@ final class PasskeyController extends AuthAwareController
     {
         try {
             $passkey = $this->passkeyAuthService->store($this->user, $request->challenge, $request->data);
+        } catch (PasskeyServiceUnavailableException $exception) {
+            return $this->response->json([
+                'message' => $this->say('error_service_unavailable'),
+                'error'   => $exception->getMessage(),
+            ], 503);
         } catch (\Throwable $exception) {
             return $this->response->json([
                 'message' => $this->say('passkey_store_exception'),

@@ -7,6 +7,8 @@ namespace App\Controller\Auth;
 use App\Request\LoginRequest;
 use App\Service\Auth\Authentication;
 use App\Service\Auth\AuthService;
+use App\Service\Auth\LoginBackoffService;
+use App\Service\Auth\LoginThrottledException;
 use App\View\UserView;
 use OpenTelemetry\API\Trace\StatusCode;
 use Psr\Http\Message\ResponseInterface;
@@ -24,6 +26,7 @@ final class LoginController extends Controller
     public function __construct(
         protected UserView $userView,
         protected ResponseWrapper $response,
+        private readonly LoginBackoffService $loginBackoff,
     ) {
         parent::__construct($userView, $response);
     }
@@ -31,6 +34,12 @@ final class LoginController extends Controller
     #[Route(route: '/auth/login', name: 'auth.login', methods: 'POST')]
     public function login(LoginRequest $request, TracerInterface $tracer): ResponseInterface
     {
+        try {
+            $this->loginBackoff->assertNotThrottled($request->email);
+        } catch (LoginThrottledException $exception) {
+            return $this->responseLoginThrottled($exception->getRetryAfter());
+        }
+
         try {
             $auth = $tracer->trace(
                 name: 'auth.login',
@@ -55,8 +64,12 @@ final class LoginController extends Controller
         }
 
         if ($auth === null) {
+            $this->loginBackoff->recordFailure($request->email);
+
             return $this->responseAuthenticationFailure();
         }
+
+        $this->loginBackoff->recordSuccess($request->email);
 
         return $this->responseTokensWithUser($auth);
     }

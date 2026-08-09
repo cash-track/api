@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Service\RateLimit;
 
+use Psr\Log\LoggerInterface;
 use Redis;
 
 final class RedisRateLimit implements RateLimitInterface
@@ -12,6 +13,7 @@ final class RedisRateLimit implements RateLimitInterface
 
     public function __construct(
         protected readonly Redis $redis,
+        private readonly LoggerInterface $logger,
     ) {
     }
 
@@ -24,14 +26,26 @@ final class RedisRateLimit implements RateLimitInterface
 
         $key = static::PREFIX . $rule->key();
 
-        $counter = $this->redis->incr($key);
+        // isConnected() can be stale, so each command is guarded to fail open on a mid-outage
+        // drop. A false return (not a throw) means a reachable server replied badly — still throws.
+        try {
+            $counter = $this->redis->incr($key);
+        } catch (\Throwable $exception) {
+            return $this->unavailable($rule, $exception);
+        }
+
         if (! is_int($counter)) {
             throw new \RuntimeException(
                 "Unable to increment rate limit counter: {$this->redis->getLastError()}"
             );
         }
 
-        $ttl = $this->redis->ttl($key);
+        try {
+            $ttl = $this->redis->ttl($key);
+        } catch (\Throwable $exception) {
+            return $this->unavailable($rule, $exception);
+        }
+
         if (! is_int($ttl)) {
             throw new \RuntimeException(
                 "Unable to retrieve rate limit counter time to live: {$this->redis->getLastError()}"
@@ -39,7 +53,13 @@ final class RedisRateLimit implements RateLimitInterface
         }
 
         if ($ttl === -1) {
-            if ($this->redis->expire($key, $rule->ttl()) === false) {
+            try {
+                $expired = $this->redis->expire($key, $rule->ttl());
+            } catch (\Throwable $exception) {
+                return $this->unavailable($rule, $exception);
+            }
+
+            if ($expired === false) {
                 throw new \RuntimeException(
                     "Unable to set expiration for rate limit counter: {$this->redis->getLastError()}"
                 );
@@ -55,5 +75,16 @@ final class RedisRateLimit implements RateLimitInterface
         }
 
         return $hit;
+    }
+
+    /** Fails open: brute-force protection is off for the outage, so the gap must be logged. */
+    private function unavailable(RuleInterface $rule, \Throwable $exception): RateLimitHitInterface
+    {
+        $this->logger->error('Rate limiting is unavailable; failing open', [
+            'error' => get_class($exception),
+            'message' => $exception->getMessage(),
+        ]);
+
+        return new RateLimitHit($rule);
     }
 }

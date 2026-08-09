@@ -12,6 +12,7 @@ use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
+use Psr\Log\LoggerInterface;
 use Spiral\Auth\AuthContextInterface;
 use Spiral\Auth\Middleware\AuthMiddleware as Framework;
 use Spiral\Translator\Traits\TranslatorTrait;
@@ -26,6 +27,7 @@ final class AuthMiddleware implements MiddlewareInterface
     public function __construct(
         private readonly UserService $userService,
         private readonly UserOptionsService $userOptionsService,
+        private readonly LoggerInterface $logger,
     ) {
     }
 
@@ -47,7 +49,7 @@ final class AuthMiddleware implements MiddlewareInterface
         $this->trackActiveAt($actor);
 
         return $handler->handle(
-            $request->withAddedHeader(self::HEADER_USER_ID, (string) $actor->id)
+            $request->withHeader(self::HEADER_USER_ID, (string) $actor->id)
                     ->withAttribute(self::USER_LOCALE, $this->userOptionsService->getLocale($actor))
         );
     }
@@ -65,7 +67,12 @@ final class AuthMiddleware implements MiddlewareInterface
 
         try {
             $this->userService->store($user);
-        } catch (\Throwable) {
+        } catch (\Throwable $exception) {
+            $this->logger->error('Failed to update user active_at', [
+                'userId' => $user->id,
+                'error' => get_class($exception),
+                'message' => $exception->getMessage(),
+            ]);
         }
     }
 }

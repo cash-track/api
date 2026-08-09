@@ -6,6 +6,7 @@ namespace App\Bootloader;
 
 use App\Auth\AuthMiddleware;
 use App\Middleware\ApiVersionMiddleware;
+use App\Middleware\InternalHeadersMiddleware;
 use App\Middleware\LocaleSelectorMiddleware;
 use App\Middleware\RateLimitMiddleware;
 use App\Middleware\TraceContextMiddleware;
@@ -41,6 +42,8 @@ final class RoutesBootloader extends BaseRoutesBootloader
     protected function globalMiddleware(): array
     {
         return [
+            // Must precede auth and every group middleware.
+            InternalHeadersMiddleware::class,
             TraceContextMiddleware::class,
             LocaleSelectorMiddleware::class,
             ApiVersionMiddleware::class,

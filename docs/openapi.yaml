@@ -180,6 +180,10 @@ paths:
       description: |
         Authenticates with email/password credentials and returns a token pair.
         Returns `400` with a descriptive message when credentials are wrong.
+
+        After 3 failed logins for the same email, further attempts for that email are delayed
+        with growing backoff (`429`, see `LoginThrottled`). This is on top of, and independent
+        from, the per-IP guest rate limit on this endpoint.
       tags: [Auth]
       security: []
       requestBody:
@@ -199,6 +203,8 @@ paths:
           $ref: "#/components/responses/BadRequest"
         "422":
           $ref: "#/components/responses/ValidationError"
+        "429":
+          $ref: "#/components/responses/LoginThrottled"
 
   /auth/refresh:
     post:
@@ -233,11 +239,12 @@ paths:
   /auth/logout:
     post:
       operationId: authLogout
-      summary: Logout / invalidate refresh token
+      summary: Logout / invalidate refresh token and access token
       description: |
-        Revokes the refresh token so it cannot be used to mint new access tokens.
-        Pass the refresh token in the body to invalidate a specific session; omit
-        it to invalidate the session derived from the current access token.
+        Revokes the current access token and the refresh token so neither can be used again —
+        the access token is blacklisted server-side and rejected on any subsequent request even
+        before it naturally expires. Pass the refresh token in the body to invalidate a specific
+        session; omit it to invalidate the session derived from the current access token.
       tags: [Auth]
       security:
         - bearerAuth: []
@@ -256,6 +263,51 @@ paths:
           $ref: "#/components/responses/Unauthorized"
         "200":
           description: Logged out successfully
+
+  /.well-known/jwks.json:
+    get:
+      operationId: authJwks
+      summary: Access token JSON Web Key Set
+      description: |
+        Publishes the access token's RSA public key as a JWK Set (RFC 7517) so third parties can
+        verify RS256-signed access tokens without calling the API. No authentication required.
+
+        Returns an empty key set (`{"keys": []}`) — never an error — when the API is still
+        signing access tokens with HS256 (no RSA keypair configured yet). The HMAC secret used
+        for HS256 is never exposed through this endpoint.
+      tags: [Auth]
+      security: []
+      responses:
+        "200":
+          description: JWK Set for the current access token signing key
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  keys:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        kty:
+                          type: string
+                          example: RSA
+                        use:
+                          type: string
+                          example: sig
+                        alg:
+                          type: string
+                          example: RS256
+                        kid:
+                          type: string
+                          description: Stable identifier for this keypair.
+                        n:
+                          type: string
+                          description: RSA modulus, base64url-encoded without padding.
+                        e:
+                          type: string
+                          description: RSA public exponent, base64url-encoded without padding.
 
   /auth/login/passkey/init:
     get:
@@ -277,6 +329,8 @@ paths:
               schema:
                 type: object
                 description: Raw `PublicKeyCredentialRequestOptions` JSON
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
 
   /auth/login/passkey:
     post:
@@ -304,6 +358,8 @@ paths:
           $ref: "#/components/responses/BadRequest"
         "422":
           $ref: "#/components/responses/ValidationError"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
 
   /auth/provider/google:
     post:
@@ -793,6 +849,8 @@ paths:
           $ref: "#/components/responses/BadRequest"
         "422":
           $ref: "#/components/responses/ValidationError"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
 
   /profile/passkey/init:
     post:
@@ -827,6 +885,8 @@ paths:
               schema:
                 type: object
                 description: Raw `PublicKeyCredentialCreationOptions` JSON
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
 
   /profile/passkey/{id}:
     delete:
@@ -3165,6 +3225,11 @@ components:
       schema:
         type: string
 
+    RetryAfter:
+      description: Seconds to wait before retrying.
+      schema:
+        type: integer
+
   # -------------------------------------------------------------------------
   # REUSABLE RESPONSES
   # -------------------------------------------------------------------------
@@ -3223,6 +3288,51 @@ components:
         application/json:
           schema:
             $ref: "#/components/schemas/ValidationError"
+
+    ServiceUnavailable:
+      description: |
+        Passkey challenge storage (Redis) is temporarily unreachable. Passkey ceremonies have
+        no degraded mode, so this is surfaced as a distinct, retryable failure rather than a
+        generic 500. No `Retry-After` header is sent: the outage duration is not predictable
+        from the server side, and this flow is a live, user-driven ceremony rather than an
+        automated retrier — advertising a fixed delay would be a false precision claim during
+        exactly the sustained-outage case this response exists for.
+      headers:
+        X-Ct-Api-Version:
+          $ref: "#/components/headers/ApiVersion"
+        X-Ct-Api-Sha:
+          $ref: "#/components/headers/ApiSha"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+          example:
+            error: Passkey challenge storage is currently unavailable.
+            message: Passkey sign-in is temporarily unavailable. Please try again shortly.
+
+    LoginThrottled:
+      description: |
+        Too many failed logins for this email. Unlike `ServiceUnavailable`, the delay here is
+        computed server-side from a per-email failure counter (exponential backoff, capped at
+        60s) rather than an unpredictable outage, so a `Retry-After` header with the exact wait
+        is sent. This is a separate mechanism from the per-IP guest rate limit on this endpoint:
+        it is keyed by email rather than IP and only fires after failed attempts. Responses
+        still carry the endpoint's `X-RateLimit-Limit`/`X-RateLimit-Remaining` headers for the
+        per-IP bucket regardless of which of the two mechanisms produced the `429` — the two are
+        independent and can both apply to the same request.
+      headers:
+        X-Ct-Api-Version:
+          $ref: "#/components/headers/ApiVersion"
+        X-Ct-Api-Sha:
+          $ref: "#/components/headers/ApiSha"
+        Retry-After:
+          $ref: "#/components/headers/RetryAfter"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+          example:
+            message: Too many failed login attempts. Please try again in 8 seconds.
 
 # ---------------------------------------------------------------------------
 # GLOBAL SECURITY
