@@ -2,9 +2,26 @@
 
 declare(strict_types=1);
 
+use App\Bootloader\LoggingBootloader;
+use App\Logging\TraceIdProcessor;
+use Cycle\Database\Driver\MySQL\MySQLDriver;
+use Monolog\Formatter\LineFormatter;
+use Monolog\Handler\RotatingFileHandler;
 use Monolog\Handler\SyslogHandler;
 use Monolog\Logger;
 use Monolog\Processor\PsrLogMessageProcessor;
+use Spiral\Http\Middleware\ErrorHandlerMiddleware;
+
+// Spiral's 'log.rotate' handler alias applies Spiral\Monolog\Bootloader\MonologBootloader::DEFAULT_FORMAT,
+// which has no %extra% placeholder — trace_id (written to extra by TraceIdProcessor) would be silently
+// dropped from app.log. Build the handler directly with an explicit format that includes it, shared with
+// LoggingBootloader's own rotating file handlers via LoggingBootloader::LOG_FORMAT.
+$appLogHandler = new RotatingFileHandler(
+    filename: directory('runtime').'logs/app.log',
+    level: Logger::DEBUG,
+    useLocking: true,
+);
+$appLogHandler->setFormatter(new LineFormatter(LoggingBootloader::LOG_FORMAT));
 
 return [
 
@@ -20,13 +37,7 @@ return [
      */
     'handlers' => [
         'default' => [
-            [
-                'class' => 'log.rotate',
-                'options' => [
-                    'filename' => directory('runtime').'logs/app.log',
-                    'level' => Logger::DEBUG,
-                ],
-            ],
+            $appLogHandler,
         ],
         'stderr' => [
             \Monolog\Handler\ErrorLogHandler::class,
@@ -50,6 +61,11 @@ return [
     'processors' => [
         'default' => [
             \Spiral\Telemetry\Monolog\TelemetryProcessor::class,
+            TraceIdProcessor::class,
+        ],
+        'stderr' => [
+            PsrLogMessageProcessor::class,
+            TraceIdProcessor::class,
         ],
         'stdout' => [
             [
@@ -58,6 +74,24 @@ return [
                     'dateFormat' => 'Y-m-d\TH:i:s.uP',
                 ],
             ],
+            TraceIdProcessor::class,
+        ],
+        ErrorHandlerMiddleware::class => [
+            PsrLogMessageProcessor::class,
+            TraceIdProcessor::class,
+        ],
+        MySQLDriver::class => [
+            PsrLogMessageProcessor::class,
+            TraceIdProcessor::class,
+        ],
+        // Selected as the default channel in production via MONOLOG_DEFAULT_CHANNEL
+        // (see infra/ansible/roles/compose-render/templates/api.env.tpl); registered by
+        // Spiral\RoadRunnerBridge\Bootloader\LoggerBootloader, which only adds a handler,
+        // not a processor — this channel would otherwise fall back to the implicit
+        // PsrLogMessageProcessor-only default.
+        'roadrunner' => [
+            PsrLogMessageProcessor::class,
+            TraceIdProcessor::class,
         ],
     ],
 ];

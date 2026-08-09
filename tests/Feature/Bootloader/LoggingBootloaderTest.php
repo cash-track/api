@@ -15,11 +15,16 @@ class LoggingBootloaderTest extends TestCase
 {
     public function testDebugConfig(): void
     {
+        // willReturnMap can't express "return whatever default was passed", and its rows are
+        // matched by == against literal arguments, so $this->anything() as a row value never
+        // matches — a callback is the only reliable way to stub both DEBUG and MONOLOG_FORMAT.
         $env = $this->getMockBuilder(EnvironmentInterface::class)->getMock();
-        $env->expects($this->exactly(3))->method('get')->willReturnMap([
-            ['MONOLOG_FORMAT', $this->anything(), $this->returnArgument(2)],
-            ['DEBUG', $this->anything(), true],
-        ]);
+        $env->expects($this->exactly(5))->method('get')->willReturnCallback(
+            static fn (string $name, mixed $default = null): mixed => match ($name) {
+                'DEBUG' => true,
+                default => $default,
+            },
+        );
 
         $config = $this->getMockBuilder(ConfiguratorInterface::class)->getMock();
 
