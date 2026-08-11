@@ -8,7 +8,6 @@ use App\Request\RefreshTokenRequest;
 use App\Service\Auth\AuthService;
 use App\View\UserView;
 use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\ServerRequestInterface;
 use Spiral\Http\ResponseWrapper;
 use Spiral\Router\Annotation\Route;
 
@@ -23,9 +22,9 @@ final class RefreshController extends Controller
     }
 
     #[Route(route: '/auth/refresh', name: 'auth.refresh', methods: 'POST')]
-    public function refresh(ServerRequestInterface $request, RefreshTokenRequest $refreshTokenRequest): ResponseInterface
+    public function refresh(RefreshTokenRequest $refreshTokenRequest): ResponseInterface
     {
-        $auth = $this->authService->refresh($request);
+        $auth = $this->authService->refresh($refreshTokenRequest->refreshToken);
 
         if ($auth === null) {
             return $this->responseUnauthenticated();

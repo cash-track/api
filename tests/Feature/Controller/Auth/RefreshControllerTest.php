@@ -44,28 +44,9 @@ class RefreshControllerTest extends TestCase implements DatabaseTransaction
     {
         $auth = $this->makeAuth($this->userFactory->create());
 
-        $response = $this->withAuthRefresh($auth)->post('/auth/refresh', [
-            'accessToken' => $auth['accessToken'],
+        $response = $this->post('/auth/refresh', [
+            'refreshToken' => $auth['refreshToken'],
         ]);
-
-        $response->assertOk();
-
-        $newAuth = $this->getJsonResponseBody($response);
-
-        $this->assertNotEquals($auth['accessToken'], $newAuth['accessToken']);
-        $this->assertNotEquals($auth['refreshToken'], $newAuth['refreshToken']);
-
-        $response = $this->withAuth($newAuth)->get('/profile');
-        $response->assertOk();
-
-        // TODO. Add checking to access protected endpoints once token blacklist implemented
-    }
-
-    public function testRefreshWithoutAccessToken(): void
-    {
-        $auth = $this->makeAuth($this->userFactory->create());
-
-        $response = $this->withAuthRefresh($auth)->post('/auth/refresh');
 
         $response->assertOk();
 
@@ -84,6 +65,51 @@ class RefreshControllerTest extends TestCase implements DatabaseTransaction
     {
         $response = $this->post('/auth/refresh');
 
+        $response->assertUnprocessable();
+
+        $body = $this->getJsonResponseBody($response);
+
+        $this->assertArrayHasKey('errors', $body);
+        $this->assertArrayHasKey('refreshToken', $body['errors']);
+    }
+
+    public function testRefreshFailsAuthorizationHeaderAloneIsNotAccepted(): void
+    {
+        $auth = $this->makeAuth($this->userFactory->create());
+
+        // the old header-only flow is no longer accepted, the token must be in the body
+        $response = $this->withAuthRefresh($auth)->post('/auth/refresh');
+
+        $response->assertUnprocessable();
+
+        $body = $this->getJsonResponseBody($response);
+
+        $this->assertArrayHasKey('errors', $body);
+        $this->assertArrayHasKey('refreshToken', $body['errors']);
+    }
+
+    public function testRefreshFailsMalformedRefreshToken(): void
+    {
+        $response = $this->post('/auth/refresh', [
+            'refreshToken' => 'not-a-jwt-shaped-token',
+        ]);
+
+        $response->assertUnprocessable();
+
+        $body = $this->getJsonResponseBody($response);
+
+        $this->assertArrayHasKey('errors', $body);
+        $this->assertArrayHasKey('refreshToken', $body['errors']);
+    }
+
+    public function testRefreshFailsWithTamperedTokenSignature(): void
+    {
+        $segments = explode('.', $this->getRefreshToken(0));
+        $segments[2] = 'tamperedSignatureAaBbCcDdEeFf012345';
+        $tamperedToken = implode('.', $segments);
+
+        $response = $this->post('/auth/refresh', ['refreshToken' => $tamperedToken]);
+
         $response->assertUnauthorized();
     }
 
@@ -98,7 +124,7 @@ class RefreshControllerTest extends TestCase implements DatabaseTransaction
             )
         ];
 
-        $response = $this->withAuthRefresh($auth)->post('/auth/refresh');
+        $response = $this->post('/auth/refresh', ['refreshToken' => $auth['refreshToken']]);
 
         $response->assertUnauthorized();
     }
@@ -112,7 +138,7 @@ class RefreshControllerTest extends TestCase implements DatabaseTransaction
             )
         ];
 
-        $response = $this->withAuthRefresh($auth)->post('/auth/refresh');
+        $response = $this->post('/auth/refresh', ['refreshToken' => $auth['refreshToken']]);
 
         $response->assertUnauthorized();
     }

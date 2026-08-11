@@ -13,7 +13,6 @@ use App\Security\PasswordContainerInterface;
 use App\Service\GoogleAccountService;
 use App\Service\UserOptionsService;
 use App\Service\UserService;
-use Psr\Http\Message\ServerRequestInterface;
 use Psr\Log\LoggerInterface;
 use Spiral\Auth\AuthContextInterface;
 use Spiral\Auth\TokenInterface;
@@ -77,19 +76,18 @@ class AuthService
         return $this->authenticate($user);
     }
 
-    public function refresh(ServerRequestInterface $request): ?Authentication
+    public function refresh(string $refreshToken): ?Authentication
     {
-        $authContext = $this->refreshTokenService->getContextByRequest($request);
+        $authContext = $this->refreshTokenService->getContextByToken($refreshToken);
 
         $user = $authContext->getActor();
-        $refreshToken = $authContext->getToken();
+        $token = $authContext->getToken();
 
-        if (! $user instanceof User || ! $refreshToken instanceof TokenInterface) {
+        if (! $user instanceof User || ! $token instanceof TokenInterface) {
             return null;
         }
 
-        // TODO. Add to blacklist token $refreshToken->getID();
-        // TODO. Add to blacklist token $refreshTokenRequest->getAccessToken();
+        // TODO. Add to blacklist token $token->getID();
 
         return $this->authenticate($user);
     }
