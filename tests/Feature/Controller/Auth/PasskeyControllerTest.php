@@ -69,7 +69,7 @@ class PasskeyControllerTest extends TestCase implements DatabaseTransaction
                            ->method('generateChallenge')
                            ->willReturn($challenge);
 
-        $response = $this->get('/auth/login/passkey/init');
+        $response = $this->get('/v1/auth/login/passkey/init');
 
         $response->assertOk();
 
@@ -114,7 +114,7 @@ class PasskeyControllerTest extends TestCase implements DatabaseTransaction
 
         $this->getContainer()->bind(PasskeyService::class, fn() => $serviceMock);
 
-        $response = $this->get('/auth/login/passkey/init');
+        $response = $this->get('/v1/auth/login/passkey/init');
 
         $response->assertStatus(500);
 
@@ -126,7 +126,7 @@ class PasskeyControllerTest extends TestCase implements DatabaseTransaction
 
     public function testLoginValidationFails(): void
     {
-        $response = $this->post('/auth/login/passkey', [
+        $response = $this->post('/v1/auth/login/passkey', [
             'challenge' => '',
             'data' => '',
         ]);
@@ -175,7 +175,7 @@ class PasskeyControllerTest extends TestCase implements DatabaseTransaction
         $passkeyData = $this->queryDatabase(table: 'passkeys', whereEncrypted: ['key_id' => $passkey->keyId])[0] ?? [];
         $this->assertNull($passkeyData['used_at'] ?? null);
 
-        $response = $this->post('/auth/login/passkey', [
+        $response = $this->post('/v1/auth/login/passkey', [
             'challenge' => $challenge,
             'data' => $data,
         ]);
@@ -189,7 +189,7 @@ class PasskeyControllerTest extends TestCase implements DatabaseTransaction
         $this->assertArrayHasKey('accessToken', $auth);
         $this->assertArrayHasKey('refreshToken', $auth);
 
-        $response = $this->withAuth($auth)->get('/profile');
+        $response = $this->withAuth($auth)->get('/v1/profile');
 
         $response->assertOk();
 
@@ -225,7 +225,7 @@ class PasskeyControllerTest extends TestCase implements DatabaseTransaction
             },
         );
 
-        $response = $this->post('/auth/login/passkey', [
+        $response = $this->post('/v1/auth/login/passkey', [
             'challenge' => $challenge.'1',
             'data' => $data,
         ]);
@@ -262,7 +262,7 @@ class PasskeyControllerTest extends TestCase implements DatabaseTransaction
             },
         );
 
-        $response = $this->post('/auth/login/passkey', [
+        $response = $this->post('/v1/auth/login/passkey', [
             'challenge' => $challenge,
             'data' => Fixtures::string(50),
         ]);
@@ -295,7 +295,7 @@ class PasskeyControllerTest extends TestCase implements DatabaseTransaction
             },
         );
 
-        $response = $this->post('/auth/login/passkey', [
+        $response = $this->post('/v1/auth/login/passkey', [
             'challenge' => $challenge,
             'data' => $data,
         ]);
@@ -337,7 +337,7 @@ class PasskeyControllerTest extends TestCase implements DatabaseTransaction
             },
         );
 
-        $response = $this->post('/auth/login/passkey', [
+        $response = $this->post('/v1/auth/login/passkey', [
             'challenge' => $challenge,
             'data' => $data,
         ]);
@@ -377,7 +377,7 @@ class PasskeyControllerTest extends TestCase implements DatabaseTransaction
             },
         );
 
-        $response = $this->post('/auth/login/passkey', [
+        $response = $this->post('/v1/auth/login/passkey', [
             'challenge' => $challenge,
             'data' => $data,
         ]);
@@ -403,7 +403,7 @@ class PasskeyControllerTest extends TestCase implements DatabaseTransaction
 
         $this->getContainer()->bind(PasskeyService::class, fn() => $serviceMock);
 
-        $response = $this->post('/auth/login/passkey', [
+        $response = $this->post('/v1/auth/login/passkey', [
             'challenge' => Fixtures::string(),
             'data' => Fixtures::string(),
         ]);
@@ -442,7 +442,7 @@ class PasskeyControllerTest extends TestCase implements DatabaseTransaction
 
         $this->getContainer()->bind(AuthService::class, fn() => $authMock);
 
-        $response = $this->post('/auth/login/passkey', [
+        $response = $this->post('/v1/auth/login/passkey', [
             'challenge' => Fixtures::string(),
             'data' => Fixtures::string(),
         ]);

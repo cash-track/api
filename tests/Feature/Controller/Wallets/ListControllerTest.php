@@ -37,7 +37,7 @@ class ListControllerTest extends TestCase implements DatabaseTransaction
 
     public function testListRequireAuth(): void
     {
-        $response = $this->get('/wallets');
+        $response = $this->get('/v1/wallets');
 
         $response->assertUnauthorized();
     }
@@ -49,7 +49,7 @@ class ListControllerTest extends TestCase implements DatabaseTransaction
         /** @var \Doctrine\Common\Collections\ArrayCollection<int, Wallet> $wallets */
         $wallets = $this->walletFactory->forUser($user)->createMany(3);
 
-        $response = $this->withAuth($auth)->get('/wallets');
+        $response = $this->withAuth($auth)->get('/v1/wallets');
 
         $response->assertOk();
 
@@ -64,7 +64,7 @@ class ListControllerTest extends TestCase implements DatabaseTransaction
 
     public function testListArchivedRequireAuth(): void
     {
-        $response = $this->get('/wallets/archived');
+        $response = $this->get('/v1/wallets/archived');
 
         $response->assertUnauthorized();
     }
@@ -76,7 +76,7 @@ class ListControllerTest extends TestCase implements DatabaseTransaction
         $unArchived = $this->walletFactory->forUser($user)->create();
         $archived = $this->walletFactory->forUser($user)->create(WalletFactory::archived());
 
-        $response = $this->withAuth($auth)->get('/wallets/archived');
+        $response = $this->withAuth($auth)->get('/v1/wallets/archived');
 
         $response->assertOk();
 
@@ -93,7 +93,7 @@ class ListControllerTest extends TestCase implements DatabaseTransaction
 
     public function testListUnArchivedRequireAuth(): void
     {
-        $response = $this->get('/wallets/unarchived');
+        $response = $this->get('/v1/wallets/unarchived');
 
         $response->assertUnauthorized();
     }
@@ -105,7 +105,7 @@ class ListControllerTest extends TestCase implements DatabaseTransaction
         $unArchived = $this->walletFactory->forUser($user)->create();
         $archived = $this->walletFactory->forUser($user)->create(WalletFactory::archived());
 
-        $response = $this->withAuth($auth)->get('/wallets/unarchived');
+        $response = $this->withAuth($auth)->get('/v1/wallets/unarchived');
 
         $response->assertOk();
 
@@ -132,7 +132,7 @@ class ListControllerTest extends TestCase implements DatabaseTransaction
 
         $missed = array_pop($order);
 
-        $response = $this->withAuth($auth)->post('/wallets/unarchived/sort', [
+        $response = $this->withAuth($auth)->post('/v1/wallets/unarchived/sort', [
             'sort' => $order,
         ]);
 
@@ -140,7 +140,7 @@ class ListControllerTest extends TestCase implements DatabaseTransaction
 
         $archived = $this->walletFactory->forUser($user)->create(WalletFactory::archived());
 
-        $response = $this->withAuth($auth)->get('/wallets/unarchived');
+        $response = $this->withAuth($auth)->get('/v1/wallets/unarchived');
 
         $response->assertOk();
 
@@ -164,7 +164,7 @@ class ListControllerTest extends TestCase implements DatabaseTransaction
 
     public function testSortUnArchivedRequireAuth(): void
     {
-        $response = $this->post('/wallets/unarchived/sort');
+        $response = $this->post('/v1/wallets/unarchived/sort');
 
         $response->assertUnauthorized();
     }
@@ -179,7 +179,7 @@ class ListControllerTest extends TestCase implements DatabaseTransaction
 
         array_push($walletIDs, 9999);
 
-        $response = $this->withAuth($auth)->post('/wallets/unarchived/sort', [
+        $response = $this->withAuth($auth)->post('/v1/wallets/unarchived/sort', [
             'sort' => $walletIDs,
         ]);
 
@@ -198,7 +198,7 @@ class ListControllerTest extends TestCase implements DatabaseTransaction
 
         $walletIDs = $wallets->map(fn($wallet) => $wallet->id)->toArray();
 
-        $response = $this->withAuth($auth)->post('/wallets/unarchived/sort', [
+        $response = $this->withAuth($auth)->post('/v1/wallets/unarchived/sort', [
             'sort' => $walletIDs,
         ]);
 
@@ -221,7 +221,7 @@ class ListControllerTest extends TestCase implements DatabaseTransaction
             $mock->expects($this->once())->method('set')->willThrowException(new \RuntimeException());
         });
 
-        $response = $this->withAuth($auth)->post('/wallets/unarchived/sort', [
+        $response = $this->withAuth($auth)->post('/v1/wallets/unarchived/sort', [
             'sort' => $walletIDs,
         ]);
 
@@ -230,7 +230,7 @@ class ListControllerTest extends TestCase implements DatabaseTransaction
 
     public function testListHasLimitsRequireAuth(): void
     {
-        $response = $this->get('/wallets/has-limits');
+        $response = $this->get('/v1/wallets/has-limits');
 
         $response->assertUnauthorized();
     }
@@ -247,7 +247,7 @@ class ListControllerTest extends TestCase implements DatabaseTransaction
         }
         $walletWithoutLimit = $this->walletFactory->forUser($user)->create();
 
-        $response = $this->withAuth($auth)->get('/wallets/has-limits');
+        $response = $this->withAuth($auth)->get('/v1/wallets/has-limits');
 
         $response->assertOk();
 

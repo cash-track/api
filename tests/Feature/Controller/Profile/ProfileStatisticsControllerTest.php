@@ -32,7 +32,7 @@ class ProfileStatisticsControllerTest extends TestCase implements DatabaseTransa
 
     public function testChargesFlowRequireAuth(): void
     {
-        $response = $this->get('/profile/statistics/charges-flow');
+        $response = $this->get('/v1/profile/statistics/charges-flow');
 
         $response->assertUnauthorized();
     }
@@ -45,7 +45,7 @@ class ProfileStatisticsControllerTest extends TestCase implements DatabaseTransa
             $mock->method('findByPK')->willReturn(null);
         });
 
-        $response = $this->withAuth($auth)->get('/profile/statistics/charges-flow');
+        $response = $this->withAuth($auth)->get('/v1/profile/statistics/charges-flow');
 
         $response->assertStatus(400);
 
@@ -66,7 +66,7 @@ class ProfileStatisticsControllerTest extends TestCase implements DatabaseTransa
             10,
         );
 
-        $response = $this->withAuth($auth)->get('/profile/statistics/charges-flow');
+        $response = $this->withAuth($auth)->get('/v1/profile/statistics/charges-flow');
 
         $response->assertOk();
 
@@ -80,7 +80,7 @@ class ProfileStatisticsControllerTest extends TestCase implements DatabaseTransa
 
     public function testCountersRequireAuth(): void
     {
-        $response = $this->get('/profile/statistics/counters');
+        $response = $this->get('/v1/profile/statistics/counters');
 
         $response->assertUnauthorized();
     }
@@ -104,7 +104,7 @@ class ProfileStatisticsControllerTest extends TestCase implements DatabaseTransa
 
         $incomeCharges = $charges->filter(fn (Charge $charge) => $charge->type === Charge::TYPE_INCOME)->count();
 
-        $response = $this->withAuth($auth)->get('/profile/statistics/counters');
+        $response = $this->withAuth($auth)->get('/v1/profile/statistics/counters');
 
         $response->assertOk();
 
@@ -122,7 +122,7 @@ class ProfileStatisticsControllerTest extends TestCase implements DatabaseTransa
 
     public function testWalletsLatestRequireAuth(): void
     {
-        $response = $this->get('/profile/wallets/latest');
+        $response = $this->get('/v1/profile/wallets/latest');
 
         $response->assertUnauthorized();
     }
@@ -142,7 +142,7 @@ class ProfileStatisticsControllerTest extends TestCase implements DatabaseTransa
             $latestChargesPerWalletAmount * 3,
         );
 
-        $response = $this->withAuth($auth)->get('/profile/wallets/latest');
+        $response = $this->withAuth($auth)->get('/v1/profile/wallets/latest');
 
         $response->assertOk();
 

@@ -56,7 +56,7 @@ class LogoutControllerTest extends TestCase implements DatabaseTransaction
 
     public function testWithoutAuth(): void
     {
-        $response = $this->post('/auth/logout');
+        $response = $this->post('/v1/auth/logout');
 
         $response->assertUnauthorized();
 
@@ -70,11 +70,11 @@ class LogoutControllerTest extends TestCase implements DatabaseTransaction
     {
         $auth = $this->makeAuth($this->userFactory->create());
 
-        $response = $this->withAuth($auth)->post('/auth/logout');
+        $response = $this->withAuth($auth)->post('/v1/auth/logout');
 
         $response->assertOk();
 
-        $response = $this->withAuth($auth)->get('/profile');
+        $response = $this->withAuth($auth)->get('/v1/profile');
 
         $response->assertUnauthorized();
     }
@@ -84,17 +84,17 @@ class LogoutControllerTest extends TestCase implements DatabaseTransaction
     {
         $auth = $this->makeAuth($this->userFactory->create());
 
-        $response = $this->withAuth($auth)->post('/auth/logout', [
+        $response = $this->withAuth($auth)->post('/v1/auth/logout', [
             'refreshToken' => $auth['refreshToken'],
         ]);
 
         $response->assertOk();
 
-        $response = $this->withAuth($auth)->get('/profile');
+        $response = $this->withAuth($auth)->get('/v1/profile');
 
         $response->assertUnauthorized();
 
-        $response = $this->withAuthRefresh($auth)->post('/auth/refresh');
+        $response = $this->withAuthRefresh($auth)->post('/v1/auth/refresh');
 
         $response->assertUnauthorized();
     }
@@ -105,7 +105,7 @@ class LogoutControllerTest extends TestCase implements DatabaseTransaction
         // revocation can't be recorded.
         $auth = $this->makeAuth($this->userFactory->create());
 
-        $response = $this->withAuth($auth)->post('/auth/logout');
+        $response = $this->withAuth($auth)->post('/v1/auth/logout');
 
         $response->assertOk();
     }

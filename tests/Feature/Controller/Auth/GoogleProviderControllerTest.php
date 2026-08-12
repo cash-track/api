@@ -70,7 +70,7 @@ class GoogleProviderControllerTest extends TestCase implements DatabaseTransacti
             $mock->expects($this->once())->method('queueDownloadProfilePhoto')->with($this->anything(), $photoUrl, null, null);
         });
 
-        $response = $this->post('/auth/provider/google', [
+        $response = $this->post('/v1/auth/provider/google', [
             'token' => $token,
         ]);
 
@@ -83,7 +83,7 @@ class GoogleProviderControllerTest extends TestCase implements DatabaseTransacti
         $this->assertArrayHasKey('accessToken', $auth);
         $this->assertArrayHasKey('refreshToken', $auth);
 
-        $response = $this->withAuth($auth)->get('/profile');
+        $response = $this->withAuth($auth)->get('/v1/profile');
 
         $response->assertOk();
 
@@ -127,7 +127,7 @@ class GoogleProviderControllerTest extends TestCase implements DatabaseTransacti
             $mock->expects($this->once())->method('queueDownloadProfilePhoto')->with($this->anything(), $photoUrl, null, null);
         });
 
-        $response = $this->post('/auth/provider/google', [
+        $response = $this->post('/v1/auth/provider/google', [
             'token' => $token,
         ]);
 
@@ -140,7 +140,7 @@ class GoogleProviderControllerTest extends TestCase implements DatabaseTransacti
         $this->assertArrayHasKey('accessToken', $auth);
         $this->assertArrayHasKey('refreshToken', $auth);
 
-        $response = $this->withAuth($auth)->get('/profile');
+        $response = $this->withAuth($auth)->get('/v1/profile');
 
         $response->assertOk();
 
@@ -193,7 +193,7 @@ class GoogleProviderControllerTest extends TestCase implements DatabaseTransacti
             $mock->method('getProfilePhotoPublicUrl')->willReturn(Fixtures::url());
         });
 
-        $response = $this->post('/auth/provider/google', [
+        $response = $this->post('/v1/auth/provider/google', [
             'token' => $token,
         ]);
 
@@ -206,7 +206,7 @@ class GoogleProviderControllerTest extends TestCase implements DatabaseTransacti
         $this->assertArrayHasKey('accessToken', $auth);
         $this->assertArrayHasKey('refreshToken', $auth);
 
-        $response = $this->withAuth($auth)->get('/profile');
+        $response = $this->withAuth($auth)->get('/v1/profile');
 
         $response->assertOk();
 
@@ -264,7 +264,7 @@ class GoogleProviderControllerTest extends TestCase implements DatabaseTransacti
             $mock->method('getProfilePhotoPublicUrl')->willReturn(Fixtures::url());
         });
 
-        $response = $this->post('/auth/provider/google', [
+        $response = $this->post('/v1/auth/provider/google', [
             'token' => $token,
         ]);
 
@@ -307,7 +307,7 @@ class GoogleProviderControllerTest extends TestCase implements DatabaseTransacti
         ]);
         $this->getContainer()->bind(\Google\Client::class, fn() => $googleClient);
 
-        $response = $this->post('/auth/provider/google', [
+        $response = $this->post('/v1/auth/provider/google', [
             'token' => $token,
         ]);
 
@@ -339,7 +339,7 @@ class GoogleProviderControllerTest extends TestCase implements DatabaseTransacti
                      ->willThrowException(new \RuntimeException($message));
         $this->getContainer()->bind(\Google\Client::class, fn() => $googleClient);
 
-        $response = $this->post('/auth/provider/google', [
+        $response = $this->post('/v1/auth/provider/google', [
             'token' => $token,
         ]);
 
@@ -386,7 +386,7 @@ class GoogleProviderControllerTest extends TestCase implements DatabaseTransacti
                      ->willReturn($data);
         $this->getContainer()->bind(\Google\Client::class, fn() => $googleClient);
 
-        $response = $this->post('/auth/provider/google', [
+        $response = $this->post('/v1/auth/provider/google', [
             'token' => $token,
         ]);
 
@@ -423,7 +423,7 @@ class GoogleProviderControllerTest extends TestCase implements DatabaseTransacti
             $mock->method('findByEmail')->with($email)->willThrowException(new \RuntimeException($message));
         });
 
-        $response = $this->post('/auth/provider/google', [
+        $response = $this->post('/v1/auth/provider/google', [
             'token' => $token,
         ]);
 
@@ -471,7 +471,7 @@ class GoogleProviderControllerTest extends TestCase implements DatabaseTransacti
 
         $this->getContainer()->bind(GoogleAccountService::class, fn () => $mock);
 
-        $response = $this->post('/auth/provider/google', [
+        $response = $this->post('/v1/auth/provider/google', [
             'token' => $token,
         ]);
 

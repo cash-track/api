@@ -10,16 +10,16 @@ info:
     Cash-Track is a personal finance management SaaS. This API powers the mobile and web clients.
 
     ## Authentication
-    Most endpoints require a **JWT Bearer token** obtained via `/auth/login`, `/auth/register`,
+    Most endpoints require a **JWT Bearer token** obtained via `/v1/auth/login`, `/v1/auth/register`,
     or one of the social/passkey login flows.
 
     Tokens come in pairs:
     - **Access token** — short-lived (~1 hour). Send in `Authorization: Bearer <token>`.
-    - **Refresh token** — long-lived (~7 days). Use `POST /auth/refresh` to get a new pair.
+    - **Refresh token** — long-lived (~7 days). Use `POST /v1/auth/refresh` to get a new pair.
 
     ## Email Confirmation
     After registration the user receives a confirmation email. Creating wallets, charges, and tags
-    requires a confirmed email address. Use the `/auth/email/confirmation` group to check status
+    requires a confirmed email address. Use the `/v1/auth/email/confirmation` group to check status
     or resend the link.
 
     ## Error Responses
@@ -112,7 +112,7 @@ paths:
   # =========================================================================
   # AUTH
   # =========================================================================
-  /auth/register:
+  /v1/auth/register:
     post:
       operationId: authRegister
       summary: Register a new account
@@ -146,7 +146,7 @@ paths:
         "422":
           $ref: "#/components/responses/ValidationError"
 
-  /auth/register/check/nick-name:
+  /v1/auth/register/check/nick-name:
     post:
       operationId: authCheckNickNameRegister
       summary: Check nick-name availability (registration)
@@ -173,7 +173,7 @@ paths:
         "422":
           $ref: "#/components/responses/ValidationError"
 
-  /auth/login:
+  /v1/auth/login:
     post:
       operationId: authLogin
       summary: Login with email and password
@@ -206,7 +206,7 @@ paths:
         "429":
           $ref: "#/components/responses/LoginThrottled"
 
-  /auth/refresh:
+  /v1/auth/refresh:
     post:
       operationId: authRefresh
       summary: Refresh access token
@@ -236,7 +236,7 @@ paths:
         "401":
           $ref: "#/components/responses/Unauthorized"
 
-  /auth/logout:
+  /v1/auth/logout:
     post:
       operationId: authLogout
       summary: Logout / invalidate refresh token and access token
@@ -309,14 +309,14 @@ paths:
                           type: string
                           description: RSA public exponent, base64url-encoded without padding.
 
-  /auth/login/passkey/init:
+  /v1/auth/login/passkey/init:
     get:
       operationId: authPasskeyLoginInit
       summary: Initialise WebAuthn login challenge
       description: |
         Returns the WebAuthn `PublicKeyCredentialRequestOptions` challenge that the
         client must pass to `navigator.credentials.get()`. Call this before
-        `POST /auth/login/passkey`.
+        `POST /v1/auth/login/passkey`.
       tags: [Auth]
       security: []
       responses:
@@ -332,7 +332,7 @@ paths:
         "503":
           $ref: "#/components/responses/ServiceUnavailable"
 
-  /auth/login/passkey:
+  /v1/auth/login/passkey:
     post:
       operationId: authPasskeyLogin
       summary: Complete WebAuthn passkey login
@@ -361,7 +361,7 @@ paths:
         "503":
           $ref: "#/components/responses/ServiceUnavailable"
 
-  /auth/provider/google:
+  /v1/auth/provider/google:
     post:
       operationId: authGoogle
       summary: Login or register via Google OAuth
@@ -396,7 +396,7 @@ paths:
   # =========================================================================
   # EMAIL CONFIRMATION
   # =========================================================================
-  /auth/email/confirmation:
+  /v1/auth/email/confirmation:
     get:
       operationId: emailConfirmationStatus
       summary: Get email confirmation status
@@ -414,7 +414,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/EmailConfirmation"
 
-  /auth/email/confirmation/confirm/{token}:
+  /v1/auth/email/confirmation/confirm/{token}:
     get:
       operationId: emailConfirmationConfirm
       summary: Confirm email with token
@@ -436,7 +436,7 @@ paths:
         "400":
           $ref: "#/components/responses/BadRequest"
 
-  /auth/email/confirmation/resend:
+  /v1/auth/email/confirmation/resend:
     post:
       operationId: emailConfirmationResend
       summary: Resend confirmation email
@@ -457,7 +457,7 @@ paths:
   # =========================================================================
   # PASSWORD
   # =========================================================================
-  /auth/password/forgot:
+  /v1/auth/password/forgot:
     post:
       operationId: passwordForgotCreate
       summary: Request a password reset
@@ -491,7 +491,7 @@ paths:
         "422":
           $ref: "#/components/responses/ValidationError"
 
-  /auth/password/reset:
+  /v1/auth/password/reset:
     post:
       operationId: passwordReset
       summary: Reset password with code
@@ -522,7 +522,7 @@ paths:
   # =========================================================================
   # PROFILE
   # =========================================================================
-  /profile:
+  /v1/profile:
     get:
       operationId: profileGet
       summary: Get current user profile
@@ -545,7 +545,7 @@ paths:
       summary: Update profile
       description: |
         Updates the user's basic profile fields. All fields are required.
-        Nick-name uniqueness is validated — use `POST /profile/check/nick-name`
+        Nick-name uniqueness is validated — use `POST /v1/profile/check/nick-name`
         to pre-validate during form entry.
       tags: [Profile]
       security:
@@ -568,7 +568,7 @@ paths:
         "422":
           $ref: "#/components/responses/ValidationError"
 
-  /profile/check/nick-name:
+  /v1/profile/check/nick-name:
     post:
       operationId: profileCheckNickName
       summary: Check nick-name availability (profile update)
@@ -595,7 +595,7 @@ paths:
         "422":
           $ref: "#/components/responses/ValidationError"
 
-  /profile/locale:
+  /v1/profile/locale:
     put:
       operationId: profileUpdateLocale
       summary: Update user locale
@@ -621,7 +621,7 @@ paths:
         "200":
           description: Locale updated
 
-  /profile/social:
+  /v1/profile/social:
     get:
       operationId: profileSocialAccounts
       summary: List connected social accounts
@@ -646,7 +646,7 @@ paths:
                         type: boolean
                         description: Whether a Google account is linked
 
-  /profile/password:
+  /v1/profile/password:
     put:
       operationId: profileUpdatePassword
       summary: Change password
@@ -674,7 +674,7 @@ paths:
         "422":
           $ref: "#/components/responses/ValidationError"
 
-  /profile/photo:
+  /v1/profile/photo:
     put:
       operationId: profileUpdatePhoto
       summary: Upload profile photo
@@ -717,7 +717,7 @@ paths:
         "422":
           $ref: "#/components/responses/ValidationError"
 
-  /profile/statistics/charges-flow:
+  /v1/profile/statistics/charges-flow:
     get:
       operationId: profileChargesFlow
       summary: Charges income/expense flow
@@ -749,7 +749,7 @@ paths:
                       currency:
                         $ref: "#/components/schemas/Currency"
 
-  /profile/statistics/counters:
+  /v1/profile/statistics/counters:
     get:
       operationId: profileCounters
       summary: Profile counters
@@ -772,7 +772,7 @@ paths:
                     additionalProperties: true
                     description: Map of counter names to integer values
 
-  /profile/wallets/latest:
+  /v1/profile/wallets/latest:
     get:
       operationId: profileWalletsLatest
       summary: Latest wallets with recent charges
@@ -800,7 +800,7 @@ paths:
   # =========================================================================
   # PASSKEYS (profile)
   # =========================================================================
-  /profile/passkey:
+  /v1/profile/passkey:
     get:
       operationId: passkeyList
       summary: List registered passkeys
@@ -824,7 +824,7 @@ paths:
       operationId: passkeyStore
       summary: Register a new passkey
       description: |
-        Completes the passkey registration flow. Call `POST /profile/passkey/init` first
+        Completes the passkey registration flow. Call `POST /v1/profile/passkey/init` first
         to get the creation options, pass them to `navigator.credentials.create()`, then
         submit the result here.
       tags: [Passkeys]
@@ -852,7 +852,7 @@ paths:
         "503":
           $ref: "#/components/responses/ServiceUnavailable"
 
-  /profile/passkey/init:
+  /v1/profile/passkey/init:
     post:
       operationId: passkeyInitRegistration
       summary: Initialise passkey registration
@@ -888,7 +888,7 @@ paths:
         "503":
           $ref: "#/components/responses/ServiceUnavailable"
 
-  /profile/passkey/{id}:
+  /v1/profile/passkey/{id}:
     delete:
       operationId: passkeyDelete
       summary: Delete a passkey
@@ -909,7 +909,7 @@ paths:
   # =========================================================================
   # WALLETS
   # =========================================================================
-  /wallets:
+  /v1/wallets:
     get:
       operationId: walletList
       summary: List all wallets
@@ -956,7 +956,7 @@ paths:
         "422":
           $ref: "#/components/responses/ValidationError"
 
-  /wallets/unarchived:
+  /v1/wallets/unarchived:
     get:
       operationId: walletListUnarchived
       summary: List unarchived wallets
@@ -976,7 +976,7 @@ paths:
                 items:
                   $ref: "#/components/schemas/Wallet"
 
-  /wallets/unarchived/sort:
+  /v1/wallets/unarchived/sort:
     post:
       operationId: walletSortUnarchived
       summary: Set wallet sort order
@@ -1005,7 +1005,7 @@ paths:
         "200":
           description: Sort order saved
 
-  /wallets/archived:
+  /v1/wallets/archived:
     get:
       operationId: walletListArchived
       summary: List archived wallets
@@ -1025,7 +1025,7 @@ paths:
                 items:
                   $ref: "#/components/schemas/WalletShort"
 
-  /wallets/has-limits:
+  /v1/wallets/has-limits:
     get:
       operationId: walletListHasLimits
       summary: List wallets that have budget limits
@@ -1045,7 +1045,7 @@ paths:
                 items:
                   $ref: "#/components/schemas/WalletShort"
 
-  /wallets/{id}:
+  /v1/wallets/{id}:
     parameters:
       - $ref: "#/components/parameters/WalletIdParam"
 
@@ -1112,7 +1112,7 @@ paths:
         "404":
           $ref: "#/components/responses/NotFound"
 
-  /wallets/{id}/activate:
+  /v1/wallets/{id}/activate:
     post:
       operationId: walletActivate
       summary: Activate wallet
@@ -1134,7 +1134,7 @@ paths:
         "404":
           $ref: "#/components/responses/NotFound"
 
-  /wallets/{id}/disable:
+  /v1/wallets/{id}/disable:
     post:
       operationId: walletDisable
       summary: Disable wallet
@@ -1156,7 +1156,7 @@ paths:
         "404":
           $ref: "#/components/responses/NotFound"
 
-  /wallets/{id}/archive:
+  /v1/wallets/{id}/archive:
     post:
       operationId: walletArchive
       summary: Archive wallet
@@ -1180,7 +1180,7 @@ paths:
         "404":
           $ref: "#/components/responses/NotFound"
 
-  /wallets/{id}/un-archive:
+  /v1/wallets/{id}/un-archive:
     post:
       operationId: walletUnarchive
       summary: Unarchive wallet
@@ -1205,7 +1205,7 @@ paths:
   # =========================================================================
   # WALLET USERS (sharing)
   # =========================================================================
-  /wallets/{id}/users:
+  /v1/wallets/{id}/users:
     get:
       operationId: walletUsersList
       summary: List wallet members
@@ -1227,7 +1227,7 @@ paths:
                 items:
                   $ref: "#/components/schemas/UserShort"
 
-  /wallets/{id}/users/{userId}:
+  /v1/wallets/{id}/users/{userId}:
     parameters:
       - $ref: "#/components/parameters/WalletIdParam"
       - $ref: "#/components/parameters/UserIdParam"
@@ -1237,7 +1237,7 @@ paths:
       summary: Add user to wallet
       description: |
         Grants another user access to the wallet. The user is found by email or nick-name.
-        Use `GET /users/find/by-email/{query}` to look up users before adding.
+        Use `GET /v1/users/find/by-email/{query}` to look up users before adding.
       tags: [Wallet Users]
       security:
         - bearerAuth: []
@@ -1267,7 +1267,7 @@ paths:
   # =========================================================================
   # WALLET TAGS
   # =========================================================================
-  /wallets/{id}/tags:
+  /v1/wallets/{id}/tags:
     get:
       operationId: walletTagsList
       summary: List tags used in wallet
@@ -1289,7 +1289,7 @@ paths:
                 items:
                   $ref: "#/components/schemas/Tag"
 
-  /wallets/{walletId}/tags/find/{query}:
+  /v1/wallets/{walletId}/tags/find/{query}:
     get:
       operationId: walletTagsFind
       summary: Search tags within a wallet
@@ -1320,7 +1320,7 @@ paths:
   # =========================================================================
   # WALLET TOTALS
   # =========================================================================
-  /wallets/{id}/total:
+  /v1/wallets/{id}/total:
     get:
       operationId: walletTotal
       summary: Get wallet income/expense totals
@@ -1348,7 +1348,7 @@ paths:
   # =========================================================================
   # CHARGES
   # =========================================================================
-  /wallets/{walletId}/charges:
+  /v1/wallets/{walletId}/charges:
     parameters:
       - $ref: "#/components/parameters/WalletIdQueryParam"
 
@@ -1420,7 +1420,7 @@ paths:
         "422":
           $ref: "#/components/responses/ValidationError"
 
-  /wallets/{walletId}/charges/{chargeId}:
+  /v1/wallets/{walletId}/charges/{chargeId}:
     parameters:
       - $ref: "#/components/parameters/WalletIdQueryParam"
       - $ref: "#/components/parameters/ChargeIdParam"
@@ -1467,7 +1467,7 @@ paths:
         "404":
           $ref: "#/components/responses/NotFound"
 
-  /wallets/{walletId}/charges/move/{targetWalletId}:
+  /v1/wallets/{walletId}/charges/move/{targetWalletId}:
     post:
       operationId: chargeMove
       summary: Move charges to another wallet
@@ -1510,7 +1510,7 @@ paths:
         "422":
           $ref: "#/components/responses/ValidationError"
 
-  /charges/title/suggestions/{query}:
+  /v1/charges/title/suggestions/{query}:
     get:
       operationId: chargeTitleSuggestions
       summary: Charge title autocomplete
@@ -1543,7 +1543,7 @@ paths:
   # =========================================================================
   # CHARGE GRAPHS
   # =========================================================================
-  /wallets/{walletId}/charges/graph/amount:
+  /v1/wallets/{walletId}/charges/graph/amount:
     get:
       operationId: chargeGraphAmount
       summary: Amount graph (time series)
@@ -1589,7 +1589,7 @@ paths:
                           type: number
                           format: float
 
-  /wallets/{walletId}/charges/graph/total:
+  /v1/wallets/{walletId}/charges/graph/total:
     get:
       operationId: chargeGraphTotal
       summary: Total graph by type
@@ -1627,7 +1627,7 @@ paths:
   # =========================================================================
   # LIMITS
   # =========================================================================
-  /wallets/{id}/limits:
+  /v1/wallets/{id}/limits:
     parameters:
       - $ref: "#/components/parameters/WalletIdParam"
 
@@ -1680,7 +1680,7 @@ paths:
         "422":
           $ref: "#/components/responses/ValidationError"
 
-  /wallets/{walletId}/limits/{limitId}:
+  /v1/wallets/{walletId}/limits/{limitId}:
     parameters:
       - $ref: "#/components/parameters/WalletIdQueryParam"
       - $ref: "#/components/parameters/LimitIdParam"
@@ -1727,7 +1727,7 @@ paths:
         "404":
           $ref: "#/components/responses/NotFound"
 
-  /wallets/{walletId}/limits/copy/{sourceWalletId}:
+  /v1/wallets/{walletId}/limits/copy/{sourceWalletId}:
     post:
       operationId: limitCopy
       summary: Copy limits from another wallet
@@ -1756,7 +1756,7 @@ paths:
   # =========================================================================
   # TAGS
   # =========================================================================
-  /tags:
+  /v1/tags:
     get:
       operationId: tagList
       summary: List user tags
@@ -1807,7 +1807,7 @@ paths:
         "422":
           $ref: "#/components/responses/ValidationError"
 
-  /tags/{id}:
+  /v1/tags/{id}:
     parameters:
       - $ref: "#/components/parameters/TagIdParam"
 
@@ -1855,7 +1855,7 @@ paths:
         "404":
           $ref: "#/components/responses/NotFound"
 
-  /tags/common:
+  /v1/tags/common:
     get:
       operationId: tagCommonList
       summary: List common (shared) tags
@@ -1877,7 +1877,7 @@ paths:
                 items:
                   $ref: "#/components/schemas/Tag"
 
-  /tags/common/{id}:
+  /v1/tags/common/{id}:
     get:
       operationId: tagCommonGet
       summary: Get a common tag
@@ -1899,7 +1899,7 @@ paths:
         "404":
           $ref: "#/components/responses/NotFound"
 
-  /tags/suggestions/{query}:
+  /v1/tags/suggestions/{query}:
     get:
       operationId: tagSuggestions
       summary: Tag autocomplete
@@ -1930,7 +1930,7 @@ paths:
   # =========================================================================
   # TAG CHARGES
   # =========================================================================
-  /tags/{id}/charges:
+  /v1/tags/{id}/charges:
     get:
       operationId: tagChargeList
       summary: List charges by tag
@@ -1954,7 +1954,7 @@ paths:
         "404":
           $ref: "#/components/responses/NotFound"
 
-  /tags/{id}/charges/total:
+  /v1/tags/{id}/charges/total:
     get:
       operationId: tagChargeTotal
       summary: Tag income/expense totals
@@ -1979,7 +1979,7 @@ paths:
                   data:
                     $ref: "#/components/schemas/ChargeTotal"
 
-  /tags/{id}/charges/graph:
+  /v1/tags/{id}/charges/graph:
     get:
       operationId: tagChargeGraph
       summary: Tag amount graph
@@ -2013,7 +2013,7 @@ paths:
   # =========================================================================
   # CURRENCIES
   # =========================================================================
-  /currencies:
+  /v1/currencies:
     get:
       operationId: currencyList
       summary: List all currencies
@@ -2033,7 +2033,7 @@ paths:
                 items:
                   $ref: "#/components/schemas/Currency"
 
-  /currencies/featured:
+  /v1/currencies/featured:
     get:
       operationId: currencyFeatured
       summary: List featured currencies
@@ -2056,7 +2056,7 @@ paths:
   # =========================================================================
   # USERS (lookup utilities)
   # =========================================================================
-  /users/find/by-email/{query}:
+  /v1/users/find/by-email/{query}:
     get:
       operationId: userFindByEmail
       summary: Find user by email
@@ -2086,7 +2086,7 @@ paths:
         "404":
           $ref: "#/components/responses/NotFound"
 
-  /users/find/by-common-wallets:
+  /v1/users/find/by-common-wallets:
     get:
       operationId: userFindByCommonWallets
       summary: Find users via shared wallets
@@ -2122,8 +2122,8 @@ components:
       scheme: bearer
       bearerFormat: JWT
       description: |
-        JWT access token obtained from `/auth/login`, `/auth/register`, or any social
-        login endpoint. Tokens expire after ~1 hour. Refresh via `POST /auth/refresh`.
+        JWT access token obtained from `/v1/auth/login`, `/v1/auth/register`, or any social
+        login endpoint. Tokens expire after ~1 hour. Refresh via `POST /v1/auth/refresh`.
 
   # -------------------------------------------------------------------------
   # PARAMETERS
@@ -2247,7 +2247,7 @@ components:
           description: Expiry timestamp for the access token (RFC 3339)
         refreshToken:
           type: string
-          description: Long-lived refresh token (~7 days). Use with `POST /auth/refresh`.
+          description: Long-lived refresh token (~7 days). Use with `POST /v1/auth/refresh`.
         refreshTokenExpiredAt:
           type: string
           format: date-time
@@ -2314,7 +2314,7 @@ components:
       properties:
         challenge:
           type: string
-          description: Challenge string received from `GET /auth/login/passkey/init`
+          description: Challenge string received from `GET /v1/auth/login/passkey/init`
         data:
           type: string
           description: JSON-stringified `PublicKeyCredential` assertion response from the authenticator
@@ -2327,7 +2327,7 @@ components:
       properties:
         challenge:
           type: string
-          description: Challenge string received from `POST /profile/passkey/init`
+          description: Challenge string received from `POST /v1/profile/passkey/init`
         data:
           type: string
           description: JSON-stringified `PublicKeyCredential` creation response from the authenticator

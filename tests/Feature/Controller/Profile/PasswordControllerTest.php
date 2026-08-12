@@ -29,7 +29,7 @@ class PasswordControllerTest extends TestCase implements DatabaseTransaction
 
     public function testUpdatePasswordRequireAuth(): void
     {
-        $response = $this->put('/profile/password');
+        $response = $this->put('/v1/profile/password');
 
         $response->assertUnauthorized();
     }
@@ -40,7 +40,7 @@ class PasswordControllerTest extends TestCase implements DatabaseTransaction
 
         $password = Fixtures::string();
 
-        $response = $this->withAuth($auth)->put('/profile/password', [
+        $response = $this->withAuth($auth)->put('/v1/profile/password', [
             'currentPassword' => UserFactory::DEFAULT_PASSWORD,
             'newPassword' => $password,
             'newPasswordConfirmation' => $password,
@@ -62,7 +62,7 @@ class PasswordControllerTest extends TestCase implements DatabaseTransaction
 
         $password = Fixtures::string();
 
-        $response = $this->withAuth($auth)->put('/profile/password', [
+        $response = $this->withAuth($auth)->put('/v1/profile/password', [
             'currentPassword' => Fixtures::string(),
             'newPassword' => $password,
             'newPasswordConfirmation' => $password,
@@ -84,7 +84,7 @@ class PasswordControllerTest extends TestCase implements DatabaseTransaction
 
         $password = Fixtures::string(5);
 
-        $response = $this->withAuth($auth)->put('/profile/password');
+        $response = $this->withAuth($auth)->put('/v1/profile/password');
 
         $response->assertUnprocessable();
 
@@ -103,7 +103,7 @@ class PasswordControllerTest extends TestCase implements DatabaseTransaction
 
         $password = Fixtures::string(5);
 
-        $response = $this->withAuth($auth)->put('/profile/password', [
+        $response = $this->withAuth($auth)->put('/v1/profile/password', [
             'currentPassword' => UserFactory::DEFAULT_PASSWORD,
             'newPassword' => $password,
             'newPasswordConfirmation' => $password . '.',
@@ -137,7 +137,7 @@ class PasswordControllerTest extends TestCase implements DatabaseTransaction
 
         $password = Fixtures::string();
 
-        $response = $this->withAuth($auth)->put('/profile/password', [
+        $response = $this->withAuth($auth)->put('/v1/profile/password', [
             'currentPassword' => UserFactory::DEFAULT_PASSWORD,
             'newPassword' => $password,
             'newPasswordConfirmation' => $password,

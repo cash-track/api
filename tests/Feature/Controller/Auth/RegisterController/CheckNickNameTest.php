@@ -25,7 +25,7 @@ class CheckNickNameTest extends TestCase implements DatabaseTransaction
 
     public function testNickNameFree(): void
     {
-        $response = $this->post('/auth/register/check/nick-name', [
+        $response = $this->post('/v1/auth/register/check/nick-name', [
             'nickName' => Fixtures::string(),
         ]);
 
@@ -36,7 +36,7 @@ class CheckNickNameTest extends TestCase implements DatabaseTransaction
     {
         $user = $this->userFactory->create();
 
-        $response = $this->post('/auth/register/check/nick-name', [
+        $response = $this->post('/v1/auth/register/check/nick-name', [
             'nickName' => $user->nickName
         ]);
 
@@ -50,7 +50,7 @@ class CheckNickNameTest extends TestCase implements DatabaseTransaction
      */
     public function testValidation($nickName): void
     {
-        $response = $this->post('/auth/register/check/nick-name', [
+        $response = $this->post('/v1/auth/register/check/nick-name', [
             'nickName' => $nickName,
         ]);
 

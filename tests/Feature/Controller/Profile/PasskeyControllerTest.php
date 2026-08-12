@@ -34,7 +34,7 @@ class PasskeyControllerTest extends TestCase implements DatabaseTransaction
 
     public function testListRequireAuth(): void
     {
-        $response = $this->get('/profile/passkey');
+        $response = $this->get('/v1/profile/passkey');
 
         $response->assertUnauthorized();
     }
@@ -46,7 +46,7 @@ class PasskeyControllerTest extends TestCase implements DatabaseTransaction
         $passkeys = $this->passkeyFactory->forUser($user)->createMany(2);
         $foreign = $this->passkeyFactory->forUser($this->userFactory->create())->createMany(2);
 
-        $response = $this->withAuth($auth)->get('/profile/passkey');
+        $response = $this->withAuth($auth)->get('/v1/profile/passkey');
 
         $response->assertOk();
 
@@ -67,7 +67,7 @@ class PasskeyControllerTest extends TestCase implements DatabaseTransaction
 
     public function testInitRequireAuth(): void
     {
-        $response = $this->post('/profile/passkey/init');
+        $response = $this->post('/v1/profile/passkey/init');
 
         $response->assertUnauthorized();
     }
@@ -91,7 +91,7 @@ class PasskeyControllerTest extends TestCase implements DatabaseTransaction
     {
         $auth = $this->makeAuth($this->userFactory->create());
 
-        $response = $this->withAuth($auth)->post('/profile/passkey/init', $request);
+        $response = $this->withAuth($auth)->post('/v1/profile/passkey/init', $request);
 
         $response->assertUnprocessable();
 
@@ -146,7 +146,7 @@ class PasskeyControllerTest extends TestCase implements DatabaseTransaction
                            ->method('generateChallenge')
                            ->willReturn($challenge);
 
-        $response = $this->withAuth($auth)->post('/profile/passkey/init', [
+        $response = $this->withAuth($auth)->post('/v1/profile/passkey/init', [
             'name' => $passkey->name,
         ]);
 
@@ -203,7 +203,7 @@ class PasskeyControllerTest extends TestCase implements DatabaseTransaction
 
         $passkey = PasskeyFactory::make();
 
-        $response = $this->withAuth($auth)->post('/profile/passkey/init', [
+        $response = $this->withAuth($auth)->post('/v1/profile/passkey/init', [
             'name' => $passkey->name,
         ]);
 
@@ -217,7 +217,7 @@ class PasskeyControllerTest extends TestCase implements DatabaseTransaction
 
     public function testStoreRequireAuth(): void
     {
-        $response = $this->post('/profile/passkey');
+        $response = $this->post('/v1/profile/passkey');
 
         $response->assertUnauthorized();
     }
@@ -242,7 +242,7 @@ class PasskeyControllerTest extends TestCase implements DatabaseTransaction
     {
         $auth = $this->makeAuth($this->userFactory->create());
 
-        $response = $this->withAuth($auth)->post('/profile/passkey', $request);
+        $response = $this->withAuth($auth)->post('/v1/profile/passkey', $request);
 
         $response->assertUnprocessable();
 
@@ -279,7 +279,7 @@ class PasskeyControllerTest extends TestCase implements DatabaseTransaction
             },
         );
 
-        $response = $this->withAuth($auth)->post('/profile/passkey', [
+        $response = $this->withAuth($auth)->post('/v1/profile/passkey', [
             'challenge' => $challenge,
             'data' => $data,
         ]);
@@ -320,7 +320,7 @@ class PasskeyControllerTest extends TestCase implements DatabaseTransaction
             },
         );
 
-        $response = $this->withAuth($auth)->post('/profile/passkey', [
+        $response = $this->withAuth($auth)->post('/v1/profile/passkey', [
             'challenge' => $challenge,
             'data' => $data,
         ]);
@@ -352,7 +352,7 @@ class PasskeyControllerTest extends TestCase implements DatabaseTransaction
 
         $this->getContainer()->bind(PasskeyService::class, fn () => $serviceMock);
 
-        $response = $this->withAuth($auth)->post('/profile/passkey', [
+        $response = $this->withAuth($auth)->post('/v1/profile/passkey', [
             'challenge' => $challenge,
             'data' => $data,
         ]);
@@ -369,7 +369,7 @@ class PasskeyControllerTest extends TestCase implements DatabaseTransaction
     {
         $passkey = $this->passkeyFactory->forUser($this->userFactory->create())->create();
 
-        $response = $this->delete("/profile/passkey/{$passkey->id}");
+        $response = $this->delete("/v1/profile/passkey/{$passkey->id}");
 
         $response->assertUnauthorized();
     }
@@ -379,7 +379,7 @@ class PasskeyControllerTest extends TestCase implements DatabaseTransaction
         $auth = $this->makeAuth($this->userFactory->create());
         $id = Fixtures::integer();
 
-        $response = $this->withAuth($auth)->delete("/profile/passkey/{$id}");
+        $response = $this->withAuth($auth)->delete("/v1/profile/passkey/{$id}");
 
         $response->assertNotFound();
     }
@@ -389,7 +389,7 @@ class PasskeyControllerTest extends TestCase implements DatabaseTransaction
         $passkey = $this->passkeyFactory->forUser($this->userFactory->create())->create();
         $auth = $this->makeAuth($this->userFactory->create());
 
-        $response = $this->withAuth($auth)->delete("/profile/passkey/{$passkey->id}");
+        $response = $this->withAuth($auth)->delete("/v1/profile/passkey/{$passkey->id}");
 
         $response->assertNotFound();
     }
@@ -399,7 +399,7 @@ class PasskeyControllerTest extends TestCase implements DatabaseTransaction
         $auth = $this->makeAuth($user = $this->userFactory->create());
         $passkey = $this->passkeyFactory->forUser($user)->create();
 
-        $response = $this->withAuth($auth)->delete("/profile/passkey/{$passkey->id}");
+        $response = $this->withAuth($auth)->delete("/v1/profile/passkey/{$passkey->id}");
 
         $response->assertOk();
 
@@ -424,7 +424,7 @@ class PasskeyControllerTest extends TestCase implements DatabaseTransaction
 
         $this->getContainer()->bind(PasskeyService::class, fn () => $storeMock);
 
-        $response = $this->withAuth($auth)->delete("/profile/passkey/{$passkey->id}");
+        $response = $this->withAuth($auth)->delete("/v1/profile/passkey/{$passkey->id}");
 
         $response->assertStatus(500);
 

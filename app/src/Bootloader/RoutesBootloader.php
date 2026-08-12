@@ -22,6 +22,7 @@ use Spiral\Filters\ErrorsRendererInterface;
 use Spiral\Http\Middleware\ErrorHandlerMiddleware;
 use Spiral\Http\Middleware\JsonPayloadMiddleware;
 use Spiral\Router\Bootloader\AnnotatedRoutesBootloader;
+use Spiral\Router\GroupRegistry;
 use Spiral\Router\Loader\Configurator\RoutingConfigurator;
 
 final class RoutesBootloader extends BaseRoutesBootloader
@@ -68,6 +69,14 @@ final class RoutesBootloader extends BaseRoutesBootloader
                 RateLimitMiddleware::class,
             ],
         ];
+    }
+
+    #[\Override]
+    protected function configureRouteGroups(GroupRegistry $groups): void
+    {
+        $groups->getGroup('auth')->setPrefix('/v1');
+        $groups->getGroup('web')->setPrefix('/v1');
+        $groups->getGroup('unversioned')->addMiddleware('middleware:web');
     }
 
     #[\Override]

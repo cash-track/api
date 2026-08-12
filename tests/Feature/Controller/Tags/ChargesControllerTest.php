@@ -42,7 +42,7 @@ class ChargesControllerTest extends TestCase implements DatabaseTransaction
         $tag = $this->tagFactory->forUser($user)->create();
         $this->chargeFactory->forUser($user)->forWallet($wallet)->withTags([$tag])->create();
 
-        $response = $this->get("/tags/{$tag->id}/charges");
+        $response = $this->get("/v1/tags/{$tag->id}/charges");
 
         $response->assertUnauthorized();
     }
@@ -54,7 +54,7 @@ class ChargesControllerTest extends TestCase implements DatabaseTransaction
         $this->chargeFactory->forUser($user)->forWallet($wallet)->withTags([$tag])->create();
         $tagId = Fixtures::integer();
 
-        $response = $this->get("/tags/{$tagId}/charges");
+        $response = $this->get("/v1/tags/{$tagId}/charges");
 
         $response->assertUnauthorized();
     }
@@ -68,7 +68,7 @@ class ChargesControllerTest extends TestCase implements DatabaseTransaction
         $this->chargeFactory->forUser($user)->forWallet($wallet)->withTags([$tag])->create();
         $tagId = Fixtures::integer();
 
-        $response = $this->withAuth($auth)->get("/tags/{$tagId}/charges");
+        $response = $this->withAuth($auth)->get("/v1/tags/{$tagId}/charges");
 
         $response->assertNotFound();
     }
@@ -81,7 +81,7 @@ class ChargesControllerTest extends TestCase implements DatabaseTransaction
         $this->chargeFactory->forUser($user)->forWallet($wallet)->create();
         $tag = $this->tagFactory->forUser($this->userFactory->create())->create();
 
-        $response = $this->withAuth($auth)->get("/tags/{$tag->id}/charges");
+        $response = $this->withAuth($auth)->get("/v1/tags/{$tag->id}/charges");
 
         $response->assertNotFound();
     }
@@ -93,7 +93,7 @@ class ChargesControllerTest extends TestCase implements DatabaseTransaction
         $tag = $this->tagFactory->forUser($user)->create();
         $this->chargeFactory->forUser($user)->forWallet($wallet)->create();
 
-        $response = $this->withAuth($auth)->get("/tags/{$tag->id}/charges");
+        $response = $this->withAuth($auth)->get("/v1/tags/{$tag->id}/charges");
 
         $response->assertOk();
 
@@ -123,7 +123,7 @@ class ChargesControllerTest extends TestCase implements DatabaseTransaction
 
         $charges = new ArrayCollection($charges);
 
-        $response = $this->withAuth($auth)->get("/tags/{$tag->id}/charges");
+        $response = $this->withAuth($auth)->get("/v1/tags/{$tag->id}/charges");
 
         $response->assertOk();
 
@@ -216,7 +216,7 @@ class ChargesControllerTest extends TestCase implements DatabaseTransaction
             $charges[$i] = $this->chargeFactory->forUser($user)->forWallet($wallet)->withTags([$tag])->create($charges[$i]);
         }
 
-        $response = $this->withAuth($auth)->get("/tags/{$tag->id}/charges", $query);
+        $response = $this->withAuth($auth)->get("/v1/tags/{$tag->id}/charges", $query);
 
         $response->assertOk();
 
@@ -243,7 +243,7 @@ class ChargesControllerTest extends TestCase implements DatabaseTransaction
         $tag = $this->tagFactory->forUser($user)->create();
         $this->chargeFactory->forUser($user)->forWallet($wallet)->withTags([$tag])->create();
 
-        $response = $this->get("/tags/{$tag->id}/charges/total");
+        $response = $this->get("/v1/tags/{$tag->id}/charges/total");
 
         $response->assertUnauthorized();
     }
@@ -253,7 +253,7 @@ class ChargesControllerTest extends TestCase implements DatabaseTransaction
         $auth = $this->makeAuth($this->userFactory->create());
         $tagId = Fixtures::integer();
 
-        $response = $this->withAuth($auth)->get("/tags/{$tagId}/charges/total");
+        $response = $this->withAuth($auth)->get("/v1/tags/{$tagId}/charges/total");
 
         $response->assertNotFound();
     }
@@ -265,7 +265,7 @@ class ChargesControllerTest extends TestCase implements DatabaseTransaction
         $tag = $this->tagFactory->forUser($this->userFactory->create())->create();
         $this->chargeFactory->forUser($user)->forWallet($wallet)->withTags([$tag])->create();
 
-        $response = $this->withAuth($auth)->get("/tags/{$tag->id}/charges/total");
+        $response = $this->withAuth($auth)->get("/v1/tags/{$tag->id}/charges/total");
 
         $response->assertNotFound();
     }
@@ -277,7 +277,7 @@ class ChargesControllerTest extends TestCase implements DatabaseTransaction
         $this->chargeFactory->forUser($user)->forWallet($wallet)->createMany(3);
         $tag = $this->tagFactory->forUser($user)->create();
 
-        $response = $this->withAuth($auth)->get("/tags/{$tag->id}/charges/total");
+        $response = $this->withAuth($auth)->get("/v1/tags/{$tag->id}/charges/total");
 
         $response->assertOk();
 
@@ -314,7 +314,7 @@ class ChargesControllerTest extends TestCase implements DatabaseTransaction
 
         $total = round($totalIncome - $totalExpense, 2);
 
-        $response = $this->withAuth($auth)->get("/tags/{$tag->id}/charges/total");
+        $response = $this->withAuth($auth)->get("/v1/tags/{$tag->id}/charges/total");
 
         $response->assertOk();
 
@@ -412,7 +412,7 @@ class ChargesControllerTest extends TestCase implements DatabaseTransaction
             $this->chargeFactory->forUser($user)->forWallet($wallet)->withTags([$tag])->create($charge);
         }
 
-        $response = $this->withAuth($auth)->get("/tags/{$tag->id}/charges/total", $query);
+        $response = $this->withAuth($auth)->get("/v1/tags/{$tag->id}/charges/total", $query);
 
         $response->assertOk();
 
@@ -430,7 +430,7 @@ class ChargesControllerTest extends TestCase implements DatabaseTransaction
         $tag = $this->tagFactory->forUser($user)->create();
         $this->chargeFactory->forUser($user)->forWallet($wallet)->withTags([$tag])->create();
 
-        $response = $this->get("/tags/{$tag->id}/charges/graph");
+        $response = $this->get("/v1/tags/{$tag->id}/charges/graph");
 
         $response->assertUnauthorized();
     }
@@ -440,7 +440,7 @@ class ChargesControllerTest extends TestCase implements DatabaseTransaction
         $auth = $this->makeAuth($this->userFactory->create());
         $tagId = Fixtures::integer();
 
-        $response = $this->withAuth($auth)->get("/tags/{$tagId}/charges/graph");
+        $response = $this->withAuth($auth)->get("/v1/tags/{$tagId}/charges/graph");
 
         $response->assertNotFound();
     }
@@ -452,7 +452,7 @@ class ChargesControllerTest extends TestCase implements DatabaseTransaction
         $tag = $this->tagFactory->forUser($this->userFactory->create())->create();
         $this->chargeFactory->forUser($user)->forWallet($wallet)->withTags([$tag])->create();
 
-        $response = $this->withAuth($auth)->get("/tags/{$tag->id}/charges/graph");
+        $response = $this->withAuth($auth)->get("/v1/tags/{$tag->id}/charges/graph");
 
         $response->assertNotFound();
     }
@@ -464,7 +464,7 @@ class ChargesControllerTest extends TestCase implements DatabaseTransaction
         $this->chargeFactory->forUser($user)->forWallet($wallet)->createMany(3);
         $tag = $this->tagFactory->forUser($user)->create();
 
-        $response = $this->withAuth($auth)->get("/tags/{$tag->id}/charges/graph");
+        $response = $this->withAuth($auth)->get("/v1/tags/{$tag->id}/charges/graph");
 
         $response->assertOk();
 
@@ -597,7 +597,7 @@ class ChargesControllerTest extends TestCase implements DatabaseTransaction
             $this->chargeFactory->withTags([$tag])->create($charge);
         }
 
-        $response = $this->withAuth($auth)->get("/tags/{$tag->id}/charges/graph", $query);
+        $response = $this->withAuth($auth)->get("/v1/tags/{$tag->id}/charges/graph", $query);
 
         $response->assertOk();
 

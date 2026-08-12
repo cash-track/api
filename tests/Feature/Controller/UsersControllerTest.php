@@ -28,7 +28,7 @@ class UsersControllerTest extends TestCase implements DatabaseTransaction
     {
         $email = Fixtures::email();
 
-        $response = $this->get("/users/find/by-email/{$email}");
+        $response = $this->get("/v1/users/find/by-email/{$email}");
 
         $response->assertUnauthorized();
     }
@@ -39,7 +39,7 @@ class UsersControllerTest extends TestCase implements DatabaseTransaction
 
         $email = Fixtures::email();
 
-        $response = $this->withAuth($auth)->get("/users/find/by-email/{$email}");
+        $response = $this->withAuth($auth)->get("/v1/users/find/by-email/{$email}");
 
         $response->assertNotFound();
 
@@ -52,7 +52,7 @@ class UsersControllerTest extends TestCase implements DatabaseTransaction
     {
         $auth = $this->makeAuth($user = $this->userFactory->create());
 
-        $response = $this->withAuth($auth)->get("/users/find/by-email/{$user->email}");
+        $response = $this->withAuth($auth)->get("/v1/users/find/by-email/{$user->email}");
 
         $response->assertNotFound();
 
@@ -67,7 +67,7 @@ class UsersControllerTest extends TestCase implements DatabaseTransaction
 
         $user = $this->userFactory->create();
 
-        $response = $this->withAuth($auth)->get("/users/find/by-email/{$user->email}");
+        $response = $this->withAuth($auth)->get("/v1/users/find/by-email/{$user->email}");
 
         $response->assertOk();
 
@@ -80,7 +80,7 @@ class UsersControllerTest extends TestCase implements DatabaseTransaction
 
     public function testFindByCommonWalletsRequireAuth(): void
     {
-        $response = $this->get('/users/find/by-common-wallets');
+        $response = $this->get('/v1/users/find/by-common-wallets');
 
         $response->assertUnauthorized();
     }
@@ -103,7 +103,7 @@ class UsersControllerTest extends TestCase implements DatabaseTransaction
         $walletTwo->users->add($Samanta);
         $this->walletFactory->create($walletTwo);
 
-        $response = $this->withAuth($auth)->get('/users/find/by-common-wallets');
+        $response = $this->withAuth($auth)->get('/v1/users/find/by-common-wallets');
 
         $response->assertOk();
 

@@ -44,7 +44,7 @@ class RefreshControllerTest extends TestCase implements DatabaseTransaction
     {
         $auth = $this->makeAuth($this->userFactory->create());
 
-        $response = $this->withAuthRefresh($auth)->post('/auth/refresh', [
+        $response = $this->withAuthRefresh($auth)->post('/v1/auth/refresh', [
             'accessToken' => $auth['accessToken'],
         ]);
 
@@ -55,7 +55,7 @@ class RefreshControllerTest extends TestCase implements DatabaseTransaction
         $this->assertNotEquals($auth['accessToken'], $newAuth['accessToken']);
         $this->assertNotEquals($auth['refreshToken'], $newAuth['refreshToken']);
 
-        $response = $this->withAuth($newAuth)->get('/profile');
+        $response = $this->withAuth($newAuth)->get('/v1/profile');
         $response->assertOk();
 
         // TODO. Add checking to access protected endpoints once token blacklist implemented
@@ -65,7 +65,7 @@ class RefreshControllerTest extends TestCase implements DatabaseTransaction
     {
         $auth = $this->makeAuth($this->userFactory->create());
 
-        $response = $this->withAuthRefresh($auth)->post('/auth/refresh');
+        $response = $this->withAuthRefresh($auth)->post('/v1/auth/refresh');
 
         $response->assertOk();
 
@@ -74,7 +74,7 @@ class RefreshControllerTest extends TestCase implements DatabaseTransaction
         $this->assertNotEquals($auth['accessToken'], $newAuth['accessToken']);
         $this->assertNotEquals($auth['refreshToken'], $newAuth['refreshToken']);
 
-        $response = $this->withAuth($newAuth)->get('/profile');
+        $response = $this->withAuth($newAuth)->get('/v1/profile');
         $response->assertOk();
 
         // TODO. Add checking to access protected endpoints once token blacklist implemented
@@ -82,7 +82,7 @@ class RefreshControllerTest extends TestCase implements DatabaseTransaction
 
     public function testRefreshFailsMissingToken()
     {
-        $response = $this->post('/auth/refresh');
+        $response = $this->post('/v1/auth/refresh');
 
         $response->assertUnauthorized();
     }
@@ -98,7 +98,7 @@ class RefreshControllerTest extends TestCase implements DatabaseTransaction
             )
         ];
 
-        $response = $this->withAuthRefresh($auth)->post('/auth/refresh');
+        $response = $this->withAuthRefresh($auth)->post('/v1/auth/refresh');
 
         $response->assertUnauthorized();
     }
@@ -112,7 +112,7 @@ class RefreshControllerTest extends TestCase implements DatabaseTransaction
             )
         ];
 
-        $response = $this->withAuthRefresh($auth)->post('/auth/refresh');
+        $response = $this->withAuthRefresh($auth)->post('/v1/auth/refresh');
 
         $response->assertUnauthorized();
     }

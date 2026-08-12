@@ -29,7 +29,7 @@ class PhotoControllerTest extends TestCase implements DatabaseTransaction
 
     public function testUpdatePhotoRequireAuth(): void
     {
-        $response = $this->put('/profile/photo');
+        $response = $this->put('/v1/profile/photo');
 
         $response->assertUnauthorized();
     }
@@ -61,7 +61,7 @@ class PhotoControllerTest extends TestCase implements DatabaseTransaction
         $this->getContainer()->bind(UpdatePhotoRequest::class, fn () => $requestMock);
         $this->getContainer()->bind(PhotoStorageService::class, fn () => $storageMock);
 
-        $response = $this->withAuth($auth)->put('/profile/photo');
+        $response = $this->withAuth($auth)->put('/v1/profile/photo');
 
         $response->assertOk();
 
@@ -94,7 +94,7 @@ class PhotoControllerTest extends TestCase implements DatabaseTransaction
         $this->getContainer()->bind(UpdatePhotoRequest::class, fn () => $requestMock);
         $this->getContainer()->bind(PhotoStorageService::class, fn () => $storageMock);
 
-        $response = $this->withAuth($auth)->put('/profile/photo');
+        $response = $this->withAuth($auth)->put('/v1/profile/photo');
 
         $response->assertStatus(500);
 
@@ -134,7 +134,7 @@ class PhotoControllerTest extends TestCase implements DatabaseTransaction
         $this->getContainer()->bind(PhotoStorageService::class, fn () => $storageMock);
         $this->getContainer()->bind(UserService::class, fn () => $userServiceMock);
 
-        $response = $this->withAuth($auth)->put('/profile/photo');
+        $response = $this->withAuth($auth)->put('/v1/profile/photo');
 
         $response->assertStatus(500);
 

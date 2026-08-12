@@ -60,7 +60,7 @@ class ConfirmEmailControllerTest extends TestCase implements DatabaseTransaction
         $confirmation->email = $user->email;
         $confirmation = $this->emailConfirmationFactory->create($confirmation);
 
-        $response = $this->post("/auth/email/confirmation/confirm/{$confirmation->token}");
+        $response = $this->post("/v1/auth/email/confirmation/confirm/{$confirmation->token}");
 
         $response->assertOk();
 
@@ -87,7 +87,7 @@ class ConfirmEmailControllerTest extends TestCase implements DatabaseTransaction
         $confirmation->email = $user->email;
         $confirmation = $this->emailConfirmationFactory->create($confirmation);
 
-        $response = $this->post("/auth/email/confirmation/confirm/{$confirmation->token}");
+        $response = $this->post("/v1/auth/email/confirmation/confirm/{$confirmation->token}");
 
         $response->assertStatus(400);
 
@@ -109,7 +109,7 @@ class ConfirmEmailControllerTest extends TestCase implements DatabaseTransaction
 
         $token = Fixtures::string(16);
 
-        $response = $this->post("/auth/email/confirmation/confirm/{$token}");
+        $response = $this->post("/v1/auth/email/confirmation/confirm/{$token}");
 
         $response->assertStatus(400);
 
@@ -133,7 +133,7 @@ class ConfirmEmailControllerTest extends TestCase implements DatabaseTransaction
         $confirmation->email = Fixtures::email();
         $confirmation = $this->emailConfirmationFactory->create($confirmation);
 
-        $response = $this->post("/auth/email/confirmation/confirm/{$confirmation->token}");
+        $response = $this->post("/v1/auth/email/confirmation/confirm/{$confirmation->token}");
 
         $response->assertStatus(400);
 

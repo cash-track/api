@@ -10,7 +10,7 @@ trait AuthAsserts
 {
     protected function assertUserCanLogin(User $user, string $password): void
     {
-        $response = $this->post('/auth/login', [
+        $response = $this->post('/v1/auth/login', [
             'email' => $user->email,
             'password' => $password,
         ]);
@@ -20,7 +20,7 @@ trait AuthAsserts
 
     protected function assertUserCannotLogin(User $user, string $password): void
     {
-        $response = $this->post('/auth/login', [
+        $response = $this->post('/v1/auth/login', [
             'email' => $user->email,
             'password' => $password,
         ]);

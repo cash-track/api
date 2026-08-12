@@ -36,7 +36,7 @@ class EndpointRateLimitTest extends TestCase implements DatabaseTransaction
 
     public function testLoginIsTightenedToFifteenPerMinute(): void
     {
-        $response = $this->post('/auth/login', [
+        $response = $this->post('/v1/auth/login', [
             'email' => Fixtures::email(),
             'password' => Fixtures::string(),
         ]);
@@ -56,7 +56,7 @@ class EndpointRateLimitTest extends TestCase implements DatabaseTransaction
 
         $user = UserFactory::make();
 
-        $response = $this->post('/auth/register', [
+        $response = $this->post('/v1/auth/register', [
             'name' => $user->name,
             'nickName' => $user->nickName,
             'email' => $user->email,
@@ -77,7 +77,7 @@ class EndpointRateLimitTest extends TestCase implements DatabaseTransaction
 
         $user = $this->userFactory->create();
 
-        $response = $this->post('/auth/password/forgot', [
+        $response = $this->post('/v1/auth/password/forgot', [
             'email' => $user->email,
         ]);
 
@@ -95,7 +95,7 @@ class EndpointRateLimitTest extends TestCase implements DatabaseTransaction
 
         $password = Fixtures::string();
 
-        $response = $this->post('/auth/password/reset', [
+        $response = $this->post('/v1/auth/password/reset', [
             'code' => $forgotPasswordRequest->code,
             'password' => $password,
             'passwordConfirmation' => $password,
@@ -111,7 +111,7 @@ class EndpointRateLimitTest extends TestCase implements DatabaseTransaction
      */
     public function testRegisterCheckNickNameStaysAtDefaultGuestLimit(): void
     {
-        $response = $this->post('/auth/register/check/nick-name', [
+        $response = $this->post('/v1/auth/register/check/nick-name', [
             'nickName' => Fixtures::string(),
         ]);
 
@@ -126,7 +126,7 @@ class EndpointRateLimitTest extends TestCase implements DatabaseTransaction
      */
     public function testLoginPasskeyStaysAtDefaultGuestLimit(): void
     {
-        $response = $this->post('/auth/login/passkey', [
+        $response = $this->post('/v1/auth/login/passkey', [
             'challenge' => Fixtures::string(),
             'data' => Fixtures::string(),
         ]);
@@ -138,7 +138,7 @@ class EndpointRateLimitTest extends TestCase implements DatabaseTransaction
     /** /auth/provider/google is a login path outside the tightened-endpoint table by design. */
     public function testProviderGoogleStaysAtDefaultGuestLimit(): void
     {
-        $response = $this->post('/auth/provider/google', [
+        $response = $this->post('/v1/auth/provider/google', [
             'token' => Fixtures::string(),
         ]);
 

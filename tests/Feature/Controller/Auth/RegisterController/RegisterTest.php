@@ -45,7 +45,7 @@ class RegisterTest extends TestCase implements DatabaseTransaction
 
         $user = UserFactory::make();
 
-        $response = $this->post('/auth/register', [
+        $response = $this->post('/v1/auth/register', [
             'name' => $user->name,
             'nickName' => $user->nickName,
             'email' => $user->email,
@@ -81,7 +81,7 @@ class RegisterTest extends TestCase implements DatabaseTransaction
 
         $user = UserFactory::make();
 
-        $response = $this->post('/auth/register', [
+        $response = $this->post('/v1/auth/register', [
             'name' => $user->name,
             'nickName' => $user->nickName,
             'email' => $user->email,
@@ -116,7 +116,7 @@ class RegisterTest extends TestCase implements DatabaseTransaction
 
         $user = UserFactory::make();
 
-        $response = $this->post('/auth/register', [
+        $response = $this->post('/v1/auth/register', [
             'name' => $user->name,
             'nickName' => $user->nickName,
             'email' => $user->email,
@@ -139,7 +139,7 @@ class RegisterTest extends TestCase implements DatabaseTransaction
 
     public function testValidationFailsByEmptyForm(): void
     {
-        $response = $this->post('/auth/register', [
+        $response = $this->post('/v1/auth/register', [
             'name' => '',
             'nickName' => '',
             'email' => '',
@@ -164,7 +164,7 @@ class RegisterTest extends TestCase implements DatabaseTransaction
     {
         $user = UserFactory::make();
 
-        $response = $this->post('/auth/register', [
+        $response = $this->post('/v1/auth/register', [
             'name' => $user->name,
             'nickName' => $user->nickName,
             'email' => $user->email,
@@ -188,7 +188,7 @@ class RegisterTest extends TestCase implements DatabaseTransaction
 
         $newUser = UserFactory::make();
 
-        $response = $this->post('/auth/register', [
+        $response = $this->post('/v1/auth/register', [
             'name' => $newUser->name,
             'nickName' => $existingUser->nickName,
             'email' => $newUser->email,
@@ -211,7 +211,7 @@ class RegisterTest extends TestCase implements DatabaseTransaction
      */
     public function testValidationFailsByNickNameInvalid(string $nickName): void
     {
-        $response = $this->post('/auth/register', [
+        $response = $this->post('/v1/auth/register', [
             'name' => Fixtures::string(),
             'nickName' => $nickName,
             'email' => Fixtures::email(),
@@ -245,7 +245,7 @@ class RegisterTest extends TestCase implements DatabaseTransaction
 
         $newUser = UserFactory::make();
 
-        $response = $this->post('/auth/register', [
+        $response = $this->post('/v1/auth/register', [
             'name' => $newUser->name,
             'nickName' => $newUser->nickName,
             'email' => $existingUser->email,
@@ -270,7 +270,7 @@ class RegisterTest extends TestCase implements DatabaseTransaction
     {
         $newUser = UserFactory::make();
 
-        $response = $this->post('/auth/register', [
+        $response = $this->post('/v1/auth/register', [
             'name' => $newUser->name,
             'nickName' => $newUser->nickName,
             'email' => $email,

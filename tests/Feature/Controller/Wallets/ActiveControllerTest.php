@@ -35,7 +35,7 @@ class ActiveControllerTest extends TestCase implements DatabaseTransaction
     {
         $wallet = $this->walletFactory->forUser($this->userFactory->create())->create();
 
-        $response = $this->post("/wallets/{$wallet->id}/activate");
+        $response = $this->post("/v1/wallets/{$wallet->id}/activate");
 
         $response->assertUnauthorized();
     }
@@ -44,7 +44,7 @@ class ActiveControllerTest extends TestCase implements DatabaseTransaction
     {
         $walletId = Fixtures::integer();
 
-        $response = $this->post("/wallets/{$walletId}/activate");
+        $response = $this->post("/v1/wallets/{$walletId}/activate");
 
         $response->assertUnauthorized();
     }
@@ -55,7 +55,7 @@ class ActiveControllerTest extends TestCase implements DatabaseTransaction
 
         $walletId = Fixtures::integer();
 
-        $response = $this->withAuth($auth)->post("/wallets/{$walletId}/activate");
+        $response = $this->withAuth($auth)->post("/v1/wallets/{$walletId}/activate");
 
         $response->assertNotFound();
     }
@@ -79,7 +79,7 @@ class ActiveControllerTest extends TestCase implements DatabaseTransaction
 
         $wallet = $this->walletFactory->forUser($user)->create($wallet);
 
-        $response = $this->withAuth($auth)->post("/wallets/{$wallet->id}/activate");
+        $response = $this->withAuth($auth)->post("/v1/wallets/{$wallet->id}/activate");
 
         $response->assertOk();
 
@@ -99,7 +99,7 @@ class ActiveControllerTest extends TestCase implements DatabaseTransaction
             $mock->method('activate')->willThrowException(new \RuntimeException('Storage exception'));
         });
 
-        $response = $this->withAuth($auth)->post("/wallets/{$wallet->id}/activate");
+        $response = $this->withAuth($auth)->post("/v1/wallets/{$wallet->id}/activate");
 
         $response->assertStatus(500);
 
@@ -118,7 +118,7 @@ class ActiveControllerTest extends TestCase implements DatabaseTransaction
     {
         $wallet = $this->walletFactory->forUser($this->userFactory->create())->create();
 
-        $response = $this->post("/wallets/{$wallet->id}/disable");
+        $response = $this->post("/v1/wallets/{$wallet->id}/disable");
 
         $response->assertUnauthorized();
     }
@@ -127,7 +127,7 @@ class ActiveControllerTest extends TestCase implements DatabaseTransaction
     {
         $walletId = Fixtures::integer();
 
-        $response = $this->post("/wallets/{$walletId}/disable");
+        $response = $this->post("/v1/wallets/{$walletId}/disable");
 
         $response->assertUnauthorized();
     }
@@ -138,7 +138,7 @@ class ActiveControllerTest extends TestCase implements DatabaseTransaction
 
         $walletId = Fixtures::integer();
 
-        $response = $this->withAuth($auth)->post("/wallets/{$walletId}/disable");
+        $response = $this->withAuth($auth)->post("/v1/wallets/{$walletId}/disable");
 
         $response->assertNotFound();
     }
@@ -154,7 +154,7 @@ class ActiveControllerTest extends TestCase implements DatabaseTransaction
 
         $wallet = $this->walletFactory->forUser($user)->create($wallet);
 
-        $response = $this->withAuth($auth)->post("/wallets/{$wallet->id}/disable");
+        $response = $this->withAuth($auth)->post("/v1/wallets/{$wallet->id}/disable");
 
         $response->assertOk();
 
@@ -174,7 +174,7 @@ class ActiveControllerTest extends TestCase implements DatabaseTransaction
             $mock->method('disable')->willThrowException(new \RuntimeException('Storage exception'));
         });
 
-        $response = $this->withAuth($auth)->post("/wallets/{$wallet->id}/disable");
+        $response = $this->withAuth($auth)->post("/v1/wallets/{$wallet->id}/disable");
 
         $response->assertStatus(500);
 

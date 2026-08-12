@@ -10,7 +10,7 @@ use Spiral\Router\Annotation\Route;
 
 final class HealthcheckController
 {
-    #[Route(route: '/healthcheck', name: 'healthcheck', methods: 'GET')]
+    #[Route(route: '/healthcheck', name: 'healthcheck', methods: 'GET', group: 'unversioned')]
     public function healthcheck(ResponseWrapper $response): ResponseInterface
     {
         return $response->create(200);

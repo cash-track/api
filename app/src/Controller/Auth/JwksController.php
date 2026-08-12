@@ -21,7 +21,7 @@ final class JwksController
     ) {
     }
 
-    #[Route(route: '/.well-known/jwks.json', name: 'auth.jwks', methods: 'GET')]
+    #[Route(route: '/.well-known/jwks.json', name: 'auth.jwks', methods: 'GET', group: 'unversioned')]
     public function index(): ResponseInterface
     {
         return $this->response->json($this->jwksService->getKeySet());

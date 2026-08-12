@@ -28,7 +28,7 @@ class IndexControllerTest extends TestCase implements DatabaseTransaction
     {
         $wallet = $this->walletFactory->create();
 
-        $response = $this->get("/wallets/{$wallet->id}");
+        $response = $this->get("/v1/wallets/{$wallet->id}");
 
         $response->assertUnauthorized();
     }
@@ -37,7 +37,7 @@ class IndexControllerTest extends TestCase implements DatabaseTransaction
     {
         $walletId = Fixtures::integer();
 
-        $response = $this->get("/wallets/{$walletId}");
+        $response = $this->get("/v1/wallets/{$walletId}");
 
         $response->assertUnauthorized();
     }
@@ -48,7 +48,7 @@ class IndexControllerTest extends TestCase implements DatabaseTransaction
 
         $walletId = Fixtures::integer();
 
-        $response = $this->withAuth($auth)->get("/wallets/{$walletId}");
+        $response = $this->withAuth($auth)->get("/v1/wallets/{$walletId}");
 
         $response->assertNotFound();
     }
@@ -59,7 +59,7 @@ class IndexControllerTest extends TestCase implements DatabaseTransaction
 
         $wallet = $this->walletFactory->create();
 
-        $response = $this->withAuth($auth)->get("/wallets/{$wallet->id}");
+        $response = $this->withAuth($auth)->get("/v1/wallets/{$wallet->id}");
 
         $response->assertNotFound();
     }
@@ -70,7 +70,7 @@ class IndexControllerTest extends TestCase implements DatabaseTransaction
 
         $wallet = $this->walletFactory->forUser($user)->create();
 
-        $response = $this->withAuth($auth)->get("/wallets/{$wallet->id}");
+        $response = $this->withAuth($auth)->get("/v1/wallets/{$wallet->id}");
 
         $response->assertOk();
 

@@ -48,7 +48,7 @@ class ProfileControllerTest extends TestCase implements DatabaseTransaction
 
     public function testIndexRequireAuth(): void
     {
-        $response = $this->get('/profile');
+        $response = $this->get('/v1/profile');
 
         $response->assertUnauthorized();
     }
@@ -57,7 +57,7 @@ class ProfileControllerTest extends TestCase implements DatabaseTransaction
     {
         $auth = $this->makeAuth($user = $this->userFactory->create());
 
-        $response = $this->withAuth($auth)->get('/profile');
+        $response = $this->withAuth($auth)->get('/v1/profile');
 
         $response->assertOk();
 
@@ -85,7 +85,7 @@ class ProfileControllerTest extends TestCase implements DatabaseTransaction
 
     public function testCheckNickNameRequireAuth(): void
     {
-        $response = $this->post('/profile/check/nick-name');
+        $response = $this->post('/v1/profile/check/nick-name');
 
         $response->assertUnauthorized();
     }
@@ -94,7 +94,7 @@ class ProfileControllerTest extends TestCase implements DatabaseTransaction
     {
         $auth = $this->makeAuth($user = $this->userFactory->create());
 
-        $response = $this->withAuth($auth)->post('/profile/check/nick-name', [
+        $response = $this->withAuth($auth)->post('/v1/profile/check/nick-name', [
             'nickName' => $user->nickName,
         ]);
 
@@ -109,7 +109,7 @@ class ProfileControllerTest extends TestCase implements DatabaseTransaction
     {
         $auth = $this->makeAuth($this->userFactory->create());
 
-        $response = $this->withAuth($auth)->post('/profile/check/nick-name', [
+        $response = $this->withAuth($auth)->post('/v1/profile/check/nick-name', [
             'nickName' => Fixtures::string(),
         ]);
 
@@ -131,7 +131,7 @@ class ProfileControllerTest extends TestCase implements DatabaseTransaction
     {
         $auth = $this->makeAuth($user = $this->userFactory->create());
 
-        $response = $this->withAuth($auth)->post('/profile/check/nick-name', [
+        $response = $this->withAuth($auth)->post('/v1/profile/check/nick-name', [
             'nickName' => $user->nickName,
         ], [
             'X-Internal-UserId' => '999999',
@@ -150,7 +150,7 @@ class ProfileControllerTest extends TestCase implements DatabaseTransaction
 
         $auth = $this->makeAuth($this->userFactory->create());
 
-        $response = $this->withAuth($auth)->post('/profile/check/nick-name', [
+        $response = $this->withAuth($auth)->post('/v1/profile/check/nick-name', [
             'nickName' => $existingUser->nickName,
         ]);
 
@@ -176,7 +176,7 @@ class ProfileControllerTest extends TestCase implements DatabaseTransaction
     {
         $auth = $this->makeAuth($this->userFactory->create());
 
-        $response = $this->withAuth($auth)->post('/profile/check/nick-name', [
+        $response = $this->withAuth($auth)->post('/v1/profile/check/nick-name', [
             'nickName' => $nickName,
         ]);
 
@@ -190,7 +190,7 @@ class ProfileControllerTest extends TestCase implements DatabaseTransaction
 
     public function testUpdateRequireAuth(): void
     {
-        $response = $this->put('/profile/');
+        $response = $this->put('/v1/profile/');
 
         $response->assertUnauthorized();
     }
@@ -201,7 +201,7 @@ class ProfileControllerTest extends TestCase implements DatabaseTransaction
 
         $newProfile = UserFactory::make();
 
-        $response = $this->withAuth($auth)->put('/profile', [
+        $response = $this->withAuth($auth)->put('/v1/profile', [
             'name' => $newProfile->name,
             'lastName' => $newProfile->lastName,
             'nickName' => $newProfile->nickName,
@@ -226,7 +226,7 @@ class ProfileControllerTest extends TestCase implements DatabaseTransaction
     {
         $auth = $this->makeAuth($this->userFactory->create());
 
-        $response = $this->withAuth($auth)->put('/profile', [
+        $response = $this->withAuth($auth)->put('/v1/profile', [
             'name' => null,
             'lastName' => null,
             'nickName' => null,
@@ -248,7 +248,7 @@ class ProfileControllerTest extends TestCase implements DatabaseTransaction
     {
         $auth = $this->makeAuth($this->userFactory->create());
 
-        $response = $this->withAuth($auth)->put('/profile', [
+        $response = $this->withAuth($auth)->put('/v1/profile', [
             'name' => 123,
             'lastName' => 123,
             'nickName' => 123,
@@ -279,7 +279,7 @@ class ProfileControllerTest extends TestCase implements DatabaseTransaction
         $auth = $this->makeAuth($this->userFactory->create());
         $newProfile = UserFactory::make();
 
-        $response = $this->withAuth($auth)->put('/profile', [
+        $response = $this->withAuth($auth)->put('/v1/profile', [
             'name' => $newProfile->name,
             'lastName' => $newProfile->lastName,
             'nickName' => $nickName,
@@ -300,7 +300,7 @@ class ProfileControllerTest extends TestCase implements DatabaseTransaction
         $auth = $this->makeAuth($this->userFactory->create());
         $newProfile = UserFactory::make();
 
-        $response = $this->withAuth($auth)->put('/profile', [
+        $response = $this->withAuth($auth)->put('/v1/profile', [
             'name' => $newProfile->name,
             'lastName' => $newProfile->lastName,
             'nickName' => $existingUser->nickName,
@@ -343,7 +343,7 @@ class ProfileControllerTest extends TestCase implements DatabaseTransaction
         $this->getContainer()->bind(UpdateBasicRequest::class, fn () => $requestMock);
         $this->getContainer()->bind(CurrencyRepository::class, fn () => $repositoryMock);
 
-        $response = $this->withAuth($auth)->put('/profile', [
+        $response = $this->withAuth($auth)->put('/v1/profile', [
             'name' => $newProfile->name,
             'lastName' => $newProfile->lastName,
             'nickName' => $newProfile->nickName,
@@ -379,7 +379,7 @@ class ProfileControllerTest extends TestCase implements DatabaseTransaction
 
         $this->getContainer()->bind(UserService::class, $mock);
 
-        $response = $this->withAuth($auth)->put('/profile', [
+        $response = $this->withAuth($auth)->put('/v1/profile', [
             'name' => $newProfile->name,
             'lastName' => $newProfile->lastName,
             'nickName' => $newProfile->nickName,
@@ -405,7 +405,7 @@ class ProfileControllerTest extends TestCase implements DatabaseTransaction
 
     public function testUpdateLocaleRequireAuth(): void
     {
-        $response = $this->put('/profile/locale');
+        $response = $this->put('/v1/profile/locale');
 
         $response->assertUnauthorized();
     }
@@ -416,7 +416,7 @@ class ProfileControllerTest extends TestCase implements DatabaseTransaction
 
         $newLocale = UserFactory::locale();
 
-        $response = $this->withAuth($auth)->put('/profile/locale', [
+        $response = $this->withAuth($auth)->put('/v1/profile/locale', [
             'locale' => $newLocale,
         ]);
 
@@ -437,7 +437,7 @@ class ProfileControllerTest extends TestCase implements DatabaseTransaction
     {
         $auth = $this->makeAuth($this->userFactory->create());
 
-        $response = $this->withAuth($auth)->put('/profile/locale', [
+        $response = $this->withAuth($auth)->put('/v1/profile/locale', [
             'locale' => 123,
         ]);
 
@@ -464,7 +464,7 @@ class ProfileControllerTest extends TestCase implements DatabaseTransaction
 
         $this->getContainer()->bind(UserService::class, $mock);
 
-        $response = $this->withAuth($auth)->put('/profile/locale', [
+        $response = $this->withAuth($auth)->put('/v1/profile/locale', [
             'locale' => UserFactory::locale(),
         ]);
 
@@ -478,7 +478,7 @@ class ProfileControllerTest extends TestCase implements DatabaseTransaction
 
     public function testSocialAccountsRequireAuth(): void
     {
-        $response = $this->get('/profile/social');
+        $response = $this->get('/v1/profile/social');
 
         $response->assertUnauthorized();
     }
@@ -487,7 +487,7 @@ class ProfileControllerTest extends TestCase implements DatabaseTransaction
     {
         $auth = $this->makeAuth($this->userFactory->create());
 
-        $response = $this->withAuth($auth)->get('/profile/social');
+        $response = $this->withAuth($auth)->get('/v1/profile/social');
 
         $response->assertOk();
 
@@ -516,7 +516,7 @@ class ProfileControllerTest extends TestCase implements DatabaseTransaction
 
         $auth = $this->makeAuth($user);
 
-        $response = $this->withAuth($auth)->get('/profile/social');
+        $response = $this->withAuth($auth)->get('/v1/profile/social');
 
         $response->assertOk();
 

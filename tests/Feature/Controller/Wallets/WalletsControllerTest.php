@@ -30,7 +30,7 @@ class WalletsControllerTest extends TestCase implements DatabaseTransaction
 
     public function testCreateRequireAuth(): void
     {
-        $response = $this->post('/wallets');
+        $response = $this->post('/v1/wallets');
 
         $response->assertUnauthorized();
     }
@@ -41,7 +41,7 @@ class WalletsControllerTest extends TestCase implements DatabaseTransaction
 
         $wallet = WalletFactory::make();
 
-        $response = $this->withAuth($auth)->post('/wallets', [
+        $response = $this->withAuth($auth)->post('/v1/wallets', [
             'name' => $wallet->name,
             'slug' => $wallet->slug,
             'isPublic' => $wallet->isPublic,
@@ -86,7 +86,7 @@ class WalletsControllerTest extends TestCase implements DatabaseTransaction
     {
         $auth = $this->makeAuth($this->userFactory->create());
 
-        $response = $this->withAuth($auth)->post('/wallets', $request);
+        $response = $this->withAuth($auth)->post('/v1/wallets', $request);
 
         $response->assertUnprocessable();
 
@@ -105,7 +105,7 @@ class WalletsControllerTest extends TestCase implements DatabaseTransaction
 
         $wallet = $this->walletFactory->create();
 
-        $response = $this->withAuth($auth)->post('/wallets', [
+        $response = $this->withAuth($auth)->post('/v1/wallets', [
             'name' => 'Test',
             'slug' => $wallet->slug
         ]);
@@ -124,7 +124,7 @@ class WalletsControllerTest extends TestCase implements DatabaseTransaction
 
         $wallet = WalletFactory::make();
 
-        $response = $this->withAuth($auth)->post('/wallets', [
+        $response = $this->withAuth($auth)->post('/v1/wallets', [
             'name' => $wallet->name,
             'slug' => $wallet->slug,
             'isPublic' => $wallet->isPublic,
@@ -164,7 +164,7 @@ class WalletsControllerTest extends TestCase implements DatabaseTransaction
             $mock->expects($this->once())->method('create')->willThrowException(new \RuntimeException());
         });
 
-        $response = $this->withAuth($auth)->post('/wallets', [
+        $response = $this->withAuth($auth)->post('/v1/wallets', [
             'name' => $wallet->name,
             'slug' => $wallet->slug,
             'isPublic' => $wallet->isPublic,
@@ -189,7 +189,7 @@ class WalletsControllerTest extends TestCase implements DatabaseTransaction
     {
         $wallet = $this->walletFactory->create();
 
-        $response = $this->put("/wallets/{$wallet->id}");
+        $response = $this->put("/v1/wallets/{$wallet->id}");
 
         $response->assertUnauthorized();
     }
@@ -201,7 +201,7 @@ class WalletsControllerTest extends TestCase implements DatabaseTransaction
         $wallet = $this->walletFactory->forUser($user)->create();
         $otherWallet = WalletFactory::make();
 
-        $response = $this->withAuth($auth)->put("/wallets/{$wallet->id}", [
+        $response = $this->withAuth($auth)->put("/v1/wallets/{$wallet->id}", [
             'name' => $otherWallet->name,
             'isPublic' => $otherWallet->isPublic,
             'defaultCurrencyCode' => $otherWallet->defaultCurrencyCode,
@@ -222,7 +222,7 @@ class WalletsControllerTest extends TestCase implements DatabaseTransaction
     {
         $walletId = Fixtures::integer();
 
-        $response = $this->put("/wallets/{$walletId}");
+        $response = $this->put("/v1/wallets/{$walletId}");
 
         $response->assertUnauthorized();
     }
@@ -233,7 +233,7 @@ class WalletsControllerTest extends TestCase implements DatabaseTransaction
 
         $walletId = Fixtures::integer();
 
-        $response = $this->withAuth($auth)->put("/wallets/{$walletId}", [
+        $response = $this->withAuth($auth)->put("/v1/wallets/{$walletId}", [
             'name' => Fixtures::string(),
             'defaultCurrencyCode' => CurrencyFactory::code(),
         ]);
@@ -247,7 +247,7 @@ class WalletsControllerTest extends TestCase implements DatabaseTransaction
 
         $wallet = $this->walletFactory->create();
 
-        $response = $this->withAuth($auth)->put("/wallets/{$wallet->id}", [
+        $response = $this->withAuth($auth)->put("/v1/wallets/{$wallet->id}", [
             'name' => Fixtures::string(),
             'defaultCurrencyCode' => CurrencyFactory::code(),
         ]);
@@ -283,7 +283,7 @@ class WalletsControllerTest extends TestCase implements DatabaseTransaction
 
         $wallet = $this->walletFactory->forUser($user)->create();
 
-        $response = $this->withAuth($auth)->put("/wallets/{$wallet->id}", $request);
+        $response = $this->withAuth($auth)->put("/v1/wallets/{$wallet->id}", $request);
 
         $response->assertUnprocessable();
 
@@ -303,7 +303,7 @@ class WalletsControllerTest extends TestCase implements DatabaseTransaction
         $wallet = $this->walletFactory->forUser($user)->create();
         $otherWallet = WalletFactory::make();
 
-        $response = $this->withAuth($auth)->put("/wallets/{$wallet->id}", [
+        $response = $this->withAuth($auth)->put("/v1/wallets/{$wallet->id}", [
             'name' => $otherWallet->name,
             'isPublic' => $otherWallet->isPublic,
             'defaultCurrencyCode' => $otherWallet->defaultCurrencyCode,
@@ -338,7 +338,7 @@ class WalletsControllerTest extends TestCase implements DatabaseTransaction
             $mock->expects($this->once())->method('findByPK')->willReturn(null);
         });
 
-        $response = $this->withAuth($auth)->put("/wallets/{$wallet->id}", [
+        $response = $this->withAuth($auth)->put("/v1/wallets/{$wallet->id}", [
             'name' => $otherWallet->name,
             'isPublic' => $otherWallet->isPublic,
             'defaultCurrencyCode' => $otherWallet->defaultCurrencyCode,
@@ -370,7 +370,7 @@ class WalletsControllerTest extends TestCase implements DatabaseTransaction
             $mock->expects($this->once())->method('findByPK')->willThrowException(new \RuntimeException());
         });
 
-        $response = $this->withAuth($auth)->put("/wallets/{$wallet->id}", [
+        $response = $this->withAuth($auth)->put("/v1/wallets/{$wallet->id}", [
             'name' => $otherWallet->name,
             'isPublic' => $otherWallet->isPublic,
             'defaultCurrencyCode' => $otherWallet->defaultCurrencyCode,
@@ -402,7 +402,7 @@ class WalletsControllerTest extends TestCase implements DatabaseTransaction
             $mock->expects($this->once())->method('store')->willThrowException(new \RuntimeException());
         });
 
-        $response = $this->withAuth($auth)->put("/wallets/{$wallet->id}", [
+        $response = $this->withAuth($auth)->put("/v1/wallets/{$wallet->id}", [
             'name' => $otherWallet->name,
             'isPublic' => $otherWallet->isPublic,
             'defaultCurrencyCode' => $otherWallet->defaultCurrencyCode,
@@ -427,7 +427,7 @@ class WalletsControllerTest extends TestCase implements DatabaseTransaction
     {
         $wallet = $this->walletFactory->create();
 
-        $response = $this->delete("/wallets/{$wallet->id}");
+        $response = $this->delete("/v1/wallets/{$wallet->id}");
 
         $response->assertUnauthorized();
     }
@@ -436,7 +436,7 @@ class WalletsControllerTest extends TestCase implements DatabaseTransaction
     {
         $walletId = Fixtures::integer();
 
-        $response = $this->delete("/wallets/{$walletId}");
+        $response = $this->delete("/v1/wallets/{$walletId}");
 
         $response->assertUnauthorized();
     }
@@ -447,7 +447,7 @@ class WalletsControllerTest extends TestCase implements DatabaseTransaction
 
         $walletId = Fixtures::integer();
 
-        $response = $this->withAuth($auth)->delete("/wallets/{$walletId}");
+        $response = $this->withAuth($auth)->delete("/v1/wallets/{$walletId}");
 
         $response->assertNotFound();
     }
@@ -458,7 +458,7 @@ class WalletsControllerTest extends TestCase implements DatabaseTransaction
 
         $wallet = $this->walletFactory->create();
 
-        $response = $this->withAuth($auth)->delete("/wallets/{$wallet->id}");
+        $response = $this->withAuth($auth)->delete("/v1/wallets/{$wallet->id}");
 
         $response->assertNotFound();
     }
@@ -469,7 +469,7 @@ class WalletsControllerTest extends TestCase implements DatabaseTransaction
 
         $wallet = $this->walletFactory->forUser($user)->create();
 
-        $response = $this->withAuth($auth)->delete("/wallets/{$wallet->id}");
+        $response = $this->withAuth($auth)->delete("/v1/wallets/{$wallet->id}");
 
         $response->assertOk();
 
@@ -490,7 +490,7 @@ class WalletsControllerTest extends TestCase implements DatabaseTransaction
             $mock->expects($this->once())->method('delete')->willThrowException(new \RuntimeException());
         });
 
-        $response = $this->withAuth($auth)->delete("/wallets/{$wallet->id}");
+        $response = $this->withAuth($auth)->delete("/v1/wallets/{$wallet->id}");
 
         $response->assertStatus(500);
 

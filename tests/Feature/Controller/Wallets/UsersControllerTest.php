@@ -31,7 +31,7 @@ class UsersControllerTest extends TestCase implements DatabaseTransaction
     {
         $wallet = $this->walletFactory->forUser($this->userFactory->create())->create();
 
-        $response = $this->get("/wallets/{$wallet->id}/users");
+        $response = $this->get("/v1/wallets/{$wallet->id}/users");
 
         $response->assertUnauthorized();
     }
@@ -40,7 +40,7 @@ class UsersControllerTest extends TestCase implements DatabaseTransaction
     {
         $walletId = Fixtures::integer();
 
-        $response = $this->get("/wallets/{$walletId}/users");
+        $response = $this->get("/v1/wallets/{$walletId}/users");
 
         $response->assertUnauthorized();
     }
@@ -51,7 +51,7 @@ class UsersControllerTest extends TestCase implements DatabaseTransaction
 
         $walletId = Fixtures::integer();
 
-        $response = $this->withAuth($auth)->get("/wallets/{$walletId}/users");
+        $response = $this->withAuth($auth)->get("/v1/wallets/{$walletId}/users");
 
         $response->assertNotFound();
     }
@@ -62,7 +62,7 @@ class UsersControllerTest extends TestCase implements DatabaseTransaction
 
         $wallet = $this->walletFactory->forUser($this->userFactory->create())->create();
 
-        $response = $this->withAuth($auth)->get("/wallets/{$wallet->id}/users");
+        $response = $this->withAuth($auth)->get("/v1/wallets/{$wallet->id}/users");
 
         $response->assertNotFound();
     }
@@ -79,7 +79,7 @@ class UsersControllerTest extends TestCase implements DatabaseTransaction
 
         $this->walletFactory->create($wallet);
 
-        $response = $this->withAuth($auth)->get("/wallets/{$wallet->id}/users");
+        $response = $this->withAuth($auth)->get("/v1/wallets/{$wallet->id}/users");
 
         $response->assertOk();
 
@@ -97,7 +97,7 @@ class UsersControllerTest extends TestCase implements DatabaseTransaction
 
         $otherUser = $this->userFactory->create();
 
-        $response = $this->patch("/wallets/{$wallet->id}/users/{$otherUser->id}");
+        $response = $this->patch("/v1/wallets/{$wallet->id}/users/{$otherUser->id}");
 
         $response->assertUnauthorized();
     }
@@ -109,7 +109,7 @@ class UsersControllerTest extends TestCase implements DatabaseTransaction
 
         $otherUser = $this->userFactory->create();
 
-        $response = $this->withAuth($auth)->patch("/wallets/{$wallet->id}/users/{$otherUser->id}");
+        $response = $this->withAuth($auth)->patch("/v1/wallets/{$wallet->id}/users/{$otherUser->id}");
 
         $response->assertForbidden();
 
@@ -124,7 +124,7 @@ class UsersControllerTest extends TestCase implements DatabaseTransaction
         $walletId = Fixtures::integer();
         $userId = Fixtures::integer();
 
-        $response = $this->patch("/wallets/{$walletId}/users/{$userId}");
+        $response = $this->patch("/v1/wallets/{$walletId}/users/{$userId}");
 
         $response->assertUnauthorized();
     }
@@ -136,7 +136,7 @@ class UsersControllerTest extends TestCase implements DatabaseTransaction
         $walletId = Fixtures::integer();
         $user = $this->userFactory->create();
 
-        $response = $this->withAuth($auth)->patch("/wallets/{$walletId}/users/{$user->id}");
+        $response = $this->withAuth($auth)->patch("/v1/wallets/{$walletId}/users/{$user->id}");
 
         $response->assertNotFound();
     }
@@ -152,7 +152,7 @@ class UsersControllerTest extends TestCase implements DatabaseTransaction
             $mock->expects($this->never())->method('send');
         });
 
-        $response = $this->withAuth($auth)->patch("/wallets/{$wallet->id}/users/{$otherUserId}");
+        $response = $this->withAuth($auth)->patch("/v1/wallets/{$wallet->id}/users/{$otherUserId}");
 
         $response->assertNotFound();
     }
@@ -165,7 +165,7 @@ class UsersControllerTest extends TestCase implements DatabaseTransaction
 
         $otherUser = $this->userFactory->create();
 
-        $response = $this->withAuth($auth)->patch("/wallets/{$wallet->id}/users/{$otherUser->id}");
+        $response = $this->withAuth($auth)->patch("/v1/wallets/{$wallet->id}/users/{$otherUser->id}");
 
         $response->assertNotFound();
     }
@@ -182,7 +182,7 @@ class UsersControllerTest extends TestCase implements DatabaseTransaction
             $mock->expects($this->once())->method('send');
         });
 
-        $response = $this->withAuth($auth)->patch("/wallets/{$wallet->id}/users/{$otherUser->id}");
+        $response = $this->withAuth($auth)->patch("/v1/wallets/{$wallet->id}/users/{$otherUser->id}");
 
         $response->assertOk();
 
@@ -204,7 +204,7 @@ class UsersControllerTest extends TestCase implements DatabaseTransaction
             $mock->expects($this->once())->method('share')->willThrowException(new \RuntimeException());
         });
 
-        $response = $this->withAuth($auth)->patch("/wallets/{$wallet->id}/users/{$otherUser->id}");
+        $response = $this->withAuth($auth)->patch("/v1/wallets/{$wallet->id}/users/{$otherUser->id}");
 
         $response->assertStatus(500);
 
@@ -220,7 +220,7 @@ class UsersControllerTest extends TestCase implements DatabaseTransaction
 
         $otherUser = $this->userFactory->create();
 
-        $response = $this->delete("/wallets/{$wallet->id}/users/{$otherUser->id}");
+        $response = $this->delete("/v1/wallets/{$wallet->id}/users/{$otherUser->id}");
 
         $response->assertUnauthorized();
     }
@@ -236,7 +236,7 @@ class UsersControllerTest extends TestCase implements DatabaseTransaction
         $wallet->users->add($otherUser);
         $wallet = $this->walletFactory->create($wallet);
 
-        $response = $this->withAuth($auth)->delete("/wallets/{$wallet->id}/users/{$otherUser->id}");
+        $response = $this->withAuth($auth)->delete("/v1/wallets/{$wallet->id}/users/{$otherUser->id}");
 
         $response->assertForbidden();
 
@@ -251,7 +251,7 @@ class UsersControllerTest extends TestCase implements DatabaseTransaction
         $walletId = Fixtures::integer();
         $userId = Fixtures::integer();
 
-        $response = $this->delete("/wallets/{$walletId}/users/{$userId}");
+        $response = $this->delete("/v1/wallets/{$walletId}/users/{$userId}");
 
         $response->assertUnauthorized();
     }
@@ -263,7 +263,7 @@ class UsersControllerTest extends TestCase implements DatabaseTransaction
         $walletId = Fixtures::integer();
         $user = $this->userFactory->create();
 
-        $response = $this->withAuth($auth)->delete("/wallets/{$walletId}/users/{$user->id}");
+        $response = $this->withAuth($auth)->delete("/v1/wallets/{$walletId}/users/{$user->id}");
 
         $response->assertNotFound();
     }
@@ -275,7 +275,7 @@ class UsersControllerTest extends TestCase implements DatabaseTransaction
         $wallet = $this->walletFactory->forUser($user)->create();
         $otherUserId = Fixtures::integer() * -1;
 
-        $response = $this->withAuth($auth)->delete("/wallets/{$wallet->id}/users/{$otherUserId}");
+        $response = $this->withAuth($auth)->delete("/v1/wallets/{$wallet->id}/users/{$otherUserId}");
 
         $response->assertNotFound();
     }
@@ -288,7 +288,7 @@ class UsersControllerTest extends TestCase implements DatabaseTransaction
 
         $otherUser = $this->userFactory->create();
 
-        $response = $this->withAuth($auth)->delete("/wallets/{$wallet->id}/users/{$otherUser->id}");
+        $response = $this->withAuth($auth)->delete("/v1/wallets/{$wallet->id}/users/{$otherUser->id}");
 
         $response->assertNotFound();
     }
@@ -301,7 +301,7 @@ class UsersControllerTest extends TestCase implements DatabaseTransaction
 
         $wallet = $this->walletFactory->forUser($user)->create();
 
-        $response = $this->withAuth($auth)->delete("/wallets/{$wallet->id}/users/{$otherUser->id}");
+        $response = $this->withAuth($auth)->delete("/v1/wallets/{$wallet->id}/users/{$otherUser->id}");
 
         $response->assertOk();
     }
@@ -312,7 +312,7 @@ class UsersControllerTest extends TestCase implements DatabaseTransaction
 
         $wallet = $this->walletFactory->forUser($user)->create();
 
-        $response = $this->withAuth($auth)->delete("/wallets/{$wallet->id}/users/{$user->id}");
+        $response = $this->withAuth($auth)->delete("/v1/wallets/{$wallet->id}/users/{$user->id}");
 
         $response->assertForbidden();
 
@@ -333,7 +333,7 @@ class UsersControllerTest extends TestCase implements DatabaseTransaction
         $wallet->users->add($otherUser);
         $wallet = $this->walletFactory->create($wallet);
 
-        $response = $this->withAuth($auth)->delete("/wallets/{$wallet->id}/users/{$otherUser->id}");
+        $response = $this->withAuth($auth)->delete("/v1/wallets/{$wallet->id}/users/{$otherUser->id}");
 
         $response->assertOk();
 
@@ -358,7 +358,7 @@ class UsersControllerTest extends TestCase implements DatabaseTransaction
             $mock->expects($this->once())->method('revoke')->willThrowException(new \RuntimeException());
         });
 
-        $response = $this->withAuth($auth)->delete("/wallets/{$wallet->id}/users/{$otherUser->id}");
+        $response = $this->withAuth($auth)->delete("/v1/wallets/{$wallet->id}/users/{$otherUser->id}");
 
         $response->assertStatus(500);
 

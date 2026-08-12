@@ -19,7 +19,7 @@ class ViewRendererTest extends TestCase
 
         $this->getContainer()->bind(CurrencyRepository::class, $repoMock);
 
-        $response = $this->withAuth($auth)->get('/currencies');
+        $response = $this->withAuth($auth)->get('/v1/currencies');
 
         $body = $this->getJsonResponseBody($response);
 

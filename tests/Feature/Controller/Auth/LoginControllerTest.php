@@ -25,7 +25,7 @@ class LoginControllerTest extends TestCase implements DatabaseTransaction
     {
         $user = $this->userFactory->create();
 
-        $response = $this->post('/auth/login', [
+        $response = $this->post('/v1/auth/login', [
             'email' => $user->email,
             'password' => UserFactory::DEFAULT_PASSWORD,
         ]);
@@ -39,7 +39,7 @@ class LoginControllerTest extends TestCase implements DatabaseTransaction
         $this->assertArrayHasKey('accessToken', $auth);
         $this->assertArrayHasKey('refreshToken', $auth);
 
-        $response = $this->withAuth($auth)->get('/profile');
+        $response = $this->withAuth($auth)->get('/v1/profile');
 
         $response->assertOk();
 
@@ -55,7 +55,7 @@ class LoginControllerTest extends TestCase implements DatabaseTransaction
         $this->userFactory->create();
         $missingUser = UserFactory::make();
 
-        $response = $this->post('/auth/login', [
+        $response = $this->post('/v1/auth/login', [
             'email' => $missingUser->email,
             'password' => UserFactory::DEFAULT_PASSWORD,
         ]);
@@ -71,7 +71,7 @@ class LoginControllerTest extends TestCase implements DatabaseTransaction
     {
         $user = $this->userFactory->create();
 
-        $response = $this->post('/auth/login', [
+        $response = $this->post('/v1/auth/login', [
             'email' => $user->email,
             'password' => Fixtures::string(),
         ]);
@@ -99,7 +99,7 @@ class LoginControllerTest extends TestCase implements DatabaseTransaction
 
         $this->getContainer()->bind(UserRepository::class, fn () => $mock);
 
-        $response = $this->post('/auth/login', [
+        $response = $this->post('/v1/auth/login', [
             'email' => $user->email,
             'password' => UserFactory::DEFAULT_PASSWORD,
         ]);
@@ -114,7 +114,7 @@ class LoginControllerTest extends TestCase implements DatabaseTransaction
 
     public function testValidationFailsEmptyForm(): void
     {
-        $response = $this->post('/auth/login', []);
+        $response = $this->post('/v1/auth/login', []);
 
         $response->assertUnprocessable();
 
@@ -127,7 +127,7 @@ class LoginControllerTest extends TestCase implements DatabaseTransaction
 
     public function testValidationFailsEmptyFormFields(): void
     {
-        $response = $this->post('/auth/login', [
+        $response = $this->post('/v1/auth/login', [
             'email' => '',
             'password' => '',
         ]);

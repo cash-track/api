@@ -34,7 +34,7 @@ class CommonControllerTest extends TestCase implements DatabaseTransaction
 
     public function testListRequireAuth(): void
     {
-        $response = $this->get('/tags/common');
+        $response = $this->get('/v1/tags/common');
 
         $response->assertUnauthorized();
     }
@@ -50,7 +50,7 @@ class CommonControllerTest extends TestCase implements DatabaseTransaction
         $this->chargeFactory->forWallet($wallet)->forUser($user)->withTags([$tag1])->createMany(3);
         $this->chargeFactory->forWallet($wallet)->forUser($user)->withTags([$tag2])->create();
 
-        $response = $this->withAuth($auth)->get('/tags/common');
+        $response = $this->withAuth($auth)->get('/v1/tags/common');
 
         $response->assertOk();
 
@@ -86,7 +86,7 @@ class CommonControllerTest extends TestCase implements DatabaseTransaction
         $this->chargeFactory->forWallet($wallet)->forUser($user)->withTags([$tag1])->createMany(3);
         $this->chargeFactory->forWallet($wallet)->forUser($user)->withTags([$tag2])->create();
 
-        $response = $this->withAuth($auth)->get('/tags/common');
+        $response = $this->withAuth($auth)->get('/v1/tags/common');
 
         $response->assertOk();
 
@@ -109,7 +109,7 @@ class CommonControllerTest extends TestCase implements DatabaseTransaction
     {
         $tag = $this->tagFactory->forUser($this->userFactory->create())->create();
 
-        $response = $this->get("/tags/common/{$tag->id}");
+        $response = $this->get("/v1/tags/common/{$tag->id}");
 
         $response->assertUnauthorized();
     }
@@ -118,7 +118,7 @@ class CommonControllerTest extends TestCase implements DatabaseTransaction
     {
         $tagId = Fixtures::integer();
 
-        $response = $this->get("/tags/common/{$tagId}");
+        $response = $this->get("/v1/tags/common/{$tagId}");
 
         $response->assertUnauthorized();
     }
@@ -129,7 +129,7 @@ class CommonControllerTest extends TestCase implements DatabaseTransaction
 
         $tagId = Fixtures::integer();
 
-        $response = $this->withAuth($auth)->get("/tags/common/{$tagId}");
+        $response = $this->withAuth($auth)->get("/v1/tags/common/{$tagId}");
 
         $response->assertNotFound();
     }
@@ -140,7 +140,7 @@ class CommonControllerTest extends TestCase implements DatabaseTransaction
 
         $tag = $this->tagFactory->forUser($this->userFactory->create())->create();
 
-        $response = $this->withAuth($auth)->get("/tags/common/{$tag->id}");
+        $response = $this->withAuth($auth)->get("/v1/tags/common/{$tag->id}");
 
         $response->assertNotFound();
     }
@@ -151,7 +151,7 @@ class CommonControllerTest extends TestCase implements DatabaseTransaction
 
         $tag = $this->tagFactory->forUser($user)->create();
 
-        $response = $this->withAuth($auth)->get("/tags/common/{$tag->id}");
+        $response = $this->withAuth($auth)->get("/v1/tags/common/{$tag->id}");
 
         $response->assertOk();
 
@@ -172,7 +172,7 @@ class CommonControllerTest extends TestCase implements DatabaseTransaction
         $wallet->users->add($friend);
         $this->walletFactory->forUser($user)->create($wallet);
 
-        $response = $this->withAuth($auth)->get("/tags/common/{$tag->id}");
+        $response = $this->withAuth($auth)->get("/v1/tags/common/{$tag->id}");
 
         $response->assertOk();
 

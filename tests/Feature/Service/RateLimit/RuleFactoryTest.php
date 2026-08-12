@@ -38,10 +38,10 @@ class RuleFactoryTest extends TestCase
     public function tightenedEndpointsProvider(): array
     {
         return [
-            'login' => ['POST', '/auth/login', 15],
-            'register' => ['POST', '/auth/register', 3],
-            'password forgot' => ['POST', '/auth/password/forgot', 3],
-            'password reset' => ['POST', '/auth/password/reset', 5],
+            'login' => ['POST', '/v1/auth/login', 15],
+            'register' => ['POST', '/v1/auth/register', 3],
+            'password forgot' => ['POST', '/v1/auth/password/forgot', 3],
+            'password reset' => ['POST', '/v1/auth/password/reset', 5],
         ];
     }
 
@@ -65,17 +65,17 @@ class RuleFactoryTest extends TestCase
     public function nonTightenedPathsProvider(): array
     {
         return [
-            'nick name check' => ['POST', '/auth/register/check/nick-name'],
-            'passkey login' => ['POST', '/auth/login/passkey'],
-            'google provider' => ['POST', '/auth/provider/google'],
-            'wrong method on login path' => ['GET', '/auth/login'],
-            'unrelated route' => ['GET', '/wallets'],
+            'nick name check' => ['POST', '/v1/auth/register/check/nick-name'],
+            'passkey login' => ['POST', '/v1/auth/login/passkey'],
+            'google provider' => ['POST', '/v1/auth/provider/google'],
+            'wrong method on login path' => ['GET', '/v1/auth/login'],
+            'unrelated route' => ['GET', '/v1/wallets'],
         ];
     }
 
     public function testAuthenticatedUserAlwaysGetsUserRuleRegardlessOfPath(): void
     {
-        $rule = $this->factory->getRule(userId: '123', clientIp: '1.2.3.4', method: 'POST', path: '/auth/login');
+        $rule = $this->factory->getRule(userId: '123', clientIp: '1.2.3.4', method: 'POST', path: '/v1/auth/login');
 
         $this->assertInstanceOf(UserRule::class, $rule);
         $this->assertEquals('user:123-1.2.3.4', $rule->key());

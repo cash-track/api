@@ -25,7 +25,7 @@ class CurrencyControllerTest extends TestCase implements DatabaseTransaction
 
     public function testListRequireAuth(): void
     {
-        $response = $this->get('/currencies');
+        $response = $this->get('/v1/currencies');
 
         $response->assertUnauthorized();
     }
@@ -34,7 +34,7 @@ class CurrencyControllerTest extends TestCase implements DatabaseTransaction
     {
         $auth = $this->makeAuth($this->userFactory->create());
 
-        $response = $this->withAuth($auth)->get('/currencies');
+        $response = $this->withAuth($auth)->get('/v1/currencies');
 
         $response->assertOk();
 
@@ -55,7 +55,7 @@ class CurrencyControllerTest extends TestCase implements DatabaseTransaction
 
     public function testFeaturedRequireAuth(): void
     {
-        $response = $this->get('/currencies/featured');
+        $response = $this->get('/v1/currencies/featured');
 
         $response->assertUnauthorized();
     }
@@ -64,7 +64,7 @@ class CurrencyControllerTest extends TestCase implements DatabaseTransaction
     {
         $auth = $this->makeAuth($this->userFactory->create());
 
-        $response = $this->withAuth($auth)->get('/currencies/featured');
+        $response = $this->withAuth($auth)->get('/v1/currencies/featured');
 
         $response->assertOk();
 

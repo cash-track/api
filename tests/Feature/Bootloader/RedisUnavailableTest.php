@@ -67,10 +67,10 @@ class RedisUnavailableTest extends TestCase implements DatabaseTransaction
         // throws path is covered separately by TokenStorageTest's mocked try/catch tests.
         $auth = $this->makeAuth($this->userFactory->create());
 
-        $response = $this->withAuth($auth)->get('/profile');
+        $response = $this->withAuth($auth)->get('/v1/profile');
         $response->assertOk();
 
-        $response = $this->withAuth($auth)->post('/auth/logout');
+        $response = $this->withAuth($auth)->post('/v1/auth/logout');
         $response->assertOk();
     }
 
@@ -83,7 +83,7 @@ class RedisUnavailableTest extends TestCase implements DatabaseTransaction
     #[Env('REDIS_CONNECTION', self::UNREACHABLE_CONNECTION)]
     public function testPasskeyLoginInitFailsCleanlyWhenRedisIsUnreachableThenSucceedsOnceRedisIsHealthyAgain(): void
     {
-        $response = $this->get('/auth/login/passkey/init');
+        $response = $this->get('/v1/auth/login/passkey/init');
 
         $response->assertStatus(503);
         $body = $this->getJsonResponseBody($response);
@@ -110,7 +110,7 @@ class RedisUnavailableTest extends TestCase implements DatabaseTransaction
             force: true,
         );
 
-        $response = $this->get('/auth/login/passkey/init');
+        $response = $this->get('/v1/auth/login/passkey/init');
 
         $response->assertOk();
         $body = $this->getJsonResponseBody($response);
@@ -126,7 +126,7 @@ class RedisUnavailableTest extends TestCase implements DatabaseTransaction
     #[Env('REDIS_CONNECTION', self::UNREACHABLE_CONNECTION)]
     public function testPasskeyLoginFailsCleanlyWhenRedisIsUnreachable(): void
     {
-        $response = $this->post('/auth/login/passkey', [
+        $response = $this->post('/v1/auth/login/passkey', [
             'challenge' => Fixtures::string(32),
             'data' => Fixtures::string(32),
         ]);
@@ -148,7 +148,7 @@ class RedisUnavailableTest extends TestCase implements DatabaseTransaction
     {
         $auth = $this->makeAuth($this->userFactory->create());
 
-        $response = $this->withAuth($auth)->post('/profile/passkey/init', [
+        $response = $this->withAuth($auth)->post('/v1/profile/passkey/init', [
             'name' => Fixtures::string(6),
         ]);
 
@@ -173,7 +173,7 @@ class RedisUnavailableTest extends TestCase implements DatabaseTransaction
         $options = $this->makeCreationChallengeOptions($challenge, $user);
         $data = $this->makeCreateData($options, $passkey);
 
-        $response = $this->withAuth($auth)->post('/profile/passkey', [
+        $response = $this->withAuth($auth)->post('/v1/profile/passkey', [
             'challenge' => $challenge,
             'data' => $data,
         ]);

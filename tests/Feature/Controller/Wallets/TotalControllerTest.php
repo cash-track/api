@@ -37,7 +37,7 @@ class TotalControllerTest extends TestCase implements DatabaseTransaction
     {
         $wallet = $this->walletFactory->create();
 
-        $response = $this->get("/wallets/{$wallet->id}/total");
+        $response = $this->get("/v1/wallets/{$wallet->id}/total");
 
         $response->assertUnauthorized();
     }
@@ -46,7 +46,7 @@ class TotalControllerTest extends TestCase implements DatabaseTransaction
     {
         $walletId = Fixtures::integer();
 
-        $response = $this->get("/wallets/{$walletId}/total");
+        $response = $this->get("/v1/wallets/{$walletId}/total");
 
         $response->assertUnauthorized();
     }
@@ -57,7 +57,7 @@ class TotalControllerTest extends TestCase implements DatabaseTransaction
 
         $walletId = Fixtures::integer();
 
-        $response = $this->withAuth($auth)->get("/wallets/{$walletId}/total");
+        $response = $this->withAuth($auth)->get("/v1/wallets/{$walletId}/total");
 
         $response->assertNotFound();
     }
@@ -68,7 +68,7 @@ class TotalControllerTest extends TestCase implements DatabaseTransaction
 
         $wallet = $this->walletFactory->create();
 
-        $response = $this->withAuth($auth)->get("/wallets/{$wallet->id}/total");
+        $response = $this->withAuth($auth)->get("/v1/wallets/{$wallet->id}/total");
 
         $response->assertNotFound();
     }
@@ -79,7 +79,7 @@ class TotalControllerTest extends TestCase implements DatabaseTransaction
 
         $wallet = $this->walletFactory->forUser($user)->create();
 
-        $response = $this->withAuth($auth)->get("/wallets/{$wallet->id}/total");
+        $response = $this->withAuth($auth)->get("/v1/wallets/{$wallet->id}/total");
 
         $response->assertOk();
 
@@ -115,7 +115,7 @@ class TotalControllerTest extends TestCase implements DatabaseTransaction
         $wallet->totalAmount = $total = round($totalIncome - $totalExpense, 2);
         $this->walletFactory->persist($wallet);
 
-        $response = $this->withAuth($auth)->get("/wallets/{$wallet->id}/total");
+        $response = $this->withAuth($auth)->get("/v1/wallets/{$wallet->id}/total");
 
         $response->assertOk();
 
@@ -212,7 +212,7 @@ class TotalControllerTest extends TestCase implements DatabaseTransaction
             $this->chargeFactory->forUser($user)->forWallet($wallet)->create($charge);
         }
 
-        $response = $this->withAuth($auth)->get("/wallets/{$wallet->id}/total", $query);
+        $response = $this->withAuth($auth)->get("/v1/wallets/{$wallet->id}/total", $query);
 
         $response->assertOk();
 
@@ -244,7 +244,7 @@ class TotalControllerTest extends TestCase implements DatabaseTransaction
             $this->chargeFactory->forUser($user)->forWallet($wallet)->create($charge);
         }
 
-        $response = $this->withAuth($auth)->get("/wallets/{$wallet->id}/total", [
+        $response = $this->withAuth($auth)->get("/v1/wallets/{$wallet->id}/total", [
             'date-from' => '02-06-2022',
             'date-to' => '03-06-2022',
         ]);
@@ -257,7 +257,7 @@ class TotalControllerTest extends TestCase implements DatabaseTransaction
         $this->assertArrayContains(205, $body, 'data.totalIncomeAmount');
         $this->assertArrayContains(105, $body, 'data.totalExpenseAmount');
 
-        $response = $this->withAuth($auth)->get("/wallets/{$wallet->id}/total");
+        $response = $this->withAuth($auth)->get("/v1/wallets/{$wallet->id}/total");
 
         $response->assertOk();
 
@@ -275,7 +275,7 @@ class TotalControllerTest extends TestCase implements DatabaseTransaction
         $this->chargeFactory->forUser($user)->forWallet($wallet)->createMany(3);
         $tag = $this->tagFactory->forUser($user)->create();
 
-        $response = $this->withAuth($auth)->get("/wallets/{$wallet->id}/total", [
+        $response = $this->withAuth($auth)->get("/v1/wallets/{$wallet->id}/total", [
             'tags' => (string) $tag->id,
         ]);
 
@@ -313,7 +313,7 @@ class TotalControllerTest extends TestCase implements DatabaseTransaction
             }
         }
 
-        $response = $this->withAuth($auth)->get("/wallets/{$wallet->id}/total", [
+        $response = $this->withAuth($auth)->get("/v1/wallets/{$wallet->id}/total", [
             'tags' => (string) $tag->id,
         ]);
 
@@ -419,7 +419,7 @@ class TotalControllerTest extends TestCase implements DatabaseTransaction
 
         $query['tags'] = (string) $tag->id;
 
-        $response = $this->withAuth($auth)->get("/wallets/{$wallet->id}/total", $query);
+        $response = $this->withAuth($auth)->get("/v1/wallets/{$wallet->id}/total", $query);
 
         $response->assertOk();
 
@@ -456,7 +456,7 @@ class TotalControllerTest extends TestCase implements DatabaseTransaction
         $wallet->totalAmount = $correctTotal - 10;
         $this->walletFactory->persist($wallet);
 
-        $response = $this->withAuth($auth)->get("/wallets/{$wallet->id}/total");
+        $response = $this->withAuth($auth)->get("/v1/wallets/{$wallet->id}/total");
 
         $response->assertOk();
 

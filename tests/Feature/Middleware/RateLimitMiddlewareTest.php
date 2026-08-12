@@ -59,12 +59,12 @@ class RateLimitMiddlewareTest extends TestCase
         $rateLimit = $this->getContainer()->get(RateLimitInterface::class);
 
         $ruleFactory = $this->getMockBuilder(RuleFactory::class)->getMock();
-        $ruleFactory->method('getRule')->with('123', $ip, 'GET', '/wallets')->willReturn($rule = new GuestRule(5));
+        $ruleFactory->method('getRule')->with('123', $ip, 'GET', '/v1/wallets')->willReturn($rule = new GuestRule(5));
 
         $middleware = new RateLimitMiddleware($rateLimit, $ruleFactory);
 
         $uri = $this->getMockBuilder(UriInterface::class)->getMock();
-        $uri->method('getPath')->willReturn('/wallets');
+        $uri->method('getPath')->willReturn('/v1/wallets');
 
         $request = $this->getMockBuilder(ServerRequestInterface::class)->getMock();
         $request->method('getHeaderLine')->with('X-Internal-UserId')->willReturn('123');
@@ -102,12 +102,12 @@ class RateLimitMiddlewareTest extends TestCase
         $rateLimit = $this->getContainer()->get(RateLimitInterface::class);
 
         $ruleFactory = $this->getMockBuilder(RuleFactory::class)->getMock();
-        $ruleFactory->method('getRule')->with('', $remoteAddr, 'GET', '/wallets')->willReturn(new GuestRule(5));
+        $ruleFactory->method('getRule')->with('', $remoteAddr, 'GET', '/v1/wallets')->willReturn(new GuestRule(5));
 
         $middleware = new RateLimitMiddleware($rateLimit, $ruleFactory);
 
         $uri = $this->getMockBuilder(UriInterface::class)->getMock();
-        $uri->method('getPath')->willReturn('/wallets');
+        $uri->method('getPath')->willReturn('/v1/wallets');
 
         $request = $this->getMockBuilder(ServerRequestInterface::class)->getMock();
         $request->method('getHeaderLine')->with('X-Internal-UserId')->willReturn('');
@@ -136,7 +136,7 @@ class RateLimitMiddlewareTest extends TestCase
      */
     public function testWebGroupRateLimitUnaffectedByForgedInternalUserIdHeader(): void
     {
-        $response = $this->post('/auth/register/check/nick-name', [
+        $response = $this->post('/v1/auth/register/check/nick-name', [
             'nickName' => Fixtures::string(),
         ], [
             'X-Internal-UserId' => '999999',
@@ -156,7 +156,7 @@ class RateLimitMiddlewareTest extends TestCase
         // Mirrors testHandleGuest above: a fixed-window counter rejects the request that makes
         // the counter reach the limit, so only limit()-1 requests actually succeed.
         for ($i = 14; $i > 0; $i--) {
-            $response = $this->post('/auth/login', [
+            $response = $this->post('/v1/auth/login', [
                 'email' => Fixtures::email(),
                 'password' => Fixtures::string(),
             ]);
@@ -166,7 +166,7 @@ class RateLimitMiddlewareTest extends TestCase
             $response->assertHasHeader('X-RateLimit-Remaining', (string) $i);
         }
 
-        $response = $this->post('/auth/login', [
+        $response = $this->post('/v1/auth/login', [
             'email' => Fixtures::email(),
             'password' => Fixtures::string(),
         ]);
@@ -176,7 +176,7 @@ class RateLimitMiddlewareTest extends TestCase
         $response->assertHasHeader('X-RateLimit-Remaining', '0');
 
         // D1: same IP, different (default-bucket) route — must still have its full 100 budget.
-        $nickNameResponse = $this->post('/auth/register/check/nick-name', [
+        $nickNameResponse = $this->post('/v1/auth/register/check/nick-name', [
             'nickName' => Fixtures::string(),
         ]);
 

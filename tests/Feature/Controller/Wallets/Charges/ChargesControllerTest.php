@@ -45,7 +45,7 @@ class ChargesControllerTest extends TestCase implements DatabaseTransaction
         $wallet = $this->walletFactory->forUser($user = $this->userFactory->create())->create();
         $this->chargeFactory->forUser($user)->forWallet($wallet)->create();
 
-        $response = $this->get("/wallets/{$wallet->id}/charges");
+        $response = $this->get("/v1/wallets/{$wallet->id}/charges");
 
         $response->assertUnauthorized();
     }
@@ -54,7 +54,7 @@ class ChargesControllerTest extends TestCase implements DatabaseTransaction
     {
         $walletId = Fixtures::integer();
 
-        $response = $this->get("/wallets/{$walletId}/charges");
+        $response = $this->get("/v1/wallets/{$walletId}/charges");
 
         $response->assertUnauthorized();
     }
@@ -65,7 +65,7 @@ class ChargesControllerTest extends TestCase implements DatabaseTransaction
 
         $walletId = Fixtures::integer();
 
-        $response = $this->withAuth($auth)->get("/wallets/{$walletId}/charges");
+        $response = $this->withAuth($auth)->get("/v1/wallets/{$walletId}/charges");
 
         $response->assertNotFound();
     }
@@ -77,7 +77,7 @@ class ChargesControllerTest extends TestCase implements DatabaseTransaction
         $wallet = $this->walletFactory->create();
         $this->chargeFactory->forUser($user)->forWallet($wallet)->create();
 
-        $response = $this->withAuth($auth)->get("/wallets/{$wallet->id}/charges");
+        $response = $this->withAuth($auth)->get("/v1/wallets/{$wallet->id}/charges");
 
         $response->assertNotFound();
     }
@@ -87,7 +87,7 @@ class ChargesControllerTest extends TestCase implements DatabaseTransaction
         $auth = $this->makeAuth($user = $this->userFactory->create());
         $wallet = $this->walletFactory->forUser($user)->create();
 
-        $response = $this->withAuth($auth)->get("/wallets/{$wallet->id}/charges");
+        $response = $this->withAuth($auth)->get("/v1/wallets/{$wallet->id}/charges");
 
         $response->assertOk();
 
@@ -114,7 +114,7 @@ class ChargesControllerTest extends TestCase implements DatabaseTransaction
 
         $charges = new ArrayCollection($charges);
 
-        $response = $this->withAuth($auth)->get("/wallets/{$wallet->id}/charges");
+        $response = $this->withAuth($auth)->get("/v1/wallets/{$wallet->id}/charges");
 
         $response->assertOk();
 
@@ -197,7 +197,7 @@ class ChargesControllerTest extends TestCase implements DatabaseTransaction
             $charges[$i] = $this->chargeFactory->forUser($user)->forWallet($wallet)->create($charges[$i]);
         }
 
-        $response = $this->withAuth($auth)->get("/wallets/{$wallet->id}/charges", $query);
+        $response = $this->withAuth($auth)->get("/v1/wallets/{$wallet->id}/charges", $query);
 
         $response->assertOk();
 
@@ -224,7 +224,7 @@ class ChargesControllerTest extends TestCase implements DatabaseTransaction
         $tag = $this->tagFactory->forUser($user)->create();
         $this->chargeFactory->forUser($user)->forWallet($wallet)->create();
 
-        $response = $this->withAuth($auth)->get("/wallets/{$wallet->id}/charges", [
+        $response = $this->withAuth($auth)->get("/v1/wallets/{$wallet->id}/charges", [
             'tags' => (string) $tag->id,
         ]);
 
@@ -256,7 +256,7 @@ class ChargesControllerTest extends TestCase implements DatabaseTransaction
 
         $charges = new ArrayCollection($charges);
 
-        $response = $this->withAuth($auth)->get("/wallets/{$wallet->id}/charges", [
+        $response = $this->withAuth($auth)->get("/v1/wallets/{$wallet->id}/charges", [
             'tags' => (string) $tag->id,
         ]);
 
@@ -351,7 +351,7 @@ class ChargesControllerTest extends TestCase implements DatabaseTransaction
 
         $query['tags'] = (string) $tag->id;
 
-        $response = $this->withAuth($auth)->get("/wallets/{$wallet->id}/charges", $query);
+        $response = $this->withAuth($auth)->get("/v1/wallets/{$wallet->id}/charges", $query);
 
         $response->assertOk();
 
@@ -377,7 +377,7 @@ class ChargesControllerTest extends TestCase implements DatabaseTransaction
 
         $charge = ChargeFactory::make();
 
-        $response = $this->post("/wallets/{$wallet->id}/charges", [
+        $response = $this->post("/v1/wallets/{$wallet->id}/charges", [
             'type' => $charge->type,
             'amount' => $charge->amount,
             'title' => $charge->title,
@@ -393,7 +393,7 @@ class ChargesControllerTest extends TestCase implements DatabaseTransaction
 
         $charge = ChargeFactory::make();
 
-        $response = $this->post("/wallets/{$walletId}/charges", [
+        $response = $this->post("/v1/wallets/{$walletId}/charges", [
             'type' => $charge->type,
             'amount' => $charge->amount,
             'title' => $charge->title,
@@ -411,7 +411,7 @@ class ChargesControllerTest extends TestCase implements DatabaseTransaction
 
         $charge = ChargeFactory::make();
 
-        $response = $this->withAuth($auth)->post("/wallets/{$walletId}/charges", [
+        $response = $this->withAuth($auth)->post("/v1/wallets/{$walletId}/charges", [
             'type' => $charge->type,
             'amount' => $charge->amount,
             'title' => $charge->title,
@@ -429,7 +429,7 @@ class ChargesControllerTest extends TestCase implements DatabaseTransaction
 
         $charge = ChargeFactory::make();
 
-        $response = $this->withAuth($auth)->post("/wallets/{$wallet->id}/charges", [
+        $response = $this->withAuth($auth)->post("/v1/wallets/{$wallet->id}/charges", [
             'type' => $charge->type,
             'amount' => $charge->amount,
             'title' => $charge->title,
@@ -477,7 +477,7 @@ class ChargesControllerTest extends TestCase implements DatabaseTransaction
 
         $wallet = $this->walletFactory->forUser($user)->create();
 
-        $response = $this->withAuth($auth)->post("/wallets/{$wallet->id}/charges", $request);
+        $response = $this->withAuth($auth)->post("/v1/wallets/{$wallet->id}/charges", $request);
 
         $response->assertUnprocessable();
 
@@ -498,7 +498,7 @@ class ChargesControllerTest extends TestCase implements DatabaseTransaction
 
         $charge = ChargeFactory::make();
 
-        $response = $this->withAuth($auth)->post("/wallets/{$wallet->id}/charges", [
+        $response = $this->withAuth($auth)->post("/v1/wallets/{$wallet->id}/charges", [
             'type' => $charge->type,
             'amount' => $charge->amount,
             'title' => $charge->title,
@@ -540,7 +540,7 @@ class ChargesControllerTest extends TestCase implements DatabaseTransaction
 
         $tags = $this->tagFactory->forUser($user)->createMany(3);
 
-        $response = $this->withAuth($auth)->post("/wallets/{$wallet->id}/charges", [
+        $response = $this->withAuth($auth)->post("/v1/wallets/{$wallet->id}/charges", [
             'type' => $charge->type,
             'amount' => $charge->amount,
             'title' => $charge->title,
@@ -574,7 +574,7 @@ class ChargesControllerTest extends TestCase implements DatabaseTransaction
 
         $tags = $this->tagFactory->forUser($this->userFactory->create())->createMany(3);
 
-        $response = $this->withAuth($auth)->post("/wallets/{$wallet->id}/charges", [
+        $response = $this->withAuth($auth)->post("/v1/wallets/{$wallet->id}/charges", [
             'type' => $charge->type,
             'amount' => $charge->amount,
             'title' => $charge->title,
@@ -610,7 +610,7 @@ class ChargesControllerTest extends TestCase implements DatabaseTransaction
             $mock->expects($this->once())->method('create')->willThrowException(new \RuntimeException());
         });
 
-        $response = $this->withAuth($auth)->post("/wallets/{$wallet->id}/charges", [
+        $response = $this->withAuth($auth)->post("/v1/wallets/{$wallet->id}/charges", [
             'type' => $charge->type,
             'amount' => $charge->amount,
             'title' => $charge->title,
@@ -633,7 +633,7 @@ class ChargesControllerTest extends TestCase implements DatabaseTransaction
 
         $updatedCharge = ChargeFactory::make();
 
-        $response = $this->put("/wallets/{$wallet->id}/charges/{$charge->id}", [
+        $response = $this->put("/v1/wallets/{$wallet->id}/charges/{$charge->id}", [
             'type' => $updatedCharge->type,
             'amount' => $updatedCharge->amount,
             'title' => $updatedCharge->title,
@@ -650,7 +650,7 @@ class ChargesControllerTest extends TestCase implements DatabaseTransaction
 
         $updatedCharge = ChargeFactory::make();
 
-        $response = $this->put("/wallets/{$walletId}/charges/{$chargeId}", [
+        $response = $this->put("/v1/wallets/{$walletId}/charges/{$chargeId}", [
             'type' => $updatedCharge->type,
             'amount' => $updatedCharge->amount,
             'title' => $updatedCharge->title,
@@ -667,7 +667,7 @@ class ChargesControllerTest extends TestCase implements DatabaseTransaction
 
         $updatedCharge = ChargeFactory::make();
 
-        $response = $this->put("/wallets/{$wallet->id}/charges/{$chargeId}", [
+        $response = $this->put("/v1/wallets/{$wallet->id}/charges/{$chargeId}", [
             'type' => $updatedCharge->type,
             'amount' => $updatedCharge->amount,
             'title' => $updatedCharge->title,
@@ -685,7 +685,7 @@ class ChargesControllerTest extends TestCase implements DatabaseTransaction
 
         $updatedCharge = ChargeFactory::make();
 
-        $response = $this->withAuth($auth)->put("/wallets/{$walletId}/charges/{$chargeId}", [
+        $response = $this->withAuth($auth)->put("/v1/wallets/{$walletId}/charges/{$chargeId}", [
             'type' => $updatedCharge->type,
             'amount' => $updatedCharge->amount,
             'title' => $updatedCharge->title,
@@ -703,7 +703,7 @@ class ChargesControllerTest extends TestCase implements DatabaseTransaction
 
         $updatedCharge = ChargeFactory::make();
 
-        $response = $this->withAuth($auth)->put("/wallets/{$wallet->id}/charges/{$chargeId}", [
+        $response = $this->withAuth($auth)->put("/v1/wallets/{$wallet->id}/charges/{$chargeId}", [
             'type' => $updatedCharge->type,
             'amount' => $updatedCharge->amount,
             'title' => $updatedCharge->title,
@@ -721,7 +721,7 @@ class ChargesControllerTest extends TestCase implements DatabaseTransaction
 
         $updatedCharge = ChargeFactory::make();
 
-        $response = $this->withAuth($auth)->put("/wallets/{$wallet->id}/charges/{$charge->id}", [
+        $response = $this->withAuth($auth)->put("/v1/wallets/{$wallet->id}/charges/{$charge->id}", [
             'type' => $updatedCharge->type,
             'amount' => $updatedCharge->amount,
             'title' => $updatedCharge->title,
@@ -769,7 +769,7 @@ class ChargesControllerTest extends TestCase implements DatabaseTransaction
         $wallet = $this->walletFactory->forUser($user)->create();
         $charge = $this->chargeFactory->forUser($user)->forWallet($wallet)->create();
 
-        $response = $this->withAuth($auth)->put("/wallets/{$wallet->id}/charges/{$charge->id}", $request);
+        $response = $this->withAuth($auth)->put("/v1/wallets/{$wallet->id}/charges/{$charge->id}", $request);
 
         $response->assertUnprocessable();
 
@@ -788,7 +788,7 @@ class ChargesControllerTest extends TestCase implements DatabaseTransaction
         $wallet = $this->walletFactory->forUser($user)->create();
 
         $charge = ChargeFactory::make();
-        $response = $this->withAuth($auth)->post("/wallets/{$wallet->id}/charges", [
+        $response = $this->withAuth($auth)->post("/v1/wallets/{$wallet->id}/charges", [
             'type' => $charge->type,
             'amount' => $charge->amount,
             'title' => $charge->title,
@@ -801,7 +801,7 @@ class ChargesControllerTest extends TestCase implements DatabaseTransaction
 
         $updatedCharge = ChargeFactory::make();
 
-        $response = $this->withAuth($auth)->put("/wallets/{$wallet->id}/charges/{$chargeId}", [
+        $response = $this->withAuth($auth)->put("/v1/wallets/{$wallet->id}/charges/{$chargeId}", [
             'type' => $updatedCharge->type,
             'amount' => $updatedCharge->amount,
             'title' => $updatedCharge->title,
@@ -843,7 +843,7 @@ class ChargesControllerTest extends TestCase implements DatabaseTransaction
         $newTags = $this->tagFactory->forUser($user)->createMany(2);
         $newTags->add($tags->first());
 
-        $response = $this->withAuth($auth)->post("/wallets/{$wallet->id}/charges", [
+        $response = $this->withAuth($auth)->post("/v1/wallets/{$wallet->id}/charges", [
             'type' => $charge->type,
             'amount' => $charge->amount,
             'title' => $charge->title,
@@ -857,7 +857,7 @@ class ChargesControllerTest extends TestCase implements DatabaseTransaction
 
         $updatedCharge = ChargeFactory::make();
 
-        $response = $this->withAuth($auth)->put("/wallets/{$wallet->id}/charges/{$chargeId}", [
+        $response = $this->withAuth($auth)->put("/v1/wallets/{$wallet->id}/charges/{$chargeId}", [
             'type' => $updatedCharge->type,
             'amount' => $updatedCharge->amount,
             'title' => $updatedCharge->title,
@@ -904,7 +904,7 @@ class ChargesControllerTest extends TestCase implements DatabaseTransaction
             $mock->expects($this->once())->method('update')->willThrowException(new \RuntimeException());
         });
 
-        $response = $this->withAuth($auth)->put("/wallets/{$wallet->id}/charges/{$charge->id}", [
+        $response = $this->withAuth($auth)->put("/v1/wallets/{$wallet->id}/charges/{$charge->id}", [
             'type' => $updatedCharge->type,
             'amount' => $updatedCharge->amount,
             'title' => $updatedCharge->title,
@@ -926,7 +926,7 @@ class ChargesControllerTest extends TestCase implements DatabaseTransaction
         $wallet = $this->walletFactory->forUser($user)->create();
         $charge = $this->chargeFactory->forUser($user)->forWallet($wallet)->create();
 
-        $response = $this->delete("/wallets/{$wallet->id}/charges/{$charge->id}");
+        $response = $this->delete("/v1/wallets/{$wallet->id}/charges/{$charge->id}");
 
         $response->assertUnauthorized();
     }
@@ -936,7 +936,7 @@ class ChargesControllerTest extends TestCase implements DatabaseTransaction
         $walletId = Fixtures::integer();
         $chargeId = Fixtures::string();
 
-        $response = $this->delete("/wallets/{$walletId}/charges/{$chargeId}");
+        $response = $this->delete("/v1/wallets/{$walletId}/charges/{$chargeId}");
 
         $response->assertUnauthorized();
     }
@@ -946,7 +946,7 @@ class ChargesControllerTest extends TestCase implements DatabaseTransaction
         $wallet = $this->walletFactory->create();
         $chargeId = Fixtures::string();
 
-        $response = $this->delete("/wallets/{$wallet->id}/charges/{$chargeId}");
+        $response = $this->delete("/v1/wallets/{$wallet->id}/charges/{$chargeId}");
 
         $response->assertUnauthorized();
     }
@@ -957,7 +957,7 @@ class ChargesControllerTest extends TestCase implements DatabaseTransaction
         $walletId = Fixtures::integer();
         $chargeId = Fixtures::string();
 
-        $response = $this->withAuth($auth)->delete("/wallets/{$walletId}/charges/{$chargeId}");
+        $response = $this->withAuth($auth)->delete("/v1/wallets/{$walletId}/charges/{$chargeId}");
 
         $response->assertNotFound();
     }
@@ -968,7 +968,7 @@ class ChargesControllerTest extends TestCase implements DatabaseTransaction
         $wallet = $this->walletFactory->forUser($user)->create();
         $chargeId = Fixtures::string();
 
-        $response = $this->withAuth($auth)->delete("/wallets/{$wallet->id}/charges/{$chargeId}");
+        $response = $this->withAuth($auth)->delete("/v1/wallets/{$wallet->id}/charges/{$chargeId}");
 
         $response->assertNotFound();
     }
@@ -979,7 +979,7 @@ class ChargesControllerTest extends TestCase implements DatabaseTransaction
         $wallet = $this->walletFactory->create();
         $charge = $this->chargeFactory->forUser($user)->forWallet($wallet)->create();
 
-        $response = $this->withAuth($auth)->delete("/wallets/{$wallet->id}/charges/{$charge->id}");
+        $response = $this->withAuth($auth)->delete("/v1/wallets/{$wallet->id}/charges/{$charge->id}");
 
         $response->assertNotFound();
     }
@@ -990,7 +990,7 @@ class ChargesControllerTest extends TestCase implements DatabaseTransaction
         $wallet = $this->walletFactory->forUser($user)->create();
 
         $charge = ChargeFactory::make();
-        $response = $this->withAuth($auth)->post("/wallets/{$wallet->id}/charges", [
+        $response = $this->withAuth($auth)->post("/v1/wallets/{$wallet->id}/charges", [
             'type' => $charge->type,
             'amount' => $charge->amount,
             'title' => $charge->title,
@@ -1001,7 +1001,7 @@ class ChargesControllerTest extends TestCase implements DatabaseTransaction
 
         $chargeId = $this->getJsonResponseBody($response)['data']['id'] ?? null;
 
-        $response = $this->withAuth($auth)->delete("/wallets/{$wallet->id}/charges/{$chargeId}");
+        $response = $this->withAuth($auth)->delete("/v1/wallets/{$wallet->id}/charges/{$chargeId}");
 
         $response->assertOk();
 
@@ -1029,7 +1029,7 @@ class ChargesControllerTest extends TestCase implements DatabaseTransaction
             $mock->expects($this->once())->method('delete')->willThrowException(new \RuntimeException());
         });
 
-        $response = $this->withAuth($auth)->delete("/wallets/{$wallet->id}/charges/{$charge->id}");
+        $response = $this->withAuth($auth)->delete("/v1/wallets/{$wallet->id}/charges/{$charge->id}");
 
         $response->assertStatus(500);
 
@@ -1046,7 +1046,7 @@ class ChargesControllerTest extends TestCase implements DatabaseTransaction
         $charges = $this->chargeFactory->forUser($user)->forWallet($wallet)->createMany(10);
         $targetWallet = $this->walletFactory->forUser($user)->create();
 
-        $response = $this->post("/wallets/{$wallet->id}/charges/move/{$targetWallet->id}", [
+        $response = $this->post("/v1/wallets/{$wallet->id}/charges/move/{$targetWallet->id}", [
             'chargeIds' => $charges->map(fn (Charge $charge) => $charge->id)->toArray(),
         ]);
 
@@ -1059,7 +1059,7 @@ class ChargesControllerTest extends TestCase implements DatabaseTransaction
         $targetWalletId = Fixtures::integer();
         $chargeId = Fixtures::string();
 
-        $response = $this->post("/wallets/{$walletId}/charges/move/{$targetWalletId}", [
+        $response = $this->post("/v1/wallets/{$walletId}/charges/move/{$targetWalletId}", [
             'chargeIds' => [$chargeId],
         ]);
 
@@ -1073,7 +1073,7 @@ class ChargesControllerTest extends TestCase implements DatabaseTransaction
         $targetWallet = $this->walletFactory->forUser($user)->create();
         $chargeId = Fixtures::string();
 
-        $response = $this->withAuth($auth)->post("/wallets/{$wallet->id}/charges/move/{$targetWallet->id}", [
+        $response = $this->withAuth($auth)->post("/v1/wallets/{$wallet->id}/charges/move/{$targetWallet->id}", [
             'chargeIds' => [$chargeId],
         ]);
 
@@ -1088,7 +1088,7 @@ class ChargesControllerTest extends TestCase implements DatabaseTransaction
         $walletId = Fixtures::integer();
         $targetWalletId = Fixtures::integer();
 
-        $response = $this->withAuth($auth)->post("/wallets/{$walletId}/charges/move/{$targetWalletId}", [
+        $response = $this->withAuth($auth)->post("/v1/wallets/{$walletId}/charges/move/{$targetWalletId}", [
             'chargeIds' => $charges->map(fn (Charge $charge) => $charge->id)->toArray(),
         ]);
 
@@ -1105,13 +1105,13 @@ class ChargesControllerTest extends TestCase implements DatabaseTransaction
         $wallet = $this->walletFactory->forUser($user)->create();
         $charges = $this->chargeFactory->forUser($user)->forWallet($wallet)->createMany(10);
 
-        $response = $this->withAuth($auth)->post("/wallets/{$foreignWallet->id}/charges/move/{$foreignTargetWallet->id}", [
+        $response = $this->withAuth($auth)->post("/v1/wallets/{$foreignWallet->id}/charges/move/{$foreignTargetWallet->id}", [
             'chargeIds' => $charges->map(fn (Charge $charge) => $charge->id)->toArray(),
         ]);
 
         $response->assertNotFound();
 
-        $response = $this->withAuth($auth)->post("/wallets/{$wallet->id}/charges/move/{$foreignTargetWallet->id}", [
+        $response = $this->withAuth($auth)->post("/v1/wallets/{$wallet->id}/charges/move/{$foreignTargetWallet->id}", [
             'chargeIds' => $charges->map(fn (Charge $charge) => $charge->id)->toArray(),
         ]);
 
@@ -1125,7 +1125,7 @@ class ChargesControllerTest extends TestCase implements DatabaseTransaction
         $targetWallet = $this->walletFactory->forUser($user)->create();
         $charges = $this->chargeFactory->forUser($user)->forWallet($wallet)->createMany(10);
 
-        $response = $this->withAuth($auth)->post("/wallets/{$wallet->id}/charges/move/{$targetWallet->id}", [
+        $response = $this->withAuth($auth)->post("/v1/wallets/{$wallet->id}/charges/move/{$targetWallet->id}", [
             'chargeIds' => $charges->map(fn (Charge $charge) => $charge->id)->toArray(),
         ]);
 
@@ -1157,7 +1157,7 @@ class ChargesControllerTest extends TestCase implements DatabaseTransaction
             $mock->expects($this->once())->method('move')->willThrowException(new \RuntimeException());
         });
 
-        $response = $this->withAuth($auth)->post("/wallets/{$wallet->id}/charges/move/{$targetWallet->id}", [
+        $response = $this->withAuth($auth)->post("/v1/wallets/{$wallet->id}/charges/move/{$targetWallet->id}", [
             'chargeIds' => $charges->map(fn (Charge $charge) => $charge->id)->toArray(),
         ]);
 

@@ -36,7 +36,7 @@ class TagsControllerTest extends TestCase implements DatabaseTransaction
 
     public function testListRequireAuth(): void
     {
-        $response = $this->get('/tags');
+        $response = $this->get('/v1/tags');
 
         $response->assertUnauthorized();
     }
@@ -47,7 +47,7 @@ class TagsControllerTest extends TestCase implements DatabaseTransaction
 
         $tags = $this->tagFactory->forUser($user)->createMany(10);
 
-        $response = $this->withAuth($auth)->get('/tags');
+        $response = $this->withAuth($auth)->get('/v1/tags');
 
         $response->assertOk();
 
@@ -65,7 +65,7 @@ class TagsControllerTest extends TestCase implements DatabaseTransaction
 
         $auth = $this->makeAuth($this->userFactory->create());
 
-        $response = $this->withAuth($auth)->get('/tags');
+        $response = $this->withAuth($auth)->get('/v1/tags');
 
         $response->assertOk();
 
@@ -76,7 +76,7 @@ class TagsControllerTest extends TestCase implements DatabaseTransaction
 
     public function testCreateRequireAuth(): void
     {
-        $response = $this->post('/tags');
+        $response = $this->post('/v1/tags');
 
         $response->assertUnauthorized();
     }
@@ -87,7 +87,7 @@ class TagsControllerTest extends TestCase implements DatabaseTransaction
 
         $auth = $this->makeAuth($this->userFactory->create(UserFactory::emailNotConfirmed()));
 
-        $response = $this->withAuth($auth)->post('/tags', [
+        $response = $this->withAuth($auth)->post('/v1/tags', [
             'name' => $tag->name,
             'icon' => $tag->icon,
             'color' => $tag->color,
@@ -131,7 +131,7 @@ class TagsControllerTest extends TestCase implements DatabaseTransaction
     {
         $auth = $this->makeAuth($this->userFactory->create());
 
-        $response = $this->withAuth($auth)->post('/tags', $request);
+        $response = $this->withAuth($auth)->post('/v1/tags', $request);
 
         $response->assertUnprocessable();
 
@@ -150,7 +150,7 @@ class TagsControllerTest extends TestCase implements DatabaseTransaction
 
         $tag = $this->tagFactory->forUser($user)->create();
 
-        $response = $this->withAuth($auth)->post('/tags', [
+        $response = $this->withAuth($auth)->post('/v1/tags', [
             'name' => $tag->name
         ]);
 
@@ -168,7 +168,7 @@ class TagsControllerTest extends TestCase implements DatabaseTransaction
 
         $auth = $this->makeAuth($user = $this->userFactory->create());
 
-        $response = $this->withAuth($auth)->post('/tags', [
+        $response = $this->withAuth($auth)->post('/v1/tags', [
             'name' => $tag->name,
             'icon' => $tag->icon,
             'color' => $tag->color,
@@ -199,7 +199,7 @@ class TagsControllerTest extends TestCase implements DatabaseTransaction
             $mock->expects($this->once())->method('create')->willThrowException(new \RuntimeException());
         });
 
-        $response = $this->withAuth($auth)->post('/tags', [
+        $response = $this->withAuth($auth)->post('/v1/tags', [
             'name' => $tag->name,
             'icon' => $tag->icon,
             'color' => $tag->color,
@@ -222,7 +222,7 @@ class TagsControllerTest extends TestCase implements DatabaseTransaction
     {
         $tag = $this->tagFactory->forUser($this->userFactory->create())->create();
 
-        $response = $this->put("/tags/{$tag->id}");
+        $response = $this->put("/v1/tags/{$tag->id}");
 
         $response->assertUnauthorized();
     }
@@ -233,7 +233,7 @@ class TagsControllerTest extends TestCase implements DatabaseTransaction
 
         $auth = $this->makeAuth($user);
 
-        $response = $this->withAuth($auth)->put("/tags/{$tag->id}", [
+        $response = $this->withAuth($auth)->put("/v1/tags/{$tag->id}", [
             'name' => $tag->name,
             'icon' => $tag->icon,
             'color' => $tag->color,
@@ -246,7 +246,7 @@ class TagsControllerTest extends TestCase implements DatabaseTransaction
     {
         $tagId = Fixtures::integer();
 
-        $response = $this->put("/tags/{$tagId}");
+        $response = $this->put("/v1/tags/{$tagId}");
 
         $response->assertUnauthorized();
     }
@@ -257,7 +257,7 @@ class TagsControllerTest extends TestCase implements DatabaseTransaction
 
         $tagId = Fixtures::integer();
 
-        $response = $this->withAuth($auth)->put("/tags/{$tagId}", [
+        $response = $this->withAuth($auth)->put("/v1/tags/{$tagId}", [
             'name' => Fixtures::string()
         ]);
 
@@ -270,7 +270,7 @@ class TagsControllerTest extends TestCase implements DatabaseTransaction
 
         $tag = $this->tagFactory->forUser($this->userFactory->create())->create();
 
-        $response = $this->withAuth($auth)->put("/tags/{$tag->id}", [
+        $response = $this->withAuth($auth)->put("/v1/tags/{$tag->id}", [
             'name' => Fixtures::string()
         ]);
 
@@ -314,7 +314,7 @@ class TagsControllerTest extends TestCase implements DatabaseTransaction
 
         $tag = $this->tagFactory->forUser($user)->create();
 
-        $response = $this->withAuth($auth)->put("/tags/{$tag->id}", $request);
+        $response = $this->withAuth($auth)->put("/v1/tags/{$tag->id}", $request);
 
         $response->assertUnprocessable();
 
@@ -334,7 +334,7 @@ class TagsControllerTest extends TestCase implements DatabaseTransaction
         $tag = $this->tagFactory->forUser($user)->create();
         $otherTag = TagFactory::make();
 
-        $response = $this->withAuth($auth)->put("/tags/{$tag->id}", [
+        $response = $this->withAuth($auth)->put("/v1/tags/{$tag->id}", [
             'name' => $otherTag->name,
             'icon' => $otherTag->icon,
             'color' => $otherTag->color,
@@ -360,7 +360,7 @@ class TagsControllerTest extends TestCase implements DatabaseTransaction
 
         $tag = $this->tagFactory->forUser($user)->create();
 
-        $response = $this->withAuth($auth)->put("/tags/{$tag->id}", [
+        $response = $this->withAuth($auth)->put("/v1/tags/{$tag->id}", [
             'name' => $tag->name,
             'icon' => $tag->icon,
             'color' => $tag->color,
@@ -389,7 +389,7 @@ class TagsControllerTest extends TestCase implements DatabaseTransaction
         $tag = $this->tagFactory->forUser($user)->create();
         $oldTagName = $tag->name;
 
-        $response = $this->withAuth($auth)->put("/tags/{$tag->id}", [
+        $response = $this->withAuth($auth)->put("/v1/tags/{$tag->id}", [
             'name' => $otherTagName,
             'icon' => $tag->icon,
             'color' => $tag->color,
@@ -430,7 +430,7 @@ class TagsControllerTest extends TestCase implements DatabaseTransaction
             $mock->expects($this->once())->method('store')->willThrowException(new \RuntimeException());
         });
 
-        $response = $this->withAuth($auth)->put("/tags/{$tag->id}", [
+        $response = $this->withAuth($auth)->put("/v1/tags/{$tag->id}", [
             'name' => $otherTag->name,
             'icon' => $otherTag->icon,
             'color' => $otherTag->color,
@@ -453,7 +453,7 @@ class TagsControllerTest extends TestCase implements DatabaseTransaction
     {
         $tag = $this->tagFactory->forUser($this->userFactory->create())->create();
 
-        $response = $this->delete("/tags/{$tag->id}");
+        $response = $this->delete("/v1/tags/{$tag->id}");
 
         $response->assertUnauthorized();
     }
@@ -464,7 +464,7 @@ class TagsControllerTest extends TestCase implements DatabaseTransaction
 
         $tag = $this->tagFactory->forUser($user)->create();
 
-        $response = $this->withAuth($auth)->delete("/tags/{$tag->id}");
+        $response = $this->withAuth($auth)->delete("/v1/tags/{$tag->id}");
 
         $response->assertForbidden();
     }
@@ -473,7 +473,7 @@ class TagsControllerTest extends TestCase implements DatabaseTransaction
     {
         $tagId = Fixtures::integer();
 
-        $response = $this->delete("/tags/{$tagId}");
+        $response = $this->delete("/v1/tags/{$tagId}");
 
         $response->assertUnauthorized();
     }
@@ -484,7 +484,7 @@ class TagsControllerTest extends TestCase implements DatabaseTransaction
 
         $tagId = Fixtures::integer();
 
-        $response = $this->withAuth($auth)->delete("/tags/{$tagId}");
+        $response = $this->withAuth($auth)->delete("/v1/tags/{$tagId}");
 
         $response->assertNotFound();
     }
@@ -495,7 +495,7 @@ class TagsControllerTest extends TestCase implements DatabaseTransaction
 
         $auth = $this->makeAuth($this->userFactory->create());
 
-        $response = $this->withAuth($auth)->delete("/tags/{$tag->id}");
+        $response = $this->withAuth($auth)->delete("/v1/tags/{$tag->id}");
 
         $response->assertNotFound();
     }
@@ -506,7 +506,7 @@ class TagsControllerTest extends TestCase implements DatabaseTransaction
 
         $tag = $this->tagFactory->forUser($user)->create();
 
-        $response = $this->withAuth($auth)->delete("/tags/{$tag->id}");
+        $response = $this->withAuth($auth)->delete("/v1/tags/{$tag->id}");
 
         $response->assertOk();
 
@@ -526,7 +526,7 @@ class TagsControllerTest extends TestCase implements DatabaseTransaction
             $mock->expects($this->once())->method('delete')->willThrowException(new \RuntimeException());
         });
 
-        $response = $this->withAuth($auth)->delete("/tags/{$tag->id}");
+        $response = $this->withAuth($auth)->delete("/v1/tags/{$tag->id}");
 
         $response->assertStatus(500);
 

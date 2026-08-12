@@ -39,7 +39,7 @@ class GraphControllerTest extends TestCase implements DatabaseTransaction
         $wallet = $this->walletFactory->forUser($user)->create();
         $this->chargeFactory->forUser($user)->forWallet($wallet)->create();
 
-        $response = $this->get("/wallets/{$wallet->id}/charges/graph/amount");
+        $response = $this->get("/v1/wallets/{$wallet->id}/charges/graph/amount");
 
         $response->assertUnauthorized();
     }
@@ -49,7 +49,7 @@ class GraphControllerTest extends TestCase implements DatabaseTransaction
         $auth = $this->makeAuth($this->userFactory->create());
         $walletId = Fixtures::integer();
 
-        $response = $this->withAuth($auth)->get("/wallets/{$walletId}/charges/graph/amount");
+        $response = $this->withAuth($auth)->get("/v1/wallets/{$walletId}/charges/graph/amount");
 
         $response->assertNotFound();
     }
@@ -60,7 +60,7 @@ class GraphControllerTest extends TestCase implements DatabaseTransaction
         $wallet = $this->walletFactory->forUser($this->userFactory->create())->create();
         $this->chargeFactory->forUser($user)->forWallet($wallet)->create();
 
-        $response = $this->withAuth($auth)->get("/wallets/{$wallet->id}/charges/graph/amount");
+        $response = $this->withAuth($auth)->get("/v1/wallets/{$wallet->id}/charges/graph/amount");
 
         $response->assertNotFound();
     }
@@ -70,7 +70,7 @@ class GraphControllerTest extends TestCase implements DatabaseTransaction
         $auth = $this->makeAuth($user = $this->userFactory->create());
         $wallet = $this->walletFactory->forUser($user)->create();
 
-        $response = $this->withAuth($auth)->get("/wallets/{$wallet->id}/charges/graph/amount");
+        $response = $this->withAuth($auth)->get("/v1/wallets/{$wallet->id}/charges/graph/amount");
 
         $response->assertOk();
 
@@ -202,7 +202,7 @@ class GraphControllerTest extends TestCase implements DatabaseTransaction
             $this->chargeFactory->forWallet($wallet)->create($charge);
         }
 
-        $response = $this->withAuth($auth)->get("/wallets/{$wallet->id}/charges/graph/amount", $query);
+        $response = $this->withAuth($auth)->get("/v1/wallets/{$wallet->id}/charges/graph/amount", $query);
 
         $response->assertOk();
 
@@ -225,7 +225,7 @@ class GraphControllerTest extends TestCase implements DatabaseTransaction
         $tag = $this->tagFactory->forUser($user)->create();
         $this->chargeFactory->forUser($user)->forWallet($wallet)->createMany(3);
 
-        $response = $this->withAuth($auth)->get("/wallets/{$wallet->id}/charges/graph/amount", [
+        $response = $this->withAuth($auth)->get("/v1/wallets/{$wallet->id}/charges/graph/amount", [
             'tags' => (string) $tag->id,
         ]);
 
@@ -361,7 +361,7 @@ class GraphControllerTest extends TestCase implements DatabaseTransaction
 
         $query['tags'] = (string) $tag->id;
 
-        $response = $this->withAuth($auth)->get("/wallets/{$wallet->id}/charges/graph/amount", $query);
+        $response = $this->withAuth($auth)->get("/v1/wallets/{$wallet->id}/charges/graph/amount", $query);
 
         $response->assertOk();
 
@@ -383,7 +383,7 @@ class GraphControllerTest extends TestCase implements DatabaseTransaction
         $wallet = $this->walletFactory->forUser($user)->create();
         $this->chargeFactory->forUser($user)->forWallet($wallet)->create();
 
-        $response = $this->get("/wallets/{$wallet->id}/charges/graph/total");
+        $response = $this->get("/v1/wallets/{$wallet->id}/charges/graph/total");
 
         $response->assertUnauthorized();
     }
@@ -393,7 +393,7 @@ class GraphControllerTest extends TestCase implements DatabaseTransaction
         $auth = $this->makeAuth($this->userFactory->create());
         $walletId = Fixtures::integer();
 
-        $response = $this->withAuth($auth)->get("/wallets/{$walletId}/charges/graph/total");
+        $response = $this->withAuth($auth)->get("/v1/wallets/{$walletId}/charges/graph/total");
 
         $response->assertNotFound();
     }
@@ -404,7 +404,7 @@ class GraphControllerTest extends TestCase implements DatabaseTransaction
         $wallet = $this->walletFactory->forUser($this->userFactory->create())->create();
         $this->chargeFactory->forUser($user)->forWallet($wallet)->create();
 
-        $response = $this->withAuth($auth)->get("/wallets/{$wallet->id}/charges/graph/total");
+        $response = $this->withAuth($auth)->get("/v1/wallets/{$wallet->id}/charges/graph/total");
 
         $response->assertNotFound();
     }
@@ -414,7 +414,7 @@ class GraphControllerTest extends TestCase implements DatabaseTransaction
         $auth = $this->makeAuth($user = $this->userFactory->create());
         $wallet = $this->walletFactory->forUser($user)->create();
 
-        $response = $this->withAuth($auth)->get("/wallets/{$wallet->id}/charges/graph/total");
+        $response = $this->withAuth($auth)->get("/v1/wallets/{$wallet->id}/charges/graph/total");
 
         $response->assertOk();
 
@@ -582,7 +582,7 @@ class GraphControllerTest extends TestCase implements DatabaseTransaction
             $this->chargeFactory->forWallet($wallet)->withTags($item['tags'])->create($charge);
         }
 
-        $response = $this->withAuth($auth)->get("/wallets/{$wallet->id}/charges/graph/total", $query);
+        $response = $this->withAuth($auth)->get("/v1/wallets/{$wallet->id}/charges/graph/total", $query);
 
         $response->assertOk();
 

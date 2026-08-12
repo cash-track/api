@@ -36,7 +36,7 @@ class SuggestionsControllerTest extends TestCase implements DatabaseTransaction
     {
         $query = Fixtures::string();
 
-        $response = $this->get("/tags/suggestions/{$query}");
+        $response = $this->get("/v1/tags/suggestions/{$query}");
 
         $response->assertUnauthorized();
     }
@@ -85,7 +85,7 @@ class SuggestionsControllerTest extends TestCase implements DatabaseTransaction
         $this->chargeFactory->forUser($sharedUser)->forWallet($wallet)->withTags([$sharedTag])->create($chargeSharedUser);
         $this->chargeFactory->forUser($otherUser)->forWallet($otherWallet)->withTags([$otherTag])->create($chargeOtherUser);
 
-        $response = $this->withAuth($auth)->get("/tags/suggestions/{$query}");
+        $response = $this->withAuth($auth)->get("/v1/tags/suggestions/{$query}");
 
         $response->assertOk();
 

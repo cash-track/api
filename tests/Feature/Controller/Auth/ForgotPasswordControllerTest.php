@@ -60,7 +60,7 @@ class ForgotPasswordControllerTest extends TestCase implements DatabaseTransacti
 
         $this->getContainer()->bind(MailerInterface::class, fn () => $mock);
 
-        $response = $this->post('/auth/password/forgot', [
+        $response = $this->post('/v1/auth/password/forgot', [
             'email' => $user->email,
         ]);
 
@@ -77,7 +77,7 @@ class ForgotPasswordControllerTest extends TestCase implements DatabaseTransacti
 
     public function testCreateValidationFails(): void
     {
-        $response = $this->post('/auth/password/forgot', [
+        $response = $this->post('/v1/auth/password/forgot', [
             'email' => Fixtures::email(),
         ]);
 
@@ -103,7 +103,7 @@ class ForgotPasswordControllerTest extends TestCase implements DatabaseTransacti
         $forgotPasswordRequest->email = $user->email;
         $this->requestFactory->create($forgotPasswordRequest);
 
-        $response = $this->post('/auth/password/forgot', [
+        $response = $this->post('/v1/auth/password/forgot', [
             'email' => $user->email,
         ]);
 
@@ -136,7 +136,7 @@ class ForgotPasswordControllerTest extends TestCase implements DatabaseTransacti
         $forgotPasswordRequest->email = $user->email;
         $this->requestFactory->create($forgotPasswordRequest);
 
-        $response = $this->post('/auth/password/forgot', [
+        $response = $this->post('/v1/auth/password/forgot', [
             'email' => $user->email,
         ]);
 
@@ -170,7 +170,7 @@ class ForgotPasswordControllerTest extends TestCase implements DatabaseTransacti
 
         $this->getContainer()->bind(MailerInterface::class, fn () => $mock);
 
-        $response = $this->post('/auth/password/forgot', [
+        $response = $this->post('/v1/auth/password/forgot', [
             'email' => $user->email,
         ]);
 
@@ -210,7 +210,7 @@ class ForgotPasswordControllerTest extends TestCase implements DatabaseTransacti
 
         $this->getContainer()->bind(UserRepository::class, fn () => $mock);
 
-        $response = $this->post('/auth/password/forgot', [
+        $response = $this->post('/v1/auth/password/forgot', [
             'email' => $user->email,
         ]);
 
@@ -236,7 +236,7 @@ class ForgotPasswordControllerTest extends TestCase implements DatabaseTransacti
 
         $password = Fixtures::string();
 
-        $response = $this->post('/auth/password/reset', [
+        $response = $this->post('/v1/auth/password/reset', [
             'code' => $forgotPasswordRequest->code,
             'password' => $password,
             'passwordConfirmation' => $password,
@@ -257,7 +257,7 @@ class ForgotPasswordControllerTest extends TestCase implements DatabaseTransacti
 
     public function testResetValidationFailsWithEmptyRequest(): void
     {
-        $response = $this->post('/auth/password/reset', [
+        $response = $this->post('/v1/auth/password/reset', [
             'code' => '',
             'password' => '',
             'passwordConfirmation' => '',
@@ -275,7 +275,7 @@ class ForgotPasswordControllerTest extends TestCase implements DatabaseTransacti
     public function testResetValidationFailsWithInvalidRequest(): void
     {
         $password = Fixtures::string(5);
-        $response = $this->post('/auth/password/reset', [
+        $response = $this->post('/v1/auth/password/reset', [
             'code' => Fixtures::string(),
             'password' => $password,
             'passwordConfirmation' => $password . '.',
@@ -301,7 +301,7 @@ class ForgotPasswordControllerTest extends TestCase implements DatabaseTransacti
 
         $password = Fixtures::string();
 
-        $response = $this->post('/auth/password/reset', [
+        $response = $this->post('/v1/auth/password/reset', [
             'code' => $forgotPasswordRequest->code,
             'password' => $password,
             'passwordConfirmation' => $password,
@@ -343,7 +343,7 @@ class ForgotPasswordControllerTest extends TestCase implements DatabaseTransacti
 
         $password = Fixtures::string();
 
-        $response = $this->post('/auth/password/reset', [
+        $response = $this->post('/v1/auth/password/reset', [
             'code' => $forgotPasswordRequest->code,
             'password' => $password,
             'passwordConfirmation' => $password,
@@ -381,7 +381,7 @@ class ForgotPasswordControllerTest extends TestCase implements DatabaseTransacti
 
         $password = Fixtures::string();
 
-        $response = $this->post('/auth/password/reset', [
+        $response = $this->post('/v1/auth/password/reset', [
             'code' => $forgotPasswordRequest->code,
             'password' => $password,
             'passwordConfirmation' => $password,

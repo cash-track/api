@@ -62,7 +62,7 @@ class LimitsControllerTest extends TestCase implements DatabaseTransaction
         $wallet = $this->walletFactory->forUser($this->userFactory->create())->create();
         $this->limitFactory->forWallet($wallet)->create();
 
-        $response = $this->get("/wallets/{$wallet->id}/limits");
+        $response = $this->get("/v1/wallets/{$wallet->id}/limits");
 
         $response->assertUnauthorized();
     }
@@ -71,7 +71,7 @@ class LimitsControllerTest extends TestCase implements DatabaseTransaction
     {
         $walletId = Fixtures::integer();
 
-        $response = $this->get("/wallets/{$walletId}/limits");
+        $response = $this->get("/v1/wallets/{$walletId}/limits");
 
         $response->assertUnauthorized();
     }
@@ -82,7 +82,7 @@ class LimitsControllerTest extends TestCase implements DatabaseTransaction
 
         $walletId = Fixtures::integer();
 
-        $response = $this->withAuth($auth)->get("/wallets/{$walletId}/limits");
+        $response = $this->withAuth($auth)->get("/v1/wallets/{$walletId}/limits");
 
         $response->assertNotFound();
     }
@@ -94,7 +94,7 @@ class LimitsControllerTest extends TestCase implements DatabaseTransaction
 
         $auth = $this->makeAuth($this->userFactory->create());
 
-        $response = $this->withAuth($auth)->get("/wallets/{$wallet->id}/limits");
+        $response = $this->withAuth($auth)->get("/v1/wallets/{$wallet->id}/limits");
 
         $response->assertNotFound();
     }
@@ -104,7 +104,7 @@ class LimitsControllerTest extends TestCase implements DatabaseTransaction
         $auth = $this->makeAuth($user = $this->userFactory->create());
         $wallet = $this->walletFactory->forUser($user)->create();
 
-        $response = $this->withAuth($auth)->get("/wallets/{$wallet->id}/limits");
+        $response = $this->withAuth($auth)->get("/v1/wallets/{$wallet->id}/limits");
 
         $response->assertOk();
 
@@ -163,7 +163,7 @@ class LimitsControllerTest extends TestCase implements DatabaseTransaction
             $chargesWithTwoTagsTotal = round($chargesWithTwoTagsTotal - $chargesWithTwoTagsCorrectionTotal, 2);
         }
 
-        $response = $this->withAuth($auth)->get("/wallets/{$wallet->id}/limits");
+        $response = $this->withAuth($auth)->get("/v1/wallets/{$wallet->id}/limits");
 
         $response->assertOk();
 
@@ -216,7 +216,7 @@ class LimitsControllerTest extends TestCase implements DatabaseTransaction
             ])
             ->create(LimitFactory::expense());
 
-        $response = $this->withAuth($auth)->get("/wallets/{$wallet->id}/limits");
+        $response = $this->withAuth($auth)->get("/v1/wallets/{$wallet->id}/limits");
 
         $response->assertOk();
 
@@ -249,7 +249,7 @@ class LimitsControllerTest extends TestCase implements DatabaseTransaction
             ])
             ->create(LimitFactory::expense());
 
-        $response = $this->withAuth($auth)->get("/wallets/{$wallet->id}/limits");
+        $response = $this->withAuth($auth)->get("/v1/wallets/{$wallet->id}/limits");
 
         $response->assertOk();
 
@@ -265,7 +265,7 @@ class LimitsControllerTest extends TestCase implements DatabaseTransaction
 
         $limit = LimitFactory::make();
 
-        $response = $this->post("/wallets/{$wallet->id}/limits", [
+        $response = $this->post("/v1/wallets/{$wallet->id}/limits", [
             'type' => $limit->type,
             'amount' => $limit->amount,
             'tagGroups' => null,
@@ -280,7 +280,7 @@ class LimitsControllerTest extends TestCase implements DatabaseTransaction
 
         $limit = LimitFactory::make();
 
-        $response = $this->post("/wallets/{$walletId}/limits", [
+        $response = $this->post("/v1/wallets/{$walletId}/limits", [
             'type' => $limit->type,
             'amount' => $limit->amount,
             'tagGroups' => null,
@@ -298,7 +298,7 @@ class LimitsControllerTest extends TestCase implements DatabaseTransaction
 
         $limit = LimitFactory::make();
 
-        $response = $this->withAuth($auth)->post("/wallets/{$walletId}/limits", [
+        $response = $this->withAuth($auth)->post("/v1/wallets/{$walletId}/limits", [
             'type' => $limit->type,
             'amount' => $limit->amount,
             'tagGroups' => [['operation' => 'and', 'tags' => [$tag->id]]],
@@ -316,7 +316,7 @@ class LimitsControllerTest extends TestCase implements DatabaseTransaction
 
         $limit = LimitFactory::make();
 
-        $response = $this->withAuth($auth)->post("/wallets/{$wallet->id}/limits", [
+        $response = $this->withAuth($auth)->post("/v1/wallets/{$wallet->id}/limits", [
             'type' => $limit->type,
             'amount' => $limit->amount,
             'tagGroups' => [['operation' => 'and', 'tags' => [$tag->id]]],
@@ -364,7 +364,7 @@ class LimitsControllerTest extends TestCase implements DatabaseTransaction
 
         $wallet = $this->walletFactory->forUser($user)->create();
 
-        $response = $this->withAuth($auth)->post("/wallets/{$wallet->id}/limits", $request);
+        $response = $this->withAuth($auth)->post("/v1/wallets/{$wallet->id}/limits", $request);
 
         $response->assertUnprocessable();
 
@@ -386,7 +386,7 @@ class LimitsControllerTest extends TestCase implements DatabaseTransaction
         $limit = LimitFactory::make();
         $tags = $this->tagFactory->forUser($user)->createMany(2);
 
-        $response = $this->withAuth($auth)->post("/wallets/{$wallet->id}/limits", [
+        $response = $this->withAuth($auth)->post("/v1/wallets/{$wallet->id}/limits", [
             'type' => $limit->type,
             'amount' => $limit->amount,
             'tagGroups' => [['operation' => 'and', 'tags' => $tags->map(fn($tag) => $tag->id)->toArray()]],
@@ -430,7 +430,7 @@ class LimitsControllerTest extends TestCase implements DatabaseTransaction
         $tagB = $this->tagFactory->forUser($user)->create();
         $tagC = $this->tagFactory->forUser($user)->create();
 
-        $response = $this->withAuth($auth)->post("/wallets/{$wallet->id}/limits", [
+        $response = $this->withAuth($auth)->post("/v1/wallets/{$wallet->id}/limits", [
             'type' => $limit->type,
             'amount' => $limit->amount,
             'tagGroups' => [
@@ -469,7 +469,7 @@ class LimitsControllerTest extends TestCase implements DatabaseTransaction
             $mock->expects($this->once())->method('store')->willThrowException(new \RuntimeException());
         });
 
-        $response = $this->withAuth($auth)->post("/wallets/{$wallet->id}/limits", [
+        $response = $this->withAuth($auth)->post("/v1/wallets/{$wallet->id}/limits", [
             'type' => $limit->type,
             'amount' => $limit->amount,
             'tagGroups' => [['operation' => 'and', 'tags' => $tags->map(fn($tag) => $tag->id)->toArray()]],
@@ -491,7 +491,7 @@ class LimitsControllerTest extends TestCase implements DatabaseTransaction
 
         $updatedLimit = LimitFactory::make();
 
-        $response = $this->put("/wallets/{$wallet->id}/limits/{$limit->id}", [
+        $response = $this->put("/v1/wallets/{$wallet->id}/limits/{$limit->id}", [
             'type' => $updatedLimit->type,
             'amount' => $updatedLimit->amount,
         ]);
@@ -506,7 +506,7 @@ class LimitsControllerTest extends TestCase implements DatabaseTransaction
 
         $updatedLimit = LimitFactory::make();
 
-        $response = $this->put("/wallets/{$walletId}/limits/{$limitId}", [
+        $response = $this->put("/v1/wallets/{$walletId}/limits/{$limitId}", [
             'type' => $updatedLimit->type,
             'amount' => $updatedLimit->amount,
         ]);
@@ -521,7 +521,7 @@ class LimitsControllerTest extends TestCase implements DatabaseTransaction
 
         $updatedLimit = LimitFactory::make();
 
-        $response = $this->put("/wallets/{$wallet->id}/limits/{$limitId}", [
+        $response = $this->put("/v1/wallets/{$wallet->id}/limits/{$limitId}", [
             'type' => $updatedLimit->type,
             'amount' => $updatedLimit->amount,
         ]);
@@ -538,7 +538,7 @@ class LimitsControllerTest extends TestCase implements DatabaseTransaction
 
         $updatedLimit = LimitFactory::make();
 
-        $response = $this->withAuth($auth)->put("/wallets/{$walletId}/limits/{$limitId}", [
+        $response = $this->withAuth($auth)->put("/v1/wallets/{$walletId}/limits/{$limitId}", [
             'type' => $updatedLimit->type,
             'amount' => $updatedLimit->amount,
             'tagGroups' => [['operation' => 'and', 'tags' => [$tag->id]]],
@@ -556,7 +556,7 @@ class LimitsControllerTest extends TestCase implements DatabaseTransaction
 
         $updatedLimit = LimitFactory::make();
 
-        $response = $this->withAuth($auth)->put("/wallets/{$wallet->id}/limits/{$limitId}", [
+        $response = $this->withAuth($auth)->put("/v1/wallets/{$wallet->id}/limits/{$limitId}", [
             'type' => $updatedLimit->type,
             'amount' => $updatedLimit->amount,
             'tagGroups' => [['operation' => 'and', 'tags' => [$tag->id]]],
@@ -574,7 +574,7 @@ class LimitsControllerTest extends TestCase implements DatabaseTransaction
 
         $updatedLimit = LimitFactory::make();
 
-        $response = $this->withAuth($auth)->put("/wallets/{$wallet->id}/limits/{$limit->id}", [
+        $response = $this->withAuth($auth)->put("/v1/wallets/{$wallet->id}/limits/{$limit->id}", [
             'type' => $updatedLimit->type,
             'amount' => $updatedLimit->amount,
             'tagGroups' => [['operation' => 'and', 'tags' => [$tag->id]]],
@@ -617,7 +617,7 @@ class LimitsControllerTest extends TestCase implements DatabaseTransaction
         $wallet = $this->walletFactory->forUser($user)->create();
         $limit = $this->limitFactory->forWallet($wallet)->create();
 
-        $response = $this->withAuth($auth)->put("/wallets/{$wallet->id}/limits/{$limit->id}", $request);
+        $response = $this->withAuth($auth)->put("/v1/wallets/{$wallet->id}/limits/{$limit->id}", $request);
 
         $response->assertUnprocessable();
 
@@ -637,7 +637,7 @@ class LimitsControllerTest extends TestCase implements DatabaseTransaction
         $tag = $this->tagFactory->forUser($user)->create();
 
         $limit = LimitFactory::make();
-        $response = $this->withAuth($auth)->post("/wallets/{$wallet->id}/limits", [
+        $response = $this->withAuth($auth)->post("/v1/wallets/{$wallet->id}/limits", [
             'type' => $limit->type,
             'amount' => $limit->amount,
             'tagGroups' => [['operation' => 'and', 'tags' => [$tag->id]]],
@@ -650,7 +650,7 @@ class LimitsControllerTest extends TestCase implements DatabaseTransaction
         $updatedLimit = LimitFactory::make();
         $updatedTag = $this->tagFactory->forUser($user)->create();
 
-        $response = $this->withAuth($auth)->put("/wallets/{$wallet->id}/limits/{$limitId}", [
+        $response = $this->withAuth($auth)->put("/v1/wallets/{$wallet->id}/limits/{$limitId}", [
             'type' => $updatedLimit->type,
             'amount' => $updatedLimit->amount,
             'tagGroups' => [['operation' => 'or', 'tags' => [$updatedTag->id]]],
@@ -695,7 +695,7 @@ class LimitsControllerTest extends TestCase implements DatabaseTransaction
             $mock->expects($this->once())->method('store')->willThrowException(new \RuntimeException());
         });
 
-        $response = $this->withAuth($auth)->put("/wallets/{$wallet->id}/limits/{$limit->id}", [
+        $response = $this->withAuth($auth)->put("/v1/wallets/{$wallet->id}/limits/{$limit->id}", [
             'type' => $updatedLimit->type,
             'amount' => $updatedLimit->amount,
             'tagGroups' => [['operation' => 'and', 'tags' => [$tag->id]]],
@@ -715,7 +715,7 @@ class LimitsControllerTest extends TestCase implements DatabaseTransaction
         $wallet = $this->walletFactory->forUser($user)->create();
         $limit = $this->limitFactory->forWallet($wallet)->create();
 
-        $response = $this->delete("/wallets/{$wallet->id}/limits/{$limit->id}");
+        $response = $this->delete("/v1/wallets/{$wallet->id}/limits/{$limit->id}");
 
         $response->assertUnauthorized();
     }
@@ -725,7 +725,7 @@ class LimitsControllerTest extends TestCase implements DatabaseTransaction
         $walletId = Fixtures::integer();
         $limitId = Fixtures::string();
 
-        $response = $this->delete("/wallets/{$walletId}/limits/{$limitId}");
+        $response = $this->delete("/v1/wallets/{$walletId}/limits/{$limitId}");
 
         $response->assertUnauthorized();
     }
@@ -735,7 +735,7 @@ class LimitsControllerTest extends TestCase implements DatabaseTransaction
         $wallet = $this->walletFactory->create();
         $limitId = Fixtures::string();
 
-        $response = $this->delete("/wallets/{$wallet->id}/limits/{$limitId}");
+        $response = $this->delete("/v1/wallets/{$wallet->id}/limits/{$limitId}");
 
         $response->assertUnauthorized();
     }
@@ -746,7 +746,7 @@ class LimitsControllerTest extends TestCase implements DatabaseTransaction
         $walletId = Fixtures::integer();
         $limitId = Fixtures::string();
 
-        $response = $this->withAuth($auth)->delete("/wallets/{$walletId}/limits/{$limitId}");
+        $response = $this->withAuth($auth)->delete("/v1/wallets/{$walletId}/limits/{$limitId}");
 
         $response->assertNotFound();
     }
@@ -757,7 +757,7 @@ class LimitsControllerTest extends TestCase implements DatabaseTransaction
         $wallet = $this->walletFactory->forUser($user)->create();
         $limitId = Fixtures::string();
 
-        $response = $this->withAuth($auth)->delete("/wallets/{$wallet->id}/limits/{$limitId}");
+        $response = $this->withAuth($auth)->delete("/v1/wallets/{$wallet->id}/limits/{$limitId}");
 
         $response->assertNotFound();
     }
@@ -768,7 +768,7 @@ class LimitsControllerTest extends TestCase implements DatabaseTransaction
         $wallet = $this->walletFactory->forUser($this->userFactory->create())->create();
         $limit = $this->limitFactory->forWallet($wallet)->create();
 
-        $response = $this->withAuth($auth)->delete("/wallets/{$wallet->id}/limits/{$limit->id}");
+        $response = $this->withAuth($auth)->delete("/v1/wallets/{$wallet->id}/limits/{$limit->id}");
 
         $response->assertNotFound();
     }
@@ -780,7 +780,7 @@ class LimitsControllerTest extends TestCase implements DatabaseTransaction
         $tag = $this->tagFactory->forUser($user)->create();
 
         $limit = LimitFactory::make();
-        $response = $this->withAuth($auth)->post("/wallets/{$wallet->id}/limits", [
+        $response = $this->withAuth($auth)->post("/v1/wallets/{$wallet->id}/limits", [
             'type' => $limit->type,
             'amount' => $limit->amount,
             'tagGroups' => [['operation' => 'and', 'tags' => [$tag->id]]],
@@ -790,7 +790,7 @@ class LimitsControllerTest extends TestCase implements DatabaseTransaction
 
         $limitId = $this->getJsonResponseBody($response)['data']['id'] ?? null;
 
-        $response = $this->withAuth($auth)->delete("/wallets/{$wallet->id}/limits/{$limitId}");
+        $response = $this->withAuth($auth)->delete("/v1/wallets/{$wallet->id}/limits/{$limitId}");
 
         $response->assertOk();
 
@@ -819,7 +819,7 @@ class LimitsControllerTest extends TestCase implements DatabaseTransaction
             $mock->expects($this->once())->method('delete')->willThrowException(new \RuntimeException());
         });
 
-        $response = $this->withAuth($auth)->delete("/wallets/{$wallet->id}/limits/{$limit->id}");
+        $response = $this->withAuth($auth)->delete("/v1/wallets/{$wallet->id}/limits/{$limit->id}");
 
         $response->assertStatus(500);
 
@@ -836,7 +836,7 @@ class LimitsControllerTest extends TestCase implements DatabaseTransaction
         $sourceWallet = $this->walletFactory->forUser($user)->create();
         $this->limitFactory->forWallet($sourceWallet)->create();
 
-        $response = $this->post("/wallets/{$wallet->id}/limits/copy/{$sourceWallet->id}");
+        $response = $this->post("/v1/wallets/{$wallet->id}/limits/copy/{$sourceWallet->id}");
 
         $response->assertUnauthorized();
     }
@@ -851,13 +851,13 @@ class LimitsControllerTest extends TestCase implements DatabaseTransaction
         $walletId = Fixtures::integer();
         $sourceWalletId = Fixtures::integer();
 
-        $response = $this->post("/wallets/{$walletId}/limits/copy/{$sourceWallet->id}");
+        $response = $this->post("/v1/wallets/{$walletId}/limits/copy/{$sourceWallet->id}");
         $response->assertUnauthorized();
 
-        $response = $this->post("/wallets/{$wallet->id}/limits/copy/{$sourceWalletId}");
+        $response = $this->post("/v1/wallets/{$wallet->id}/limits/copy/{$sourceWalletId}");
         $response->assertUnauthorized();
 
-        $response = $this->post("/wallets/{$walletId}/limits/copy/{$sourceWalletId}");
+        $response = $this->post("/v1/wallets/{$walletId}/limits/copy/{$sourceWalletId}");
         $response->assertUnauthorized();
     }
 
@@ -869,7 +869,7 @@ class LimitsControllerTest extends TestCase implements DatabaseTransaction
         $sourceWallet = $this->walletFactory->forUser($user)->create();
         $this->limitFactory->forWallet($sourceWallet)->create();
 
-        $response = $this->withAuth($auth)->post("/wallets/{$wallet->id}/limits/copy/{$sourceWallet->id}");
+        $response = $this->withAuth($auth)->post("/v1/wallets/{$wallet->id}/limits/copy/{$sourceWallet->id}");
         $response->assertNotFound();
     }
 
@@ -881,7 +881,7 @@ class LimitsControllerTest extends TestCase implements DatabaseTransaction
         $sourceWallet = $this->walletFactory->forUser($this->userFactory->create())->create();
         $this->limitFactory->forWallet($sourceWallet)->create();
 
-        $response = $this->withAuth($auth)->post("/wallets/{$wallet->id}/limits/copy/{$sourceWallet->id}");
+        $response = $this->withAuth($auth)->post("/v1/wallets/{$wallet->id}/limits/copy/{$sourceWallet->id}");
         $response->assertNotFound();
     }
 
@@ -897,7 +897,7 @@ class LimitsControllerTest extends TestCase implements DatabaseTransaction
             ['connection' => LimitTagGroup::CONNECTION_AND, 'tags' => $tags->toArray()],
         ])->createMany(2);
 
-        $response = $this->withAuth($auth)->post("/wallets/{$wallet->id}/limits/copy/{$sourceWallet->id}");
+        $response = $this->withAuth($auth)->post("/v1/wallets/{$wallet->id}/limits/copy/{$sourceWallet->id}");
 
         $response->assertOk();
 
@@ -938,7 +938,7 @@ class LimitsControllerTest extends TestCase implements DatabaseTransaction
             $mock->expects($this->once())->method('copy')->willThrowException(new \RuntimeException());
         });
 
-        $response = $this->withAuth($auth)->post("/wallets/{$wallet->id}/limits/copy/{$sourceWallet->id}");
+        $response = $this->withAuth($auth)->post("/v1/wallets/{$wallet->id}/limits/copy/{$sourceWallet->id}");
 
         $response->assertStatus(500);
 

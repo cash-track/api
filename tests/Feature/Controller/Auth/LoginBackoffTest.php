@@ -69,7 +69,7 @@ class LoginBackoffTest extends TestCase implements DatabaseTransaction
      */
     private function attemptLogin(string $email, string $password): TestResponse
     {
-        return $this->post('/auth/login', [
+        return $this->post('/v1/auth/login', [
             'email' => $email,
             'password' => $password,
         ], [

@@ -35,7 +35,7 @@ class EmailConfirmationsControllerTest extends TestCase implements DatabaseTrans
 
     public function testGetEmailConfirmationRequireAuth(): void
     {
-        $response = $this->get('/auth/email/confirmation');
+        $response = $this->get('/v1/auth/email/confirmation');
 
         $response->assertUnauthorized();
     }
@@ -48,7 +48,7 @@ class EmailConfirmationsControllerTest extends TestCase implements DatabaseTrans
         $confirmation->email = $user->email;
         $this->emailConfirmationFactory->create($confirmation);
 
-        $response = $this->withAuth($auth)->get('/auth/email/confirmation');
+        $response = $this->withAuth($auth)->get('/v1/auth/email/confirmation');
 
         $response->assertOk();
 
@@ -63,7 +63,7 @@ class EmailConfirmationsControllerTest extends TestCase implements DatabaseTrans
     {
         $auth = $this->makeAuth($this->userFactory->create());
 
-        $response = $this->withAuth($auth)->get('/auth/email/confirmation');
+        $response = $this->withAuth($auth)->get('/v1/auth/email/confirmation');
 
         $response->assertOk();
 
@@ -75,7 +75,7 @@ class EmailConfirmationsControllerTest extends TestCase implements DatabaseTrans
 
     public function testReSendRequireAuth(): void
     {
-        $response = $this->post('/auth/email/confirmation/resend');
+        $response = $this->post('/v1/auth/email/confirmation/resend');
 
         $response->assertUnauthorized();
     }
@@ -105,7 +105,7 @@ class EmailConfirmationsControllerTest extends TestCase implements DatabaseTrans
         $confirmation->email = $user->email;
         $confirmation = $this->emailConfirmationFactory->create($confirmation);
 
-        $response = $this->withAuth($auth)->post("/auth/email/confirmation/resend");
+        $response = $this->withAuth($auth)->post("/v1/auth/email/confirmation/resend");
 
         $response->assertOk();
 
@@ -133,7 +133,7 @@ class EmailConfirmationsControllerTest extends TestCase implements DatabaseTrans
         $confirmation->email = $user->email;
         $confirmation = $this->emailConfirmationFactory->create($confirmation);
 
-        $response = $this->withAuth($auth)->post("/auth/email/confirmation/resend");
+        $response = $this->withAuth($auth)->post("/v1/auth/email/confirmation/resend");
 
         $response->assertStatus(400);
 
@@ -154,7 +154,7 @@ class EmailConfirmationsControllerTest extends TestCase implements DatabaseTrans
 
         $this->mockMailerNeverCalled();
 
-        $response = $this->withAuth($auth)->post("/auth/email/confirmation/resend");
+        $response = $this->withAuth($auth)->post("/v1/auth/email/confirmation/resend");
 
         $response->assertStatus(400);
 

@@ -35,7 +35,7 @@ class ArchiveControllerTest extends TestCase implements DatabaseTransaction
     {
         $wallet = $this->walletFactory->forUser($this->userFactory->create())->create();
 
-        $response = $this->post("/wallets/{$wallet->id}/archive");
+        $response = $this->post("/v1/wallets/{$wallet->id}/archive");
 
         $response->assertUnauthorized();
     }
@@ -44,7 +44,7 @@ class ArchiveControllerTest extends TestCase implements DatabaseTransaction
     {
         $walletId = Fixtures::integer();
 
-        $response = $this->post("/wallets/{$walletId}/archive");
+        $response = $this->post("/v1/wallets/{$walletId}/archive");
 
         $response->assertUnauthorized();
     }
@@ -55,7 +55,7 @@ class ArchiveControllerTest extends TestCase implements DatabaseTransaction
 
         $walletId = Fixtures::integer();
 
-        $response = $this->withAuth($auth)->post("/wallets/{$walletId}/archive");
+        $response = $this->withAuth($auth)->post("/v1/wallets/{$walletId}/archive");
 
         $response->assertNotFound();
     }
@@ -79,7 +79,7 @@ class ArchiveControllerTest extends TestCase implements DatabaseTransaction
 
         $wallet = $this->walletFactory->forUser($user)->create($wallet);
 
-        $response = $this->withAuth($auth)->post("/wallets/{$wallet->id}/archive");
+        $response = $this->withAuth($auth)->post("/v1/wallets/{$wallet->id}/archive");
 
         $response->assertOk();
 
@@ -99,7 +99,7 @@ class ArchiveControllerTest extends TestCase implements DatabaseTransaction
             $mock->method('archive')->willThrowException(new \RuntimeException('Storage exception'));
         });
 
-        $response = $this->withAuth($auth)->post("/wallets/{$wallet->id}/archive");
+        $response = $this->withAuth($auth)->post("/v1/wallets/{$wallet->id}/archive");
 
         $response->assertStatus(500);
 
@@ -118,7 +118,7 @@ class ArchiveControllerTest extends TestCase implements DatabaseTransaction
     {
         $wallet = $this->walletFactory->forUser($this->userFactory->create())->create();
 
-        $response = $this->post("/wallets/{$wallet->id}/un-archive");
+        $response = $this->post("/v1/wallets/{$wallet->id}/un-archive");
 
         $response->assertUnauthorized();
     }
@@ -127,7 +127,7 @@ class ArchiveControllerTest extends TestCase implements DatabaseTransaction
     {
         $walletId = Fixtures::integer();
 
-        $response = $this->post("/wallets/{$walletId}/un-archive");
+        $response = $this->post("/v1/wallets/{$walletId}/un-archive");
 
         $response->assertUnauthorized();
     }
@@ -138,7 +138,7 @@ class ArchiveControllerTest extends TestCase implements DatabaseTransaction
 
         $walletId = Fixtures::integer();
 
-        $response = $this->withAuth($auth)->post("/wallets/{$walletId}/un-archive");
+        $response = $this->withAuth($auth)->post("/v1/wallets/{$walletId}/un-archive");
 
         $response->assertNotFound();
     }
@@ -154,7 +154,7 @@ class ArchiveControllerTest extends TestCase implements DatabaseTransaction
 
         $wallet = $this->walletFactory->forUser($user)->create($wallet);
 
-        $response = $this->withAuth($auth)->post("/wallets/{$wallet->id}/un-archive");
+        $response = $this->withAuth($auth)->post("/v1/wallets/{$wallet->id}/un-archive");
 
         $response->assertOk();
 
@@ -174,7 +174,7 @@ class ArchiveControllerTest extends TestCase implements DatabaseTransaction
             $mock->method('unArchive')->willThrowException(new \RuntimeException('Storage exception'));
         });
 
-        $response = $this->withAuth($auth)->post("/wallets/{$wallet->id}/un-archive");
+        $response = $this->withAuth($auth)->post("/v1/wallets/{$wallet->id}/un-archive");
 
         $response->assertStatus(500);
 
