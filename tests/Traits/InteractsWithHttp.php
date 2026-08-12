@@ -83,29 +83,6 @@ trait InteractsWithHttp
         return $this->http()->deleteJson($uri, $data, $this->getHeaders($headers), $cookies);
     }
 
-    /**
-     * @throws \ReflectionException
-     */
-    public function optionsJson(
-        $uri,
-        array $headers = [],
-        array $cookies = []
-    ): TestResponse {
-        // FIXME. This implements OPTIONS HTTP call over standard FakeHttp using reflection
-        //        as extending FakeHttp not possible due to internal methods visibility.
-        $http = $this->fakeHttp();
-        $r = new \ReflectionClass($http);
-        $response = $r->getMethod('handleRequest')->invoke(
-            $http,
-            $r->getMethod('createJsonRequest')->invoke($http, $uri, 'OPTIONS', [], $this->getHeaders($headers), $cookies)
-        );
-        if ($response instanceof TestResponse) {
-            return $response;
-        }
-
-        throw new \ReflectionException('Unable to handle request with method OPTIONS');
-    }
-
     public function getResponseBody(TestResponse|ResponseInterface $response): string
     {
         if ($response instanceof TestResponse) {

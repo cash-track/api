@@ -75,7 +75,6 @@ class App extends Kernel
         Framework\Http\CsrfBootloader::class,
         Framework\Http\PaginationBootloader::class,
 
-        Bootloader\CorsBootloader::class,
         Router\AnnotatedRoutesBootloader::class,
 
         // Databases
