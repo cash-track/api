@@ -13,13 +13,17 @@ use Spiral\Validator\FilterDefinition;
 class RefreshTokenRequest extends Filter implements HasFilterDefinition
 {
     #[Data]
-    public string $accessToken = '';
+    public string $refreshToken = '';
 
     #[\Override]
     public function filterDefinition(): FilterDefinitionInterface
     {
         return new FilterDefinition(validationRules: [
-            'accessToken' => ['is_string'],
+            'refreshToken' => [
+                'is_string',
+                'type::notEmpty',
+                ['string::regexp', '/^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/'],
+            ],
         ]);
     }
 }
