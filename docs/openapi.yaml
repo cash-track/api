@@ -211,21 +211,21 @@ paths:
       operationId: authRefresh
       summary: Refresh access token
       description: |
-        Issues a new access + refresh token pair. The old refresh token is invalidated.
-        The `accessToken` body field is optional — when omitted the server reads the
-        current token from the `Authorization` header.
+        Issues a new access + refresh token pair from a valid refresh token. The old
+        refresh token is invalidated.
       tags: [Auth]
       security: []
       requestBody:
-        required: false
+        required: true
         content:
           application/json:
             schema:
               type: object
+              required: [refreshToken]
               properties:
-                accessToken:
+                refreshToken:
                   type: string
-                  description: Current (possibly expired) access token. Optional.
+                  description: Current refresh token.
       responses:
         "200":
           description: New token pair issued
@@ -235,6 +235,8 @@ paths:
                 $ref: "#/components/schemas/AuthResponse"
         "401":
           $ref: "#/components/responses/Unauthorized"
+        "422":
+          $ref: "#/components/responses/ValidationError"
 
   /v1/auth/logout:
     post:

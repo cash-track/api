@@ -94,7 +94,7 @@ class LogoutControllerTest extends TestCase implements DatabaseTransaction
 
         $response->assertUnauthorized();
 
-        $response = $this->withAuthRefresh($auth)->post('/v1/auth/refresh');
+        $response = $this->post('/v1/auth/refresh', ['refreshToken' => $auth['refreshToken']]);
 
         $response->assertUnauthorized();
     }
