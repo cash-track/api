@@ -10,6 +10,7 @@ use App\Middleware\InternalHeadersMiddleware;
 use App\Middleware\LocaleSelectorMiddleware;
 use App\Middleware\RateLimitMiddleware;
 use App\Middleware\TraceContextMiddleware;
+use App\Middleware\TraceIdMiddleware;
 use App\Middleware\UserLocaleSelectorMiddleware;
 use App\Request\JsonErrorsRenderer;
 use App\Service\RateLimit\RateLimitInterface;
@@ -48,6 +49,7 @@ final class RoutesBootloader extends BaseRoutesBootloader
             TraceContextMiddleware::class,
             LocaleSelectorMiddleware::class,
             ApiVersionMiddleware::class,
+            TraceIdMiddleware::class,
             ErrorHandlerMiddleware::class,
             JsonPayloadMiddleware::class,
             HttpCollector::class,

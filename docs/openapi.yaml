@@ -33,10 +33,12 @@ info:
     Every response — success or error — carries `X-Ct-Api-Version` (git tag of the running
     image) and `X-Ct-Api-Sha` (git commit SHA), so a caller can identify exactly which build
     served a request. Either header is omitted if the image was built without that value (e.g.
-    a local dev build outside Docker). These headers are only documented once, on the shared
-    error responses below (`BadRequest`, `Unauthorized`, `NotFound`, `ValidationError`) — they
-    are not repeated on every inline 2xx response schema for brevity, but apply to all of them
-    too.
+    a local dev build outside Docker). Every response also carries `X-Ct-Trace-Id`, the active
+    OpenTelemetry trace ID, so a caller hitting the API directly (bypassing the gateway) can
+    correlate the response with API logs; it is omitted when tracing is disabled. These headers
+    are only documented once, on the shared error responses below (`BadRequest`, `Unauthorized`,
+    `NotFound`, `ValidationError`) — they are not repeated on every inline 2xx response schema
+    for brevity, but apply to all of them too.
 
 servers:
   - url: https://api.cash-track.app
@@ -3227,6 +3229,13 @@ components:
       schema:
         type: string
 
+    TraceId:
+      description: |
+        The active OpenTelemetry trace ID. Present on every response; omitted entirely (rather
+        than sent empty or all-zeros) when tracing is disabled (no valid active span context).
+      schema:
+        type: string
+
     RetryAfter:
       description: Seconds to wait before retrying.
       schema:
@@ -3243,6 +3252,8 @@ components:
           $ref: "#/components/headers/ApiVersion"
         X-Ct-Api-Sha:
           $ref: "#/components/headers/ApiSha"
+        X-Ct-Trace-Id:
+          $ref: "#/components/headers/TraceId"
       content:
         application/json:
           schema:
@@ -3258,6 +3269,8 @@ components:
           $ref: "#/components/headers/ApiVersion"
         X-Ct-Api-Sha:
           $ref: "#/components/headers/ApiSha"
+        X-Ct-Trace-Id:
+          $ref: "#/components/headers/TraceId"
       content:
         application/json:
           schema:
@@ -3272,6 +3285,8 @@ components:
           $ref: "#/components/headers/ApiVersion"
         X-Ct-Api-Sha:
           $ref: "#/components/headers/ApiSha"
+        X-Ct-Trace-Id:
+          $ref: "#/components/headers/TraceId"
       content:
         application/json:
           schema:
@@ -3286,6 +3301,8 @@ components:
           $ref: "#/components/headers/ApiVersion"
         X-Ct-Api-Sha:
           $ref: "#/components/headers/ApiSha"
+        X-Ct-Trace-Id:
+          $ref: "#/components/headers/TraceId"
       content:
         application/json:
           schema:
@@ -3304,6 +3321,8 @@ components:
           $ref: "#/components/headers/ApiVersion"
         X-Ct-Api-Sha:
           $ref: "#/components/headers/ApiSha"
+        X-Ct-Trace-Id:
+          $ref: "#/components/headers/TraceId"
       content:
         application/json:
           schema:
@@ -3327,6 +3346,8 @@ components:
           $ref: "#/components/headers/ApiVersion"
         X-Ct-Api-Sha:
           $ref: "#/components/headers/ApiSha"
+        X-Ct-Trace-Id:
+          $ref: "#/components/headers/TraceId"
         Retry-After:
           $ref: "#/components/headers/RetryAfter"
       content:
