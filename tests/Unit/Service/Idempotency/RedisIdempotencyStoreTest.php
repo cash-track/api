@@ -225,6 +225,137 @@ class RedisIdempotencyStoreTest extends TestCase
         $this->assertSame(86400, $capturedOptions['ex']);
     }
 
+    public function testThrowingGetFailsOpenAndLogsAWarning(): void
+    {
+        $redis = $this->redisMock(['isConnected', 'set', 'get']);
+        $redis->method('isConnected')->willReturn(true);
+        $redis->method('set')->willReturn(false);
+        $redis->method('get')->willThrowException(new \RedisException('connection lost'));
+
+        $logger = $this->loggerMock();
+        $logger->expects($this->once())->method('warning')->with($this->stringContains('claim'));
+
+        $store = new RedisIdempotencyStore($redis, $logger);
+
+        $claim = $store->claim(self::KEY, 'fp');
+
+        $this->assertFalse($claim->claimed);
+        $this->assertFalse($claim->available);
+    }
+
+    /**
+     * Well-formed JSON that isn't a usable record: the claim fails open rather than replaying
+     * or blocking on something it can't read.
+     *
+     * @dataProvider malformedPayloadDataProvider
+     */
+    public function testStructurallyInvalidPayloadFailsOpen(string $payload): void
+    {
+        $redis = $this->redisMock(['isConnected', 'set', 'get']);
+        $redis->method('isConnected')->willReturn(true);
+        $redis->method('set')->willReturn(false);
+        $redis->method('get')->willReturn($payload);
+
+        $store = new RedisIdempotencyStore($redis, $this->loggerMock());
+
+        $claim = $store->claim(self::KEY, 'fp');
+
+        $this->assertFalse($claim->claimed);
+        $this->assertFalse($claim->available);
+        $this->assertNull($claim->existing);
+    }
+
+    public function malformedPayloadDataProvider(): array
+    {
+        return [
+            'not an object' => ['42'],
+            'no fingerprint' => ['{"status":200,"body":"e30=","headers":[]}'],
+            'non-integer status' => ['{"fingerprint":"fp","status":"200","body":"e30=","headers":[]}'],
+            'body is not base64' => ['{"fingerprint":"fp","status":200,"body":"!!!","headers":[]}'],
+        ];
+    }
+
+    public function testCompleteIsANoOpWhenNotConnected(): void
+    {
+        $redis = $this->redisMock(['isConnected', 'set']);
+        $redis->method('isConnected')->willReturn(false);
+        $redis->expects($this->never())->method('set');
+
+        $logger = $this->loggerMock();
+        $logger->expects($this->never())->method('warning');
+
+        $store = new RedisIdempotencyStore($redis, $logger);
+
+        $store->complete(self::KEY, IdempotencyRecord::completed('fp', 200, '{}', []));
+    }
+
+    /**
+     * The response is already on its way to the client, so a failed write is logged and
+     * swallowed — the next retry simply re-executes instead of replaying.
+     */
+    public function testCompleteFailureIsLoggedAndSwallowed(): void
+    {
+        $redis = $this->redisMock(['isConnected', 'set']);
+        $redis->method('isConnected')->willReturn(true);
+        $redis->method('set')->willThrowException(new \RedisException('connection lost'));
+
+        $logger = $this->loggerMock();
+        $logger->expects($this->once())
+            ->method('warning')
+            ->with($this->stringContains('store the response for'));
+
+        $store = new RedisIdempotencyStore($redis, $logger);
+
+        $store->complete(self::KEY, IdempotencyRecord::completed('fp', 200, '{}', []));
+    }
+
+    public function testReleaseDeletesTheKey(): void
+    {
+        $redis = $this->redisMock(['isConnected', 'del']);
+        $redis->method('isConnected')->willReturn(true);
+        $redis->expects($this->once())->method('del')->with(self::KEY)->willReturn(1);
+
+        $logger = $this->loggerMock();
+        $logger->expects($this->never())->method('warning');
+
+        $store = new RedisIdempotencyStore($redis, $logger);
+
+        $store->release(self::KEY);
+    }
+
+    public function testReleaseIsANoOpWhenNotConnected(): void
+    {
+        $redis = $this->redisMock(['isConnected', 'del']);
+        $redis->method('isConnected')->willReturn(false);
+        $redis->expects($this->never())->method('del');
+
+        $logger = $this->loggerMock();
+        $logger->expects($this->never())->method('warning');
+
+        $store = new RedisIdempotencyStore($redis, $logger);
+
+        $store->release(self::KEY);
+    }
+
+    /**
+     * A failed release leaves the lease to expire on its own, so it must not surface as an error.
+     */
+    public function testReleaseFailureIsLoggedAndSwallowed(): void
+    {
+        $redis = $this->redisMock(['isConnected', 'del']);
+        $redis->method('isConnected')->willReturn(true);
+        $redis->method('del')->willThrowException(new \RedisException('connection lost'));
+
+        $logger = $this->loggerMock();
+        $logger->expects($this->once())
+            ->method('warning')
+            ->with($this->stringContains('release'));
+
+        $store = new RedisIdempotencyStore($redis, $logger);
+
+        $store->release(self::KEY);
+    }
+
     /**
      * @param list<string> $methods
      * @return Redis&MockObject

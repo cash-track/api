@@ -196,4 +196,41 @@ class ChargeWalletServiceTest extends TestCase implements DatabaseTransaction
 
         $this->assertDatabaseHas('wallets', ['id' => $wallet->id, 'total_amount' => 85.0]);
     }
+
+    /**
+     * move() takes whatever the caller collected, so a non-Charge entry must be skipped rather
+     * than counted against either balance.
+     */
+    public function testMoveSkipsEntriesThatAreNotCharges(): void
+    {
+        $wallet = $this->makeWallet(50.0);
+        $targetWallet = $this->makeWallet(10.0);
+
+        $charge = $this->makeCharge(Charge::TYPE_INCOME, 5.0, $wallet);
+        $this->chargeFactory->create($charge);
+
+        $this->service->move($wallet, $targetWallet, ['not-a-charge', $charge, null]);
+
+        $this->assertEquals(45.0, $wallet->totalAmount);
+        $this->assertEquals(15.0, $targetWallet->totalAmount);
+        $this->assertDatabaseHas('wallets', ['id' => $wallet->id, 'total_amount' => 45.0]);
+        $this->assertDatabaseHas('wallets', ['id' => $targetWallet->id, 'total_amount' => 15.0]);
+    }
+
+    /**
+     * A zero delta skips the UPDATE and the re-read that follows it, so the entity keeps the
+     * value it already had.
+     */
+    public function testZeroAmountChargeLeavesTheBalanceUntouched(): void
+    {
+        $wallet = $this->makeWallet(100.0);
+
+        $charge = $this->makeCharge(Charge::TYPE_EXPENSE, 0.0, $wallet);
+
+        $this->service->create($wallet, $charge);
+
+        $this->assertEquals(100.0, $wallet->totalAmount);
+        $this->assertDatabaseHas('wallets', ['id' => $wallet->id, 'total_amount' => 100.0]);
+        $this->assertDatabaseHas('charges', ['id' => $charge->id, 'amount' => 0.0]);
+    }
 }
