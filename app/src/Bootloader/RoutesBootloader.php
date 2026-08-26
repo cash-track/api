@@ -6,6 +6,7 @@ namespace App\Bootloader;
 
 use App\Auth\AuthMiddleware;
 use App\Middleware\ApiVersionMiddleware;
+use App\Middleware\IdempotencyKeyMiddleware;
 use App\Middleware\InternalHeadersMiddleware;
 use App\Middleware\LocaleSelectorMiddleware;
 use App\Middleware\RateLimitMiddleware;
@@ -13,6 +14,8 @@ use App\Middleware\TraceContextMiddleware;
 use App\Middleware\TraceIdMiddleware;
 use App\Middleware\UserLocaleSelectorMiddleware;
 use App\Request\JsonErrorsRenderer;
+use App\Service\Idempotency\IdempotencyStoreInterface;
+use App\Service\Idempotency\RedisIdempotencyStore;
 use App\Service\RateLimit\RateLimitInterface;
 use App\Service\RateLimit\RedisRateLimit;
 use Spiral\Auth\Middleware\AuthMiddleware as InitAuthMiddleware;
@@ -34,6 +37,7 @@ final class RoutesBootloader extends BaseRoutesBootloader
 
     protected const array BINDINGS = [
         RateLimitInterface::class => RedisRateLimit::class,
+        IdempotencyStoreInterface::class => RedisIdempotencyStore::class,
     ];
 
     protected const array DEPENDENCIES = [
@@ -62,12 +66,18 @@ final class RoutesBootloader extends BaseRoutesBootloader
     protected function middlewareGroups(): array
     {
         return [
+            // After AuthMiddleware (the user-id scope it reads is set there), before
+            // RateLimitMiddleware so a replay or conflict doesn't consume rate limit budget.
             'auth' => [
                 AuthMiddleware::class,
+                IdempotencyKeyMiddleware::class,
                 RateLimitMiddleware::class,
                 UserLocaleSelectorMiddleware::class,
             ],
+            // Unauthenticated routes, so keys are IP-scoped. Still needed: password/forgot and
+            // email/confirmation/resend amplify emails on retry.
             'web' => [
+                IdempotencyKeyMiddleware::class,
                 RateLimitMiddleware::class,
             ],
         ];

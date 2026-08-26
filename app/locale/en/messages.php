@@ -21,6 +21,9 @@ return [
     'error_auth_passkey_invalid_response'   => 'Authentication response is not valid. Please try again.',
     'error_auth_passkey_unregistered'       => 'Provided passkey is not registered. Please use passkey added before.',
     'error_auth_passkey_unavailable'        => 'Passkey sign-in is temporarily unavailable. Please try again shortly.',
+    'error_idempotency_key_invalid'         => 'Idempotency-Key header must be a canonical lowercase UUIDv4.',
+    'error_idempotency_key_in_flight'       => 'The original request with this Idempotency-Key is still processing. Please retry shortly.',
+    'error_idempotency_key_mismatch'        => 'This Idempotency-Key was already used with a different request body.',
 
     'email_confirmation_confirm_failure' => 'Unable to confirm your email.',
     'email_confirmation_ok'              => 'Your email has been confirmed.',
