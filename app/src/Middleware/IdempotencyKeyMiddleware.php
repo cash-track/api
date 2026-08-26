@@ -231,7 +231,7 @@ final class IdempotencyKeyMiddleware implements MiddlewareInterface
             'idempotency:%s:%s:%s:%s',
             $scope,
             $request->getMethod(),
-            $request->getUri()->getPath(),
+            $request->getUri()->getPath() . '?' . $request->getUri()->getQuery(),
             $key,
         );
     }
@@ -240,7 +240,10 @@ final class IdempotencyKeyMiddleware implements MiddlewareInterface
     {
         return hash(
             'sha256',
-            $request->getMethod() . "\n" . $request->getUri()->getPath() . "\n" . (string) $request->getBody(),
+            $request->getMethod() . "\n"
+                . $request->getUri()->getPath() . "\n"
+                . $request->getUri()->getQuery() . "\n"
+                . (string) $request->getBody(),
         );
     }
 

@@ -143,7 +143,7 @@ class IdempotencyKeyMiddlewareTest extends TestCase
         $store->expects($this->once())
             ->method('complete')
             ->with(
-                $this->stringContains('idempotency:42:POST:' . self::PATH . ':' . self::VALID_KEY),
+                $this->stringContains('idempotency:42:POST:' . self::PATH . '?:' . self::VALID_KEY),
                 $this->callback(fn(IdempotencyRecord $record): bool => $record->status === 201 && $record->isComplete()),
             );
         $store->expects($this->never())->method('release');
@@ -159,6 +159,59 @@ class IdempotencyKeyMiddlewareTest extends TestCase
 
         $this->assertSame($handlerResponse, $response);
         $this->assertFalse($response->hasHeader(IdempotencyKeyMiddleware::REPLAYED_HEADER));
+    }
+
+    /**
+     * The Redis key must fold the query string in, not just the path, or two mutating requests
+     * differing only in query string would share a claim.
+     */
+    public function testRedisKeyIncludesTheQueryString(): void
+    {
+        $handlerResponse = new JsonResponse(['data' => ['id' => 1]], 201);
+
+        $store = $this->createMock(IdempotencyStoreInterface::class);
+        $store->expects($this->once())
+            ->method('claim')
+            ->with($this->stringContains('idempotency:42:POST:' . self::PATH . '?foo=bar:' . self::VALID_KEY), $this->anything())
+            ->willReturn(IdempotencyClaim::claimed());
+
+        $request = $this->authenticatedRequest('POST', self::VALID_KEY, '{"name":"a"}', 'foo=bar');
+
+        $handler = $this->getMockBuilder(RequestHandlerInterface::class)->getMock();
+        $handler->expects($this->once())->method('handle')->willReturn($handlerResponse);
+
+        $middleware = new IdempotencyKeyMiddleware($store);
+
+        $middleware->process($request, $handler);
+    }
+
+    /**
+     * Two requests with the same key, method, path and body but a different query string must
+     * NOT be treated as the same request — the fingerprint has to disagree, not the Redis key.
+     */
+    public function testConflictWithSameKeyPathAndBodyButDifferentQueryStringReturns422NotAReplay(): void
+    {
+        $body = '{"name":"a"}';
+
+        // Fingerprint computed for the *original* request (query string "foo=bar"); the record
+        // simulates what claim() would return for the second request's Redis key collision.
+        $originalFingerprint = $this->fingerprint('POST', self::PATH, $body, 'foo=bar');
+        $record = IdempotencyRecord::completed($originalFingerprint, 200, '{}', []);
+
+        $store = $this->createMock(IdempotencyStoreInterface::class);
+        $store->expects($this->once())->method('claim')->willReturn(IdempotencyClaim::conflict($record));
+
+        // Same key/path/body, different query string ("foo=baz").
+        $request = $this->authenticatedRequest('POST', self::VALID_KEY, $body, 'foo=baz');
+
+        $handler = $this->getMockBuilder(RequestHandlerInterface::class)->getMock();
+        $handler->expects($this->never())->method('handle');
+
+        $middleware = new IdempotencyKeyMiddleware($store);
+
+        $response = $middleware->process($request, $handler);
+
+        $this->assertSame(422, $response->getStatusCode());
     }
 
     /**
@@ -206,7 +259,7 @@ class IdempotencyKeyMiddlewareTest extends TestCase
         $store->expects($this->never())->method('complete');
         $store->expects($this->once())
             ->method('release')
-            ->with($this->stringContains('idempotency:42:POST:' . self::PATH . ':' . self::VALID_KEY));
+            ->with($this->stringContains('idempotency:42:POST:' . self::PATH . '?:' . self::VALID_KEY));
 
         $request = $this->authenticatedRequest('POST', self::VALID_KEY, '{}');
 
@@ -228,7 +281,7 @@ class IdempotencyKeyMiddlewareTest extends TestCase
         $store->expects($this->never())->method('complete');
         $store->expects($this->once())
             ->method('release')
-            ->with($this->stringContains('idempotency:42:POST:' . self::PATH . ':' . self::VALID_KEY));
+            ->with($this->stringContains('idempotency:42:POST:' . self::PATH . '?:' . self::VALID_KEY));
 
         $request = $this->authenticatedRequest('POST', self::VALID_KEY, '{}');
 
@@ -374,7 +427,7 @@ class IdempotencyKeyMiddlewareTest extends TestCase
         $store->expects($this->never())->method('complete');
         $store->expects($this->once())
             ->method('release')
-            ->with($this->stringContains('idempotency:42:POST:' . self::PATH . ':' . self::VALID_KEY));
+            ->with($this->stringContains('idempotency:42:POST:' . self::PATH . '?:' . self::VALID_KEY));
 
         $request = $this->authenticatedRequest('POST', self::VALID_KEY, '{}');
 
@@ -414,10 +467,15 @@ class IdempotencyKeyMiddlewareTest extends TestCase
      * An authenticated (X-Internal-UserId: 42) request, so buildKey()/fingerprint() run without
      * falling back to ClientIpResolver.
      */
-    private function authenticatedRequest(string $method, string $idempotencyKey, string $body): ServerRequestInterface
-    {
+    private function authenticatedRequest(
+        string $method,
+        string $idempotencyKey,
+        string $body,
+        string $query = '',
+    ): ServerRequestInterface {
         $uri = $this->getMockBuilder(UriInterface::class)->getMock();
         $uri->method('getPath')->willReturn(self::PATH);
+        $uri->method('getQuery')->willReturn($query);
 
         $stream = $this->getMockBuilder(StreamInterface::class)->getMock();
         $stream->method('__toString')->willReturn($body);
@@ -435,8 +493,8 @@ class IdempotencyKeyMiddlewareTest extends TestCase
     }
 
     /** Mirrors IdempotencyKeyMiddleware::fingerprint() — there is no public accessor for it. */
-    private function fingerprint(string $method, string $path, string $body): string
+    private function fingerprint(string $method, string $path, string $body, string $query = ''): string
     {
-        return hash('sha256', $method . "\n" . $path . "\n" . $body);
+        return hash('sha256', $method . "\n" . $path . "\n" . $query . "\n" . $body);
     }
 }

@@ -170,6 +170,70 @@ class IdempotencyKeyMiddlewareHttpTest extends TestCase implements DatabaseTrans
     }
 
     /**
+     * Same key, method, path and body, but a different query string. Must be treated as two
+     * genuinely distinct requests, not a replay of one another.
+     */
+    #[Env('REDIS_CONNECTION', 'localhost:6379')]
+    public function testSameKeyWithDifferingQueryStringExecutesBothRequestsInsteadOfReplaying(): void
+    {
+        $auth = $this->makeAuth($user = $this->userFactory->create());
+        $wallet = $this->walletFactory->forUser($user)->create();
+
+        $key = Uuid::uuid4()->toString();
+        $payload = ['type' => '-', 'amount' => 1, 'title' => 't', 'description' => ''];
+
+        $first = $this->withAuth($auth)->post(
+            "/v1/wallets/{$wallet->id}/charges?source=web",
+            $payload,
+            ['Idempotency-Key' => $key],
+        );
+        $first->assertOk();
+        $first->assertHeaderMissing('Idempotency-Replayed');
+
+        $second = $this->withAuth($auth)->post(
+            "/v1/wallets/{$wallet->id}/charges?source=mobile",
+            $payload,
+            ['Idempotency-Key' => $key],
+        );
+        $second->assertOk();
+        $second->assertHeaderMissing('Idempotency-Replayed');
+
+        // Two genuinely distinct requests (query string differs) both really ran.
+        $this->assertDatabaseCount(2, 'charges', ['wallet_id' => $wallet->id]);
+    }
+
+    /**
+     * Same key, method, path, body AND query string — the ordinary replay case, just with a
+     * non-empty query string present, proving it doesn't break the identical-repeat path.
+     */
+    #[Env('REDIS_CONNECTION', 'localhost:6379')]
+    public function testSameKeyWithIdenticalQueryStringStillReplays(): void
+    {
+        $auth = $this->makeAuth($user = $this->userFactory->create());
+        $wallet = $this->walletFactory->forUser($user)->create();
+
+        $key = Uuid::uuid4()->toString();
+        $payload = ['type' => '-', 'amount' => 1, 'title' => 't', 'description' => ''];
+
+        $first = $this->withAuth($auth)->post(
+            "/v1/wallets/{$wallet->id}/charges?source=web",
+            $payload,
+            ['Idempotency-Key' => $key],
+        );
+        $first->assertOk();
+
+        $second = $this->withAuth($auth)->post(
+            "/v1/wallets/{$wallet->id}/charges?source=web",
+            $payload,
+            ['Idempotency-Key' => $key],
+        );
+        $second->assertOk();
+        $second->assertHasHeader('Idempotency-Replayed', 'true');
+
+        $this->assertDatabaseCount(1, 'charges', ['wallet_id' => $wallet->id]);
+    }
+
+    /**
      * With the store unreachable, a keyed mutating request still succeeds and is simply not
      * deduplicated — the fail-open contract.
      */
