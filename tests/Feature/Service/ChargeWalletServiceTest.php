@@ -5,14 +5,58 @@ declare(strict_types=1);
 namespace Tests\Feature\Service;
 
 use App\Database\Charge;
+use App\Database\Wallet;
 use App\Service\ChargeWalletService;
-use Cycle\ORM\EntityManagerInterface;
+use Tests\DatabaseTransaction;
 use Tests\Factories\ChargeFactory;
+use Tests\Factories\UserFactory;
 use Tests\Factories\WalletFactory;
 use Tests\TestCase;
 
-class ChargeWalletServiceTest extends TestCase
+/**
+ * The service mutates wallets.total_amount with raw atomic SQL, so every case here runs against
+ * the real database rather than a mocked EntityManagerInterface.
+ */
+class ChargeWalletServiceTest extends TestCase implements DatabaseTransaction
 {
+    protected UserFactory $userFactory;
+
+    protected WalletFactory $walletFactory;
+
+    protected ChargeFactory $chargeFactory;
+
+    protected ChargeWalletService $service;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->userFactory = $this->getContainer()->get(UserFactory::class);
+        $this->walletFactory = $this->getContainer()->get(WalletFactory::class);
+        $this->chargeFactory = $this->getContainer()->get(ChargeFactory::class);
+        $this->service = $this->getContainer()->get(ChargeWalletService::class);
+    }
+
+    protected function makeWallet(float $totalAmount): Wallet
+    {
+        $wallet = WalletFactory::make();
+        $wallet->totalAmount = $totalAmount;
+
+        return $this->walletFactory->create($wallet);
+    }
+
+    protected function makeCharge(string $type, float $amount, Wallet $wallet): Charge
+    {
+        $user = $this->userFactory->create();
+
+        $charge = ChargeFactory::type(null, $type);
+        $charge->amount = $amount;
+        $charge->setWallet($wallet);
+        $charge->setUser($user);
+
+        return $charge;
+    }
+
     public function createDataProvider(): array
     {
         return [
@@ -28,29 +72,17 @@ class ChargeWalletServiceTest extends TestCase
 
     /**
      * @dataProvider createDataProvider
-     * @param string $type
-     * @param float $totalAmount
-     * @param float $chargeAmount
-     * @param float $expectedTotal
-     * @return void
-     * @throws \Throwable
      */
     public function testCreate(string $type, float $totalAmount, float $chargeAmount, float $expectedTotal): void
     {
-        $service = new ChargeWalletService(
-            $this->getMockBuilder(EntityManagerInterface::class)->getMock()
-        );
+        $wallet = $this->makeWallet($totalAmount);
+        $charge = $this->makeCharge($type, $chargeAmount, $wallet);
 
-        $wallet = WalletFactory::make();
-        $wallet->totalAmount = $totalAmount;
-
-        $charge = ChargeFactory::income();
-        $charge->type = $type;
-        $charge->amount = $chargeAmount;
-
-        $service->create($wallet, $charge);
+        $this->service->create($wallet, $charge);
 
         $this->assertEquals($expectedTotal, $wallet->totalAmount);
+        $this->assertDatabaseHas('wallets', ['id' => $wallet->id, 'total_amount' => $expectedTotal]);
+        $this->assertDatabaseHas('charges', ['id' => $charge->id, 'wallet_id' => $wallet->id]);
     }
 
     public function deleteDataProvider(): array
@@ -68,81 +100,100 @@ class ChargeWalletServiceTest extends TestCase
 
     /**
      * @dataProvider deleteDataProvider
-     * @param string $type
-     * @param float $totalAmount
-     * @param float $chargeAmount
-     * @param float $expectedTotal
-     * @return void
-     * @throws \Throwable
      */
     public function testDelete(string $type, float $totalAmount, float $chargeAmount, float $expectedTotal): void
     {
-        $service = new ChargeWalletService(
-            $this->getMockBuilder(EntityManagerInterface::class)->getMock()
-        );
+        $wallet = $this->makeWallet($totalAmount);
+        $charge = $this->makeCharge($type, $chargeAmount, $wallet);
+        $this->chargeFactory->create($charge);
 
-        $wallet = WalletFactory::make();
-        $wallet->totalAmount = $totalAmount;
-
-        $charge = ChargeFactory::income();
-        $charge->type = $type;
-        $charge->amount = $chargeAmount;
-
-        $service->delete($wallet, $charge);
+        $this->service->delete($wallet, $charge);
 
         $this->assertEquals($expectedTotal, $wallet->totalAmount);
+        $this->assertDatabaseHas('wallets', ['id' => $wallet->id, 'total_amount' => $expectedTotal]);
+        $this->assertDatabaseMissing('charges', ['id' => $charge->id]);
+    }
+
+    public function testUpdateAdjustsBalanceByTheDifferenceBetweenOldAndNewCharge(): void
+    {
+        $wallet = $this->makeWallet(100.0);
+
+        $charge = $this->makeCharge(Charge::TYPE_EXPENSE, 10.0, $wallet);
+        $this->service->create($wallet, $charge);
+
+        // 100 - 10 = 90 after the original charge.
+        $this->assertDatabaseHas('wallets', ['id' => $wallet->id, 'total_amount' => 90.0]);
+
+        // Mirrors ChargesController::update(): clone for the "old" snapshot, mutate the
+        // heap-tracked original as the "new" one. Persisting the clone would make Cycle INSERT
+        // an already-existing primary key.
+        $oldCharge = clone $charge;
+        $charge->amount = 25.0;
+
+        $this->service->update($wallet, $oldCharge, $charge);
+
+        // Rollback the old expense (+10) then apply the new one (-25): 90 + 10 - 25 = 75.
+        $this->assertEquals(75.0, $wallet->totalAmount);
+        $this->assertDatabaseHas('wallets', ['id' => $wallet->id, 'total_amount' => 75.0]);
     }
 
     public function moveDataProvider(): array
     {
-        $charge1 = ChargeFactory::income();
-        $charge1->amount = 1.99;
-
-        $charge2 = ChargeFactory::expense();
-        $charge2->amount = 1.99;
-
-        $charge3 = ChargeFactory::expense();
-        $charge3->amount = 1.01;
-
         return [
-            [[3.00, 1.01], [1.01, 3.00], [$charge1, null]],
-            [[3.00, 4.99], [2.01, 0.02], [$charge2, 1]],
-            [[3.01, 2.03], [2.02, 3.00], [$charge1, $charge3]],
+            [[3.00, 1.01], [1.01, 3.00], [Charge::TYPE_INCOME, 1.99]],
         ];
     }
 
     /**
      * @dataProvider moveDataProvider
-     * @param array $walletAmounts
-     * @param array $targetWalletAmounts
-     * @param array $charges
-     * @return void
      */
-    public function testMove(array $walletAmounts, array $targetWalletAmounts, array $charges)
+    public function testMove(array $walletAmounts, array $targetWalletAmounts, array $chargeSpec): void
     {
-        $service = new ChargeWalletService(
-            $this->getMockBuilder(EntityManagerInterface::class)->getMock()
-        );
+        $wallet = $this->makeWallet($walletAmounts[0]);
+        $targetWallet = $this->makeWallet($targetWalletAmounts[0]);
 
-        $wallet = WalletFactory::make();
-        $wallet->totalAmount = $walletAmounts[0];
+        $charge = $this->makeCharge($chargeSpec[0], $chargeSpec[1], $wallet);
+        $this->chargeFactory->create($charge);
 
-        $targetWallet = WalletFactory::make();
-        $targetWallet->totalAmount = $targetWalletAmounts[0];
-
-        $charge = ChargeFactory::income();
-        $charge->type = Charge::TYPE_INCOME;
-        $charge->amount = 1.99;
-
-        $service->move($wallet, $targetWallet, $charges);
+        $this->service->move($wallet, $targetWallet, [$charge]);
 
         $this->assertEquals($walletAmounts[1], $wallet->totalAmount);
         $this->assertEquals($targetWalletAmounts[1], $targetWallet->totalAmount);
+        $this->assertEquals($targetWallet->id, $charge->walletId);
 
-        foreach ($charges as $charge) {
-            if ($charge instanceof Charge) {
-                $this->assertEquals($charge->walletId, $targetWallet->id);
-            }
-        }
+        $this->assertDatabaseHas('wallets', ['id' => $wallet->id, 'total_amount' => $walletAmounts[1]]);
+        $this->assertDatabaseHas('wallets', ['id' => $targetWallet->id, 'total_amount' => $targetWalletAmounts[1]]);
+    }
+
+    /**
+     * Two concurrent requests, simulated by cloning the wallet entity so both PHP objects hold
+     * the pre-charge balance. A read-modify-write would produce 95 for the second charge,
+     * clobbering the first; the atomic UPDATE reads the current DB value, so they net to 85.
+     */
+    public function testConcurrentChargesOnStaleWalletCopiesDoNotLoseAnUpdate(): void
+    {
+        $wallet = $this->makeWallet(100.0);
+
+        // Two PHP objects for the same row. Both charges relate to the heap-tracked $wallet:
+        // Cycle's identity map is keyed by object identity, so attaching the untracked clone
+        // would INSERT an existing row. Only the balance argument differs between "requests".
+        $requestA = $wallet;
+        $requestB = clone $wallet;
+
+        $chargeA = $this->makeCharge(Charge::TYPE_EXPENSE, 10.0, $wallet);
+        $chargeB = $this->makeCharge(Charge::TYPE_EXPENSE, 5.0, $wallet);
+
+        $this->service->create($requestA, $chargeA);
+
+        // requestA's own response correctly reflects the balance right after its own commit.
+        $this->assertEquals(90.0, $requestA->totalAmount);
+
+        $this->service->create($requestB, $chargeB);
+
+        // requestB started from a stale in-memory 100, but the atomic UPDATE reads the current
+        // DB value — 85, not the 95 a read-modify-write would have produced.
+        $this->assertEquals(85.0, $requestB->totalAmount);
+
+        $this->assertDatabaseHas('wallets', ['id' => $wallet->id, 'total_amount' => 85.0]);
     }
 }

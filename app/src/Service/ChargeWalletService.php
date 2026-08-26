@@ -6,64 +6,72 @@ namespace App\Service;
 
 use App\Database\Charge;
 use App\Database\Wallet;
+use Cycle\Database\DatabaseInterface;
+use Cycle\Database\Injection\Expression;
 use Cycle\ORM\EntityManagerInterface;
 
 class ChargeWalletService
 {
     const int PRECISION = 2;
 
-    public function __construct(private readonly EntityManagerInterface $tr)
-    {
+    public function __construct(
+        private readonly EntityManagerInterface $tr,
+        private readonly DatabaseInterface $database,
+    ) {
     }
 
     public function create(Wallet $wallet, Charge $charge): Charge
     {
-        $wallet = $this->apply($wallet, $charge);
+        $this->database->transaction(function () use ($wallet, $charge): void {
+            $this->adjustBalance($wallet, $this->delta($charge));
 
-        $this->tr->persist($charge);
-        $this->tr->persist($wallet);
-        $this->tr->run();
+            $this->tr->persist($charge);
+            $this->tr->run();
+        });
 
         return $charge;
     }
 
     public function update(Wallet $wallet, Charge $oldCharge, Charge $newCharge): Charge
     {
-        $wallet = $this->rollback($wallet, $oldCharge);
-        $wallet = $this->apply($wallet, $newCharge);
+        $this->database->transaction(function () use ($wallet, $oldCharge, $newCharge): void {
+            $this->adjustBalance($wallet, $this->delta($newCharge) - $this->delta($oldCharge));
 
-        $this->tr->persist($newCharge);
-        $this->tr->persist($wallet);
-        $this->tr->run();
+            $this->tr->persist($newCharge);
+            $this->tr->run();
+        });
 
         return $newCharge;
     }
 
     public function delete(Wallet $wallet, Charge $charge): void
     {
-        $wallet = $this->rollback($wallet, $charge);
+        $this->database->transaction(function () use ($wallet, $charge): void {
+            $this->adjustBalance($wallet, -$this->delta($charge));
 
-        $this->tr->delete($charge);
-        $this->tr->persist($wallet);
-        $this->tr->run();
+            $this->tr->delete($charge);
+            $this->tr->run();
+        });
     }
 
     public function move(Wallet $wallet, Wallet $targetWallet, array $charges): void
     {
-        foreach ($charges as $charge) {
-            if (! $charge instanceof Charge) {
-                continue;
+        $this->database->transaction(function () use ($wallet, $targetWallet, $charges): void {
+            foreach ($charges as $charge) {
+                if (! $charge instanceof Charge) {
+                    continue;
+                }
+
+                $delta = $this->delta($charge);
+
+                $this->adjustBalance($wallet, -$delta);
+                $this->adjustBalance($targetWallet, $delta);
+                $charge->setWallet($targetWallet);
+                $this->tr->persist($charge);
             }
 
-            $this->rollback($wallet, $charge);
-            $this->apply($targetWallet, $charge);
-            $charge->setWallet($targetWallet);
-            $this->tr->persist($charge);
-        }
-
-        $this->tr->persist($wallet);
-        $this->tr->persist($targetWallet);
-        $this->tr->run();
+            $this->tr->run();
+        });
     }
 
     public function totalByIncomeAndExpense(float $income, float $expense): float
@@ -71,36 +79,45 @@ class ChargeWalletService
         return static::safeFloatNumber($income - $expense);
     }
 
-    protected function apply(Wallet $wallet, Charge $charge): Wallet
+    /**
+     * Signed effect a charge has on its wallet's balance: positive for income, negative for
+     * expense.
+     */
+    private function delta(Charge $charge): float
     {
-        switch ($charge->type) {
-            case Charge::TYPE_EXPENSE:
-                $wallet->totalAmount = $wallet->totalAmount - $charge->amount;
-                break;
-            case Charge::TYPE_INCOME:
-                $wallet->totalAmount = $wallet->totalAmount + $charge->amount;
-                break;
-        }
-
-        $wallet->totalAmount = static::safeFloatNumber($wallet->totalAmount);
-
-        return $wallet;
+        return match ($charge->type) {
+            Charge::TYPE_EXPENSE => -$charge->amount,
+            Charge::TYPE_INCOME => $charge->amount,
+            default => 0.0,
+        };
     }
 
-    protected function rollback(Wallet $wallet, Charge $charge): Wallet
+    /**
+     * Atomic `total_amount = total_amount + :delta` UPDATE instead of a PHP read-modify-write,
+     * so concurrent charges on the same wallet can't lose an update. Cycle always persists an
+     * entity's tracked value verbatim, so the balance is written by raw query and never
+     * persist()ed; the entity is then refreshed from the row this UPDATE produced.
+     */
+    private function adjustBalance(Wallet $wallet, float $delta): void
     {
-        switch ($charge->type) {
-            case Charge::TYPE_EXPENSE:
-                $wallet->totalAmount = $wallet->totalAmount + $charge->amount;
-                break;
-            case Charge::TYPE_INCOME:
-                $wallet->totalAmount = $wallet->totalAmount - $charge->amount;
-                break;
+        if ($delta === 0.0) {
+            return;
         }
 
-        $wallet->totalAmount = static::safeFloatNumber($wallet->totalAmount);
+        $this->database->update('wallets')
+            ->set('total_amount', new Expression('total_amount + ?', $delta))
+            ->where('id', $wallet->id)
+            ->run();
 
-        return $wallet;
+        $row = $this->database->select('total_amount')
+            ->from('wallets')
+            ->where('id', $wallet->id)
+            ->run()
+            ->fetch();
+
+        if (is_array($row) && isset($row['total_amount'])) {
+            $wallet->totalAmount = static::safeFloatNumber((float) $row['total_amount']);
+        }
     }
 
     public function totalSafeCheck(Wallet $wallet, float $income, float $expense): void
