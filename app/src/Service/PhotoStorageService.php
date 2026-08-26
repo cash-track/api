@@ -73,11 +73,20 @@ class PhotoStorageService
             return;
         }
 
-        /** @psalm-suppress UndefinedMagicMethod */
-        $this->storage->deleteObject([
-            'Bucket' => $this->config->getBucket(),
-            'Key' => self::PHOTO_PATH . $fileName
-        ]);
+        try {
+            /** @psalm-suppress UndefinedMagicMethod */
+            $this->storage->deleteObject([
+                'Bucket' => $this->config->getBucket(),
+                'Key' => self::PHOTO_PATH . $fileName
+            ]);
+        } catch (\Throwable $exception) {
+            // An orphaned S3 object is a far better outcome than a 500 on a request whose real
+            // work (persisting the new filename) already committed.
+            $this->logger->warning('Unable to remove profile photo', [
+                'filename' => $fileName,
+                'error' => $exception->getMessage(),
+            ]);
+        }
     }
 
     public function queueDownloadProfilePhoto(int $userId, string $url, ?string $ext = null, ?string $mime = null): void

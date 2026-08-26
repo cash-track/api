@@ -34,16 +34,14 @@ final class PhotoController extends AuthAwareController
     {
         $file = $request->getPhoto();
 
+        $oldFileName = $this->user->photo;
+
         $fileName = $this->photoStorageService->storeUploadedProfilePhoto($file);
 
         if ($fileName === null) {
             return $this->response->json([
                 'message' => $this->say('profile_photo_update_empty'),
             ], 500);
-        }
-
-        if ($this->user->photo !== null) {
-            $this->photoStorageService->removeProfilePhoto($this->user->photo);
         }
 
         $this->user->photo = $fileName;
@@ -61,6 +59,10 @@ final class PhotoController extends AuthAwareController
                 'message' => $this->say('profile_photo_update_exception'),
                 'error'   => $exception->getMessage(),
             ], 500);
+        }
+
+        if ($oldFileName !== null) {
+            $this->photoStorageService->removeProfilePhoto($oldFileName);
         }
 
         return $this->response->json([

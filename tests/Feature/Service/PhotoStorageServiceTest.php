@@ -181,6 +181,49 @@ class PhotoStorageServiceTest extends TestCase
         $service->removeProfilePhoto('');
     }
 
+    /**
+     * An S3 error on delete (missing key, transient failure) must not propagate: an orphaned
+     * object is a far better outcome than a 500 on a request whose real work already committed
+     * (see issue #224, item 1).
+     */
+    public function testRemoveProfilePhotoSwallowsS3FailureAndLogsAWarning(): void
+    {
+        $fileName = md5((string) time()) . '.jpg';
+        $bucket = $this->getContainer()->get(EnvironmentInterface::class)->get('CDN_BUCKET');
+        $s3Exception = new \RuntimeException('S3 unavailable');
+
+        $s3Client = $this->getMockBuilder(S3Client::class)
+                         ->disableOriginalConstructor()
+                         ->addMethods(['deleteObject'])
+                         ->getMock();
+
+        $s3Client->expects($this->once())
+                 ->method('deleteObject')
+                 ->with([
+                     'Bucket' => $bucket,
+                     'Key' => PhotoStorageService::PHOTO_PATH . $fileName,
+                 ])
+                 ->willThrowException($s3Exception);
+
+        $queueMock = $this->getMockBuilder(QueueInterface::class)->getMock();
+
+        $loggerMock = $this->getMockBuilder(LoggerInterface::class)->getMock();
+        $loggerMock->expects($this->once())
+                   ->method('warning')
+                   ->with(
+                       $this->isType('string'),
+                       $this->callback(static function (array $context) use ($fileName, $s3Exception): bool {
+                           return ($context['filename'] ?? null) === $fileName
+                               && ($context['error'] ?? null) === $s3Exception->getMessage();
+                       }),
+                   );
+
+        $service = new PhotoStorageService($loggerMock, $s3Client, $this->getContainer()->get(CdnConfig::class), $queueMock);
+
+        // Must not throw.
+        $service->removeProfilePhoto($fileName);
+    }
+
     public function testGetProfilePhotoPublicUrl(): void
     {
         $fileName = md5((string) time()) . '.jpg';

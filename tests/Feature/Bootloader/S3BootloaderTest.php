@@ -7,7 +7,6 @@ namespace Tests\Feature\Bootloader;
 use App\Bootloader\S3Bootloader;
 use App\Config\S3Config;
 use App\Service\Idempotency\RedisIdempotencyStore;
-use Aws\AwsClient;
 use Aws\S3\S3ClientInterface;
 use Tests\Fixtures;
 use Tests\TestCase;
@@ -36,11 +35,12 @@ class S3BootloaderTest extends TestCase
 
         $client = $this->getContainer()->get(S3ClientInterface::class);
 
-        // getConfig() only surfaces client context params, not raw request options, so read the
-        // private AwsClient::$defaultRequestOptions instead.
-        $property = new \ReflectionProperty(AwsClient::class, 'defaultRequestOptions');
-        $property->setAccessible(true);
-        $httpOptions = $property->getValue($client);
+        // getConfig() only surfaces client context params, not raw request options.
+        // AwsClient::getCommand() merges the client's default request options into the built
+        // command's '@http' key, so that's a public route to the same values without reflecting
+        // into the private AwsClient::$defaultRequestOptions.
+        $command = $client->getCommand('PutObject', ['Bucket' => Fixtures::string(), 'Key' => Fixtures::string()]);
+        $httpOptions = $command['@http'];
 
         $this->assertIsArray($httpOptions);
         $this->assertArrayHasKey('timeout', $httpOptions);

@@ -103,9 +103,14 @@ class PhotoControllerTest extends TestCase implements DatabaseTransaction
         $this->assertArrayHasKey('message', $body);
     }
 
+    /**
+     * If store() throws, the new filename was never persisted, so the old S3 object must NOT be
+     * deleted — a broken avatar with no recovery path (see issue #224, item 1).
+     */
     public function testUpdatePhotoUpdateUserFails(): void
     {
         $auth = $this->makeAuth($user = $this->userFactory->create());
+        $oldPhoto = $user->photo;
 
         $fileName = Fixtures::fileName();
         $fileMock = $this->getMockUploadedFile();
@@ -117,9 +122,7 @@ class PhotoControllerTest extends TestCase implements DatabaseTransaction
                     ->with($fileMock)
                     ->willReturn($fileName);
 
-        $storageMock->expects($this->once())
-                    ->method('removeProfilePhoto')
-                    ->with($user->photo);
+        $storageMock->expects($this->never())->method('removeProfilePhoto');
 
         $userServiceMock = $this->getMockBuilder(UserService::class)
                                 ->disableOriginalConstructor()
@@ -142,6 +145,59 @@ class PhotoControllerTest extends TestCase implements DatabaseTransaction
 
         $this->assertArrayHasKey('message', $body);
         $this->assertArrayHasKey('error', $body);
+
+        $this->assertDatabaseHas('users', [
+            'photo' => $oldPhoto,
+        ]);
+    }
+
+    /**
+     * Delete-after-commit: the old S3 object must only be removed once the new filename is
+     * durably persisted, never before (see issue #224, item 1).
+     */
+    public function testUpdatePhotoDeletesOldPhotoOnlyAfterNewFilenameIsPersisted(): void
+    {
+        $auth = $this->makeAuth($user = $this->userFactory->create());
+        $oldPhoto = $user->photo;
+
+        $fileName = Fixtures::fileName();
+        $url = Fixtures::url($fileName);
+        $fileMock = $this->getMockUploadedFile();
+        $requestMock = $this->getMockUpdatePhotoRequest($fileMock);
+        $storageMock = $this->getMockStorageService();
+
+        $order = [];
+
+        $storageMock->method('storeUploadedProfilePhoto')->willReturn($fileName);
+        $storageMock->method('getProfilePhotoPublicUrl')->willReturn($url);
+        $storageMock->expects($this->once())
+                    ->method('removeProfilePhoto')
+                    ->with($oldPhoto)
+                    ->willReturnCallback(function () use (&$order): void {
+                        $order[] = 'delete';
+                    });
+
+        $userServiceMock = $this->getMockBuilder(UserService::class)
+                                ->disableOriginalConstructor()
+                                ->onlyMethods(['store'])
+                                ->getMock();
+        $userServiceMock->method('store')->willReturnCallback(function ($user) use (&$order) {
+            $order[] = 'store';
+
+            return $user;
+        });
+
+        $this->getContainer()->bind(UpdatePhotoRequest::class, fn () => $requestMock);
+        $this->getContainer()->bind(PhotoStorageService::class, fn () => $storageMock);
+        $this->getContainer()->bind(UserService::class, fn () => $userServiceMock);
+
+        $response = $this->withAuth($auth)->put('/v1/profile/photo');
+
+        $response->assertOk();
+
+        // AuthMiddleware::trackActiveAt() also calls store() before the controller runs, so two
+        // 'store' entries land first — 'delete' must be last regardless.
+        $this->assertSame(['store', 'store', 'delete'], $order);
     }
 
     private function getMockUploadedFile(): UploadedFileInterface
