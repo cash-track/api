@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Middleware;
 
 use App\Config\GatewayConfig;
+use App\Http\ClientIpResolver;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
@@ -58,7 +59,7 @@ final class InternalHeadersMiddleware implements MiddlewareInterface
     {
         $remoteAddr = (string) ($request->getServerParams()['REMOTE_ADDR'] ?? '');
 
-        foreach (RateLimitMiddleware::IP_HEADERS as $header) {
+        foreach (ClientIpResolver::IP_HEADERS as $header) {
             $request = $request->withHeader($header, $remoteAddr);
         }
 

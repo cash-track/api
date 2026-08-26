@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Tests\Feature\Middleware;
 
 use App\Middleware\InternalHeadersMiddleware;
-use App\Middleware\RateLimitMiddleware;
+use App\Http\ClientIpResolver;
 use Laminas\Diactoros\Response\JsonResponse;
 use Nyholm\Psr7\ServerRequest;
 use Psr\Http\Message\ResponseInterface;
@@ -76,7 +76,7 @@ class InternalHeadersMiddlewareTest extends TestCase
         $this->assertSame('', $downstream->getHeaderLine('X-Internal-UserId'));
         $this->assertSame('', $downstream->getHeaderLine('X-Internal-UserLocale'));
 
-        foreach (RateLimitMiddleware::IP_HEADERS as $header) {
+        foreach (ClientIpResolver::IP_HEADERS as $header) {
             $this->assertSame('203.0.113.9', $downstream->getHeaderLine($header), "Header {$header}");
         }
     }
@@ -93,7 +93,7 @@ class InternalHeadersMiddlewareTest extends TestCase
 
         $this->assertSame('', $downstream->getHeaderLine('X-Gateway-Secret'));
 
-        foreach (RateLimitMiddleware::IP_HEADERS as $header) {
+        foreach (ClientIpResolver::IP_HEADERS as $header) {
             $this->assertSame('203.0.113.9', $downstream->getHeaderLine($header), "Header {$header}");
         }
     }
