@@ -26,6 +26,26 @@ info:
     Standard errors return an `Error` object. Validation failures return a `ValidationError`
     object with per-field messages (HTTP 422).
 
+    ## Idempotency
+    Most state-changing endpoints (`POST`/`PUT`/`PATCH`/`DELETE`) accept an optional
+    `Idempotency-Key` request header — a client-generated UUIDv4. Retrying the exact same
+    request with the same key within 24 hours replays the original response instead of
+    re-executing it (`Idempotency-Replayed: true` is added to the replayed response). Reusing
+    the key with a different request body is rejected (`422`); a request still in flight under
+    the same key is rejected (`409`, retryable per `Retry-After`); a malformed key value is
+    rejected (`400`). See `IdempotencyKeyParam`, `IdempotencyKeyConflict`, and
+    `IdempotencyKeyMismatch` for the exact shapes. Omitting the header is always safe — the
+    request just runs normally, with no deduplication.
+
+    **Exception — credential-issuing endpoints never support idempotency**:
+    `POST /v1/auth/register`, `POST /v1/auth/login`, `POST /v1/auth/refresh`,
+    `POST /v1/auth/login/passkey`, and `POST /v1/auth/provider/google` do not accept
+    `Idempotency-Key` at all. Their 200 response body carries a live `accessToken` /
+    `refreshToken` pair, and caching that for 24 hours would persist a live credential;
+    `POST /v1/auth/refresh` additionally rotates the token pair on every call, so replaying a
+    cached response would hand back a token that may already be invalid. Sending the header to
+    one of these endpoints is simply ignored — it is neither validated nor rejected.
+
     ## Timestamps
     All timestamps in responses are **RFC 3339 / W3C** strings (e.g. `2024-01-15T10:30:00+00:00`).
 
@@ -146,8 +166,9 @@ paths:
               schema:
                 $ref: "#/components/schemas/AuthResponse"
         "422":
-          $ref: "#/components/responses/ValidationError"
-
+          $ref: "#/components/responses/ValidationFailed"
+        "400":
+          $ref: "#/components/responses/BadRequest"
   /v1/auth/register/check/nick-name:
     post:
       operationId: authCheckNickNameRegister
@@ -157,6 +178,8 @@ paths:
         registration form validation before submitting the full registration request.
       tags: [Auth]
       security: []
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKeyParam"
       requestBody:
         required: true
         content:
@@ -171,10 +194,16 @@ paths:
                   description: Nick-name to check
       responses:
         "200":
+          headers:
+            Idempotency-Replayed:
+              $ref: "#/components/headers/IdempotencyReplayed"
           description: Nick-name is available
         "422":
-          $ref: "#/components/responses/ValidationError"
-
+          $ref: "#/components/responses/ValidationOrIdempotencyMismatch"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "409":
+          $ref: "#/components/responses/IdempotencyKeyConflict"
   /v1/auth/login:
     post:
       operationId: authLogin
@@ -204,10 +233,9 @@ paths:
         "400":
           $ref: "#/components/responses/BadRequest"
         "422":
-          $ref: "#/components/responses/ValidationError"
+          $ref: "#/components/responses/ValidationFailed"
         "429":
           $ref: "#/components/responses/LoginThrottled"
-
   /v1/auth/refresh:
     post:
       operationId: authRefresh
@@ -238,8 +266,9 @@ paths:
         "401":
           $ref: "#/components/responses/Unauthorized"
         "422":
-          $ref: "#/components/responses/ValidationError"
-
+          $ref: "#/components/responses/ValidationFailed"
+        "400":
+          $ref: "#/components/responses/BadRequest"
   /v1/auth/logout:
     post:
       operationId: authLogout
@@ -252,6 +281,8 @@ paths:
       tags: [Auth]
       security:
         - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKeyParam"
       requestBody:
         required: false
         content:
@@ -266,8 +297,16 @@ paths:
         "401":
           $ref: "#/components/responses/Unauthorized"
         "200":
+          headers:
+            Idempotency-Replayed:
+              $ref: "#/components/headers/IdempotencyReplayed"
           description: Logged out successfully
-
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "409":
+          $ref: "#/components/responses/IdempotencyKeyConflict"
+        "422":
+          $ref: "#/components/responses/IdempotencyKeyMismatch"
   /.well-known/jwks.json:
     get:
       operationId: authJwks
@@ -361,10 +400,9 @@ paths:
         "400":
           $ref: "#/components/responses/BadRequest"
         "422":
-          $ref: "#/components/responses/ValidationError"
+          $ref: "#/components/responses/ValidationFailed"
         "503":
           $ref: "#/components/responses/ServiceUnavailable"
-
   /v1/auth/provider/google:
     post:
       operationId: authGoogle
@@ -396,7 +434,6 @@ paths:
                 $ref: "#/components/schemas/AuthResponse"
         "400":
           $ref: "#/components/responses/BadRequest"
-
   # =========================================================================
   # EMAIL CONFIRMATION
   # =========================================================================
@@ -450,14 +487,22 @@ paths:
       tags: [Email Confirmation]
       security:
         - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKeyParam"
       responses:
         "401":
           $ref: "#/components/responses/Unauthorized"
         "200":
+          headers:
+            Idempotency-Replayed:
+              $ref: "#/components/headers/IdempotencyReplayed"
           description: Confirmation email sent
         "400":
           $ref: "#/components/responses/BadRequest"
-
+        "409":
+          $ref: "#/components/responses/IdempotencyKeyConflict"
+        "422":
+          $ref: "#/components/responses/IdempotencyKeyMismatch"
   # =========================================================================
   # PASSWORD
   # =========================================================================
@@ -470,6 +515,8 @@ paths:
         Always returns 200 to avoid user enumeration.
       tags: [Password]
       security: []
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKeyParam"
       requestBody:
         required: true
         content:
@@ -485,6 +532,9 @@ paths:
         "401":
           $ref: "#/components/responses/Unauthorized"
         "200":
+          headers:
+            Idempotency-Replayed:
+              $ref: "#/components/headers/IdempotencyReplayed"
           description: Reset email sent (if account exists)
           content:
             application/json:
@@ -493,8 +543,9 @@ paths:
         "400":
           $ref: "#/components/responses/BadRequest"
         "422":
-          $ref: "#/components/responses/ValidationError"
-
+          $ref: "#/components/responses/ValidationOrIdempotencyMismatch"
+        "409":
+          $ref: "#/components/responses/IdempotencyKeyConflict"
   /v1/auth/password/reset:
     post:
       operationId: passwordReset
@@ -505,6 +556,8 @@ paths:
         their access tokens expire.
       tags: [Password]
       security: []
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKeyParam"
       requestBody:
         required: true
         content:
@@ -513,6 +566,9 @@ paths:
               $ref: "#/components/schemas/PasswordResetRequest"
       responses:
         "200":
+          headers:
+            Idempotency-Replayed:
+              $ref: "#/components/headers/IdempotencyReplayed"
           description: Password changed successfully
           content:
             application/json:
@@ -521,8 +577,9 @@ paths:
         "400":
           $ref: "#/components/responses/BadRequest"
         "422":
-          $ref: "#/components/responses/ValidationError"
-
+          $ref: "#/components/responses/ValidationOrIdempotencyMismatch"
+        "409":
+          $ref: "#/components/responses/IdempotencyKeyConflict"
   # =========================================================================
   # PROFILE
   # =========================================================================
@@ -554,6 +611,8 @@ paths:
       tags: [Profile]
       security:
         - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKeyParam"
       requestBody:
         required: true
         content:
@@ -564,14 +623,20 @@ paths:
         "401":
           $ref: "#/components/responses/Unauthorized"
         "200":
+          headers:
+            Idempotency-Replayed:
+              $ref: "#/components/headers/IdempotencyReplayed"
           description: Updated user profile
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/User"
         "422":
-          $ref: "#/components/responses/ValidationError"
-
+          $ref: "#/components/responses/ValidationOrIdempotencyMismatch"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "409":
+          $ref: "#/components/responses/IdempotencyKeyConflict"
   /v1/profile/check/nick-name:
     post:
       operationId: profileCheckNickName
@@ -580,6 +645,8 @@ paths:
       tags: [Profile]
       security:
         - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKeyParam"
       requestBody:
         required: true
         content:
@@ -595,10 +662,16 @@ paths:
         "401":
           $ref: "#/components/responses/Unauthorized"
         "200":
+          headers:
+            Idempotency-Replayed:
+              $ref: "#/components/headers/IdempotencyReplayed"
           description: Nick-name is available
         "422":
-          $ref: "#/components/responses/ValidationError"
-
+          $ref: "#/components/responses/ValidationOrIdempotencyMismatch"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "409":
+          $ref: "#/components/responses/IdempotencyKeyConflict"
   /v1/profile/locale:
     put:
       operationId: profileUpdateLocale
@@ -607,6 +680,8 @@ paths:
       tags: [Profile]
       security:
         - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKeyParam"
       requestBody:
         required: true
         content:
@@ -623,8 +698,16 @@ paths:
         "401":
           $ref: "#/components/responses/Unauthorized"
         "200":
+          headers:
+            Idempotency-Replayed:
+              $ref: "#/components/headers/IdempotencyReplayed"
           description: Locale updated
-
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "409":
+          $ref: "#/components/responses/IdempotencyKeyConflict"
+        "422":
+          $ref: "#/components/responses/IdempotencyKeyMismatch"
   /v1/profile/social:
     get:
       operationId: profileSocialAccounts
@@ -660,6 +743,8 @@ paths:
       tags: [Profile]
       security:
         - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKeyParam"
       requestBody:
         required: true
         content:
@@ -670,14 +755,20 @@ paths:
         "401":
           $ref: "#/components/responses/Unauthorized"
         "200":
+          headers:
+            Idempotency-Replayed:
+              $ref: "#/components/headers/IdempotencyReplayed"
           description: Password changed
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/MessageResponse"
         "422":
-          $ref: "#/components/responses/ValidationError"
-
+          $ref: "#/components/responses/ValidationOrIdempotencyMismatch"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "409":
+          $ref: "#/components/responses/IdempotencyKeyConflict"
   /v1/profile/photo:
     put:
       operationId: profileUpdatePhoto
@@ -689,6 +780,8 @@ paths:
       tags: [Profile]
       security:
         - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKeyParam"
       requestBody:
         required: true
         content:
@@ -705,6 +798,9 @@ paths:
         "401":
           $ref: "#/components/responses/Unauthorized"
         "200":
+          headers:
+            Idempotency-Replayed:
+              $ref: "#/components/headers/IdempotencyReplayed"
           description: Photo uploaded
           content:
             application/json:
@@ -719,8 +815,11 @@ paths:
                     type: string
                     format: uri
         "422":
-          $ref: "#/components/responses/ValidationError"
-
+          $ref: "#/components/responses/ValidationOrIdempotencyMismatch"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "409":
+          $ref: "#/components/responses/IdempotencyKeyConflict"
   /v1/profile/statistics/charges-flow:
     get:
       operationId: profileChargesFlow
@@ -834,6 +933,8 @@ paths:
       tags: [Passkeys]
       security:
         - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKeyParam"
       requestBody:
         required: true
         content:
@@ -844,6 +945,9 @@ paths:
         "401":
           $ref: "#/components/responses/Unauthorized"
         "200":
+          headers:
+            Idempotency-Replayed:
+              $ref: "#/components/headers/IdempotencyReplayed"
           description: Passkey registered
           content:
             application/json:
@@ -852,10 +956,11 @@ paths:
         "400":
           $ref: "#/components/responses/BadRequest"
         "422":
-          $ref: "#/components/responses/ValidationError"
+          $ref: "#/components/responses/ValidationOrIdempotencyMismatch"
         "503":
           $ref: "#/components/responses/ServiceUnavailable"
-
+        "409":
+          $ref: "#/components/responses/IdempotencyKeyConflict"
   /v1/profile/passkey/init:
     post:
       operationId: passkeyInitRegistration
@@ -867,6 +972,8 @@ paths:
       tags: [Passkeys]
       security:
         - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKeyParam"
       requestBody:
         required: true
         content:
@@ -883,6 +990,9 @@ paths:
         "401":
           $ref: "#/components/responses/Unauthorized"
         "200":
+          headers:
+            Idempotency-Replayed:
+              $ref: "#/components/headers/IdempotencyReplayed"
           description: WebAuthn creation options
           content:
             application/json:
@@ -891,7 +1001,12 @@ paths:
                 description: Raw `PublicKeyCredentialCreationOptions` JSON
         "503":
           $ref: "#/components/responses/ServiceUnavailable"
-
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "409":
+          $ref: "#/components/responses/IdempotencyKeyConflict"
+        "422":
+          $ref: "#/components/responses/IdempotencyKeyMismatch"
   /v1/profile/passkey/{id}:
     delete:
       operationId: passkeyDelete
@@ -902,14 +1017,23 @@ paths:
         - bearerAuth: []
       parameters:
         - $ref: "#/components/parameters/PasskeyIdParam"
+        - $ref: "#/components/parameters/IdempotencyKeyParam"
       responses:
         "401":
           $ref: "#/components/responses/Unauthorized"
         "200":
+          headers:
+            Idempotency-Replayed:
+              $ref: "#/components/headers/IdempotencyReplayed"
           description: Passkey deleted
         "404":
           $ref: "#/components/responses/NotFound"
-
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "409":
+          $ref: "#/components/responses/IdempotencyKeyConflict"
+        "422":
+          $ref: "#/components/responses/IdempotencyKeyMismatch"
   # =========================================================================
   # WALLETS
   # =========================================================================
@@ -942,6 +1066,8 @@ paths:
       tags: [Wallets]
       security:
         - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKeyParam"
       requestBody:
         required: true
         content:
@@ -952,14 +1078,20 @@ paths:
         "401":
           $ref: "#/components/responses/Unauthorized"
         "200":
+          headers:
+            Idempotency-Replayed:
+              $ref: "#/components/headers/IdempotencyReplayed"
           description: Created wallet
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/Wallet"
         "422":
-          $ref: "#/components/responses/ValidationError"
-
+          $ref: "#/components/responses/ValidationOrIdempotencyMismatch"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "409":
+          $ref: "#/components/responses/IdempotencyKeyConflict"
   /v1/wallets/unarchived:
     get:
       operationId: walletListUnarchived
@@ -990,6 +1122,8 @@ paths:
       tags: [Wallets]
       security:
         - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKeyParam"
       requestBody:
         required: true
         content:
@@ -1007,8 +1141,16 @@ paths:
         "401":
           $ref: "#/components/responses/Unauthorized"
         "200":
+          headers:
+            Idempotency-Replayed:
+              $ref: "#/components/headers/IdempotencyReplayed"
           description: Sort order saved
-
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "409":
+          $ref: "#/components/responses/IdempotencyKeyConflict"
+        "422":
+          $ref: "#/components/responses/IdempotencyKeyMismatch"
   /v1/wallets/archived:
     get:
       operationId: walletListArchived
@@ -1079,6 +1221,8 @@ paths:
       tags: [Wallets]
       security:
         - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKeyParam"
       requestBody:
         required: true
         content:
@@ -1089,6 +1233,9 @@ paths:
         "401":
           $ref: "#/components/responses/Unauthorized"
         "200":
+          headers:
+            Idempotency-Replayed:
+              $ref: "#/components/headers/IdempotencyReplayed"
           description: Updated wallet
           content:
             application/json:
@@ -1097,8 +1244,11 @@ paths:
         "404":
           $ref: "#/components/responses/NotFound"
         "422":
-          $ref: "#/components/responses/ValidationError"
-
+          $ref: "#/components/responses/ValidationOrIdempotencyMismatch"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "409":
+          $ref: "#/components/responses/IdempotencyKeyConflict"
     delete:
       operationId: walletDelete
       summary: Delete wallet
@@ -1108,14 +1258,24 @@ paths:
       tags: [Wallets]
       security:
         - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKeyParam"
       responses:
         "401":
           $ref: "#/components/responses/Unauthorized"
         "200":
+          headers:
+            Idempotency-Replayed:
+              $ref: "#/components/headers/IdempotencyReplayed"
           description: Wallet deleted
         "404":
           $ref: "#/components/responses/NotFound"
-
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "409":
+          $ref: "#/components/responses/IdempotencyKeyConflict"
+        "422":
+          $ref: "#/components/responses/IdempotencyKeyMismatch"
   /v1/wallets/{id}/activate:
     post:
       operationId: walletActivate
@@ -1126,10 +1286,14 @@ paths:
         - bearerAuth: []
       parameters:
         - $ref: "#/components/parameters/WalletIdParam"
+        - $ref: "#/components/parameters/IdempotencyKeyParam"
       responses:
         "401":
           $ref: "#/components/responses/Unauthorized"
         "200":
+          headers:
+            Idempotency-Replayed:
+              $ref: "#/components/headers/IdempotencyReplayed"
           description: Wallet activated
           content:
             application/json:
@@ -1137,7 +1301,12 @@ paths:
                 $ref: "#/components/schemas/Wallet"
         "404":
           $ref: "#/components/responses/NotFound"
-
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "409":
+          $ref: "#/components/responses/IdempotencyKeyConflict"
+        "422":
+          $ref: "#/components/responses/IdempotencyKeyMismatch"
   /v1/wallets/{id}/disable:
     post:
       operationId: walletDisable
@@ -1148,10 +1317,14 @@ paths:
         - bearerAuth: []
       parameters:
         - $ref: "#/components/parameters/WalletIdParam"
+        - $ref: "#/components/parameters/IdempotencyKeyParam"
       responses:
         "401":
           $ref: "#/components/responses/Unauthorized"
         "200":
+          headers:
+            Idempotency-Replayed:
+              $ref: "#/components/headers/IdempotencyReplayed"
           description: Wallet disabled
           content:
             application/json:
@@ -1159,7 +1332,12 @@ paths:
                 $ref: "#/components/schemas/Wallet"
         "404":
           $ref: "#/components/responses/NotFound"
-
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "409":
+          $ref: "#/components/responses/IdempotencyKeyConflict"
+        "422":
+          $ref: "#/components/responses/IdempotencyKeyMismatch"
   /v1/wallets/{id}/archive:
     post:
       operationId: walletArchive
@@ -1172,10 +1350,14 @@ paths:
         - bearerAuth: []
       parameters:
         - $ref: "#/components/parameters/WalletIdParam"
+        - $ref: "#/components/parameters/IdempotencyKeyParam"
       responses:
         "401":
           $ref: "#/components/responses/Unauthorized"
         "200":
+          headers:
+            Idempotency-Replayed:
+              $ref: "#/components/headers/IdempotencyReplayed"
           description: Wallet archived
           content:
             application/json:
@@ -1183,7 +1365,12 @@ paths:
                 $ref: "#/components/schemas/Wallet"
         "404":
           $ref: "#/components/responses/NotFound"
-
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "409":
+          $ref: "#/components/responses/IdempotencyKeyConflict"
+        "422":
+          $ref: "#/components/responses/IdempotencyKeyMismatch"
   /v1/wallets/{id}/un-archive:
     post:
       operationId: walletUnarchive
@@ -1194,10 +1381,14 @@ paths:
         - bearerAuth: []
       parameters:
         - $ref: "#/components/parameters/WalletIdParam"
+        - $ref: "#/components/parameters/IdempotencyKeyParam"
       responses:
         "401":
           $ref: "#/components/responses/Unauthorized"
         "200":
+          headers:
+            Idempotency-Replayed:
+              $ref: "#/components/headers/IdempotencyReplayed"
           description: Wallet unarchived
           content:
             application/json:
@@ -1205,7 +1396,12 @@ paths:
                 $ref: "#/components/schemas/Wallet"
         "404":
           $ref: "#/components/responses/NotFound"
-
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "409":
+          $ref: "#/components/responses/IdempotencyKeyConflict"
+        "422":
+          $ref: "#/components/responses/IdempotencyKeyMismatch"
   # =========================================================================
   # WALLET USERS (sharing)
   # =========================================================================
@@ -1245,14 +1441,24 @@ paths:
       tags: [Wallet Users]
       security:
         - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKeyParam"
       responses:
         "401":
           $ref: "#/components/responses/Unauthorized"
         "200":
+          headers:
+            Idempotency-Replayed:
+              $ref: "#/components/headers/IdempotencyReplayed"
           description: User added to wallet
         "404":
           $ref: "#/components/responses/NotFound"
-
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "409":
+          $ref: "#/components/responses/IdempotencyKeyConflict"
+        "422":
+          $ref: "#/components/responses/IdempotencyKeyMismatch"
     delete:
       operationId: walletUserRemove
       summary: Remove user from wallet
@@ -1260,14 +1466,24 @@ paths:
       tags: [Wallet Users]
       security:
         - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKeyParam"
       responses:
         "401":
           $ref: "#/components/responses/Unauthorized"
         "200":
+          headers:
+            Idempotency-Replayed:
+              $ref: "#/components/headers/IdempotencyReplayed"
           description: User removed from wallet
         "404":
           $ref: "#/components/responses/NotFound"
-
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "409":
+          $ref: "#/components/responses/IdempotencyKeyConflict"
+        "422":
+          $ref: "#/components/responses/IdempotencyKeyMismatch"
   # =========================================================================
   # WALLET TAGS
   # =========================================================================
@@ -1390,6 +1606,8 @@ paths:
       tags: [Charges]
       security:
         - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKeyParam"
       requestBody:
         required: true
         content:
@@ -1416,14 +1634,20 @@ paths:
         "401":
           $ref: "#/components/responses/Unauthorized"
         "200":
+          headers:
+            Idempotency-Replayed:
+              $ref: "#/components/headers/IdempotencyReplayed"
           description: Created charge
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/Charge"
         "422":
-          $ref: "#/components/responses/ValidationError"
-
+          $ref: "#/components/responses/ValidationOrIdempotencyMismatch"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "409":
+          $ref: "#/components/responses/IdempotencyKeyConflict"
   /v1/wallets/{walletId}/charges/{chargeId}:
     parameters:
       - $ref: "#/components/parameters/WalletIdQueryParam"
@@ -1436,6 +1660,8 @@ paths:
       tags: [Charges]
       security:
         - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKeyParam"
       requestBody:
         required: true
         content:
@@ -1446,6 +1672,9 @@ paths:
         "401":
           $ref: "#/components/responses/Unauthorized"
         "200":
+          headers:
+            Idempotency-Replayed:
+              $ref: "#/components/headers/IdempotencyReplayed"
           description: Updated charge
           content:
             application/json:
@@ -1454,8 +1683,11 @@ paths:
         "404":
           $ref: "#/components/responses/NotFound"
         "422":
-          $ref: "#/components/responses/ValidationError"
-
+          $ref: "#/components/responses/ValidationOrIdempotencyMismatch"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "409":
+          $ref: "#/components/responses/IdempotencyKeyConflict"
     delete:
       operationId: chargeDelete
       summary: Delete a charge
@@ -1463,14 +1695,24 @@ paths:
       tags: [Charges]
       security:
         - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKeyParam"
       responses:
         "401":
           $ref: "#/components/responses/Unauthorized"
         "200":
+          headers:
+            Idempotency-Replayed:
+              $ref: "#/components/headers/IdempotencyReplayed"
           description: Charge deleted
         "404":
           $ref: "#/components/responses/NotFound"
-
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "409":
+          $ref: "#/components/responses/IdempotencyKeyConflict"
+        "422":
+          $ref: "#/components/responses/IdempotencyKeyMismatch"
   /v1/wallets/{walletId}/charges/move/{targetWalletId}:
     post:
       operationId: chargeMove
@@ -1489,6 +1731,7 @@ paths:
           description: Destination wallet ID
           schema:
             type: integer
+        - $ref: "#/components/parameters/IdempotencyKeyParam"
       requestBody:
         required: true
         content:
@@ -1508,12 +1751,18 @@ paths:
         "401":
           $ref: "#/components/responses/Unauthorized"
         "200":
+          headers:
+            Idempotency-Replayed:
+              $ref: "#/components/headers/IdempotencyReplayed"
           description: Charges moved
         "404":
           $ref: "#/components/responses/NotFound"
         "422":
-          $ref: "#/components/responses/ValidationError"
-
+          $ref: "#/components/responses/ValidationOrIdempotencyMismatch"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "409":
+          $ref: "#/components/responses/IdempotencyKeyConflict"
   /v1/charges/title/suggestions/{query}:
     get:
       operationId: chargeTitleSuggestions
@@ -1666,6 +1915,8 @@ paths:
       tags: [Limits]
       security:
         - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKeyParam"
       requestBody:
         required: true
         content:
@@ -1676,14 +1927,20 @@ paths:
         "401":
           $ref: "#/components/responses/Unauthorized"
         "200":
+          headers:
+            Idempotency-Replayed:
+              $ref: "#/components/headers/IdempotencyReplayed"
           description: Created limit
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/Limit"
         "422":
-          $ref: "#/components/responses/ValidationError"
-
+          $ref: "#/components/responses/ValidationOrIdempotencyMismatch"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "409":
+          $ref: "#/components/responses/IdempotencyKeyConflict"
   /v1/wallets/{walletId}/limits/{limitId}:
     parameters:
       - $ref: "#/components/parameters/WalletIdQueryParam"
@@ -1696,6 +1953,8 @@ paths:
       tags: [Limits]
       security:
         - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKeyParam"
       requestBody:
         required: true
         content:
@@ -1706,6 +1965,9 @@ paths:
         "401":
           $ref: "#/components/responses/Unauthorized"
         "200":
+          headers:
+            Idempotency-Replayed:
+              $ref: "#/components/headers/IdempotencyReplayed"
           description: Updated limit
           content:
             application/json:
@@ -1714,8 +1976,11 @@ paths:
         "404":
           $ref: "#/components/responses/NotFound"
         "422":
-          $ref: "#/components/responses/ValidationError"
-
+          $ref: "#/components/responses/ValidationOrIdempotencyMismatch"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "409":
+          $ref: "#/components/responses/IdempotencyKeyConflict"
     delete:
       operationId: limitDelete
       summary: Delete a limit
@@ -1723,14 +1988,24 @@ paths:
       tags: [Limits]
       security:
         - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKeyParam"
       responses:
         "401":
           $ref: "#/components/responses/Unauthorized"
         "200":
+          headers:
+            Idempotency-Replayed:
+              $ref: "#/components/headers/IdempotencyReplayed"
           description: Limit deleted
         "404":
           $ref: "#/components/responses/NotFound"
-
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "409":
+          $ref: "#/components/responses/IdempotencyKeyConflict"
+        "422":
+          $ref: "#/components/responses/IdempotencyKeyMismatch"
   /v1/wallets/{walletId}/limits/copy/{sourceWalletId}:
     post:
       operationId: limitCopy
@@ -1749,14 +2024,23 @@ paths:
           description: Wallet to copy limits from
           schema:
             type: integer
+        - $ref: "#/components/parameters/IdempotencyKeyParam"
       responses:
         "401":
           $ref: "#/components/responses/Unauthorized"
         "200":
+          headers:
+            Idempotency-Replayed:
+              $ref: "#/components/headers/IdempotencyReplayed"
           description: Limits copied
         "404":
           $ref: "#/components/responses/NotFound"
-
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "409":
+          $ref: "#/components/responses/IdempotencyKeyConflict"
+        "422":
+          $ref: "#/components/responses/IdempotencyKeyMismatch"
   # =========================================================================
   # TAGS
   # =========================================================================
@@ -1789,6 +2073,8 @@ paths:
       tags: [Tags]
       security:
         - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKeyParam"
       requestBody:
         required: true
         content:
@@ -1803,14 +2089,20 @@ paths:
         "401":
           $ref: "#/components/responses/Unauthorized"
         "200":
+          headers:
+            Idempotency-Replayed:
+              $ref: "#/components/headers/IdempotencyReplayed"
           description: Created tag
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/Tag"
         "422":
-          $ref: "#/components/responses/ValidationError"
-
+          $ref: "#/components/responses/ValidationOrIdempotencyMismatch"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "409":
+          $ref: "#/components/responses/IdempotencyKeyConflict"
   /v1/tags/{id}:
     parameters:
       - $ref: "#/components/parameters/TagIdParam"
@@ -1822,6 +2114,8 @@ paths:
       tags: [Tags]
       security:
         - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKeyParam"
       requestBody:
         required: true
         content:
@@ -1832,6 +2126,9 @@ paths:
         "401":
           $ref: "#/components/responses/Unauthorized"
         "200":
+          headers:
+            Idempotency-Replayed:
+              $ref: "#/components/headers/IdempotencyReplayed"
           description: Updated tag
           content:
             application/json:
@@ -1840,8 +2137,11 @@ paths:
         "404":
           $ref: "#/components/responses/NotFound"
         "422":
-          $ref: "#/components/responses/ValidationError"
-
+          $ref: "#/components/responses/ValidationOrIdempotencyMismatch"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "409":
+          $ref: "#/components/responses/IdempotencyKeyConflict"
     delete:
       operationId: tagDelete
       summary: Delete a tag
@@ -1851,14 +2151,24 @@ paths:
       tags: [Tags]
       security:
         - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKeyParam"
       responses:
         "401":
           $ref: "#/components/responses/Unauthorized"
         "200":
+          headers:
+            Idempotency-Replayed:
+              $ref: "#/components/headers/IdempotencyReplayed"
           description: Tag deleted
         "404":
           $ref: "#/components/responses/NotFound"
-
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "409":
+          $ref: "#/components/responses/IdempotencyKeyConflict"
+        "422":
+          $ref: "#/components/responses/IdempotencyKeyMismatch"
   /v1/tags/common:
     get:
       operationId: tagCommonList
@@ -2214,6 +2524,24 @@ components:
         minimum: 1
         maximum: 100
         default: 20
+
+    IdempotencyKeyParam:
+      name: Idempotency-Key
+      in: header
+      required: false
+      description: |
+        Optional. A canonical lowercase UUIDv4 supplied by the client. Sending the same key
+        again with the same method, path, and request body within 24 hours replays the first
+        response verbatim (see the `Idempotency-Replayed` response header) instead of
+        re-executing the request. Sending it again with a *different* body returns `422`
+        instead of running — see the `IdempotencyKeyMismatch` response. A malformed value
+        (not a canonical UUIDv4) returns `400`. Omitting the header entirely runs the request
+        normally, with no deduplication.
+      schema:
+        type: string
+        format: uuid
+        pattern: "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+        example: "1e6c2a6a-9e2e-4d3a-8f2e-6a2f1b8c9d10"
 
   # -------------------------------------------------------------------------
   # SCHEMAS
@@ -3241,12 +3569,22 @@ components:
       schema:
         type: integer
 
+    IdempotencyReplayed:
+      description: |
+        `true` when this response is a verbatim replay of the first request that used this
+        `Idempotency-Key`, rather than a fresh execution. Absent on a fresh response.
+      schema:
+        type: string
+        enum: ["true"]
+
   # -------------------------------------------------------------------------
   # REUSABLE RESPONSES
   # -------------------------------------------------------------------------
   responses:
     BadRequest:
-      description: Bad request — invalid input or business rule violation
+      description: |
+        Bad request — invalid input or business rule violation. Also returned when an
+        `Idempotency-Key` header is present but not a canonical lowercase UUIDv4.
       headers:
         X-Ct-Api-Version:
           $ref: "#/components/headers/ApiVersion"
@@ -3294,8 +3632,55 @@ components:
           example:
             message: Resource not found.
 
-    ValidationError:
-      description: Validation failed — see `errors` for field-level details
+    IdempotencyKeyConflict:
+      description: |
+        A request with this `Idempotency-Key` (same scope, method, path, and request body) is
+        still being processed. Retry after the given delay; do not send a different body under
+        the same key while this is in flight.
+      headers:
+        X-Ct-Api-Version:
+          $ref: "#/components/headers/ApiVersion"
+        X-Ct-Api-Sha:
+          $ref: "#/components/headers/ApiSha"
+        X-Ct-Trace-Id:
+          $ref: "#/components/headers/TraceId"
+        Retry-After:
+          $ref: "#/components/headers/RetryAfter"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+          example:
+            message: The original request with this Idempotency-Key is still processing. Please retry shortly.
+
+    IdempotencyKeyMismatch:
+      description: |
+        This `Idempotency-Key` was already used with a different request body (method, path, or
+        payload). Idempotency keys are single-use per distinct request — retry with a new key,
+        or resend the exact original request body to get the stored result.
+
+        Deliberately `Error`-shaped (a plain `message`, no `errors` map) rather than
+        `ValidationError`-shaped: this is a conflict over key reuse, not a field-level
+        validation failure, and callers should not try to render it as one.
+      headers:
+        X-Ct-Api-Version:
+          $ref: "#/components/headers/ApiVersion"
+        X-Ct-Api-Sha:
+          $ref: "#/components/headers/ApiSha"
+        X-Ct-Trace-Id:
+          $ref: "#/components/headers/TraceId"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+          example:
+            message: This Idempotency-Key was already used with a different request body.
+
+    ValidationFailed:
+      description: |
+        Field-level validation failure — `ValidationError`-shaped, carries an `errors` map keyed
+        by field name. Unlike `ValidationOrIdempotencyMismatch`, this endpoint does not accept
+        `Idempotency-Key`, so `422` here has exactly one cause.
       headers:
         X-Ct-Api-Version:
           $ref: "#/components/headers/ApiVersion"
@@ -3307,6 +3692,31 @@ components:
         application/json:
           schema:
             $ref: "#/components/schemas/ValidationError"
+
+    ValidationOrIdempotencyMismatch:
+      description: |
+        `422` on this endpoint has two distinct causes, both possible since it accepts an
+        `Idempotency-Key`:
+          - **Field-level validation failure** — `ValidationError`-shaped, carries an `errors`
+            map keyed by field name.
+          - **Idempotency key reused with a different body** — `Error`-shaped, a plain
+            `message`, no `errors` key.
+
+        Discriminate by the presence of `errors` in the body, not by anything else — both
+        causes share this single `422` status code.
+      headers:
+        X-Ct-Api-Version:
+          $ref: "#/components/headers/ApiVersion"
+        X-Ct-Api-Sha:
+          $ref: "#/components/headers/ApiSha"
+        X-Ct-Trace-Id:
+          $ref: "#/components/headers/TraceId"
+      content:
+        application/json:
+          schema:
+            oneOf:
+              - $ref: "#/components/schemas/ValidationError"
+              - $ref: "#/components/schemas/Error"
 
     ServiceUnavailable:
       description: |

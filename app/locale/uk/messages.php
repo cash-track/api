@@ -21,6 +21,9 @@ return [
     'error_auth_passkey_invalid_response'   => 'Не успішна авторизація. Будь ласка, спробуйте ще раз.',
     'error_auth_passkey_unregistered'       => 'Ключ доступу не знайдено. Будь ласка, використовуйте ключ доступу доданий раніше.',
     'error_auth_passkey_unavailable'        => 'Вхід за допомогою ключа доступу тимчасово недоступний. Будь ласка, спробуйте пізніше.',
+    'error_idempotency_key_invalid'         => 'Заголовок Idempotency-Key має бути канонічним UUIDv4 у нижньому регістрі.',
+    'error_idempotency_key_in_flight'       => 'Початковий запит з цим Idempotency-Key ще обробляється. Будь ласка, спробуйте трохи пізніше.',
+    'error_idempotency_key_mismatch'        => 'Цей Idempotency-Key вже було використано з іншим тілом запиту.',
 
     'email_confirmation_confirm_failure' => 'Неможливо підтвердити ваш email.',
     'email_confirmation_ok'              => 'Ваш email було підтверджено.',
