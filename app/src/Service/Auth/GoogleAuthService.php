@@ -12,6 +12,7 @@ use App\Repository\GoogleAccountRepository;
 use App\Repository\UserRepository;
 use App\Service\Auth\Exception\InvalidTokenException;
 use App\Service\GoogleAccountService;
+use App\Service\Metrics\AppMetricsInterface;
 use App\Service\PhotoStorageService;
 use App\Service\UserOptionsService;
 use App\Service\UserService;
@@ -43,6 +44,7 @@ class GoogleAuthService extends AuthService
         protected EmailConfirmationService $emailConfirmationService,
         protected SluggerInterface $slugger,
         protected readonly GoogleAccountRepository $googleAccountRepository,
+        protected readonly AppMetricsInterface $appMetrics,
     ) {
         parent::__construct(
             $this->auth,
@@ -162,10 +164,20 @@ class GoogleAuthService extends AuthService
         } else {
             // new user
             $user = $this->makeUser($data);
-            $user = $this->createUser($user);
+
+            try {
+                $user = $this->createUser($user);
+            } catch (\Throwable $exception) {
+                $this->appMetrics->incrementRegistration(false);
+
+                throw $exception;
+            }
+
             $googleAccount = $this->makeGoogleAccount($user, $data);
             $this->storeGoogleAccount($googleAccount);
             $this->photoStorageService->queueDownloadProfilePhoto((int) $user->id, $data['picture']);
+
+            $this->appMetrics->incrementRegistration(true);
         }
 
         return $this->authenticate($user);

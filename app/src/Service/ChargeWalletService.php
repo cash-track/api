@@ -6,6 +6,7 @@ namespace App\Service;
 
 use App\Database\Charge;
 use App\Database\Wallet;
+use App\Service\Metrics\AppMetricsInterface;
 use Cycle\Database\DatabaseInterface;
 use Cycle\Database\Injection\Expression;
 use Cycle\ORM\EntityManagerInterface;
@@ -17,6 +18,7 @@ class ChargeWalletService
     public function __construct(
         private readonly EntityManagerInterface $tr,
         private readonly DatabaseInterface $database,
+        private readonly AppMetricsInterface $metrics,
     ) {
     }
 
@@ -28,6 +30,9 @@ class ChargeWalletService
             $this->tr->persist($charge);
             $this->tr->run();
         });
+
+        $this->metrics->incrementChargeCreated($charge->type);
+        $this->metrics->incrementTagAssignments($charge->tags->count());
 
         return $charge;
     }
@@ -52,6 +57,8 @@ class ChargeWalletService
             $this->tr->delete($charge);
             $this->tr->run();
         });
+
+        $this->metrics->incrementChargeDeleted($charge->type);
     }
 
     public function move(Wallet $wallet, Wallet $targetWallet, array $charges): void

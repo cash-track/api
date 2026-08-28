@@ -6,12 +6,14 @@ namespace App\Service;
 
 use App\Database\Tag;
 use App\Database\User;
+use App\Service\Metrics\AppMetricsInterface;
 use Cycle\ORM\EntityManagerInterface;
 
 class TagService
 {
     public function __construct(
         private EntityManagerInterface $tr,
+        private readonly AppMetricsInterface $metrics,
     ) {
     }
 
@@ -19,7 +21,11 @@ class TagService
     {
         $tag->setUser($user);
 
-        return $this->store($tag);
+        $this->store($tag);
+
+        $this->metrics->incrementTagCreated();
+
+        return $tag;
     }
 
     public function store(Tag $tag): Tag

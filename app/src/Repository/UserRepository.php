@@ -103,6 +103,28 @@ class UserRepository extends Repository implements ActorProviderInterface
         return $users;
     }
 
+    /**
+     * Index-friendly count of users by their e-mail confirmation state. Backs the
+     * `app_users{state}` gauge refreshed by the scheduler.
+     */
+    public function countByEmailConfirmed(bool $confirmed): int
+    {
+        return $this->select()
+            ->where('is_email_confirmed', $confirmed)
+            ->count();
+    }
+
+    /**
+     * Index-friendly count of users whose last activity is at or after the given instant.
+     * Backs the `app_users_active{window}` gauge refreshed by the scheduler.
+     */
+    public function countActiveSince(\DateTimeInterface $since): int
+    {
+        return $this->select()
+            ->where('active_at', '>=', $since)
+            ->count();
+    }
+
     public function allForNewsletter(?bool $emailConfirmed = null, int $testId = 0): ?SelectQuery
     {
         $query = $this->select()->getBuilder()->getQuery();

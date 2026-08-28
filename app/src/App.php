@@ -146,6 +146,7 @@ class App extends Kernel
      */
     protected const array APP = [
         Bootloader\AppBootloader::class,
+        Bootloader\MetricsBootloader::class,
         Bootloader\RedisBootloader::class,
         Auth\AuthBootloader::class,
         Bootloader\RoutesBootloader::class,
