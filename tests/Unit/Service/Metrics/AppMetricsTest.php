@@ -208,4 +208,38 @@ final class AppMetricsTest extends TestCase
         // Must not throw.
         $this->metrics->incrementLogin('password', true);
     }
+
+    public function testObserveFailureIsSwallowedAndLogged(): void
+    {
+        $this->rr->method('observe')->willThrowException(new \RuntimeException('observe down'));
+
+        $this->logger->expects($this->once())
+            ->method('warning')
+            ->with('Unable to emit application metric', $this->callback(function (array $context): bool {
+                $this->assertSame('db_query_duration_seconds', $context['metric']);
+                $this->assertSame('observe down', $context['error']);
+
+                return true;
+            }));
+
+        // Must not throw.
+        $this->metrics->observeDatabaseQuery(0.01);
+    }
+
+    public function testSetFailureIsSwallowedAndLogged(): void
+    {
+        $this->rr->method('set')->willThrowException(new \RuntimeException('set down'));
+
+        $this->logger->expects($this->once())
+            ->method('warning')
+            ->with('Unable to emit application metric', $this->callback(function (array $context): bool {
+                $this->assertSame('users', $context['metric']);
+                $this->assertSame('set down', $context['error']);
+
+                return true;
+            }));
+
+        // Must not throw.
+        $this->metrics->setUserCount('verified', 1);
+    }
 }
