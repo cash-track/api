@@ -10,6 +10,7 @@ use App\Database\Wallet;
 use App\Mail\WalletShareMail;
 use App\Repository\CurrencyRepository;
 use App\Service\Mailer\MailerInterface;
+use App\Service\Metrics\AppMetricsInterface;
 use Cycle\ORM\EntityManagerInterface;
 use Symfony\Component\String\Slugger\SluggerInterface;
 
@@ -21,6 +22,7 @@ class WalletService
         private readonly UriService $uri,
         private readonly MailerInterface $mailer,
         private readonly SluggerInterface $slugger,
+        private readonly AppMetricsInterface $metrics,
     ) {
     }
 
@@ -42,7 +44,11 @@ class WalletService
 
         $wallet->users->add($user);
 
-        return $this->store($wallet);
+        $this->store($wallet);
+
+        $this->metrics->incrementWalletCreated();
+
+        return $wallet;
     }
 
     public function store(Wallet $wallet): Wallet
@@ -89,7 +95,11 @@ class WalletService
 
         $wallet->isArchived = true;
 
-        return $this->store($wallet);
+        $this->store($wallet);
+
+        $this->metrics->incrementWalletArchived();
+
+        return $wallet;
     }
 
     public function unArchive(Wallet $wallet): Wallet

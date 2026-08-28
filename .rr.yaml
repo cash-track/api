@@ -42,6 +42,62 @@ logs:
 
 metrics:
   address: 0.0.0.0:2112
+  # Application business metrics are declared here (plugin-side, once, before any worker
+  # boots) instead of at runtime via Metrics::declare(). With ~10 http + jobs pool workers
+  # each calling declare() against the single process-wide RR metrics registry, the first
+  # wins and every other emits an RR-side `metric with provided name already exist` WARN
+  # into Loki on every serve boot and worker respawn. Declaring statically removes that
+  # race entirely (docs: "Declaring metrics via configuration").
+  #
+  # The map key IS the Prometheus series name: the `app_` prefix is baked in to match the
+  # runtime add/set/observe calls in App\Service\Metrics\AppMetrics, and namespace/subsystem
+  # are deliberately omitted so BuildFQName does not double-prefix the emitted series.
+  # Keep this block in lock-step with AppMetrics::definitions() — MetricsCollectConfigTest
+  # fails the build on any drift (name, type, labels, or histogram buckets).
+  collect:
+    app_db_queries_total:
+      type: counter
+      help: 'Total number of SQL statements executed against the database.'
+    app_db_query_duration_seconds:
+      type: histogram
+      help: 'Duration of a single executed SQL statement in seconds.'
+      buckets: [0.001, 0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1.0, 2.5, 5.0]
+    app_auth_logins_total:
+      type: counter
+      help: 'Login attempts by method (password|google|passkey) and result.'
+      labels: ['method', 'result']
+    app_auth_registrations_total:
+      type: counter
+      help: 'User registration attempts by result.'
+      labels: ['result']
+    app_users:
+      type: gauge
+      help: 'Registered users by e-mail confirmation state (verified|unverified).'
+      labels: ['state']
+    app_users_active:
+      type: gauge
+      help: 'Users active within a rolling window (daily|weekly|monthly), sampled every 5 minutes.'
+      labels: ['window']
+    app_charges_created_total:
+      type: counter
+      help: 'Charges created by type (income|expense).'
+      labels: ['type']
+    app_charges_deleted_total:
+      type: counter
+      help: 'Charges deleted by type (income|expense).'
+      labels: ['type']
+    app_tag_assignments_total:
+      type: counter
+      help: 'Tag-to-charge assignments created.'
+    app_wallets_created_total:
+      type: counter
+      help: 'Wallets created.'
+    app_wallets_archived_total:
+      type: counter
+      help: 'Wallets archived.'
+    app_tags_created_total:
+      type: counter
+      help: 'Tags created.'
 
 jobs:
   pool:
@@ -59,3 +115,21 @@ jobs:
       driver: memory
       config:
         priority: 10
+
+# Long-lived worker for the Spiral scheduler. `schedule:work` loops forever and spawns
+# `php app.php schedule:run` at the top of every minute; that is what actually fires the
+# 5-minute `refresh-app-user-metrics` job declared in MetricsBootloader (without it the
+# app_users / app_users_active gauges are never populated). Single process only — a second
+# one would double-run every scheduled job.
+#
+# restart_sec is 15, not 1: on a persistent boot failure (DB down, fatal error) a 1s delay
+# respawns a full PHP kernel boot every second forever. The runner is minute-granular — it
+# picks up the next `second === 0` boundary regardless — so a sub-30s restart delay buys
+# nothing and just adds churn.
+service:
+  scheduler:
+    command: 'php app.php schedule:work'
+    process_num: 1
+    exec_timeout: 0s
+    remain_after_exit: true
+    restart_sec: 15

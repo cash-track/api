@@ -7,6 +7,7 @@ namespace App\Controller\Auth;
 use App\Request\CheckNickNameRequest;
 use App\Request\RegisterRequest;
 use App\Service\Auth\AuthService;
+use App\Service\Metrics\AppMetricsInterface;
 use App\View\UserView;
 use Psr\Http\Message\ResponseInterface;
 use Spiral\Http\ResponseWrapper;
@@ -21,6 +22,7 @@ final class RegisterController extends Controller
         protected UserView $userView,
         protected ResponseWrapper $response,
         protected readonly AuthService $authService,
+        private readonly AppMetricsInterface $metrics,
     ) {
         parent::__construct($userView, $response);
     }
@@ -33,11 +35,15 @@ final class RegisterController extends Controller
         try {
             $auth = $this->authService->register($user, $request->locale);
         } catch (\Throwable $exception) {
+            $this->metrics->incrementRegistration(false);
+
             return $this->responseAuthenticationException(
                 error: $exception->getMessage(),
                 message: $this->say('user_register_exception'),
             );
         }
+
+        $this->metrics->incrementRegistration(true);
 
         return $this->responseTokensWithUser($auth);
     }

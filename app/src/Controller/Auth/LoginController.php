@@ -9,6 +9,7 @@ use App\Service\Auth\Authentication;
 use App\Service\Auth\AuthService;
 use App\Service\Auth\LoginBackoffService;
 use App\Service\Auth\LoginThrottledException;
+use App\Service\Metrics\AppMetricsInterface;
 use App\View\UserView;
 use OpenTelemetry\API\Trace\StatusCode;
 use Psr\Http\Message\ResponseInterface;
@@ -23,10 +24,13 @@ final class LoginController extends Controller
 {
     use TranslatorTrait;
 
+    private const string METHOD = 'password';
+
     public function __construct(
         protected UserView $userView,
         protected ResponseWrapper $response,
         private readonly LoginBackoffService $loginBackoff,
+        private readonly AppMetricsInterface $metrics,
     ) {
         parent::__construct($userView, $response);
     }
@@ -37,6 +41,8 @@ final class LoginController extends Controller
         try {
             $this->loginBackoff->assertNotThrottled($request->email);
         } catch (LoginThrottledException $exception) {
+            $this->metrics->incrementLogin(self::METHOD, false);
+
             return $this->responseLoginThrottled($exception->getRetryAfter());
         }
 
@@ -60,16 +66,20 @@ final class LoginController extends Controller
                 traceKind: TraceKind::CLIENT,
             );
         } catch (\Throwable $exception) {
+            $this->metrics->incrementLogin(self::METHOD, false);
+
             return $this->responseAuthenticationException($exception->getMessage());
         }
 
         if ($auth === null) {
             $this->loginBackoff->recordFailure($request->email);
+            $this->metrics->incrementLogin(self::METHOD, false);
 
             return $this->responseAuthenticationFailure();
         }
 
         $this->loginBackoff->recordSuccess($request->email);
+        $this->metrics->incrementLogin(self::METHOD, true);
 
         return $this->responseTokensWithUser($auth);
     }

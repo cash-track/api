@@ -21,6 +21,7 @@ use Cycle\ORM\Parser\Typecast;
 #[ORM\Table(indexes: [
     new ORM\Table\Index(columns: ['nick_name'], unique: true),
     new ORM\Table\Index(columns: ['email'], unique: true),
+    new ORM\Table\Index(columns: ['active_at'], unique: false),
 ])]
 #[Behavior\CreatedAt(field: 'createdAt', column: 'created_at')]
 #[Behavior\UpdatedAt(field: 'updatedAt', column: 'updated_at')]
