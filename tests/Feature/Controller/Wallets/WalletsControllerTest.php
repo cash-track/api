@@ -154,6 +154,44 @@ class WalletsControllerTest extends TestCase implements DatabaseTransaction
         ]);
     }
 
+    public function testCreateWithoutSlugGeneratesCollisionResistantSlug(): void
+    {
+        $auth = $this->makeAuth($this->userFactory->create());
+
+        $response = $this->withAuth($auth)->post('/v1/wallets', [
+            'name' => 'Test',
+            'defaultCurrencyCode' => 'USD',
+        ]);
+
+        $response->assertOk();
+
+        $body = $this->getJsonResponseBody($response);
+
+        $this->assertMatchesRegularExpression('/^test-[0-9a-f]{6}$/', $body['data']['slug']);
+    }
+
+    public function testCreateWithoutSlugTwiceWithSameNameYieldsDifferentSlugs(): void
+    {
+        $auth = $this->makeAuth($this->userFactory->create());
+
+        $firstResponse = $this->withAuth($auth)->post('/v1/wallets', [
+            'name' => 'Test',
+            'defaultCurrencyCode' => 'USD',
+        ]);
+        $secondResponse = $this->withAuth($auth)->post('/v1/wallets', [
+            'name' => 'Test',
+            'defaultCurrencyCode' => 'USD',
+        ]);
+
+        $firstResponse->assertOk();
+        $secondResponse->assertOk();
+
+        $firstSlug = $this->getJsonResponseBody($firstResponse)['data']['slug'];
+        $secondSlug = $this->getJsonResponseBody($secondResponse)['data']['slug'];
+
+        $this->assertNotEquals($firstSlug, $secondSlug);
+    }
+
     public function testCreateThrownException(): void
     {
         $auth = $this->makeAuth($this->userFactory->create());
