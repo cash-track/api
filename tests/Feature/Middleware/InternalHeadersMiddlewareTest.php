@@ -46,6 +46,7 @@ class InternalHeadersMiddlewareTest extends TestCase
         return $captured;
     }
 
+    #[Env('GATEWAY_SECRET', null)]
     public function testSecretUnsetStripsInternalHeadersAndLeavesIpHeadersAlone(): void
     {
         $request = new ServerRequest('GET', '/', self::FORGED_HEADERS, null, '1.1', ['REMOTE_ADDR' => '203.0.113.9']);

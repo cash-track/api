@@ -48,6 +48,7 @@ class RedisUnavailableTest extends TestCase implements DatabaseTransaction
     }
 
     #[Env('REDIS_CONNECTION', self::UNREACHABLE_CONNECTION)]
+    #[Env('ACCESS_TOKEN_PUBLIC_KEY', null)]
     public function testUnauthenticatedJwksEndpointStillRespondsWhenRedisIsUnreachable(): void
     {
         // This route needs no Redis of its own, but AuthMiddleware constructs

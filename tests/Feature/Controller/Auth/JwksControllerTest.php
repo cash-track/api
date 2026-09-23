@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Controller\Auth;
 
+use Spiral\Testing\Attribute\Env;
 use Tests\TestCase;
 
 class JwksControllerTest extends TestCase
 {
+    #[Env('ACCESS_TOKEN_PUBLIC_KEY', null)]
     public function testReturnsEmptyKeySetWhenAccessKeypairNotConfigured(): void
     {
         $response = $this->get('/.well-known/jwks.json');
