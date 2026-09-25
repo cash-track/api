@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace App\Bootloader;
 
 use App\Exception\ViewRenderer;
+use App\Logging\ExceptionLogReporter;
 use Spiral\Boot\AbstractKernel;
 use Spiral\Boot\Bootloader\Bootloader;
 use Spiral\Exceptions\ExceptionHandler;
 use Spiral\Exceptions\Renderer\ConsoleRenderer;
 use Spiral\Exceptions\Renderer\JsonRenderer;
 use Spiral\Exceptions\Reporter\FileReporter;
-use Spiral\Exceptions\Reporter\LoggerReporter;
 use Spiral\Http\ErrorHandler\RendererInterface;
 use Spiral\Http\Middleware\ErrorHandlerMiddleware\EnvSuppressErrors;
 use Spiral\Http\Middleware\ErrorHandlerMiddleware\SuppressErrorsInterface;
@@ -41,10 +41,9 @@ final class ExceptionHandlerBootloader extends Bootloader
         $kernel->running(\Closure::fromCallable([$this, 'addRenderer']));
     }
 
-    public function boot(LoggerReporter $logger, FileReporter $files): void
+    public function boot(ExceptionLogReporter $logger, FileReporter $files): void
     {
-        // Register the logger reporter, that will be used to log the exceptions using
-        // the logger component.
+        // Logs reported exceptions; client errors at debug level.
         $this->handler->addReporter($logger);
 
         // Register the file reporter. It allows you to save detailed information about an exception to a file

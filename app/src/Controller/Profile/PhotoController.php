@@ -52,7 +52,7 @@ final class PhotoController extends AuthAwareController
             $this->logger->error('Unable to store user', [
                 'action' => 'profile.update.photo',
                 'userId' => $this->user->id,
-                'msg'    => $exception->getMessage(),
+                'exception' => $exception,
             ]);
 
             return $this->response->json([

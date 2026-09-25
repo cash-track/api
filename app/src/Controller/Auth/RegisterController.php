@@ -10,6 +10,7 @@ use App\Service\Auth\AuthService;
 use App\Service\Metrics\AppMetricsInterface;
 use App\View\UserView;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Log\LoggerInterface;
 use Spiral\Http\ResponseWrapper;
 use Spiral\Router\Annotation\Route;
 use Spiral\Translator\Traits\TranslatorTrait;
@@ -21,10 +22,11 @@ final class RegisterController extends Controller
     public function __construct(
         protected UserView $userView,
         protected ResponseWrapper $response,
+        LoggerInterface $logger,
         protected readonly AuthService $authService,
         private readonly AppMetricsInterface $metrics,
     ) {
-        parent::__construct($userView, $response);
+        parent::__construct($userView, $response, $logger);
     }
 
     #[Route(route: '/auth/register', name: 'auth.register', methods: 'POST')]
@@ -38,7 +40,7 @@ final class RegisterController extends Controller
             $this->metrics->incrementRegistration(false);
 
             return $this->responseAuthenticationException(
-                error: $exception->getMessage(),
+                exception: $exception,
                 message: $this->say('user_register_exception'),
             );
         }

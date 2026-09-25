@@ -11,7 +11,8 @@ use Psr\Log\LoggerInterface;
 /**
  * Forwards ErrorHandlerMiddleware's 5xx log lines to the default logger, so they reach
  * stdout/Loki in prod. 4xx (bot 404 scans, expired-token 401s, ...) stay out of stdout.
- * Never stops the chain: http.log must still get every error, so handle() always returns false.
+ * Warning, not error: ExceptionLogReporter already logs the 5xx at error; this line only
+ * adds the request path. Never stops the chain: http.log must still get every error.
  */
 final class ForwardServerErrorsHandler extends AbstractHandler
 {
@@ -30,7 +31,7 @@ final class ForwardServerErrorsHandler extends AbstractHandler
     public function handle(LogRecord $record): bool
     {
         if (preg_match(self::PATTERN, $record->message) === 1) {
-            ($this->logger)()->error($record->message, $record->context);
+            ($this->logger)()->warning($record->message, $record->context);
         }
 
         return false;

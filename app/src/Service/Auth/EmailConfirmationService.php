@@ -6,6 +6,7 @@ namespace App\Service\Auth;
 
 use App\Database\EmailConfirmation;
 use App\Database\User;
+use App\Exception\ClientErrorException;
 use App\Mail\EmailConfirmationMail;
 use App\Mail\WelcomeMail;
 use App\Repository\EmailConfirmationRepository;
@@ -32,7 +33,7 @@ class EmailConfirmationService extends HelperService
     public function create(User $user): void
     {
         if ($user->isEmailConfirmed) {
-            throw new \RuntimeException($this->say('email_confirmation_account_already_confirmed'));
+            throw new ClientErrorException($this->say('email_confirmation_account_already_confirmed'));
         }
 
         $confirmation            = new EmailConfirmation();
@@ -59,7 +60,7 @@ class EmailConfirmationService extends HelperService
         $confirmation = $this->repository->findByPK($user->email);
         if ($confirmation instanceof EmailConfirmation) {
             if ($this->isThrottled($confirmation->createdAt)) {
-                throw new \RuntimeException(
+                throw new ClientErrorException(
                     sprintf($this->say('email_confirmation_throttled'), self::RESEND_TIME_LIMIT)
                 );
             }
@@ -76,17 +77,17 @@ class EmailConfirmationService extends HelperService
         $confirmation = $this->repository->findByToken($token);
 
         if (! $confirmation instanceof EmailConfirmation) {
-            throw new \RuntimeException($this->say('email_confirmation_invalid_token'));
+            throw new ClientErrorException($this->say('email_confirmation_invalid_token'));
         }
 
         if ($this->isExpired($confirmation->createdAt)) {
-            throw new \RuntimeException($this->say('email_confirmation_expired'));
+            throw new ClientErrorException($this->say('email_confirmation_expired'));
         }
 
         $user = $this->userRepository->findByEmail((string) $confirmation->email);
 
         if (! $user instanceof User) {
-            throw new \RuntimeException($this->say('email_confirmation_invalid_user'));
+            throw new ClientErrorException($this->say('email_confirmation_invalid_user'));
         }
 
         $user->isEmailConfirmed = true;

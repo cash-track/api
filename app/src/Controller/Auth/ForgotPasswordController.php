@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace App\Controller\Auth;
 
+use App\Exception\ClientErrorException;
 use App\Request\ForgotPasswordCreateRequest;
 use App\Request\ForgotPasswordResetRequest;
 use App\Service\Auth\ForgotPasswordService;
-use App\Service\Auth\ForgotPasswordThrottledException;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Log\LoggerInterface;
 use Spiral\Http\ResponseWrapper;
 use Spiral\Router\Annotation\Route;
 use Spiral\Translator\Traits\TranslatorTrait;
@@ -20,6 +21,7 @@ final class ForgotPasswordController
     public function __construct(
         protected readonly ResponseWrapper $response,
         protected readonly ForgotPasswordService $forgotPasswordService,
+        private readonly LoggerInterface $logger,
     ) {
     }
 
@@ -28,15 +30,13 @@ final class ForgotPasswordController
     {
         try {
             $this->forgotPasswordService->create($request->email);
-        } catch (ForgotPasswordThrottledException $exception) {
-            return $this->response->json([
-                'message' => $exception->getMessage(),
-            ], 400);
         } catch (\Throwable $exception) {
+            $this->logger->error('Unable to create password reset request', ['exception' => $exception]);
+
             return $this->response->json([
                 'message' => $this->say('forgot_password_send_failure'),
                 'error' => $exception->getMessage(),
-            ], 400);
+            ], 500);
         }
 
         return $this->response->json([
@@ -49,11 +49,18 @@ final class ForgotPasswordController
     {
         try {
             $this->forgotPasswordService->reset($request->code, $request->password);
-        } catch (\Throwable $exception) {
+        } catch (ClientErrorException $exception) {
             return $this->response->json([
                 'message' => $this->say('forgot_password_reset_failure'),
                 'error' => $exception->getMessage(),
             ], 400);
+        } catch (\Throwable $exception) {
+            $this->logger->error('Unable to reset password', ['exception' => $exception]);
+
+            return $this->response->json([
+                'message' => $this->say('forgot_password_reset_failure'),
+                'error' => $exception->getMessage(),
+            ], 500);
         }
 
         return $this->response->json([

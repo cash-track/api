@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Sentry;
 
+use App\Redis\RedisUnavailableException;
 use App\Sentry\BeforeSend;
 use OpenTelemetry\API\Trace\Span;
 use OpenTelemetry\API\Trace\SpanContext;
 use Sentry\Event;
+use Sentry\EventHint;
 use Sentry\ExceptionDataBag;
 use Sentry\Frame;
 use Sentry\Stacktrace;
@@ -109,5 +111,42 @@ class BeforeSendTest extends TestCase
 
         $this->assertSame(str_repeat('a', 32), $event?->getTags()['trace_id']);
         $this->assertArrayNotHasKey('tempo', $event?->getContexts() ?? []);
+    }
+
+    public function testSendsSameExceptionOnce(): void
+    {
+        $beforeSend = new BeforeSend();
+        $exception = new \RuntimeException('boom');
+
+        $this->assertNotNull($beforeSend(Event::createEvent(), EventHint::fromArray(['exception' => $exception])));
+        $this->assertNull($beforeSend(Event::createEvent(), EventHint::fromArray(['exception' => $exception])));
+        $this->assertNotNull($beforeSend(
+            Event::createEvent(),
+            EventHint::fromArray(['exception' => new \RuntimeException('boom')]),
+        ));
+    }
+
+    public function testFingerprintsRedisOutageIntoOneIssue(): void
+    {
+        $beforeSend = new BeforeSend();
+
+        $first = $beforeSend(Event::createEvent(), EventHint::fromArray([
+            'exception' => new RedisUnavailableException('Connection refused'),
+        ]));
+        $second = $beforeSend(Event::createEvent(), EventHint::fromArray([
+            'exception' => new RedisUnavailableException('read error on connection'),
+        ]));
+
+        $this->assertSame(['redis-unavailable'], $first?->getFingerprint());
+        $this->assertSame(['redis-unavailable'], $second?->getFingerprint());
+    }
+
+    public function testDoesNotFingerprintOtherRedisExceptions(): void
+    {
+        $event = (new BeforeSend())(Event::createEvent(), EventHint::fromArray([
+            'exception' => new \RedisException('WRONGTYPE'),
+        ]));
+
+        $this->assertSame([], $event?->getFingerprint());
     }
 }

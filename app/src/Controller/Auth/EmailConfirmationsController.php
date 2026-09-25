@@ -6,10 +6,12 @@ namespace App\Controller\Auth;
 
 use App\Controller\AuthAwareController;
 use App\Database\EmailConfirmation;
+use App\Exception\ClientErrorException;
 use App\Repository\EmailConfirmationRepository;
 use App\Service\Auth\EmailConfirmationService;
 use App\View\EmailConfirmationView;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Log\LoggerInterface;
 use Spiral\Auth\AuthContextInterface;
 use Spiral\Http\ResponseWrapper;
 use Spiral\Router\Annotation\Route;
@@ -25,6 +27,7 @@ final class EmailConfirmationsController extends AuthAwareController
         protected readonly EmailConfirmationView $emailConfirmationView,
         protected readonly EmailConfirmationService $emailConfirmationService,
         protected readonly EmailConfirmationRepository $emailConfirmationRepository,
+        private readonly LoggerInterface $logger,
     ) {
         parent::__construct($auth);
     }
@@ -49,11 +52,18 @@ final class EmailConfirmationsController extends AuthAwareController
     {
         try {
             $this->emailConfirmationService->reSend($this->user);
-        } catch (\Throwable $exception) {
+        } catch (ClientErrorException $exception) {
             return $this->response->json([
                 'message' => $this->say('email_confirmation_resend_failure'),
                 'error' => $exception->getMessage(),
             ], 400);
+        } catch (\Throwable $exception) {
+            $this->logger->error('Unable to resend email confirmation', ['user_id' => $this->user->id, 'exception' => $exception]);
+
+            return $this->response->json([
+                'message' => $this->say('email_confirmation_resend_failure'),
+                'error' => $exception->getMessage(),
+            ], 500);
         }
 
         return $this->response->json([

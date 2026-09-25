@@ -57,9 +57,9 @@ class AuthMiddlewareTest extends TestCase
                  ->with(
                      'Failed to update user active_at',
                      $this->callback(function (array $context) {
-                         $this->assertEquals(42, $context['userId']);
-                         $this->assertEquals(\RuntimeException::class, $context['error']);
-                         $this->assertEquals('db down', $context['message']);
+                         $this->assertEquals(42, $context['user_id']);
+                         $this->assertInstanceOf(\RuntimeException::class, $context['exception']);
+                         $this->assertEquals('db down', $context['exception']->getMessage());
 
                          return true;
                      }),

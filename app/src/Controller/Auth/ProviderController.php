@@ -9,6 +9,7 @@ use App\Service\Auth\GoogleAuthService;
 use App\Service\Metrics\AppMetricsInterface;
 use App\View\UserView;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Log\LoggerInterface;
 use Spiral\Http\Request\InputManager;
 use Spiral\Http\ResponseWrapper;
 use Spiral\Router\Annotation\Route;
@@ -23,10 +24,11 @@ final class ProviderController extends Controller
     public function __construct(
         protected UserView $userView,
         protected ResponseWrapper $response,
+        LoggerInterface $logger,
         protected readonly GoogleAuthService $googleAuthService,
         private readonly AppMetricsInterface $metrics,
     ) {
-        parent::__construct($userView, $response);
+        parent::__construct($userView, $response, $logger);
     }
 
     #[Route(route: '/auth/provider/google', name: 'auth.provider.google', methods: 'POST')]
@@ -44,7 +46,7 @@ final class ProviderController extends Controller
         } catch (\Throwable $exception) {
             $this->metrics->incrementLogin(self::METHOD, false);
 
-            return $this->responseAuthenticationException($exception->getMessage());
+            return $this->responseAuthenticationException($exception);
         }
 
         $this->metrics->incrementLogin(self::METHOD, true);

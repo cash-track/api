@@ -20,6 +20,8 @@ final class ReconnectingRedis extends Redis
 
     private ?float $lastAttemptAt = null;
 
+    private bool $down = false;
+
     public function __construct(
         private readonly RedisConfig $config,
         private readonly LoggerInterface $logger,
@@ -77,8 +79,7 @@ final class ReconnectingRedis extends Redis
                 throw new RedisException("Unable to connect to Redis: {$this->getLastError()}");
             }
         } catch (RedisException $exception) {
-            // Repeats every cooldown window: the only signal revocation and rate limiting are off.
-            $this->logger->emergency("Connection to a Redis instance failed [{$uri}]: {$exception->getMessage()}");
+            $this->logFailure($uri, $exception);
 
             return false;
         }
@@ -87,8 +88,34 @@ final class ReconnectingRedis extends Redis
         $this->setOption(Redis::OPT_MAX_RETRIES, $this->config->getMaxRetries());
         $this->setOption(Redis::OPT_SCAN, Redis::SCAN_RETRY);
 
-        $this->logger->info("Connection to a Redis instance has been established [{$uri}]");
+        if ($this->down) {
+            $this->down = false;
+            $this->logger->info("Connection to a Redis instance has been restored [{$uri}]");
+        } else {
+            $this->logger->info("Connection to a Redis instance has been established [{$uri}]");
+        }
 
         return true;
+    }
+
+    /**
+     * Error (and Sentry) once per outage per worker; retries during the same outage stay in Loki only.
+     */
+    private function logFailure(string $uri, RedisException $exception): void
+    {
+        if ($this->down) {
+            $this->logger->warning('Redis instance is still unreachable', [
+                'uri' => $uri,
+                'error' => $exception->getMessage(),
+            ]);
+
+            return;
+        }
+
+        $this->down = true;
+        $this->logger->error('Connection to a Redis instance failed', [
+            'uri' => $uri,
+            'exception' => new RedisUnavailableException($exception->getMessage(), 0, $exception),
+        ]);
     }
 }

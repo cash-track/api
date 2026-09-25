@@ -98,7 +98,7 @@ final class ChargesController extends Controller
                 'action' => 'wallet.charge.create',
                 'id'     => $wallet->id,
                 'userId' => $this->user->id,
-                'msg'    => $exception->getMessage(),
+                'exception' => $exception,
             ]);
 
             return $this->response->json([
@@ -154,7 +154,7 @@ final class ChargesController extends Controller
                 'action' => 'wallet.charge.update',
                 'id'     => $wallet->id,
                 'userId' => $this->user->id,
-                'msg'    => $exception->getMessage(),
+                'exception' => $exception,
             ]);
 
             return $this->response->json([
@@ -190,7 +190,7 @@ final class ChargesController extends Controller
                 'action' => 'wallet.charge.delete',
                 'id'     => $wallet->id,
                 'userId' => $this->user->id,
-                'msg'    => $exception->getMessage(),
+                'exception' => $exception,
             ]);
 
             return $this->response->json([
@@ -230,7 +230,7 @@ final class ChargesController extends Controller
                 'targetId'  => $targetWallet->id,
                 'chargeIds' => $request->chargeIds,
                 'userId'    => $this->user->id,
-                'msg'       => $exception->getMessage(),
+                'exception' => $exception,
             ]);
 
             return $this->response->json([

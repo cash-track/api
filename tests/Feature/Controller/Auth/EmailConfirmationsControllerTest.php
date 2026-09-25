@@ -7,7 +7,9 @@ namespace Tests\Feature\Controller\Auth;
 use App\Database\EntityHeader;
 use App\Database\User;
 use App\Mail\EmailConfirmationMail;
+use App\Service\Auth\EmailConfirmationService;
 use App\Service\Mailer\MailerInterface;
+use PHPUnit\Framework\MockObject\MockObject;
 use Tests\DatabaseTransaction;
 use Tests\Factories\EmailConfirmationFactory;
 use Tests\Factories\UserFactory;
@@ -132,6 +134,7 @@ class EmailConfirmationsControllerTest extends TestCase implements DatabaseTrans
         $confirmation = EmailConfirmationFactory::throttled();
         $confirmation->email = $user->email;
         $confirmation = $this->emailConfirmationFactory->create($confirmation);
+        $this->expectErrorLog(null);
 
         $response = $this->withAuth($auth)->post("/v1/auth/email/confirmation/resend");
 
@@ -146,6 +149,21 @@ class EmailConfirmationsControllerTest extends TestCase implements DatabaseTrans
             'email' => $confirmation->email,
             'token' => $confirmation->token,
         ]);
+    }
+
+    public function testReSendUnexpectedFailureIsLoggedAsError(): void
+    {
+        $auth = $this->makeAuth($this->userFactory->create(UserFactory::emailNotConfirmed()));
+
+        $this->mock(EmailConfirmationService::class, ['reSend'], function (MockObject $mock): void {
+            $mock->expects($this->once())->method('reSend')->willThrowException(new \RuntimeException('db down'));
+        });
+        $this->expectErrorLog('Unable to resend email confirmation');
+
+        $response = $this->withAuth($auth)->post('/v1/auth/email/confirmation/resend');
+
+        $response->assertStatus(500);
+        $this->assertArrayHasKey('message', $this->getJsonResponseBody($response));
     }
 
     public function testReSendRejectAlreadyConfirmed(): void

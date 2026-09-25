@@ -211,12 +211,12 @@ class LoginBackoffServiceTest extends TestCase
 
         $logger = $this->getMockBuilder(LoggerInterface::class)->getMock();
         $logger->expects($this->once())
-               ->method('error')
+               ->method('warning')
                ->with(
                    'Login backoff storage is unavailable; failing open',
                    $this->callback(function (array $context) {
-                       $this->assertEquals(\RedisException::class, $context['error']);
-                       $this->assertEquals('Connection lost', $context['message']);
+                       $this->assertInstanceOf(\RedisException::class, $context['exception']);
+                       $this->assertEquals('Connection lost', $context['exception']->getMessage());
 
                        return true;
                    }),
@@ -236,7 +236,7 @@ class LoginBackoffServiceTest extends TestCase
         $redis->method('hIncrBy')->willThrowException(new \RedisException('Connection lost'));
 
         $logger = $this->getMockBuilder(LoggerInterface::class)->getMock();
-        $logger->expects($this->once())->method('error');
+        $logger->expects($this->once())->method('warning');
 
         $service = new LoginBackoffService($redis, $logger);
 
@@ -252,7 +252,7 @@ class LoginBackoffServiceTest extends TestCase
         $redis->method('del')->willThrowException(new \RedisException('Connection lost'));
 
         $logger = $this->getMockBuilder(LoggerInterface::class)->getMock();
-        $logger->expects($this->once())->method('error');
+        $logger->expects($this->once())->method('warning');
 
         $service = new LoginBackoffService($redis, $logger);
 

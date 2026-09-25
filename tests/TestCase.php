@@ -28,6 +28,7 @@ abstract class TestCase extends BaseTestCase
 
     public const ENV = [
         'REDIS_CONNECTION' => '',
+        'SENTRY_DSN' => '',
     ];
 
     protected function setUp(): void

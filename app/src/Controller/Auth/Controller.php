@@ -7,6 +7,7 @@ namespace App\Controller\Auth;
 use App\Service\Auth\Authentication;
 use App\View\UserView;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Log\LoggerInterface;
 use Spiral\Http\ResponseWrapper;
 use Spiral\Translator\Traits\TranslatorTrait;
 
@@ -17,6 +18,7 @@ abstract class Controller
     public function __construct(
         protected UserView $userView,
         protected ResponseWrapper $response,
+        protected LoggerInterface $logger,
     ) {
     }
 
@@ -46,10 +48,15 @@ abstract class Controller
         ], 401);
     }
 
-    protected function responseAuthenticationException(string $error = '', ?string $message = null): ResponseInterface
+    protected function responseAuthenticationException(\Throwable $exception, ?string $message = null): ResponseInterface
     {
+        $this->logger->error('Unexpected authentication failure', [
+            'controller' => static::class,
+            'exception' => $exception,
+        ]);
+
         return $this->response->json([
-            'error' => $error,
+            'error' => $exception->getMessage(),
             'message' => $message ?? $this->say('error_authentication_exception'),
         ], 500);
     }

@@ -476,6 +476,8 @@ paths:
           description: Email confirmed successfully
         "400":
           $ref: "#/components/responses/BadRequest"
+        "500":
+          $ref: "#/components/responses/InternalError"
 
   /v1/auth/email/confirmation/resend:
     post:
@@ -499,6 +501,8 @@ paths:
           description: Confirmation email sent
         "400":
           $ref: "#/components/responses/BadRequest"
+        "500":
+          $ref: "#/components/responses/InternalError"
         "409":
           $ref: "#/components/responses/IdempotencyKeyConflict"
         "422":
@@ -512,7 +516,9 @@ paths:
       summary: Request a password reset
       description: |
         Sends a password reset code to the provided email address if an account exists.
-        Always returns 200 to avoid user enumeration.
+        Returns the same 200 body for unknown emails and for repeat requests inside the resend
+        window (no mail is sent), so the response never reveals whether an account exists.
+        422 is returned only for a missing or malformed email.
       tags: [Password]
       security: []
       parameters:
@@ -535,13 +541,15 @@ paths:
           headers:
             Idempotency-Replayed:
               $ref: "#/components/headers/IdempotencyReplayed"
-          description: Reset email sent (if account exists)
+          description: Request accepted (mail sent only if the account exists and is not throttled)
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/MessageResponse"
         "400":
           $ref: "#/components/responses/BadRequest"
+        "500":
+          $ref: "#/components/responses/InternalError"
         "422":
           $ref: "#/components/responses/ValidationOrIdempotencyMismatch"
         "409":
@@ -576,6 +584,8 @@ paths:
                 $ref: "#/components/schemas/MessageResponse"
         "400":
           $ref: "#/components/responses/BadRequest"
+        "500":
+          $ref: "#/components/responses/InternalError"
         "422":
           $ref: "#/components/responses/ValidationOrIdempotencyMismatch"
         "409":
@@ -955,6 +965,8 @@ paths:
                 $ref: "#/components/schemas/Passkey"
         "400":
           $ref: "#/components/responses/BadRequest"
+        "500":
+          $ref: "#/components/responses/InternalError"
         "422":
           $ref: "#/components/responses/ValidationOrIdempotencyMismatch"
         "503":
@@ -3717,6 +3729,25 @@ components:
             oneOf:
               - $ref: "#/components/schemas/ValidationError"
               - $ref: "#/components/schemas/Error"
+
+    InternalError:
+      description: |
+        Unexpected server-side failure (database, mail transport, etc.). Logged and reported;
+        safe to retry. Not cached by `Idempotency-Key`.
+      headers:
+        X-Ct-Api-Version:
+          $ref: "#/components/headers/ApiVersion"
+        X-Ct-Api-Sha:
+          $ref: "#/components/headers/ApiSha"
+        X-Ct-Trace-Id:
+          $ref: "#/components/headers/TraceId"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+          example:
+            error: Transport exception
+            message: Unable to reset your password.
 
     ServiceUnavailable:
       description: |

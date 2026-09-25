@@ -16,7 +16,7 @@ class ForwardServerErrorsHandlerTest extends TestCase
     {
         $logger = $this->getMockBuilder(LoggerInterface::class)->getMock();
         $logger->expects($this->once())
-            ->method('error')
+            ->method('warning')
             ->with($this->stringContains('caused the error 500 '), ['foo' => 'bar']);
 
         $handler = new ForwardServerErrorsHandler(fn (): LoggerInterface => $logger);
@@ -32,7 +32,7 @@ class ForwardServerErrorsHandlerTest extends TestCase
     public function testDoesNotForward404(): void
     {
         $logger = $this->getMockBuilder(LoggerInterface::class)->getMock();
-        $logger->expects($this->never())->method('error');
+        $logger->expects($this->never())->method('warning');
 
         $handler = new ForwardServerErrorsHandler(fn (): LoggerInterface => $logger);
 
@@ -46,7 +46,7 @@ class ForwardServerErrorsHandlerTest extends TestCase
     public function testDoesNotForward401(): void
     {
         $logger = $this->getMockBuilder(LoggerInterface::class)->getMock();
-        $logger->expects($this->never())->method('error');
+        $logger->expects($this->never())->method('warning');
 
         $handler = new ForwardServerErrorsHandler(fn (): LoggerInterface => $logger);
 

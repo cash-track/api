@@ -76,7 +76,7 @@ final class LimitsController extends Controller
                 'action'   => 'wallet.limit.create',
                 'walletId' => $wallet->id,
                 'userId'   => $this->user->id,
-                'msg'      => $exception->getMessage(),
+                'exception' => $exception,
             ]);
 
             return $this->response->json([
@@ -117,7 +117,7 @@ final class LimitsController extends Controller
                 'walletId' => $wallet->id,
                 'limitId'  => $limit->id,
                 'userId'   => $this->user->id,
-                'msg'      => $exception->getMessage(),
+                'exception' => $exception,
             ]);
 
             return $this->response->json([
@@ -150,7 +150,7 @@ final class LimitsController extends Controller
             $this->logger->error('Unable to delete limit', [
                 'action' => 'wallet.limit.delete',
                 'id'     => $limitId,
-                'msg'    => $exception->getMessage(),
+                'exception' => $exception,
             ]);
 
             return $this->response->json([
@@ -185,7 +185,7 @@ final class LimitsController extends Controller
                 'walletId' => $wallet->id,
                 'sourceWalletId' => $sourceWallet->id,
                 'userId'   => $this->user->id,
-                'msg'      => $exception->getMessage(),
+                'exception' => $exception,
             ]);
 
             return $this->response->json([

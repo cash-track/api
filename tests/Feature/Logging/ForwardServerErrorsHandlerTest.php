@@ -17,7 +17,7 @@ use Tests\TestCase;
  */
 class ForwardServerErrorsHandlerTest extends TestCase implements DatabaseTransaction
 {
-    public function testUncaught500IsForwardedToDefaultLogger(): void
+    public function testUncaught500IsForwardedToDefaultLoggerAsWarning(): void
     {
         // Create the user with the real repository first: UserFactory needs it too,
         // and its constructor is disabled once mocked below.
@@ -29,7 +29,7 @@ class ForwardServerErrorsHandlerTest extends TestCase implements DatabaseTransac
 
         $this->mock(LoggerInterface::class, [], function (MockObject $mock) {
             $mock->expects($this->once())
-                ->method('error')
+                ->method('warning')
                 ->with($this->stringContains('caused the error 500 '));
         });
 
@@ -41,7 +41,7 @@ class ForwardServerErrorsHandlerTest extends TestCase implements DatabaseTransac
     public function testUncaught404IsNotForwarded(): void
     {
         $this->mock(LoggerInterface::class, [], function (MockObject $mock) {
-            $mock->expects($this->never())->method('error');
+            $mock->expects($this->never())->method('warning');
         });
 
         $response = $this->get('/this-route-does-not-exist');

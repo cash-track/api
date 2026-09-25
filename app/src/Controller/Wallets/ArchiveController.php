@@ -43,7 +43,7 @@ final class ArchiveController extends Controller
             $this->logger->error('Unable to archive wallet', [
                 'action' => 'wallet.archive',
                 'id'     => $wallet->id,
-                'msg'    => $exception->getMessage(),
+                'exception' => $exception,
             ]);
 
             return $this->response->json([
@@ -70,7 +70,7 @@ final class ArchiveController extends Controller
             $this->logger->error('Unable to un-archive wallet', [
                 'action' => 'wallet.unarchive',
                 'id'     => $wallet->id,
-                'msg'    => $exception->getMessage(),
+                'exception' => $exception,
             ]);
 
             return $this->response->json([

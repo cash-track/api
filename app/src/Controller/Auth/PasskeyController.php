@@ -15,6 +15,7 @@ use App\Service\Auth\Passkey\PasskeyService;
 use App\Service\Metrics\AppMetricsInterface;
 use App\View\UserView;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Log\LoggerInterface;
 use Spiral\Http\ResponseWrapper;
 use Spiral\Router\Annotation\Route;
 use Spiral\Translator\Traits\TranslatorTrait;
@@ -29,11 +30,12 @@ final class PasskeyController extends Controller
     public function __construct(
         protected UserView $userView,
         protected ResponseWrapper $response,
+        LoggerInterface $logger,
         protected readonly AuthService $authService,
         protected readonly PasskeyService $passkeyService,
         private readonly AppMetricsInterface $metrics,
     ) {
-        parent::__construct($userView, $response);
+        parent::__construct($userView, $response, $logger);
     }
 
     #[Route(route: '/auth/login/passkey/init', name: 'auth.login.passkey.init', methods: 'GET')]
@@ -48,7 +50,7 @@ final class PasskeyController extends Controller
             );
         } catch (\Throwable $exception) {
             return $this->responseAuthenticationException(
-                error: $exception->getMessage(),
+                exception: $exception,
                 message: $this->say('passkey_init_exception'),
             );
         }
@@ -99,7 +101,7 @@ final class PasskeyController extends Controller
         } catch (\Throwable $exception) {
             $this->metrics->incrementLogin(self::METHOD, false);
 
-            return $this->responseAuthenticationException($exception->getMessage());
+            return $this->responseAuthenticationException($exception);
         }
 
         try {
@@ -107,7 +109,7 @@ final class PasskeyController extends Controller
         } catch (\Throwable $exception) {
             $this->metrics->incrementLogin(self::METHOD, false);
 
-            return $this->responseAuthenticationException($exception->getMessage());
+            return $this->responseAuthenticationException($exception);
         }
 
         $this->metrics->incrementLogin(self::METHOD, true);

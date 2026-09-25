@@ -200,6 +200,7 @@ class PasskeyControllerTest extends TestCase implements DatabaseTransaction
                     ->willThrowException(new \RuntimeException('broken pipe'));
 
         $this->getContainer()->bind(PasskeyService::class, fn () => $serviceMock);
+        $this->expectErrorLog('Unable to init passkey registration');
 
         $passkey = PasskeyFactory::make();
 
@@ -319,18 +320,37 @@ class PasskeyControllerTest extends TestCase implements DatabaseTransaction
                 return true;
             },
         );
+        $this->expectErrorLog(null);
 
         $response = $this->withAuth($auth)->post('/v1/profile/passkey', [
             'challenge' => $challenge,
             'data' => $data,
         ]);
 
-        $response->assertStatus(500);
+        $response->assertStatus(400);
 
         $body = $this->getJsonResponseBody($response);
 
         $this->assertArrayHasKey('message', $body);
         $this->assertArrayHasKey('error', $body);
+    }
+
+    public function testStoreInvalidClientData(): void
+    {
+        $auth = $this->makeAuth($this->userFactory->create());
+        $this->expectErrorLog(null);
+
+        $response = $this->withAuth($auth)->post('/v1/profile/passkey', [
+            'challenge' => Fixtures::string(32),
+            'data' => Base64UrlSafe::encodeUnpadded('{"not":"a credential"}'),
+        ]);
+
+        $response->assertStatus(400);
+
+        $body = $this->getJsonResponseBody($response);
+
+        $this->assertArrayHasKey('message', $body);
+        $this->assertSame('Invalid client data', $body['error']);
     }
 
     public function testStoreException(): void
@@ -351,6 +371,7 @@ class PasskeyControllerTest extends TestCase implements DatabaseTransaction
                     ->willThrowException(new \RuntimeException('broken pipe'));
 
         $this->getContainer()->bind(PasskeyService::class, fn () => $serviceMock);
+        $this->expectErrorLog('Unable to store passkey');
 
         $response = $this->withAuth($auth)->post('/v1/profile/passkey', [
             'challenge' => $challenge,
@@ -423,6 +444,7 @@ class PasskeyControllerTest extends TestCase implements DatabaseTransaction
                   ->willThrowException(new \RuntimeException('broken pipe'));
 
         $this->getContainer()->bind(PasskeyService::class, fn () => $storeMock);
+        $this->expectErrorLog('Unable to delete passkey');
 
         $response = $this->withAuth($auth)->delete("/v1/profile/passkey/{$passkey->id}");
 

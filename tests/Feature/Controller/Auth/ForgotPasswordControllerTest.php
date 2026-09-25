@@ -9,7 +9,9 @@ use App\Database\User;
 use App\Mail\ForgotPasswordMail;
 use App\Repository\ForgotPasswordRequestRepository;
 use App\Repository\UserRepository;
+use App\Service\Auth\ForgotPasswordService;
 use App\Service\Mailer\MailerInterface;
+use PHPUnit\Framework\MockObject\MockObject;
 use Tests\DatabaseTransaction;
 use Tests\Factories\ForgotPasswordRequestFactory;
 use Tests\Factories\UserFactory;
@@ -75,10 +77,35 @@ class ForgotPasswordControllerTest extends TestCase implements DatabaseTransacti
         ]);
     }
 
-    public function testCreateValidationFails(): void
+    public function testCreateUnknownEmailIsIndistinguishableFromKnown(): void
+    {
+        $user = $this->userFactory->create();
+
+        $mock = $this->getMockBuilder(MailerInterface::class)
+                     ->disableOriginalConstructor()
+                     ->getMock();
+
+        // Only the known email gets a mail.
+        $mock->expects($this->once())->method('send');
+
+        $this->getContainer()->bind(MailerInterface::class, fn () => $mock);
+        $this->expectErrorLog(null);
+
+        $unknownEmail = Fixtures::email();
+        $unknown = $this->post('/v1/auth/password/forgot', ['email' => $unknownEmail]);
+        $known = $this->post('/v1/auth/password/forgot', ['email' => $user->email]);
+
+        $unknown->assertOk();
+        $known->assertOk();
+        $this->assertSame((string) $known->getOriginalResponse()->getBody(), (string) $unknown->getOriginalResponse()->getBody());
+        $this->assertDatabaseHas('forgot_password_requests', ['email' => $user->email]);
+        $this->assertDatabaseMissing('forgot_password_requests', ['email' => $unknownEmail]);
+    }
+
+    public function testCreateMalformedEmailFails(): void
     {
         $response = $this->post('/v1/auth/password/forgot', [
-            'email' => Fixtures::email(),
+            'email' => 'not-an-email',
         ]);
 
         $response->assertUnprocessable();
@@ -89,13 +116,15 @@ class ForgotPasswordControllerTest extends TestCase implements DatabaseTransacti
         $this->assertArrayHasKey('email', $body['errors']);
     }
 
-    public function testCreateThrottled(): void
+    public function testCreateThrottledIsIndistinguishableFromSuccess(): void
     {
         $user = $this->userFactory->create();
 
         $mock = $this->getMockBuilder(MailerInterface::class)
                      ->disableOriginalConstructor()
                      ->getMock();
+
+        $mock->expects($this->never())->method('send');
 
         $this->getContainer()->bind(MailerInterface::class, fn () => $mock);
 
@@ -107,15 +136,15 @@ class ForgotPasswordControllerTest extends TestCase implements DatabaseTransacti
             'email' => $user->email,
         ]);
 
-        $response->assertStatus(400);
+        $response->assertOk();
 
-        $body = $this->getJsonResponseBody($response);
+        $this->assertSame(['message' => $this->getJsonResponseBody($this->post('/v1/auth/password/forgot', [
+            'email' => Fixtures::email(),
+        ]))['message']], $this->getJsonResponseBody($response));
 
-        $this->assertArrayHasKey('message', $body);
-
-
-        $this->assertDatabaseCount(1, 'forgot_password_requests', [
+        $this->assertDatabaseHas('forgot_password_requests', [
             'email' => $user->email,
+            'code' => $forgotPasswordRequest->code,
         ]);
     }
 
@@ -169,61 +198,18 @@ class ForgotPasswordControllerTest extends TestCase implements DatabaseTransacti
              ->willThrowException(new \RuntimeException('Transport exception'));
 
         $this->getContainer()->bind(MailerInterface::class, fn () => $mock);
+        $this->expectErrorLog('Unable to create password reset request');
 
         $response = $this->post('/v1/auth/password/forgot', [
             'email' => $user->email,
         ]);
 
-        $response->assertStatus(400);
+        $response->assertStatus(500);
 
         $body = $this->getJsonResponseBody($response);
 
         $this->assertArrayHasKey('message', $body);
         $this->assertArrayHasKey('error', $body);
-    }
-
-    public function testCreateCannotResolveUserFails(): void
-    {
-        $user = $this->userFactory->create();
-
-        $mock = $this->getMockBuilder(MailerInterface::class)
-                     ->disableOriginalConstructor()
-                     ->getMock();
-
-        $mock->expects($this->never())
-             ->method('send');
-
-        $this->getContainer()->bind(MailerInterface::class, fn () => $mock);
-
-        $mock = $this->getMockBuilder(UserRepository::class)
-                     ->disableOriginalConstructor()
-                     ->onlyMethods(['findByEmail', 'findOne'])
-                     ->getMock();
-
-        $mock->expects($this->once())
-             ->method('findByEmail')
-             ->willReturn(null);
-
-        $mock->expects($this->once())
-             ->method('findOne')
-             ->willReturn(ForgotPasswordRequestFactory::make());
-
-        $this->getContainer()->bind(UserRepository::class, fn () => $mock);
-
-        $response = $this->post('/v1/auth/password/forgot', [
-            'email' => $user->email,
-        ]);
-
-        $response->assertStatus(400);
-
-        $body = $this->getJsonResponseBody($response);
-
-        $this->assertArrayHasKey('message', $body);
-        $this->assertArrayHasKey('error', $body);
-
-        $this->assertDatabaseMissing('forgot_password_requests', [
-            'email' => $user->email,
-        ]);
     }
 
     public function testResetUpdatesPassword(): void
@@ -300,6 +286,7 @@ class ForgotPasswordControllerTest extends TestCase implements DatabaseTransacti
         $this->requestFactory->create($forgotPasswordRequest);
 
         $password = Fixtures::string();
+        $this->expectErrorLog(null);
 
         $response = $this->post('/v1/auth/password/reset', [
             'code' => $forgotPasswordRequest->code,
@@ -315,6 +302,29 @@ class ForgotPasswordControllerTest extends TestCase implements DatabaseTransacti
         $this->assertArrayHasKey('error', $body);
 
         $this->assertUserCannotLogin($user, $password);
+    }
+
+    public function testResetUnexpectedFailureIsLoggedAsError(): void
+    {
+        $this->mock(ForgotPasswordService::class, ['reset'], function (MockObject $mock): void {
+            $mock->expects($this->once())->method('reset')->willThrowException(new \RuntimeException('db down'));
+        });
+        $this->expectErrorLog('Unable to reset password');
+
+        $forgotPasswordRequest = ForgotPasswordRequestFactory::make();
+        $forgotPasswordRequest->email = $this->userFactory->create()->email;
+        $this->requestFactory->create($forgotPasswordRequest);
+
+        $password = Fixtures::string();
+
+        $response = $this->post('/v1/auth/password/reset', [
+            'code' => $forgotPasswordRequest->code,
+            'password' => $password,
+            'passwordConfirmation' => $password,
+        ]);
+
+        $response->assertStatus(500);
+        $this->assertArrayHasKey('message', $this->getJsonResponseBody($response));
     }
 
     public function testResetFailsByMissingRequest(): void

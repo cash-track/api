@@ -8,6 +8,7 @@ use App\Request\RefreshTokenRequest;
 use App\Service\Auth\AuthService;
 use App\View\UserView;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Log\LoggerInterface;
 use Spiral\Http\ResponseWrapper;
 use Spiral\Router\Annotation\Route;
 
@@ -16,9 +17,10 @@ final class RefreshController extends Controller
     public function __construct(
         protected UserView $userView,
         protected ResponseWrapper $response,
+        LoggerInterface $logger,
         protected readonly AuthService $authService,
     ) {
-        parent::__construct($userView, $response);
+        parent::__construct($userView, $response, $logger);
     }
 
     #[Route(route: '/auth/refresh', name: 'auth.refresh', methods: 'POST')]

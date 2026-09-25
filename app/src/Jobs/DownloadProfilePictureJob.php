@@ -29,15 +29,11 @@ final class DownloadProfilePictureJob extends JobHandler
             'mime' => $mime,
         ] = $payload;
 
-        $logger->info('Downloading remote profile photo', [
-            'id' => $id,
-            'payload' => $payload,
-            'headers' => $headers,
-        ]);
+        $logger->debug('Downloading remote profile photo', ['id' => $id, 'user_id' => $userId]);
 
         $user = $repository->findByPK($userId);
         if (! $user instanceof User) {
-            $logger->error('User is not found', ['id' => $id]);
+            $logger->warning('Profile photo download skipped: user not found', ['id' => $id, 'user_id' => $userId]);
             return;
         }
 
@@ -45,18 +41,21 @@ final class DownloadProfilePictureJob extends JobHandler
 
         $fileName = $storageService->storeRemoteProfilePhoto($url, $ext, $mime);
         if ($fileName === null) {
-            $logger->error('Unable to download remote profile photo', ['id' => $id]);
             return;
         }
 
-        $logger->info("Remote profile photo saved", ['id' => $id, 'fileName' => $fileName]);
+        $logger->debug('Remote profile photo saved', ['id' => $id, 'fileName' => $fileName]);
 
         $user->photo = $fileName;
 
         try {
             $userService->store($user);
         } catch (\Throwable $exception) {
-            $logger->error('Unable to attach profile photo to user', ['id' => $id, 'error' => $exception->getMessage()]);
+            $logger->error('Unable to attach profile photo to user', [
+                'id' => $id,
+                'user_id' => $userId,
+                'exception' => $exception,
+            ]);
             return;
         }
 
@@ -64,6 +63,6 @@ final class DownloadProfilePictureJob extends JobHandler
             $storageService->removeProfilePhoto($oldFileName);
         }
 
-        $logger->info('Remote profile photo attached to user', ['id' => $id, 'userId' => $userId]);
+        $logger->info('Remote profile photo attached to user', ['id' => $id, 'user_id' => $userId]);
     }
 }

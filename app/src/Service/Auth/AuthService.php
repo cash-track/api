@@ -100,8 +100,8 @@ class AuthService
             $this->userService->store($user);
         } catch (\Throwable $exception) {
             $this->logger->error('Unable to store user while update password', [
-                'userId' => $user->id,
-                'message'    => $exception->getMessage(),
+                'user_id' => $user->id,
+                'exception' => $exception,
             ]);
 
             throw $exception;
@@ -149,32 +149,13 @@ class AuthService
 
     protected function storeUser(User $user): User
     {
-        try {
-            return $this->userService->store($user);
-        } catch (\Throwable $exception) {
-            $this->logger->error('Error while storing user', [
-                'error' => get_class($exception),
-                'message' => $exception->getMessage(),
-                'code' => $exception->getCode(),
-            ]);
-
-            throw new \RuntimeException($exception->getMessage(), (int) $exception->getCode(), $exception);
-        }
+        // Callers log the failure.
+        return $this->userService->store($user);
     }
 
     protected function storeGoogleAccount(GoogleAccount $googleAccount): GoogleAccount
     {
-        try {
-            return $this->googleAccountService->store($googleAccount);
-        } catch (\Throwable $exception) {
-            $this->logger->error('Error while storing googleAccount', [
-                'error' => get_class($exception),
-                'message' => $exception->getMessage(),
-                'code' => $exception->getCode(),
-            ]);
-
-            throw new \RuntimeException($exception->getMessage(), (int) $exception->getCode(), $exception);
-        }
+        return $this->googleAccountService->store($googleAccount);
     }
 
     protected function initiateEmailConfirmation(User $user): void
@@ -182,10 +163,9 @@ class AuthService
         try {
             $this->emailConfirmationService->create($user);
         } catch (\Throwable $exception) {
-            $this->logger->error('Error while creating email confirmation request', [
-                'error' => get_class($exception),
-                'message' => $exception->getMessage(),
-                'code' => $exception->getCode(),
+            $this->logger->error('Unable to create email confirmation request', [
+                'user_id' => $user->id,
+                'exception' => $exception,
             ]);
         }
     }

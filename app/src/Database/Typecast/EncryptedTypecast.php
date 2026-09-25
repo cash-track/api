@@ -75,8 +75,7 @@ final class EncryptedTypecast implements CastableInterface, UncastableInterface
 
                 $this->logger->warning('Unable to decrypt database column', [
                     'column' => $column,
-                    'message' => $exception->getMessage(),
-                    'value' => $original,
+                    'exception' => $exception,
                 ]);
             }
         }
@@ -95,9 +94,9 @@ final class EncryptedTypecast implements CastableInterface, UncastableInterface
             try {
                 $data[$column] = $this->encrypter->encrypt($data[$column], $this->getCipherByRule($rule));
             } catch (EncrypterException $exception) {
-                $this->logger->warning('Unable to encrypt database column', [
+                $this->logger->error('Unable to encrypt database column', [
                     'column' => $column,
-                    'message' => $exception->getMessage(),
+                    'exception' => $exception,
                 ]);
             }
         }

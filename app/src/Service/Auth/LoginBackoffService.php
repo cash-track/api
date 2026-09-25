@@ -131,9 +131,6 @@ final class LoginBackoffService
 
     private function logUnavailable(\Throwable $exception): void
     {
-        $this->logger->error('Login backoff storage is unavailable; failing open', [
-            'error' => get_class($exception),
-            'message' => $exception->getMessage(),
-        ]);
+        $this->logger->warning('Login backoff storage is unavailable; failing open', ['exception' => $exception]);
     }
 }

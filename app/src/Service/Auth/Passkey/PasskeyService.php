@@ -187,6 +187,9 @@ class PasskeyService
     }
 
     /**
+     * @throws InvalidClientResponseException
+     * @throws InvalidChallengeException
+     * @throws \Webauthn\Exception\WebauthnException
      * @throws PasskeyServiceUnavailableException
      */
     public function store(User $user, string $challenge, string $data): Passkey
@@ -195,14 +198,18 @@ class PasskeyService
             $this->getCeremonyStepManagerFactory()->creationCeremony(),
         );
 
-        $credential = $this->getSerializer()->deserialize(self::decode($data), PublicKeyCredential::class, 'json');
-        $credential->response instanceof AuthenticatorAttestationResponse || throw new \RuntimeException('Invalid response data');
+        try {
+            $credential = $this->getSerializer()->deserialize(self::decode($data), PublicKeyCredential::class, 'json');
+            $credential->response instanceof AuthenticatorAttestationResponse || throw new \RuntimeException('Invalid response data');
+        } catch (\Throwable $exception) {
+            throw new InvalidClientResponseException('Invalid client data', (int) $exception->getCode(), $exception);
+        }
 
         $creationOptions = $this->getCreationOptions($challenge);
         (
             $creationOptions instanceof CreationChallenge &&
             $creationOptions->options instanceof PublicKeyCredentialCreationOptions
-        ) || throw new \RuntimeException('Invalid challenge');
+        ) || throw new InvalidChallengeException('Invalid challenge');
 
         $credentialSource = $authenticatorAttestationResponseValidator->check(
             $credential->response,
@@ -382,10 +389,7 @@ class PasskeyService
     /** Covers a connected client failing mid-command; logs the original exception, which the response drops. */
     private function unavailable(\Throwable $exception): PasskeyServiceUnavailableException
     {
-        $this->logger->error('Passkey challenge storage is unavailable', [
-            'error' => get_class($exception),
-            'message' => $exception->getMessage(),
-        ]);
+        $this->logger->warning('Passkey challenge storage is unavailable', ['exception' => $exception]);
 
         return new PasskeyServiceUnavailableException(
             'Passkey challenge storage is currently unavailable.',
