@@ -23,15 +23,14 @@ final class SendMailJob extends JobHandler
         if (! $mail instanceof Mail) {
             $logger->error('Unexpected mail in payload', [
                 'id' => $id,
-                'payload' => print_r($mail, true),
+                'exception' => new \UnexpectedValueException(sprintf('%s is not a Mail', $mail::class)),
             ]);
             return;
         }
 
-        $logger->info('Sending mail job', [
+        $logger->debug('Sending mail job', [
             'id' => $id,
-            'payload' => get_class($mail),
-            'headers' => $headers,
+            'mail' => $mail::class,
         ]);
 
         $mailer->sendNow($mail);

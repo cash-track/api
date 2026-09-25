@@ -12,6 +12,7 @@ use App\Service\UserOptionsService;
 use App\Service\UserService;
 use App\View\WalletsView;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Log\LoggerInterface;
 use Spiral\Auth\AuthContextInterface;
 use Spiral\Http\Request\InputManager;
 use Spiral\Http\ResponseWrapper;
@@ -27,6 +28,7 @@ final class ListController extends Controller
         private readonly UserOptionsService $userOptionsService,
         private readonly SortService $sortService,
         private readonly UserService $userService,
+        private readonly LoggerInterface $logger,
     ) {
         parent::__construct($auth);
     }
@@ -52,7 +54,11 @@ final class ListController extends Controller
         try {
             $this->sortService->set($this->user, SortType::Wallets, $request->sort);
             $this->userService->store($this->user);
-        } catch (\Throwable) {
+        } catch (\Throwable $exception) {
+            $this->logger->error('Unable to store wallets sort', [
+                'user_id' => $this->user->id,
+                'exception' => $exception,
+            ]);
         }
 
         return $this->response->create(200);

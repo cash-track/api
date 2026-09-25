@@ -214,7 +214,7 @@ class PhotoStorageServiceTest extends TestCase
                        $this->isType('string'),
                        $this->callback(static function (array $context) use ($fileName, $s3Exception): bool {
                            return ($context['filename'] ?? null) === $fileName
-                               && ($context['error'] ?? null) === $s3Exception->getMessage();
+                               && ($context['exception'] ?? null) === $s3Exception;
                        }),
                    );
 

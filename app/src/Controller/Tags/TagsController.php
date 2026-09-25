@@ -49,6 +49,12 @@ final class TagsController extends AuthAwareController
         try {
             $tag = $this->tagService->create($request->createTag(), $this->user);
         } catch (\Throwable $exception) {
+            $this->logger->error('Unable to create tag', [
+                'action' => 'tag.create',
+                'user_id' => $this->user->id,
+                'exception' => $exception,
+            ]);
+
             return $this->response->json([
                 'message' => $this->say('tag_create_exception'),
                 'error' => $exception->getMessage(),
@@ -79,7 +85,7 @@ final class TagsController extends AuthAwareController
             $this->logger->error('Unable to store tag', [
                 'action' => 'tag.update',
                 'id'     => $tag->id,
-                'msg'    => $exception->getMessage(),
+                'exception' => $exception,
             ]);
 
             return $this->response->json([
@@ -108,7 +114,7 @@ final class TagsController extends AuthAwareController
             $this->logger->error('Unable to delete tag', [
                 'action' => 'tag.delete',
                 'id'     => $tag->id,
-                'msg'    => $exception->getMessage(),
+                'exception' => $exception,
             ]);
 
             return $this->response->json([

@@ -71,7 +71,7 @@ final class UsersController extends Controller
                 'id'       => $wallet->id,
                 'userId'   => $user->id,
                 'sharerId' => $this->user->id,
-                'msg'      => $exception->getMessage(),
+                'exception' => $exception,
             ]);
 
             return $this->response->json([
@@ -120,7 +120,7 @@ final class UsersController extends Controller
                 'id'        => $wallet->id,
                 'userId'    => $user->id,
                 'revokerId' => $this->user->id,
-                'msg'       => $exception->getMessage(),
+                'exception' => $exception,
             ]);
 
             return $this->response->json([

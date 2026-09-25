@@ -43,7 +43,7 @@ final class ActiveController extends Controller
             $this->logger->error('Unable to activate wallet', [
                 'action' => 'wallet.activate',
                 'id'     => $wallet->id,
-                'msg'    => $exception->getMessage(),
+                'exception' => $exception,
             ]);
 
             return $this->response->json([
@@ -70,7 +70,7 @@ final class ActiveController extends Controller
             $this->logger->error('Unable to disable wallet', [
                 'action' => 'wallet.disable',
                 'id'     => $wallet->id,
-                'msg'    => $exception->getMessage(),
+                'exception' => $exception,
             ]);
 
             return $this->response->json([

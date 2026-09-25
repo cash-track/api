@@ -31,7 +31,7 @@ return [
     'email_confirmation_resend_ok'       => 'Confirmation message has been sent.',
 
     'forgot_password_send_failure'  => 'Unable to reset your password.',
-    'forgot_password_sent'          => 'Email with reset password link has been sent.',
+    'forgot_password_sent'          => 'If an account exists for this email, a password reset link has been sent.',
     'forgot_password_reset_failure' => 'Unable to reset your password.',
     'forgot_password_reset_ok'      => 'Your password has been changed.',
 
@@ -84,9 +84,6 @@ return [
     'email_confirmation_invalid_token'             => 'Wrong confirmation token.',
     'email_confirmation_expired'                   => 'Confirmation link are expired.',
     'email_confirmation_invalid_user'              => 'Unable to find user linked to confirmation link.',
-
-    'forgot_password_invalid_user' => 'Unable to find user by email.',
-    'forgot_password_throttled'    => 'Previous request was created in less than %d seconds.',
     'forgot_password_invalid_code' => 'Wrong password reset code',
     'forgot_password_expired'      => 'Password reset link are expired',
     'forgot_password_missing_user' => 'Unable to find user linked to password reset link',

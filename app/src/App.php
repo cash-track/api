@@ -23,6 +23,7 @@ use Spiral\Router\Bootloader as Router;
 use Spiral\Scaffolder\Bootloader\ScaffolderBootloader;
 use Spiral\Scheduler\Bootloader\SchedulerBootloader;
 use Spiral\SendIt\Bootloader\MailerBootloader;
+use Spiral\Sentry\Bootloader\SentryReporterBootloader;
 use Spiral\Cycle\Bootloader as CycleBridge;
 use Spiral\RoadRunnerBridge\Bootloader as RoadRunnerBridge;
 use Spiral\Stempler\Bootloader\StemplerBootloader;
@@ -52,6 +53,7 @@ class App extends Kernel
         Bootloader\LoggingBootloader::class,
         Monolog\MonologBootloader::class,
         Bootloader\ExceptionHandlerBootloader::class,
+        SentryReporterBootloader::class,
 
         // RoadRunner
         RoadRunnerBridge\QueueBootloader::class,

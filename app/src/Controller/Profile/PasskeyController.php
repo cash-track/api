@@ -9,15 +9,19 @@ use App\Database\Passkey;
 use App\Repository\PasskeyRepository;
 use App\Request\Profile\InitPasskeyRequest;
 use App\Request\Profile\StorePasskeyRequest;
+use App\Service\Auth\Passkey\Exception\InvalidChallengeException;
+use App\Service\Auth\Passkey\Exception\InvalidClientResponseException;
 use App\Service\Auth\Passkey\Exception\PasskeyServiceUnavailableException;
 use App\Service\Auth\Passkey\PasskeyService;
 use App\View\PasskeysView;
 use App\View\PasskeyView;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Log\LoggerInterface;
 use Spiral\Auth\AuthContextInterface;
 use Spiral\Http\ResponseWrapper;
 use Spiral\Router\Annotation\Route;
 use Spiral\Translator\Traits\TranslatorTrait;
+use Webauthn\Exception\WebauthnException;
 
 final class PasskeyController extends AuthAwareController
 {
@@ -30,6 +34,7 @@ final class PasskeyController extends AuthAwareController
         protected readonly PasskeysView $passkeysView,
         protected readonly PasskeyService $passkeyAuthService,
         protected readonly PasskeyRepository $passkeyRepository,
+        private readonly LoggerInterface $logger,
     ) {
         parent::__construct($auth);
     }
@@ -51,6 +56,11 @@ final class PasskeyController extends AuthAwareController
                 'error'   => $exception->getMessage(),
             ], 503);
         } catch (\Throwable $exception) {
+            $this->logger->error('Unable to init passkey registration', [
+                'user_id' => $this->user->id,
+                'exception' => $exception,
+            ]);
+
             return $this->response->json([
                 'message' => $this->say('passkey_init_exception'),
                 'error'   => $exception->getMessage(),
@@ -70,7 +80,17 @@ final class PasskeyController extends AuthAwareController
                 'message' => $this->say('error_service_unavailable'),
                 'error'   => $exception->getMessage(),
             ], 503);
+        } catch (InvalidClientResponseException | InvalidChallengeException | WebauthnException $exception) {
+            return $this->response->json([
+                'message' => $this->say('passkey_store_exception'),
+                'error'   => $exception->getMessage(),
+            ], 400);
         } catch (\Throwable $exception) {
+            $this->logger->error('Unable to store passkey', [
+                'user_id' => $this->user->id,
+                'exception' => $exception,
+            ]);
+
             return $this->response->json([
                 'message' => $this->say('passkey_store_exception'),
                 'error'   => $exception->getMessage(),
@@ -92,6 +112,12 @@ final class PasskeyController extends AuthAwareController
         try {
             $this->passkeyAuthService->delete($passkey);
         } catch (\Throwable $exception) {
+            $this->logger->error('Unable to delete passkey', [
+                'user_id' => $this->user->id,
+                'passkey_id' => $passkey->id,
+                'exception' => $exception,
+            ]);
+
             return $this->response->json([
                 'message' => $this->say('passkey_delete_exception'),
                 'error'   => $exception->getMessage(),

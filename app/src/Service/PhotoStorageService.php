@@ -53,7 +53,9 @@ class PhotoStorageService
         $url = $result->get('ObjectURL');
 
         if ($url === null || $url === '') {
-            $this->logger->warning('Unable to upload profile photo => ' . print_r($result, true));
+            $this->logger->warning('Unable to upload profile photo: storage returned no URL', [
+                'filename' => $fileName,
+            ]);
 
             return null;
         }
@@ -84,19 +86,14 @@ class PhotoStorageService
             // work (persisting the new filename) already committed.
             $this->logger->warning('Unable to remove profile photo', [
                 'filename' => $fileName,
-                'error' => $exception->getMessage(),
+                'exception' => $exception,
             ]);
         }
     }
 
     public function queueDownloadProfilePhoto(int $userId, string $url, ?string $ext = null, ?string $mime = null): void
     {
-        $this->logger->info('Queuing download profile photo', [
-            'userId' => $userId,
-            'url' => $url,
-            'ext' => $ext,
-            'mime' => $mime,
-        ]);
+        $this->logger->debug('Queuing download profile photo', ['user_id' => $userId]);
 
         $this->queue->push(DownloadProfilePictureJob::class, [
             'userId' => $userId,
@@ -125,7 +122,7 @@ class PhotoStorageService
             return null;
         }
 
-        $this->logger->info('Downloaded remote profile photo before uploading on storage', [
+        $this->logger->debug('Downloaded remote profile photo before uploading on storage', [
             'path' => $tmpPath,
             'url' => $url,
             'size' => $size,

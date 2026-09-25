@@ -43,6 +43,12 @@ final class WalletsController extends Controller
         try {
             $wallet = $this->walletService->create($request->createWallet(), $this->user);
         } catch (\Throwable $exception) {
+            $this->logger->error('Unable to create wallet', [
+                'action' => 'wallet.create',
+                'user_id' => $this->user->id,
+                'exception' => $exception,
+            ]);
+
             return $this->response->json([
                 'message' => $this->say('wallet_create_exception'),
                 'error' => $exception->getMessage(),
@@ -80,7 +86,7 @@ final class WalletsController extends Controller
             $this->logger->warning('Unable to load currency entity', [
                 'action' => 'wallet.update',
                 'id'     => $wallet->id,
-                'msg'    => $exception->getMessage(),
+                'exception' => $exception,
             ]);
 
             return $this->response->json([
@@ -95,7 +101,7 @@ final class WalletsController extends Controller
             $this->logger->error('Unable to store wallet', [
                 'action' => 'wallet.update',
                 'id'     => $wallet->id,
-                'msg'    => $exception->getMessage(),
+                'exception' => $exception,
             ]);
 
             return $this->response->json([
@@ -124,7 +130,7 @@ final class WalletsController extends Controller
             $this->logger->error('Unable to delete wallet', [
                 'action' => 'wallet.delete',
                 'id'     => $wallet->id,
-                'msg'    => $exception->getMessage(),
+                'exception' => $exception,
             ]);
 
             return $this->response->json([

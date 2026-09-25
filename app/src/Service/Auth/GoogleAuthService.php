@@ -88,19 +88,16 @@ class GoogleAuthService extends AuthService
         try {
             $data = $this->client->verifyIdToken($idToken);
         } catch (\Throwable $exception) {
-            $this->logger->error('Unexpected error while verifying Google ID Token', [
-                'isEmpty' => empty($idToken),
-                'message' => $exception->getMessage(),
-                'code' => $exception->getCode(),
+            $this->logger->warning('Google ID Token verification failed', [
+                'is_empty' => empty($idToken),
+                'exception' => $exception,
             ]);
 
             throw new InvalidTokenException($exception->getMessage(), (int) $exception->getCode(), $exception);
         }
 
         if ($data === false) {
-            $this->logger->info('Google ID Token is invalid', [
-                'idToken' => $idToken,
-            ]);
+            $this->logger->debug('Google ID Token is invalid');
 
             throw new InvalidTokenException($this->say('google_auth_invalid_id_token'));
         }
@@ -110,27 +107,16 @@ class GoogleAuthService extends AuthService
                 continue;
             }
 
-            $this->logger->error("Google ID Token verification returned unexpected data. Empty field {$field}", [
-                'data' => json_encode($data),
-            ]);
+            $this->logger->warning('Google ID Token has an empty required field', ['field' => $field]);
 
             throw new InvalidTokenException($this->say('google_auth_id_token_not_verified'));
         }
 
-        try {
-            $user = $this->userRepository->findByEmail($data['email']);
-        } catch (\Throwable $exception) {
-            $this->logger->error('Unable to find user by email from Google ID Token', [
-                'message' => $exception->getMessage(),
-                'code' => $exception->getCode(),
-            ]);
-
-            throw new \RuntimeException($exception->getMessage(), (int) $exception->getCode(), $exception);
-        }
+        $user = $this->userRepository->findByEmail($data['email']);
 
         if ($user instanceof User && ($data['email_verified'] ?? false) === false) {
-            $this->logger->error('Unable to attach Google Account to existing user, Google email is not verified.', [
-                'data' => json_encode($data),
+            $this->logger->warning('Google email is not verified, not attaching Google Account to existing user', [
+                'user_id' => $user->id,
             ]);
 
             throw new InvalidTokenException($this->say('google_auth_account_not_verified'));
@@ -140,8 +126,8 @@ class GoogleAuthService extends AuthService
             $googleAccount = $this->googleAccountRepository->findByUser($user);
 
             if ($googleAccount instanceof GoogleAccount && $googleAccount->accountId !== (string) ($data['sub'] ?? '')) {
-                $this->logger->error('Unable to attach Google Account to existing user, Google account ID is already attached and different from actual.', [
-                    'data' => json_encode($data),
+                $this->logger->warning('User already has a different Google Account attached', [
+                    'user_id' => $user->id,
                 ]);
 
                 throw new InvalidTokenException($this->say('google_auth_email_already_claimed'));

@@ -7,6 +7,8 @@ namespace App\Auth\Jwt;
 use App\Config\JwtConfig;
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
+use Psr\Log\LoggerInterface;
+use Psr\Log\NullLogger;
 use Redis;
 use Spiral\Auth\Exception\TokenStorageException;
 use Spiral\Auth\TokenInterface;
@@ -23,6 +25,7 @@ class TokenStorage implements TokenStorageInterface
     public function __construct(
         protected readonly JwtConfig $config,
         protected readonly Redis $redis,
+        protected readonly LoggerInterface $logger = new NullLogger(),
     ) {
         $this->assertKeyMaterialConfigured();
 
@@ -108,6 +111,7 @@ class TokenStorage implements TokenStorageInterface
             $this->redis->setex(self::BLACKLIST_PREFIX . $jti, $ttl, '1');
         } catch (\Throwable $exception) {
             // Best effort: a Redis outage must not break logout.
+            $this->logger->warning('Unable to blacklist token; failing open', ['exception' => $exception]);
         }
     }
 
@@ -195,6 +199,8 @@ class TokenStorage implements TokenStorageInterface
 
             return is_int($exists) && $exists > 0;
         } catch (\Throwable $exception) {
+            $this->logger->warning('Unable to check token blacklist; failing open', ['exception' => $exception]);
+
             return false;
         }
     }

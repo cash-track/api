@@ -13,6 +13,7 @@ use App\Service\Metrics\AppMetricsInterface;
 use App\View\UserView;
 use OpenTelemetry\API\Trace\StatusCode;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Log\LoggerInterface;
 use Spiral\Http\ResponseWrapper;
 use Spiral\Router\Annotation\Route;
 use Spiral\Telemetry\SpanInterface;
@@ -29,10 +30,11 @@ final class LoginController extends Controller
     public function __construct(
         protected UserView $userView,
         protected ResponseWrapper $response,
+        LoggerInterface $logger,
         private readonly LoginBackoffService $loginBackoff,
         private readonly AppMetricsInterface $metrics,
     ) {
-        parent::__construct($userView, $response);
+        parent::__construct($userView, $response, $logger);
     }
 
     #[Route(route: '/auth/login', name: 'auth.login', methods: 'POST')]
@@ -68,7 +70,7 @@ final class LoginController extends Controller
         } catch (\Throwable $exception) {
             $this->metrics->incrementLogin(self::METHOD, false);
 
-            return $this->responseAuthenticationException($exception->getMessage());
+            return $this->responseAuthenticationException($exception);
         }
 
         if ($auth === null) {

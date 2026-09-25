@@ -7,7 +7,9 @@ namespace Tests\Feature\Controller\Auth;
 use App\Database\EntityHeader;
 use App\Database\User;
 use App\Mail\WelcomeMail;
+use App\Service\Auth\EmailConfirmationService;
 use App\Service\Mailer\MailerInterface;
+use PHPUnit\Framework\MockObject\MockObject;
 use Tests\DatabaseTransaction;
 use Tests\Factories\EmailConfirmationFactory;
 use Tests\Factories\UserFactory;
@@ -108,6 +110,7 @@ class ConfirmEmailControllerTest extends TestCase implements DatabaseTransaction
         $user = $this->userFactory->create(UserFactory::emailNotConfirmed());
 
         $token = Fixtures::string(16);
+        $this->expectErrorLog(null);
 
         $response = $this->post("/v1/auth/email/confirmation/confirm/{$token}");
 
@@ -123,6 +126,19 @@ class ConfirmEmailControllerTest extends TestCase implements DatabaseTransaction
         ], [
             'email' => $user->email,
         ]);
+    }
+
+    public function testConfirmUnexpectedFailureIsLoggedAsError(): void
+    {
+        $this->mock(EmailConfirmationService::class, ['confirm'], function (MockObject $mock): void {
+            $mock->expects($this->once())->method('confirm')->willThrowException(new \RuntimeException('db down'));
+        });
+        $this->expectErrorLog('Unable to confirm email');
+
+        $response = $this->post('/v1/auth/email/confirmation/confirm/' . Fixtures::string(16));
+
+        $response->assertStatus(500);
+        $this->assertArrayHasKey('message', $this->getJsonResponseBody($response));
     }
 
     public function testConfirmMissingUser(): void

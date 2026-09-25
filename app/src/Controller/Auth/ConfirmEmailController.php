@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace App\Controller\Auth;
 
+use App\Exception\ClientErrorException;
 use App\Service\Auth\EmailConfirmationService;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Log\LoggerInterface;
 use Spiral\Http\ResponseWrapper;
 use Spiral\Router\Annotation\Route;
 use Spiral\Translator\Traits\TranslatorTrait;
@@ -21,6 +23,7 @@ final class ConfirmEmailController
     public function __construct(
         protected readonly ResponseWrapper $response,
         protected readonly EmailConfirmationService $emailConfirmationService,
+        private readonly LoggerInterface $logger,
     ) {
     }
 
@@ -29,11 +32,18 @@ final class ConfirmEmailController
     {
         try {
             $this->emailConfirmationService->confirm($token);
-        } catch (\Throwable $exception) {
+        } catch (ClientErrorException $exception) {
             return $this->response->json([
                 'message' => $this->say('email_confirmation_confirm_failure'),
                 'error' => $exception->getMessage(),
             ], 400);
+        } catch (\Throwable $exception) {
+            $this->logger->error('Unable to confirm email', ['exception' => $exception]);
+
+            return $this->response->json([
+                'message' => $this->say('email_confirmation_confirm_failure'),
+                'error' => $exception->getMessage(),
+            ], 500);
         }
 
         return $this->response->json([

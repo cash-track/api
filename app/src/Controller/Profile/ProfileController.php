@@ -75,7 +75,7 @@ final class ProfileController extends AuthAwareController
             $this->logger->warning('Unable to load currency entity', [
                 'action' => 'profile.update',
                 'id'     => $this->user->id,
-                'msg'    => $exception->getMessage(),
+                'exception' => $exception,
             ]);
         }
 
@@ -85,7 +85,7 @@ final class ProfileController extends AuthAwareController
             $this->logger->error('Unable to store user', [
                 'action' => 'profile.update',
                 'id'     => $this->user->id,
-                'msg'    => $exception->getMessage(),
+                'exception' => $exception,
             ]);
 
             return $this->response->json([
@@ -108,7 +108,7 @@ final class ProfileController extends AuthAwareController
             $this->logger->error('Unable to store user', [
                 'action' => 'profile.update',
                 'id'     => $this->user->id,
-                'msg'    => $exception->getMessage(),
+                'exception' => $exception,
             ]);
 
             return $this->response->json([

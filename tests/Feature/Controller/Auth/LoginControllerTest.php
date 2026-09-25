@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Tests\Feature\Controller\Auth;
 
 use App\Repository\UserRepository;
+use PHPUnit\Framework\MockObject\MockObject;
+use Psr\Log\LoggerInterface;
 use Tests\DatabaseTransaction;
 use Tests\Factories\UserFactory;
 use Tests\Fixtures;
@@ -98,6 +100,12 @@ class LoginControllerTest extends TestCase implements DatabaseTransaction
              ->willThrowException(new \RuntimeException('Database exception'));
 
         $this->getContainer()->bind(UserRepository::class, fn () => $mock);
+
+        $this->mock(LoggerInterface::class, [], function (MockObject $mock) {
+            $mock->expects($this->once())->method('error')->with('Unexpected authentication failure', $this->callback(
+                fn (array $context) => $context['exception'] instanceof \RuntimeException,
+            ));
+        });
 
         $response = $this->post('/v1/auth/login', [
             'email' => $user->email,

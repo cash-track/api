@@ -80,10 +80,7 @@ final class RedisRateLimit implements RateLimitInterface
     /** Fails open: brute-force protection is off for the outage, so the gap must be logged. */
     private function unavailable(RuleInterface $rule, \Throwable $exception): RateLimitHitInterface
     {
-        $this->logger->error('Rate limiting is unavailable; failing open', [
-            'error' => get_class($exception),
-            'message' => $exception->getMessage(),
-        ]);
+        $this->logger->warning('Rate limiting is unavailable; failing open', ['exception' => $exception]);
 
         return new RateLimitHit($rule);
     }

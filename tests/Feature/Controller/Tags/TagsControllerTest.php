@@ -6,6 +6,7 @@ namespace Tests\Feature\Controller\Tags;
 
 use App\Service\TagService;
 use PHPUnit\Framework\MockObject\MockObject;
+use Psr\Log\LoggerInterface;
 use Tests\DatabaseTransaction;
 use Tests\Factories\ChargeFactory;
 use Tests\Factories\TagFactory;
@@ -197,6 +198,13 @@ class TagsControllerTest extends TestCase implements DatabaseTransaction
 
         $this->mock(TagService::class, ['create'], function (MockObject $mock) {
             $mock->expects($this->once())->method('create')->willThrowException(new \RuntimeException());
+        });
+
+        $this->mock(LoggerInterface::class, [], function (MockObject $mock) use ($user) {
+            $mock->expects($this->once())->method('error')->with('Unable to create tag', $this->callback(
+                fn (array $context) => $context['user_id'] === $user->id
+                    && $context['exception'] instanceof \RuntimeException,
+            ));
         });
 
         $response = $this->withAuth($auth)->post('/v1/tags', [

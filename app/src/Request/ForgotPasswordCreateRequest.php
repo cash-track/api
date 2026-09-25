@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Request;
 
-use App\Database\User;
 use Spiral\Filters\Attribute\Input\Data;
 use Spiral\Filters\Model\Filter;
 use Spiral\Filters\Model\FilterDefinitionInterface;
@@ -23,7 +22,6 @@ class ForgotPasswordCreateRequest extends Filter implements HasFilterDefinition
             'email' => [
                 'address::email',
                 'type::notEmpty',
-                ['encrypted-entity::exists', User::class, 'email'],
             ],
         ]);
     }

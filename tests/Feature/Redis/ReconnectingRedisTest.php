@@ -6,6 +6,7 @@ namespace Tests\Feature\Redis;
 
 use App\Config\RedisConfig;
 use App\Redis\ReconnectingRedis;
+use App\Redis\RedisUnavailableException;
 use Psr\Log\LoggerInterface;
 use ReflectionProperty;
 use Tests\TestCase;
@@ -24,7 +25,7 @@ class ReconnectingRedisTest extends TestCase
     public function testNeverThrowsAndReportsDisconnectedWhenTargetIsUnreachable(): void
     {
         $logger = $this->getMockBuilder(LoggerInterface::class)->getMock();
-        $logger->expects($this->atLeastOnce())->method('emergency');
+        $logger->expects($this->atLeastOnce())->method('error');
 
         $redis = new ReconnectingRedis($this->config(self::UNREACHABLE_CONNECTION), $logger);
 
@@ -36,7 +37,7 @@ class ReconnectingRedisTest extends TestCase
         $logger = $this->getMockBuilder(LoggerInterface::class)->getMock();
         // The constructor makes the first attempt; two more calls within the cooldown must not
         // trigger a second attempt or log.
-        $logger->expects($this->once())->method('emergency');
+        $logger->expects($this->once())->method('error');
 
         $redis = new ReconnectingRedis($this->config(self::UNREACHABLE_CONNECTION), $logger);
 
@@ -44,25 +45,56 @@ class ReconnectingRedisTest extends TestCase
         $this->assertFalse($redis->isConnected());
     }
 
-    public function testRetriesAndLogsAgainOnceTheCooldownHasElapsed(): void
+    public function testLogsErrorOnceThenWarningsDuringTheSameOutage(): void
     {
         $logger = $this->getMockBuilder(LoggerInterface::class)->getMock();
-        // Constructor = first attempt/log. Forcing the cooldown to elapse, then one more call,
-        // triggers a second attempt/log — proves it keeps retrying rather than staying stuck.
-        $logger->expects($this->exactly(2))->method('emergency');
+        // First failure = error with exception (Sentry). Later retries = warning, no exception key.
+        $logger->expects($this->once())->method('error')->with(
+            'Connection to a Redis instance failed',
+            $this->callback(static fn (array $context): bool => $context['exception'] instanceof RedisUnavailableException),
+        );
+        $logger->expects($this->exactly(2))->method('warning')->with(
+            'Redis instance is still unreachable',
+            $this->callback(static fn (array $context): bool => ! array_key_exists('exception', $context)
+                && is_string($context['error'])),
+        );
 
         $redis = new ReconnectingRedis($this->config(self::UNREACHABLE_CONNECTION), $logger);
+
+        $this->forceReconnectCooldownToHaveElapsed($redis);
         $this->assertFalse($redis->isConnected());
 
         $this->forceReconnectCooldownToHaveElapsed($redis);
-
         $this->assertFalse($redis->isConnected());
+    }
+
+    public function testLogsRecoveryOnceAtInfo(): void
+    {
+        $logger = $this->getMockBuilder(LoggerInterface::class)->getMock();
+        $logger->expects($this->never())->method('error');
+        $messages = [];
+        $logger->method('info')->willReturnCallback(static function (string $message) use (&$messages): void {
+            $messages[] = $message;
+        });
+
+        $redis = new ReconnectingRedis($this->config('localhost:6379'), $logger);
+        $redis->close();
+        (new ReflectionProperty(ReconnectingRedis::class, 'down'))->setValue($redis, true);
+        $this->forceReconnectCooldownToHaveElapsed($redis);
+
+        $this->assertTrue($redis->isConnected());
+        $this->assertTrue($redis->isConnected());
+
+        $this->assertSame([
+            'Connection to a Redis instance has been established [localhost:6379]',
+            'Connection to a Redis instance has been restored [localhost:6379]',
+        ], $messages);
     }
 
     public function testConnectsSuccessfullyAndStopsAttemptingOnceTargetIsReachable(): void
     {
         $logger = $this->getMockBuilder(LoggerInterface::class)->getMock();
-        $logger->expects($this->never())->method('emergency');
+        $logger->expects($this->never())->method('error');
 
         // Points at the real test Redis, proving a genuine connect/ping round trip, not a
         // mocked-away "success."

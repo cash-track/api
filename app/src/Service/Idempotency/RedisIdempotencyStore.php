@@ -111,8 +111,7 @@ final class RedisIdempotencyStore implements IdempotencyStoreInterface
     private function unavailable(\Throwable $exception, string $action = 'claim'): IdempotencyClaim
     {
         $this->logger->warning("Idempotency store is unavailable; failing open ({$action})", [
-            'error' => get_class($exception),
-            'message' => $exception->getMessage(),
+            'exception' => $exception,
         ]);
 
         return IdempotencyClaim::unavailable();

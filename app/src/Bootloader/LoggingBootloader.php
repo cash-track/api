@@ -4,11 +4,14 @@ declare(strict_types=1);
 
 namespace App\Bootloader;
 
+use App\Logging\ForwardServerErrorsHandler;
 use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\FormattableHandlerInterface;
 use Monolog\Handler\HandlerInterface;
 use Monolog\Level;
+use Psr\Log\LoggerInterface;
 use Spiral\Boot\Bootloader\Bootloader;
+use Spiral\Core\Container;
 use Spiral\Http\Middleware\ErrorHandlerMiddleware;
 use Spiral\Monolog\Bootloader\MonologBootloader;
 use Spiral\Boot\EnvironmentInterface;
@@ -31,16 +34,16 @@ final class LoggingBootloader extends Bootloader
      */
     public const string LOG_FORMAT = "[%datetime%] %level_name%: %message% %context% %extra%\n";
 
-    public function init(MonologBootloader $monolog, EnvironmentInterface $env): void
+    public function init(MonologBootloader $monolog, EnvironmentInterface $env, Container $container): void
     {
-        $this->configureCommonHandlers($monolog);
+        $this->configureCommonHandlers($monolog, $container);
 
         if ($env->get('DEBUG')) {
             $this->configureDebugHandlers($monolog);
         }
     }
 
-    private function configureCommonHandlers(MonologBootloader $monolog): void
+    private function configureCommonHandlers(MonologBootloader $monolog, Container $container): void
     {
         // app level errors
         $monolog->addHandler(
@@ -59,6 +62,15 @@ final class LoggingBootloader extends Bootloader
             handler: $this->withTraceableFormat($monolog->logRotate(
                 filename: directory('runtime') . 'logs/http.log'
             ))
+        );
+
+        // 5xx only, forwarded to the default channel so they reach stdout/Loki in prod.
+        // Resolved lazily: the container/Monolog config may still be assembling right now.
+        $monolog->addHandler(
+            channel: ErrorHandlerMiddleware::class,
+            handler: new ForwardServerErrorsHandler(
+                static fn (): LoggerInterface => $container->get(LoggerInterface::class),
+            ),
         );
     }
 

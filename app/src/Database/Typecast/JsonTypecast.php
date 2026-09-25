@@ -65,8 +65,7 @@ final class JsonTypecast implements CastableInterface, UncastableInterface
 
                 $this->logger->warning('Unable to decode database json', [
                     'column' => $column,
-                    'message' => $exception->getMessage(),
-                    'json' => $data[$column],
+                    'exception' => $exception,
                 ]);
             }
         }
@@ -85,10 +84,9 @@ final class JsonTypecast implements CastableInterface, UncastableInterface
             try {
                 $data[$column] = json_encode($data[$column], JSON_THROW_ON_ERROR);
             } catch (\JsonException $exception) {
-                $this->logger->warning('Unable to encode json for database', [
+                $this->logger->error('Unable to encode json for database', [
                     'column' => $column,
-                    'message' => $exception->getMessage(),
-                    'json' => print_r($data[$column], true),
+                    'exception' => $exception,
                 ]);
 
                 $data[$column] = '[]';

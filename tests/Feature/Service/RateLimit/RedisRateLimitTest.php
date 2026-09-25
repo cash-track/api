@@ -84,12 +84,12 @@ class RedisRateLimitTest extends TestCase
 
         $logger = $this->getMockBuilder(LoggerInterface::class)->getMock();
         $logger->expects($this->once())
-               ->method('error')
+               ->method('warning')
                ->with(
                    'Rate limiting is unavailable; failing open',
                    $this->callback(function (array $context) {
-                       $this->assertEquals(\RedisException::class, $context['error']);
-                       $this->assertEquals('Connection lost', $context['message']);
+                       $this->assertInstanceOf(\RedisException::class, $context['exception']);
+                       $this->assertEquals('Connection lost', $context['exception']->getMessage());
                        return true;
                    }),
                );
@@ -111,7 +111,7 @@ class RedisRateLimitTest extends TestCase
         $redis->method('ttl')->willThrowException(new \RedisException('Connection lost'));
 
         $logger = $this->getMockBuilder(LoggerInterface::class)->getMock();
-        $logger->expects($this->once())->method('error');
+        $logger->expects($this->once())->method('warning');
 
         $rateLimit = new RedisRateLimit($redis, $logger);
 
@@ -131,7 +131,7 @@ class RedisRateLimitTest extends TestCase
         $redis->method('expire')->willThrowException(new \RedisException('Connection lost'));
 
         $logger = $this->getMockBuilder(LoggerInterface::class)->getMock();
-        $logger->expects($this->once())->method('error');
+        $logger->expects($this->once())->method('warning');
 
         $rateLimit = new RedisRateLimit($redis, $logger);
 

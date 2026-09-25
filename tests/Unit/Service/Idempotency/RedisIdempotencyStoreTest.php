@@ -156,8 +156,8 @@ class RedisIdempotencyStoreTest extends TestCase
             ->with(
                 $this->stringContains('claim'),
                 $this->callback(function (array $context): bool {
-                    $this->assertSame(\RedisException::class, $context['error']);
-                    $this->assertSame('connection lost', $context['message']);
+                    $this->assertInstanceOf(\RedisException::class, $context['exception']);
+                    $this->assertSame('connection lost', $context['exception']->getMessage());
 
                     return true;
                 }),

@@ -95,7 +95,7 @@ final class NewsletterSendCommand extends Command
         $userId = $user['id'] ?? null;
 
         if ($userId === null) {
-            $this->warning('Unable to resolve userId from array ' . print_r($user, true));
+            $this->warning('Unable to resolve userId from the user row');
             return;
         }
 
@@ -106,9 +106,10 @@ final class NewsletterSendCommand extends Command
         } catch (\Throwable $throwable) {
             $this->warning("{$log} Error: {$throwable->getMessage()}");
 
-            $this->logger->error("Unable to send email to user: {$throwable->getMessage()}", [
-                'user' => $user,
-                'error' => $throwable->getTraceAsString(),
+            $this->logger->error('Unable to send newsletter email to user', [
+                'user_id' => $userId,
+                'mail' => $this->mailClass,
+                'exception' => $throwable,
             ]);
         }
     }

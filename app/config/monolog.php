@@ -3,13 +3,16 @@
 declare(strict_types=1);
 
 use App\Bootloader\LoggingBootloader;
+use App\Logging\ExceptionContextProcessor;
 use App\Logging\TraceIdProcessor;
 use Cycle\Database\Driver\MySQL\MySQLDriver;
 use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\RotatingFileHandler;
 use Monolog\Handler\SyslogHandler;
+use Monolog\Level;
 use Monolog\Logger;
 use Monolog\Processor\PsrLogMessageProcessor;
+use Sentry\Monolog\ExceptionToSentryIssueHandler;
 use Spiral\Http\Middleware\ErrorHandlerMiddleware;
 
 // Spiral's 'log.rotate' handler alias applies Spiral\Monolog\Bootloader\MonologBootloader::DEFAULT_FORMAT,
@@ -23,6 +26,15 @@ $appLogHandler = new RotatingFileHandler(
 );
 $appLogHandler->setFormatter(new LineFormatter(LoggingBootloader::LOG_FORMAT));
 
+// Errors logged with an 'exception' context go to Sentry (ignore_exceptions and before_send
+// still apply). Records without one are skipped, so reporter lines and ErrorHandlerMiddleware
+// lines (client IP) never reach Sentry. Autowired lazily, on the prod or local default channel.
+$sentryHandler = [
+    'class' => ExceptionToSentryIssueHandler::class,
+    'options' => ['level' => Level::Error],
+];
+$defaultChannel = (string) env('MONOLOG_DEFAULT_CHANNEL', LoggingBootloader::DEFAULT_CHANNEL);
+
 return [
 
     /**
@@ -35,7 +47,7 @@ return [
     /**
      * @see https://github.com/Seldaek/monolog/blob/main/doc/02-handlers-formatters-processors.md#handlers
      */
-    'handlers' => [
+    'handlers' => array_merge_recursive([
         'default' => [
             $appLogHandler,
         ],
@@ -51,7 +63,7 @@ return [
                 ],
             ],
         ],
-    ],
+    ], [$defaultChannel => [$sentryHandler]]),
 
     /**
      * Processors allows adding extra data for all records.
@@ -62,6 +74,7 @@ return [
         'default' => [
             \Spiral\Telemetry\Monolog\TelemetryProcessor::class,
             TraceIdProcessor::class,
+            ExceptionContextProcessor::class,
         ],
         'stderr' => [
             PsrLogMessageProcessor::class,
@@ -92,6 +105,7 @@ return [
         'roadrunner' => [
             PsrLogMessageProcessor::class,
             TraceIdProcessor::class,
+            ExceptionContextProcessor::class,
         ],
     ],
 ];

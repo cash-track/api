@@ -31,7 +31,7 @@ return [
     'email_confirmation_resend_ok'       => 'Повідомлення з новим посиланням для підтвердження email надіслано.',
 
     'forgot_password_send_failure'  => 'Неможливо скинути пароль.',
-    'forgot_password_sent'          => 'Повідомлення з посиланням для скидання паролю надіслано.',
+    'forgot_password_sent'          => 'Якщо обліковий запис з цією адресою існує, посилання для скидання паролю надіслано.',
     'forgot_password_reset_failure' => 'Неможливо скинути пароль.',
     'forgot_password_reset_ok'      => 'Ваш пароль успішно змінено.',
 
@@ -84,9 +84,6 @@ return [
     'email_confirmation_invalid_token'             => 'Некоректний токен підтвердження.',
     'email_confirmation_expired'                   => 'Термін дії посилання вичерпано.',
     'email_confirmation_invalid_user'              => 'Неможливо визначити власника посилання.',
-
-    'forgot_password_invalid_user' => 'Неможливо знайти користувача.',
-    'forgot_password_throttled'    => 'Останній запит скидання паролю створено менше ніж %d секунд тому.',
     'forgot_password_invalid_code' => 'Некоректний код для скидання паролю.',
     'forgot_password_expired'      => 'Термін дії посилання вичерпано.',
     'forgot_password_missing_user' => 'Неможливо визначити власника посилання.',

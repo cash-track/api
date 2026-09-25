@@ -69,9 +69,8 @@ final class AuthMiddleware implements MiddlewareInterface
             $this->userService->store($user);
         } catch (\Throwable $exception) {
             $this->logger->error('Failed to update user active_at', [
-                'userId' => $user->id,
-                'error' => get_class($exception),
-                'message' => $exception->getMessage(),
+                'user_id' => $user->id,
+                'exception' => $exception,
             ]);
         }
     }
