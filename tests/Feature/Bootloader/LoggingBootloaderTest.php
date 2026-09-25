@@ -37,7 +37,8 @@ class LoggingBootloaderTest extends TestCase
             $bootloader = new LoggingBootloader();
             $bootloader->init(
                 $container->get(MonologBootloader::class),
-                $container->get(EnvironmentInterface::class)
+                $container->get(EnvironmentInterface::class),
+                $container
             );
         });
     }

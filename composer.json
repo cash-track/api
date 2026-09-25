@@ -41,6 +41,7 @@
         "spiral/otel-bridge": "^1.2",
         "spiral/roadrunner-bridge": "^v4.0.0-RC2",
         "spiral/roadrunner-cli": "^2.6",
+        "spiral/sentry-bridge": "^2.5",
         "spiral/stempler-bridge": "^3.12",
         "spiral/translator": "^3.12",
         "spiral/validator": "^1.5",
