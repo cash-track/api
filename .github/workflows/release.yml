@@ -23,3 +23,9 @@ jobs:
       service: api
       post_deploy_cmds: 'php app.php migrate -s -n'
     secrets: inherit
+  sentry-release:
+    needs: deploy
+    uses: cash-track/.github/.github/workflows/sentry-release.yml@main
+    with:
+      project: api
+    secrets: inherit
