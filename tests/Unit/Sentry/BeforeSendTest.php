@@ -8,6 +8,9 @@ use App\Sentry\BeforeSend;
 use OpenTelemetry\API\Trace\Span;
 use OpenTelemetry\API\Trace\SpanContext;
 use Sentry\Event;
+use Sentry\ExceptionDataBag;
+use Sentry\Frame;
+use Sentry\Stacktrace;
 use Tests\TestCase;
 
 class BeforeSendTest extends TestCase
@@ -54,6 +57,19 @@ class BeforeSendTest extends TestCase
         $this->assertArrayNotHasKey('Cf-Original-Connecting-IP', $headers);
         $this->assertArrayNotHasKey('cf-original-forwarded-for', $headers);
         $this->assertSame(['test-agent'], $headers['User-Agent']);
+    }
+
+    public function testStripsFrameArguments(): void
+    {
+        $frame = new Frame('login', 'a.php', 1, vars: ['password' => 'secret']);
+        $event = Event::createEvent();
+        $event->setStacktrace(new Stacktrace([$frame]));
+        $event->setExceptions([new ExceptionDataBag(new \RuntimeException(), new Stacktrace([$frame]))]);
+
+        $event = (new BeforeSend())($event);
+
+        $this->assertSame([], $event?->getStacktrace()?->getFrames()[0]->getVars());
+        $this->assertSame([], $event?->getExceptions()[0]->getStacktrace()?->getFrames()[0]->getVars());
     }
 
     public function testNoTraceTagWithoutActiveSpan(): void

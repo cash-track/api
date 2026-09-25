@@ -9,8 +9,8 @@ use Sentry\Event;
 use Sentry\EventHint;
 
 /**
- * Tags events with the OTel trace id and a Tempo link; strips request bodies, cookies and
- * the gateway's renamed Cloudflare headers.
+ * Tags events with the OTel trace id and a Tempo link; strips request bodies, cookies,
+ * stack frame arguments and the gateway's renamed Cloudflare headers.
  */
 final class BeforeSend
 {
@@ -35,6 +35,17 @@ final class BeforeSend
         }
 
         $event->setRequest($request);
+
+        // Frame args can carry passwords, tokens and emails (zend.exception_ignore_args is Off).
+        $stacktraces = [$event->getStacktrace()];
+        foreach ($event->getExceptions() as $exception) {
+            $stacktraces[] = $exception->getStacktrace();
+        }
+        foreach ($stacktraces as $stacktrace) {
+            foreach ($stacktrace?->getFrames() ?? [] as $frame) {
+                $frame->setVars([]);
+            }
+        }
 
         $context = Span::getCurrent()->getContext();
         if (!$context->isValid()) {
