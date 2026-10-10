@@ -1,7 +1,7 @@
 {
     "name": "cash-track/api",
     "type": "project",
-    "license": "MIT",
+    "license": "PolyForm-Noncommercial-1.0.0",
     "description": "The core service to handle API requests from different clients",
     "homepage": "https://cash-track.app",
     "support": {
